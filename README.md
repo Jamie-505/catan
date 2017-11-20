@@ -16,9 +16,60 @@ origin/develop (Hier wird entwickelt)
     
     -> Push in den Master vom Teamleiter
 
+Work with Git
+===================
 
-Weitere Infos zum Arbeiten mit Git unter: 
+This document is supposed to help you if your unsure about our Git workflow or forgot about some basic features.
 
+-----
+
+BASICS
+----------
+### Setup
+Once you installed Git on your machine you need to make a few adjustments to your git config. To do so run this few commands in your terminal:
+```
+$ git config --global user.name "John Doe"
+$ git config --global user.email johndoe@example.com
+$ git config --global core.editor vim
+$ git config --global pull.rebase true
+$ git config --global core.safecrlf false
+$ git config --global core.autocrlf true
+$ git config --global push.default simple
+```
+if you want you can also set some aliases[^gitaliases].
+
+  [^gitaliases]: how to set aliases including some examples is shown [here](https://git-scm.com/book/it/v2/Git-Basics-Git-Aliases).
+
+### Basic Commands
+
+![Git Cheat Sheet](gitcheatsheet.png)
+
+---------
+
+Workflow
+-------------
+
+ - **EVERY DAY** before you start your work make sure your local repo is up-to-date with ` git fetch --prune`
+ - switch to your ancestor branch and pull most recent changes
+ - if you already have a feature branch then rebase it onto the ancestor branch
+  - `git co <feature-branch>`
+  - `git rebase -i <ancestor>`
+ - if not create a new branch following these rules
+	 1. Do you have an open issue for the work your about to do? If not open one!
+	 2. `$ git co <PARENT-BRANCH>` - change to parent branch
+	 3. `$ git pull origin <PARENT-BRANCH>` - pull most recent changes
+	 4. `$ git co -b <ISSUE#>_<MEANINGFUL-DESCRIPTION>` (*NOTE: use for **_** and **-***) - create new branch following our naming convention
+ - *get stuff done*
+ - commit your changes - **COMMIT MESSAGES HAVE TO BE IN PRESENT TENSE**
+	1. `$ git add -p` (*like git add but let's you review the changes about to be staged for the commit*)
+	2.  `$ git ci` - opens your editor (set with core.editor)
+		1. 1st line contains summary (this line should complete this sentence: when applied this commit will... )
+		2. Body should contain a brief description of why you made this changes
+	3. `git push [-u origin <feature-branch>]` - pushes your changes to the gitlab repo (if you push for the first time use the full command with the optional -u part)
+
+----------------
+
+Weitere Infos zum Arbeiten mit Git unter:
 
 https://de.atlassian.com/git/tutorials
 
@@ -31,4 +82,5 @@ https://www.kernel.org/pub/software/scm/git/docs/user-manual.html
 oder auf der Kurswebseite. 
 
 
-Viel Spaß beim Programmieren :) 
+Viel Spaß beim Programmieren :)
+

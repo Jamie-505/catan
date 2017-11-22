@@ -1,0 +1,36 @@
+stages:
+  - build
+  - test
+  - deploy
+
+before_script:
+#  - echo `pwd` # debug
+#  - echo "$CI_BUILD_NAME, $CI_BUILD_REF_NAME $CI_BUILD_STAGE" # debug
+  - export GRADLE_USER_HOME=`pwd`/server/.gradle
+
+cache:
+  paths:
+    - server/.gradle/wrapper
+    - server/.gradle/caches
+
+build:
+  stage: build
+  script:
+    - cd server
+    - ./gradlew assemble
+
+test:
+  stage: test
+  script:
+    - cd server
+    - ./gradlew check
+
+deploy:
+  stage: deploy
+  script:
+    - ./deploy.sh
+  only:
+    - server/develop
+
+after_script:
+  - echo "End CI"

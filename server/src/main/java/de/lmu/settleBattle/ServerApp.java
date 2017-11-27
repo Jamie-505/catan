@@ -1,4 +1,4 @@
-package com.lmu.settleBattle.server;
+package de.lmu.settleBattle;
 
 import javafx.application.Application;
 import org.springframework.boot.SpringApplication;

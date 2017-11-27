@@ -1,4 +1,4 @@
-package com.lmu.settleBattle.server;
+package de.lmu.settleBattle;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;

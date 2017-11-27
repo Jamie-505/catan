@@ -1,4 +1,4 @@
-package com.lmu.settleBattle.server;
+package de.lmu.settleBattle;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.socket.WebSocketHandler;

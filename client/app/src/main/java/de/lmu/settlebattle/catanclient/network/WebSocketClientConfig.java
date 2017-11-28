@@ -1,4 +1,4 @@
-package de.lmu.settlebattle.catanclient.utils;
+package de.lmu.settlebattle.catanclient.network;
 
 
 public class WebSocketClientConfig {

@@ -1,30 +1,30 @@
 <resources>
-    <string name="app_name">Die Siedler</string>
-    <string name="message">Nachricht</string>
-    <string name="send">Senden</string>
-    <string name="chat_history">Chatverlauf</string>
-    <string name="title">Die Siedler</string>
-    <string name="author_name"></string>
-    <string name="enter_name">Gib deinen Namen ein</string>
-    <string name="btn_join">Beitreten</string>
-    <string name="btn_send">Senden</string>
-    <string name="gameName">Die Siedler</string>
-    <string name="welcomeText">Willkommen zur Android Version von die Siedler. Du kannst nun eine Runde spielen.</string>
-    <string name="startGame">Spiel starten</string>
-    <string name="conGame">Verbindung wird hergestellt</string>
+  <string name="app_name">CatanClient</string>
+  <string name="author_name">By SettleBattle</string>
+  <string name="btn_join">Beitreten</string>
+  <string name="btn_send">Send</string>
+  <string name="btn_connect">Verbindung wird hergestellt</string>
+  <string name="chat_history">Chat History</string>
+  <string name="enter_name">Enter your name</string>
+  <string name="payload">Message</string>
+  <string name="send">Send</string>
+  <string name="title">Catan App</string>
+  <string name="gameName">Die Siedler</string>
+  <string name="welcomeText">Willkommen zur Android Version von die Siedler. Du kannst nun eine Runde spielen.</string>
+  <string name="startGame">Spiel starten</string>
 
-    <!-- selectplayer -->
-    <string name="beitreten">Lobby beitreten</string>
+  <!-- selectplayer -->
+  <string name="beitreten">Lobby beitreten</string>
 
-    <!-- Farbenauswahl-->
+  <!-- Farbenauswahl-->
 
-    <string-array name="farben_array">
-        <item>Gelb</item>
-        <item>Rot</item>
-        <item>Blau</item>
-        <item>Weiß</item>
-    </string-array>
-    <string name="title_activity_lobby_activitiy">LobbyActivitiy</string>
-    <string name="starten">Spiel Starten</string>
+  <string-array name="farben_array">
+    <item>Gelb</item>
+    <item>Rot</item>
+    <item>Blau</item>
+    <item>Weiß</item>
+  </string-array>
+  <string name="title_activity_lobby_activitiy">LobbyActivitiy</string>
+  <string name="starten">Spiel Starten</string>
 
 </resources>

@@ -1,6 +1,12 @@
 package de.lmu.settleBattle.catanServer;
-public class Location {
+import com.google.gson.annotations.Expose;
+
+public class Location extends JSONStringBuilder {
+
+    @Expose
     public int x;
+
+    @Expose
     public int y;
 
     public Location (){

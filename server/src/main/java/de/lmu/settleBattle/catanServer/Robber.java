@@ -1,5 +1,11 @@
 package de.lmu.settleBattle.catanServer;
-public class Robber {
+import com.google.gson.annotations.Expose;
+import com.google.gson.annotations.SerializedName;
+
+public class Robber extends JSONStringBuilder {
+
+    @Expose
+    @SerializedName(Constants.PLACE)
     private Location location;
 
     public Robber() {

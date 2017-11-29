@@ -1,20 +1,34 @@
 package de.lmu.settleBattle.catanServer;
-public class Player {
+
+import com.google.gson.annotations.Expose;
+import com.google.gson.annotations.SerializedName;
+
+public class Player extends JSONStringBuilder {
 
     // region Members
+    @Expose
     private int id;
-    private String sessionId;
+
+    @Expose
+    @SerializedName(Constants.PLAYER_NAME)
     private String name;
-    private Color color;
+
+    @Expose
+    @SerializedName(Constants.PLAYER_STATE)
     private String status;
+
+    @Expose
+    @SerializedName(Constants.PLAYER_COLOR)
+    private Color color;
+
     private int victoryPoints;
     private int victoryPointsTotal;
     private int armyCount;
     private boolean greatestArmy;
     private  boolean longestRoad;
     private RawMaterialOverview rawMaterial;
-    private DevelopmentCard[] developmentCards;
-    private Building buildingStock;
+    private DevelopmentCardOverview developmentCardOverview;
+    private Building[] buildingStock;
     private Haven haven;
     //endregion
 
@@ -25,10 +39,10 @@ public class Player {
      *<preconditions: none>
      *<postconditions: new player object is created>
      */
-    public Player (String sessionId){
-        this.sessionId = sessionId;
+    public Player (){
         this.id = -1;
         this.color = null;
+        this.name = "";
         this.status = "";
         this.victoryPoints = 0;
         this.victoryPointsTotal =0;
@@ -36,7 +50,7 @@ public class Player {
         this.greatestArmy = false;
         this.longestRoad = false;
         this.rawMaterial = null;
-        this.developmentCards = null;
+        this.developmentCardOverview = new DevelopmentCardOverview(0);
         this.buildingStock = null;
         this.haven = null;
     }
@@ -48,12 +62,13 @@ public class Player {
      *<postconditions: new Player object is created with the given id>
      *@param id this is id given from the server
      */
-    public Player (String sessionId, int id){
-        this(sessionId);
+    public Player (int id){
+        this();
         this.id = id;
     }
     //endregion
 
+    //region Actions
     /**
      *<method name: throwDice>
      *<description: this method rolls two dice>
@@ -160,6 +175,8 @@ public class Player {
         //TODO
     }
 
+    //endregion
+
     //region Properties
     /**
      *<method name: getId>
@@ -167,17 +184,9 @@ public class Player {
      *<preconditions: none>
      *<postconditions: none>
      */
-    public String getId() {
-        return status;
+    public int getId() {
+        return id;
     }
-
-    /**
-     *<method name: getSessionId>
-     *<description: this is a getter method for the session id>
-     *<preconditions: none>
-     *<postconditions: none>
-     */
-    public String getSessionId() { return sessionId; }
 
     /**
      *<method name: getArmyCount>
@@ -199,6 +208,7 @@ public class Player {
     public String getStatus() {
         return status;
     }
+
     /**
      *<method name: setStatus>
      *<description: this method is a setter method for the status>
@@ -294,5 +304,4 @@ public class Player {
     }
 
     //endregion
-
 }

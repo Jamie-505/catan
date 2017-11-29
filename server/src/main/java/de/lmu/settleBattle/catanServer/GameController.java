@@ -8,7 +8,7 @@ public class GameController {
     private HashMap<Integer, Integer> turnOrder;
     private List<String> chatHistory;
     private RawMaterialOverview resourcesDeck;
-    private DevelopmentCardDeck developmentDeck;
+    private DevelopmentCardOverview developmentDeck;
 
     public GameController() {
 
@@ -18,7 +18,7 @@ public class GameController {
         turnOrder = new HashMap<>();
         chatHistory = new ArrayList<>();
         resourcesDeck =  new RawMaterialOverview(19);
-        developmentDeck = new DevelopmentCardDeck();
+        developmentDeck = new DevelopmentCardOverview();
     }
 
     //region isValidPlayerData
@@ -36,7 +36,7 @@ public class GameController {
         for (int i = 0; i < players.size(); i++) {
 
             //do not compare player with itself
-            if (players.get(i).getId().equals(id))
+            if (players.get(i).getId() == id)
                 continue;
 
             // if a name or a color is already chosen
@@ -104,13 +104,17 @@ public class GameController {
                 "are already 4 players for this game!");
     }
 
+    public List<Player> getPlayers() {
+        return players;
+    }
+
     public int getPlayerCount() {
         return players.size();
     }
 
     public Player getPlayer(String sessionId) {
         for (Player p : players) {
-            if (p.getSessionId().equals(sessionId))
+            if (p.getId() == Integer.parseInt(sessionId))
                 return p;
         }
 

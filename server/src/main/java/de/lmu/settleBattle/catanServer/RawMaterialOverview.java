@@ -1,13 +1,33 @@
 package de.lmu.settleBattle.catanServer;
+
+import com.google.gson.annotations.Expose;
+import com.google.gson.annotations.SerializedName;
+import org.json.JSONObject;
+
 import java.util.ArrayList;
 import java.util.List;
 
-public class RawMaterialOverview {
-    private int clayCount;
-    private int oreCount;
+public class RawMaterialOverview extends JSONStringBuilder{
+
+    @Expose
+    @SerializedName(Constants.WOOD)
     private int woodCount;
+
+    @Expose
+    @SerializedName(Constants.CLAY)
+    private int clayCount;
+
+    @Expose
+    @SerializedName(Constants.WOOL)
     private int woolCount;
+
+    @Expose
+    @SerializedName(Constants.WEAT)
     private int weatCount;
+
+    @Expose
+    @SerializedName(Constants.ORE)
+    private int oreCount;
 
     //region Constructors
     public RawMaterialOverview() {
@@ -28,6 +48,10 @@ public class RawMaterialOverview {
         this.weatCount = weat;
     }
     //endregion
+
+    public int getTotalCount() {
+        return clayCount+oreCount+woodCount+weatCount+woolCount;
+    }
 
     //region increase
     /**
@@ -70,19 +94,19 @@ public class RawMaterialOverview {
 
         switch(type) {
             case ORE:
-                oreCount -= i;
+                oreCount = oreCount < i ? 0 : oreCount-i;
                 break;
             case CLAY:
-                clayCount -= i;
+                clayCount = clayCount < i ? 0 : clayCount-i;
                 break;
             case WEAT:
-                weatCount -= i;
+                weatCount = weatCount < i ? 0 : weatCount-i;
                 break;
             case WOOD:
-                woodCount -= i;
+                woodCount = woodCount < i ? 0 : woodCount-i;
                 break;
             case WOOL:
-                woolCount -= i;
+                woolCount = woolCount < i ? 0 : woolCount-i;
                 break;
         }
     }
@@ -175,5 +199,12 @@ public class RawMaterialOverview {
     }
 
     //endregion
+
+    @Override
+    public String toJSONString_Unknown() {
+        JSONObject json = new JSONObject();
+        json.put(Constants.UNKNOWN, getTotalCount());
+        return json.toString();
+    }
 }
 

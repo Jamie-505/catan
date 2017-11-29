@@ -1,9 +1,21 @@
 package de.lmu.settleBattle.catanServer;
-public class Building {
+import com.google.gson.annotations.Expose;
+import com.google.gson.annotations.SerializedName;
 
+public class Building extends JSONStringBuilder {
+
+    @Expose
+    @SerializedName(Constants.OWNER)
+    private int owner;
+
+    @Expose
+    @SerializedName(Constants.TYPE)
     private BuildingType type;
-    private Color color;
+
+    @Expose
+    @SerializedName(Constants.PLACE)
     private Location[] locations;
+
     private RawMaterialOverview costs;
 
     //region Constructors
@@ -14,18 +26,23 @@ public class Building {
         this.costs = getCosts(type);
     }
 
-    public Building(BuildingType type, Color color) {
+    public Building(BuildingType type, int owner) {
         this(type);
-        this.color = color;
+        this.owner = owner;
     }
     //endregion
 
-    public void build(Location loc){
-        //TODO
+    public void build(Location[] loc) throws IllegalArgumentException {
+
+        if (loc.length == 3) {
+            this.locations = loc;
+        }
+
+        else throw new IllegalArgumentException();
     }
 
-    public Color getColor() {
-        return color;
+    public int getOwner() {
+        return owner;
     }
 
     public Location[] getLocations() {

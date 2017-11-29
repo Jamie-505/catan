@@ -1,21 +1,37 @@
 package de.lmu.settleBattle.catanServer;
+
+import com.google.gson.annotations.Expose;
+import com.google.gson.annotations.SerializedName;
+
 public enum Color {
 
+    @Expose
+    @SerializedName("Orange")
     ORANGE,
+
+    @Expose
+    @SerializedName("Blau")
     BLUE,
+
+    @Expose
+    @SerializedName("Weiß")
     WHITE,
+
+    @Expose
+    @SerializedName("Rot")
     RED;
 
-    public String toString(Color color){
+    @Override
+    public String toString(){
         switch (this){
             case ORANGE:
                 return "Orange";
             case BLUE:
-                return "Blue";
+                return "Blau";
             case WHITE:
-                return "White";
+                return "Weiß";
             case RED:
-                return "Red";
+                return "Rot";
             default: throw new AssertionError( "Unknown color" + this);
 
         }

@@ -28,18 +28,20 @@ package de.lmu.settleBattle.catanServer;public enum DevCardType {
 
         }
     }
-    public String toString(DevCardType dct){
+
+    @Override
+    public String toString(){
         switch (this){
             case INVENTION:
-                return "Invention";
+                return "Erfindung";
             case KNIGHT:
-                return "Knight";
+                return "Ritter";
             case ROAD_CONSTRUCTION:
-                return "Road Construction";
+                return "Straßenbau";
             case MONOPOLE:
-                return "Monopole";
+                return "Monopol";
             case VICTORY_POINT:
-                return "Victory Points";
+                return "Siegpunkt";
             default: throw new AssertionError( "Unknown card" + this);
 
         }

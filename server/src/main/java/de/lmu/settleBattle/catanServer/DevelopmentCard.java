@@ -1,4 +1,6 @@
-package de.lmu.settleBattle.catanServer;public class DevelopmentCard {
+package de.lmu.settleBattle.catanServer;
+
+public class DevelopmentCard  {
 
     private DevCardType type;
     private String infoText;

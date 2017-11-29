@@ -2,22 +2,18 @@ package de.lmu.settleBattle.catanServer;
 import java.io.IOException;
 import java.util.*;
 
+import org.json.JSONObject;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
+import org.yaml.snakeyaml.scanner.Constant;
 
 @Component
 public class CatanSocketHandler extends TextWebSocketHandler {
 
     private GameController gameCtrl = new GameController();
-
-    //for creating unique ids for new players. The sessionId will be stored in
-    //the player objects so we know which player needs to be removed if a player
-    //is disconnected e.g.
-    private int id = 0;
-    private int getUniqueId() { return id++; }
 
     // set to store all live sessions
     private static final Set<WebSocketSession> sessions =
@@ -36,7 +32,7 @@ public class CatanSocketHandler extends TextWebSocketHandler {
 
         // Add session to session list
         sessions.add(session);
-        Player player = new Player(session.getId(), getUniqueId());
+        Player player = new Player(Integer.parseInt(session.getId()));
         gameCtrl.addPlayer(player);
 
         try {
@@ -63,14 +59,43 @@ public class CatanSocketHandler extends TextWebSocketHandler {
 
             switch (type) {
                 case Constants.HANDSHAKE:
-                    String idAllocation = jsonUtils.assignPlayerId(session.getId());
+                    String idAllocation = jsonUtils.welcomeNewPlayer(Integer.parseInt(session.getId()));
                     session.sendMessage(new TextMessage(idAllocation));
 
-                    //TODO: sendMessageToAll(jsonUtils.sendStatusUpdate());
+                    //update status of new player
+                    Player player = gameCtrl.getPlayer(session.getId());
+                    player.setStatus(Constants.START_GAME);
+
+                    sendMessageToAll(jsonUtils.statusUpdate(player));
+                    break;
+                case Constants.PLAYER:
+                    JSONObject json = new JSONObject(message);
+                    boolean validData = true;
+                    if (json.has(Constants.PLAYER_NAME) && json.has(Constants.PLAYER_COLOR) && json.length() == 2) {
+                        for (Player player1 : gameCtrl.getPlayers()) {
+                            //if name or color are already taken --> this choice is invalid for new player
+                            if (player1.getName().equals(json.get(Constants.PLAYER_NAME)) ||
+                                    player1.getColor().equals(json.get(Constants.PLAYER_COLOR)))
+                                validData = false;
+                        }
+                    }
+
+                    if (validData) {
+                        Player player1 = gameCtrl.getPlayer(session.getId());
+                        player1.setName(json.get(Constants.PLAYER_NAME).toString());
+                        player1.setColor((Color)json.get(Constants.PLAYER_COLOR));
+
+                        sendMessageToAll(jsonUtils.statusUpdate(player1));
+                    }
+                    else {
+                        session.sendMessage(new TextMessage(jsonUtils.errorMessage(Constants.PLAYER_DATA_INVALID)));
+                    }
+
                     break;
                 case Constants.DICE_RESULT:
                     int[] dice = Player.throwDice();
-                    String diceMessage = jsonUtils.throwDice(session.getId(), dice);
+                    String diceMessage = jsonUtils.throwDice(
+                            gameCtrl.getPlayer(session.getId()).getId(), dice);
 
                     for (WebSocketSession socketSession : sessions) {
                         socketSession.sendMessage(new TextMessage(diceMessage));
@@ -92,13 +117,13 @@ public class CatanSocketHandler extends TextWebSocketHandler {
         System.out.println("Session " + session.getId() + " has ended");
 
         //remove player from GameController
-        gameCtrl.removePlayer(gameCtrl.getPlayer(session.getId()));
+        Player player = gameCtrl.getPlayer(session.getId());
+        gameCtrl.removePlayer(player);
 
         // remove the session from sessions list
         sessions.remove(session);
 
-        // Notify all the clients about person exit
-        //TODO: sendMessageToAll(session.getId(), name, " left conversation!", false,true);
+        // TODO: Replace player with KI !
     }
     //endregion
 

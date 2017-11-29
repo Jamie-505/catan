@@ -42,5 +42,6 @@ dependencies {
 	compile('org.springframework.boot:spring-boot-starter-websocket')
     compile 'com.google.guava:guava:23.2-jre'
     compile 'org.json:json:20171018'
-	testCompile('org.springframework.boot:spring-boot-starter-test')
+    compile 'com.google.code.gson:gson:2.8.2'
+    testCompile('org.springframework.boot:spring-boot-starter-test')
 }

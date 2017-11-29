@@ -1,18 +1,45 @@
 package de.lmu.settleBattle.catanServer;
-public class Field {
-    private Location location;
-    private RawMaterialType harvestEarnings;
 
-    public Field(Location location, RawMaterialType harvestEarnings) {
+import com.google.gson.annotations.Expose;
+import com.google.gson.annotations.SerializedName;
+
+public class Field extends JSONStringBuilder {
+    @Expose
+    @SerializedName(Constants.PLACE)
+    private Location location;
+
+    @Expose
+    @SerializedName(Constants.TYPE)
+    private RawMaterialType harvest;
+
+    @Expose
+    @SerializedName(Constants.NUMBER)
+    private int number;
+
+    public Field(Location location, RawMaterialType harvest) {
         this.location = location;
-        this.harvestEarnings = harvestEarnings;
+        this.harvest = harvest;
     }
 
-    public RawMaterialType getHarvestEarnings() {
-        return this.harvestEarnings;
+    public Field(Location location, RawMaterialType harvest, int number) {
+        this(location, harvest);
+        this.number = number;
+    }
+
+    public RawMaterialType getHarvest() {
+        return this.harvest;
     }
 
     public Location getLocation() {
         return this.location;
+    }
+
+
+    public int getNumber() {
+        return number;
+    }
+
+    public void setNumber(int number) {
+        this.number = number;
     }
 }

@@ -1,8 +1,25 @@
 package de.lmu.settleBattle.catanServer;
-public class Haven {
+import com.google.gson.annotations.Expose;
+import com.google.gson.annotations.SerializedName;
 
+public class Haven extends JSONStringBuilder {
+
+    @Expose
+    @SerializedName(Constants.PLACE)
     private Location[] locations;
+
     private RawMaterialType harvest;
+
+    @Expose
+    @SerializedName(Constants.TYPE)
+    private String name;
+
+    public Haven(Location[] locations, RawMaterialType harvest) {
+        if (locations.length != 2) throw new IllegalArgumentException("locations must contain 2 Location objects");
+        this.locations = locations;
+        this.harvest = harvest;
+        setName();
+    }
 
     /**
      *<method name: none>
@@ -76,4 +93,13 @@ public class Haven {
 
         return false;
     }
+    //endregion
+
+    //region get and set name
+    public String getName() { return this.name; }
+
+    private void setName() {
+        this.name = harvest == RawMaterialType.NONE ? Constants.HAVEN : harvest.toString() + " " + Constants.HAVEN;
+    }
+    //endregion
 }

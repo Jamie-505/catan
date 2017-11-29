@@ -3,16 +3,27 @@ import java.util.*;
 
 public class Board {
 
-    public Map<Integer, Field[]> boardNumbers;
+    //public Map<Integer, Field[]> boardNumbers;
     public Field[] fields;
     public Building[] buildings;
     public Haven[] havens;
     public Robber robber;
-    public DevelopmentCard[] cardDeck;
+    public DevelopmentCardOverview cardDeck;
 
-    //TODO: maybe we do not need this as the costs are stored in the Building class
-    public Map<Building, RawMaterialOverview> buildingCost;  //Objects here is RawMaterialOverview
+    public Board() {
+        fields = new Field[37];
 
+        //each player gets 5 settlements, 4 cities and 15 streets. with 4 player there are 96 buildings
+        buildings = new Building[96];
+        havens = new Haven[7];
+        robber = new Robber();
+        cardDeck = new DevelopmentCardOverview();
+    }
+
+    public Board(int playerCount) {
+        this();
+        buildings = new Building[24*playerCount];
+    }
 
     /**
      *<method name: none>
@@ -63,9 +74,8 @@ public class Board {
      *<preconditions: none>
      *<postconditions: none>
      */
-    public Map<Integer,Field[]> mapNumbersWithFields(){
+    public void mapNumbersWithFields(){
         //TODO
-        return null;
     }
 
     /**

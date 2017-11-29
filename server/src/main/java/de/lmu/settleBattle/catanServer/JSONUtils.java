@@ -45,15 +45,14 @@ public class JSONUtils {
     }
     //endregion
 
-
-    //region assignPlayerId
+    //region welcomeNewPlayer
     /**
      * Json when client needs it's own session details
      * @param id
      * @return JSON structured String
      */
-    public String assignPlayerId(String id) {
-        HashMap<String, String> payload = new HashMap<>();
+    public String welcomeNewPlayer(int id) {
+        HashMap<String, Integer> payload = new HashMap<>();
         payload.put("id", id);
         return createJSON(Constants.GET_ID, payload).toString();
     }
@@ -65,7 +64,7 @@ public class JSONUtils {
      * @param id
      * @return JSON structured String containing the dice result
      */
-    public String throwDice(String id, int[] diceResult) {
+    public String throwDice(int id, int[] diceResult) {
 
         if (diceResult.length != 2)
             return null;
@@ -75,6 +74,79 @@ public class JSONUtils {
         map.put(Constants.DICE_THROW, diceResult);
 
         return createJSON(Constants.DICE_RESULT, map).toString();
+    }
+    //endregion
+
+    //region statusUpdate
+    /**
+     * creates message containing status update
+     * @param player
+     * @return string message structured like JSON
+     */
+    public String statusUpdate(Player player) {
+        JSONObject playerJSON = new JSONObject(player.toJSONString());
+
+        //at the beginning the new player can choose color and name
+        //but the other players will be informed about him
+        //then the message should not contain color and name
+        if (player.getColor() == null)
+            playerJSON.remove(Constants.PLAYER_COLOR);
+
+        if (player.getName() == "")
+            playerJSON.remove(Constants.PLAYER_NAME);
+
+        JSONObject json = new JSONObject();
+        json.put(Constants.PLAYER, playerJSON);
+
+        JSONObject ret = new JSONObject();
+        ret.put(Constants.STATUS_UPD, json);
+
+        return ret.toString();
+    }
+
+    public String statusUpdate(String status) {
+        JSONObject json = new JSONObject();
+        json.put(Constants.STATUS_UPD, status);
+
+        return json.toString();
+    }
+    //endregion
+
+    //region startGame
+    /**
+     * creates message containing start game and card for player
+     * @param overview
+     * @return string message structured like JSON
+     */
+    public String startGame(RawMaterialOverview overview) {
+        JSONObject json = new JSONObject();
+        json.put(Constants.CARD, new JSONObject(overview.toJSONString()));
+
+        JSONObject ret = new JSONObject();
+        ret.put(Constants.START_CON, json);
+        return ret.toString();
+    }
+    //endregion
+
+    //region endGame
+    /**
+     * creates message containing end game message and winner id
+     * @param winner
+     * @return string message structured like JSON
+     */
+    public String endGame(Player winner) {
+        HashMap<String, Object> map = new HashMap<>();
+        map.put(Constants.NOTIFICATION, String.format(Constants.PLAYER_ID_WON_GAME, winner.getName()));
+        map.put(Constants.WINNER, winner.getId());
+        return createJSON(Constants.GAME_OVER, map).toString();
+    }
+    //endregion
+
+    //region errorMessage
+    public String errorMessage(String message) {
+        JSONObject json = new JSONObject();
+        json.put(Constants.SERVER_RES, message);
+        return json.toString();
     }
     //endregion
 
@@ -91,6 +163,7 @@ public class JSONUtils {
         return type;
     }
     //endregion
+
 
     /*
 

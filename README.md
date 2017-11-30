@@ -42,14 +42,14 @@ Workflow
 -------------
 
  - **EVERY DAY** before you start your work make sure your local repo is up-to-date with ` git fetch --prune`
- - switch to your ancestor branch and pull most recent changes
- - if you already have a feature branch then rebase it onto the ancestor branch
-  - `git co <feature-branch>`
-  - `git rebase -i <ancestor>`
+ - switch to your ANCESTOR branch and pull most recent changes
+ - if you already have a feature branch then rebase it onto the ANCESTOR branch
+  - `git co <FEATURE-BRANCH>`
+  - `git rebase <ANCESTOR>`
  - if not create a new branch following these rules
 	 1. Do you have an open issue for the work your about to do? **If not open one!**
-	 2. `$ git co <PARENT-BRANCH>` &mdash; change to parent branch
-	 3. `$ git pull origin <PARENT-BRANCH>` &mdash; pull most recent changes
+	 2. `$ git co <ANCESTOR>` &mdash; change to parent branch
+	 3. `$ git pull origin <ANCESTOR>` &mdash; pull most recent changes
 	 4. `$ git co -b [client|server]/<ISSUE#>_<MEANINGFUL-DESCRIPTION>` (<em>NOTE: use for **_** and **-**</em>) &mdash; create new branch following our naming convention
  - *get stuff done*
  - commit your changes - **COMMIT MESSAGES HAVE TO BE IN PRESENT TENSE**
@@ -57,9 +57,27 @@ Workflow
 	2.  `$ git ci` &mdash; opens your editor (set with core.editor)
 		1. 1st line contains summary (this line should complete this sentence: when applied this commit will... )
 		2. Body should contain a brief description of why you made this changes
-	3. `git push [-u origin <feature-branch>]` &mdash; pushes your changes to the gitlab repo (if you push for the first time use the full command with the optional -u part)
+	3. `git push [-u origin <FEATURE-BRANCH>]` &mdash; pushes your changes to the gitlab repo (if you push for the first time use the full command with the optional -u part)
 	4. *on first push:* click link in terminal to create a **merge request** (otherwise your changes can't be merged!)
-	5. once your done with your feature **rebase** it onto your target branch with `git rebase -i <target>` and upload the changes to **origin**
+ - once your done with your feature **rebase** it onto your target branch and upload the changes to **origin**. To do so follow this guide:
+	1. `$ git add -p` &mdash; once again stage your changes
+	2. `$ git ci` &mdash; commit your changes using our commit template
+	3. `$ git co <ANCESTOR>` &mdash; change to parent branch
+	4. `$ git fe` &mdash; get latest updates
+	5. `$ git pull origin <ANCESTOR>` &mdash; pull most recent changes
+	6. `$ git co <FEATURE-BRANCH>` &mdash; change to feature branch
+	7. `$ git rebase -i <ANCESTOR>` &mdash; rebase _interactively_ onto your ancestor branch, you'll see something like this:
+		- ![Git Cheat Sheet](git-rebase-1.png)
+	8. turn it into something like this:
+		- ![Git Cheat Sheet](git-rebase-2.png)
+	9. save your rebase file (in vim press ZZ)
+	10. new text editor will open where you can edit your commit message for this feature
+	11. **make sure your commit satisfies our requirements -> git commit template**
+	12. resolve all possible conflicts (I recommend using your IDE for that)
+	13. once your rebase was successful, push your branch to origin with `$ git push --force-with-lease origin <FEATURE-BRANCH>`
+	14. make sure the merge request is updated to match your **feature commit**
+	15. move your issue to dev done
+
 
 ----------------
 

@@ -56,9 +56,6 @@ public class MainActivity extends Activity {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_main);
 
-    btnSend = findViewById(R.id.btnSend);
-    inputMsg = findViewById(R.id.inputMsg);
-    listViewMessages = findViewById(R.id.list_view_messages);
 
     utils = new Utils(getApplicationContext());
 

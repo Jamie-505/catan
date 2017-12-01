@@ -30,9 +30,7 @@
       android:name=".LobbyActivitiy">
       <!--android:screenOrientation="portrait" >-->
     </activity>
-    <activity
-      android:name=".MainActivity"
-      android:screenOrientation="portrait" >
+    <activity android:name=".GameBoardActivity">
     </activity>
     <service
       android:name=".network.WebSocketService"

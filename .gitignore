@@ -18,6 +18,7 @@
 **/.idea/dictionaries
 **/.idea/vcs.xml
 **/.idea/jsLibraryMappings.xml
+**/local.properties
 
 # Sensitive or high-churn files:
 **/.idea/**/dataSources/

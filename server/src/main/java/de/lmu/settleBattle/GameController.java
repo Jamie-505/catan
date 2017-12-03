@@ -8,6 +8,8 @@ public class GameController {
     private int currentPlayerId;
     private HashMap<Integer, Integer> turnOrder;
     private List<String> chatHistory;
+    private RawMaterialOverview resourcesDeck;
+    private DevelopmentCardDeck developmentDeck;
 
     public GameController() {
 
@@ -16,6 +18,8 @@ public class GameController {
         currentPlayerId = -1;
         turnOrder = new HashMap<>();
         chatHistory = new ArrayList<>();
+        resourcesDeck =  new RawMaterialOverview(19);
+        developmentDeck = new DevelopmentCardDeck();
     }
 
     //region isValidPlayerData

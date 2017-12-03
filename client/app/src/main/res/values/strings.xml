@@ -12,19 +12,22 @@
   <string name="gameName">Die Siedler</string>
   <string name="welcomeText">Willkommen zur Android Version von die Siedler. Du kannst nun eine Runde spielen.</string>
   <string name="startGame">Spiel starten</string>
-
+  <string name="snackbar_text">Farbe bereits ausgewählt</string>
+    <string name="snackbar_farbe">Farbe bereits ausgewählt</string>
+  <string name="snackbar_action">Automatische Farbe</string>
   <!-- activity_select_playerayer -->
   <string name="beitreten">Lobby beitreten</string>
 
   <!-- Farbenauswahl-->
 
   <string-array name="farben_array">
-    <item>Gelb</item>
+    <item>Orange</item>
     <item>Rot</item>
     <item>Blau</item>
     <item>Weiß</item>
   </string-array>
   <string name="title_activity_lobby_activitiy">LobbyActivitiy</string>
   <string name="starten">Spiel Starten</string>
+  <string name="player_name_input_hint">Bitte gebe deinen Spielernamen hier ein</string>
 
 </resources>

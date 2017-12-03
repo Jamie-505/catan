@@ -1,16 +1,15 @@
 package de.lmu.settlebattle.catanclient;
 
-import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.IBinder;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import de.lmu.settlebattle.catanclient.network.WebSocketService;
 
-
-public abstract class BaseSocketActivity extends Activity {
+public abstract class BaseSocketActivity extends AppCompatActivity {
 
   private static final String TAG = BaseSocketActivity.class.getSimpleName();
 

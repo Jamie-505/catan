@@ -31,7 +31,9 @@ public final class Constants {
   public static final String ROLL_DICE = "Würfeln";
   public static final String SEA_TRADE = "Seehandel";
   public static final String SERVER_RES = "Serverantwort";
-  public static final String STATUS_UPD = "Statusupdate";
+  public static final String STATUS_UPD = "Statusupdate"; //genutzt
+  public static final String ERROR_COLOR = "Farbe bereits"; //genutzt
+	public static final String ERROR_NAME = "Name bereits"; //genutzt
   public static final String TOSS_CARD = "Karte abgeben";
   public static final String TRD_ABORTED = "Handelsangebot abgebrochen";
   public static final String TRD_ACC = "Handelsangebot angenommen";
@@ -44,15 +46,19 @@ public final class Constants {
   public static final String VICTORY_PTS = "Siegpunkte";
 
   // Broadcast
+  public static final String ACTION_COLOR_ASSIGNED = "colorAssigned";
   public static final String ACTION_CONNECTION_ESTABLISHED = "connectionEstablished";
   public static final String ACTION_MSG_RECEIVED = "msgReceived";
   public static final String ACTION_MSG_TO_SEND = "sendMsg";
+  public static final String ACTION_NAME_ASSIGNED = "nameAssigned";
   public static final String ACTION_NETWORK_STATE_CHANGED = "networkStateChanged";
   public static final String DISPLAY_ERROR = "displayError";
-  public static final String ERROR_MSG = "errorMsg";
-  public static final String PROTOCOL_SUPPORTED = "protocolMatch";
+	public static final String ERROR_MSG = "errorMsg";
+  public static final String NEXT_ACTIVITY = "nextActivity";
+	public static final String PROTOCOL_SUPPORTED = "protocolMatch";
 
   // Error Handling
+  public static final String MESSAGE = "Meldung";
   public static final String PROTOCOL_MISSMATCH = "Protocol Version Unsupported";
 
   //Message Objects

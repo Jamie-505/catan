@@ -1,6 +1,6 @@
 <resources>
 
-  <style name="CatanAppTheme" parent="@android:style/Theme.Material">
+  <style name="CatanAppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
     <item name="android:actionBarStyle">@style/MyActionBarTheme</item>
   </style>
 

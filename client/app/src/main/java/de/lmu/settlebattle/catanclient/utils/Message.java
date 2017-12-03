@@ -7,14 +7,14 @@ import java.util.ArrayList;
 
 public class Message {
 
-  class Player {
-    int id;
+  public class Player {
+    public int id;
 
     @SerializedName(PLAYER_NAME)
-    private String name;
+    public String name;
 
     @SerializedName(PLAYER_STATE)
-    private String status;
+    public String status;
 
     @SerializedName(PLAYER_COLOR)
     String color;
@@ -31,6 +31,10 @@ public class Message {
 
     @SerializedName(PLACE)
     private ArrayList[] locations;
+  }
 
+  class Error {
+    @SerializedName(MESSAGE)
+    String Message;
   }
 }

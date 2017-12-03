@@ -54,14 +54,14 @@ public class StartActivity extends Activity {
     }
   };
 
+
+
   @Override
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.startscreen);
 
     btnConnect = findViewById(R.id.connectButton);
-
-    getActionBar().hide();
 
     btnConnect.setOnClickListener((View v) -> {
       if (!connected) {

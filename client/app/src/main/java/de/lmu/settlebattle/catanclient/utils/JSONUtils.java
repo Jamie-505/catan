@@ -4,6 +4,7 @@ import static de.lmu.settlebattle.catanclient.utils.Constants.*;
 
 import com.google.gson.Gson;
 import de.lmu.settlebattle.catanclient.utils.Message.Player;
+import de.lmu.settlebattle.catanclient.utils.Message.Error;
 import java.util.HashMap;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -12,13 +13,13 @@ public class JSONUtils {
 
   private static final String TAG = JSONUtils.class.getSimpleName();
 
-  private Gson gson = new Gson();
+  private static Gson gson = new Gson();
 
   /**
    * parses JSON Strings received from the backend server
    * @param msg JSON string to be interpreted
    */
-  public Object[] parse(final String msg) {
+  public static Object[] parse(final String msg) {
 
     try {
       JSONObject jObj = new JSONObject(msg);
@@ -30,10 +31,14 @@ public class JSONUtils {
           return completeHandshake(jObj.getJSONObject(HANDSHAKE));
         case GET_ID:
           Player player = gson.fromJson(jObj.getString(GET_ID), Player.class);
-          return new Object[] { TO_STORAGE, player.id };
+          return new Object[] { TO_STORAGE, player };
         case STATUS_UPD:
-          // TODO: handle different Status updates
-          // TODO: go to select Player Activity
+          JSONObject status = jObj.getJSONObject(STATUS_UPD);
+          player = gson.fromJson(status.getString(PLAYER), Player.class);
+          return handleStatusUpdate(player);
+        case ERROR:
+          Error error = gson.fromJson(jObj.getString(ERROR), Error.class);
+          return displayError(error.Message);
         case GAME_START:
           // TODO: handle game start
           // TODO: go to Main Activity, render board, etc...
@@ -47,11 +52,20 @@ public class JSONUtils {
     return null;
   }
 
-  private Object[] displayError(String errorMsg) {
+  private static Object[] handleStatusUpdate(Player player) {
+    String status = player.status;
+    switch (status) {
+      case GAME_READY:
+        return new Object[] { GAME_READY, player };
+    }
+    return null;
+  }
+
+  private static Object[] displayError(String errorMsg) {
     return new String[] { ERROR, errorMsg };
   }
 
-  private String[] completeHandshake(JSONObject jsonMsg) {
+  private static String[] completeHandshake(JSONObject jsonMsg) {
     try {
       if (jsonMsg.get(PROTOCOL).equals(VERSION_PROTOCOL)) {
         HashMap<String, String> clientInfo = new HashMap<>();
@@ -70,7 +84,7 @@ public class JSONUtils {
     return null;
   }
 
-  private String createJSONString(String messageType, HashMap information) {
+  public static String createJSONString(String messageType, HashMap information) {
     try {
       JSONObject jObj = new JSONObject();
       JSONObject payload = new JSONObject(information);

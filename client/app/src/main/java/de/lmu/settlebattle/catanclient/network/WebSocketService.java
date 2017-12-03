@@ -1,6 +1,7 @@
 package de.lmu.settlebattle.catanclient.network;
 
 import static de.lmu.settlebattle.catanclient.utils.Constants.*;
+import de.lmu.settlebattle.catanclient.utils.Message.Player;
 
 import android.app.Service;
 import android.content.BroadcastReceiver;
@@ -28,7 +29,6 @@ public class WebSocketService extends Service {
   private boolean socketConnected = false;
 
   private final IBinder binder = new WebSocketsBinder();
-  private JSONUtils jsonUtils = new JSONUtils();
   private Storage storage;
   private WebSocketClient webSocketClient;
 
@@ -47,6 +47,7 @@ public class WebSocketService extends Service {
   @Override
   public int onStartCommand(Intent intent, int flags, int startId) {
     Log.i(TAG, "onStartCommand");
+    storage = new Storage(getApplicationContext());
     Intent connectionIntent = new Intent(ACTION_CONNECTION_ESTABLISHED);
     LocalBroadcastManager.getInstance(this).sendBroadcast(connectionIntent);
     if(!socketConnected){
@@ -56,11 +57,9 @@ public class WebSocketService extends Service {
     return START_STICKY;
   }
 
-
   @Override
   public IBinder onBind(Intent intent) {
     Log.d(TAG, "onBind");
-    storage = new Storage(getApplicationContext());
     LocalBroadcastManager.getInstance(this).registerReceiver(messageReceiver,
         new IntentFilter(ACTION_NETWORK_STATE_CHANGED));
     if(!socketConnected){
@@ -120,16 +119,25 @@ public class WebSocketService extends Service {
   }
 
   private void messageReceived(String message) {
-    Object[] mail = jsonUtils.parse(message);
+    Object[] mail = JSONUtils.parse(message);
     switch (mail[0].toString()) {
       case TO_SERVER:
         Intent protocolIntent = new Intent(PROTOCOL_SUPPORTED);
         LocalBroadcastManager.getInstance(this).sendBroadcast(protocolIntent);
         webSocketClient.send(mail[1].toString());
         break;
+      case GAME_READY:
+        Player player = (Player) mail[1];
+        if (player.id == storage.getSessionId()) {
+          // should cause select player acitivity so switch to lobby
+          storage.storePlayer(player);
+          Intent lobbyIntent = new Intent(NEXT_ACTIVITY);
+          LocalBroadcastManager.getInstance(this).sendBroadcast(lobbyIntent);
+        }
+        break;
       case TO_STORAGE:
-        storage.storeSessionId(Integer.parseInt(mail[1].toString(), 16));
-        Log.d(TAG, mail[1].toString() + " --> TO_STORAGE");
+        Log.d(TAG, ((Player) mail[1]).id + " --> TO_STORAGE");
+        storage.storePlayer((Player) mail[1]);
         break;
       case ERROR:
         displayError(mail[1].toString());
@@ -152,6 +160,11 @@ public class WebSocketService extends Service {
     socketConnected = true;
     Intent intent = new Intent(ACTION_CONNECTION_ESTABLISHED);
     LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
+  }
+
+  public void sendMessage(String jsonMsg) {
+    Log.d(TAG, "Send to server -> " + jsonMsg);
+    webSocketClient.send(jsonMsg);
   }
 
   public final class WebSocketsBinder extends Binder {

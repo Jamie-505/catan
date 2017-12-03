@@ -1,5 +1,7 @@
 package de.lmu.settlebattle.catanclient.network;
 
+import static de.lmu.settlebattle.catanclient.utils.Constants.*;
+
 import android.app.Service;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -9,7 +11,8 @@ import android.os.Binder;
 import android.os.IBinder;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
-import java.io.Serializable;
+import de.lmu.settlebattle.catanclient.utils.JSONUtils;
+import de.lmu.settlebattle.catanclient.utils.Storage;
 import java.net.URI;
 import java.net.URISyntaxException;
 import org.java_websocket.client.WebSocketClient;
@@ -19,15 +22,14 @@ import org.java_websocket.handshake.ServerHandshake;
 
 public class WebSocketService extends Service {
 
-  public static final String ACTION_CONNECTION_ESTABLISHED = "connectionEstablished";
-  public static final String ACTION_MSG_RECEIVED = "msgReceived";
-  public static final String ACTION_MSG_TO_SEND = "sendMsg";
-  public static final String ACTION_NETWORK_STATE_CHANGED = "networkStateChanged";
 
-  private static final String TAG = WebSocketService.class.getSimpleName();
+  private final String TAG = WebSocketService.class.getSimpleName();
 
   private boolean socketConnected = false;
+
   private final IBinder binder = new WebSocketsBinder();
+  private JSONUtils jsonUtils = new JSONUtils();
+  private Storage storage;
   private WebSocketClient webSocketClient;
 
   private BroadcastReceiver messageReceiver = new BroadcastReceiver() {
@@ -39,10 +41,6 @@ public class WebSocketService extends Service {
       } else {
         stopSocket();
       }
-//      if(intent.getAction().equals(ACTION_MSG_TO_SEND)){
-//        Log.d(TAG, "sending to sever");
-//        webSocketClient.send(intent.getStringExtra("JSONMsg"));
-//      }
     }
   };
 
@@ -58,15 +56,13 @@ public class WebSocketService extends Service {
     return START_STICKY;
   }
 
-  public void createJson(String messageType, Serializable data){
-    // TODO: also in JSONHelper
-  }
 
   @Override
   public IBinder onBind(Intent intent) {
     Log.d(TAG, "onBind");
+    storage = new Storage(getApplicationContext());
     LocalBroadcastManager.getInstance(this).registerReceiver(messageReceiver,
-        new IntentFilter(WebSocketService.ACTION_NETWORK_STATE_CHANGED));
+        new IntentFilter(ACTION_NETWORK_STATE_CHANGED));
     if(!socketConnected){
       startSocket();
       socketConnected = true;
@@ -98,7 +94,7 @@ public class WebSocketService extends Service {
       }
       @Override
       public void onMessage(String message) {
-        Log.d(TAG, "Websocket onMessage()");
+        Log.d(TAG, "Websocket onMessage() -> " + message);
         messageReceived(message);
       }
       @Override
@@ -124,8 +120,32 @@ public class WebSocketService extends Service {
   }
 
   private void messageReceived(String message) {
-    // TODO: also send broadcast with message received
-    // TODO: handle message with JSONHelper
+    Object[] mail = jsonUtils.parse(message);
+    switch (mail[0].toString()) {
+      case TO_SERVER:
+        Intent protocolIntent = new Intent(PROTOCOL_SUPPORTED);
+        LocalBroadcastManager.getInstance(this).sendBroadcast(protocolIntent);
+        webSocketClient.send(mail[1].toString());
+        break;
+      case TO_STORAGE:
+        storage.storeSessionId(Integer.parseInt(mail[1].toString(), 16));
+        Log.d(TAG, mail[1].toString() + " --> TO_STORAGE");
+        break;
+      case ERROR:
+        displayError(mail[1].toString());
+      default:
+        break;
+    }
+  }
+
+  /**
+   * broadcasts errors to any Activity so they can be displayed
+   * @param errorMessage
+   */
+  private void displayError(String errorMessage) {
+    Intent errorIntent = new Intent(DISPLAY_ERROR);
+    errorIntent.putExtra(ERROR_MSG, errorMessage);
+    LocalBroadcastManager.getInstance(this).sendBroadcast(errorIntent);
   }
 
   private void connectionOpened(){

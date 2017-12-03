@@ -1,5 +1,7 @@
 package de.lmu.settlebattle.catanclient.network;
 
+import static de.lmu.settlebattle.catanclient.utils.Constants.ACTION_NETWORK_STATE_CHANGED;
+
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -22,8 +24,8 @@ public class NetworkStateMonitor extends BroadcastReceiver {
         NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
         boolean networkIsOn = activeNetworkInfo != null && activeNetworkInfo.isConnected();
 
-        Intent broadcastIntent = new Intent(WebSocketService.ACTION_NETWORK_STATE_CHANGED);
-        broadcastIntent.putExtra(WebSocketService.ACTION_NETWORK_STATE_CHANGED, networkIsOn);
+        Intent broadcastIntent = new Intent(ACTION_NETWORK_STATE_CHANGED);
+        broadcastIntent.putExtra(ACTION_NETWORK_STATE_CHANGED, networkIsOn);
         LocalBroadcastManager.getInstance(context).sendBroadcast(broadcastIntent);
     }
 }

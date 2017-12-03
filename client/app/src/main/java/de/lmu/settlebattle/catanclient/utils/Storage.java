@@ -1,32 +1,30 @@
 package de.lmu.settlebattle.catanclient.utils;
 
+import static de.lmu.settlebattle.catanclient.utils.Constants.KEY_SESSION_ID;
+import static de.lmu.settlebattle.catanclient.utils.Constants.KEY_SHARED_PREF;
+
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 public class Storage {
 
-  private final String DEBUG_TAG = this.getClass().getSimpleName();
+  private final String TAG = this.getClass().getSimpleName();
 
   private SharedPreferences sharedPrefs;
 
-  private static final String KEY_SHARED_PREF = "CATAN_APP";
-  private static final String KEY_SESSION_ID = "sessionId";
 
   public Storage(Context context) {
     this.sharedPrefs = context.getSharedPreferences(KEY_SHARED_PREF, Context.MODE_PRIVATE);
   }
 
-  public void storeSessionId(String sessionId) {
+  public void storeSessionId(int sessionId) {
     Editor editor = sharedPrefs.edit();
-    editor.putString(KEY_SESSION_ID, sessionId);
+    editor.putInt(KEY_SESSION_ID, sessionId);
     editor.apply();
   }
 
-  public String getSessionId() {
-    return sharedPrefs.getString(KEY_SESSION_ID, null);
+  public int getSessionId() { return sharedPrefs.getInt(KEY_SESSION_ID, 0);
   }
 
 }

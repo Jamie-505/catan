@@ -23,7 +23,7 @@
       </intent-filter>
     </activity>
     <activity
-      android:name=".selectPlayerActivity"
+      android:name=".SelectPlayerActivity"
       android:screenOrientation="portrait" >
     </activity>
     <activity

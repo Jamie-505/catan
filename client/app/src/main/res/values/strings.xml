@@ -13,7 +13,7 @@
   <string name="welcomeText">Willkommen zur Android Version von die Siedler. Du kannst nun eine Runde spielen.</string>
   <string name="startGame">Spiel starten</string>
 
-  <activity_select_playerayer -->
+  <!-- activity_select_playerayer -->
   <string name="beitreten">Lobby beitreten</string>
 
   <!-- Farbenauswahl-->

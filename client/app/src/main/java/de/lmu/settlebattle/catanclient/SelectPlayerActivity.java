@@ -1,11 +1,10 @@
 package de.lmu.settlebattle.catanclient;
 
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.widget.ArrayAdapter;
 import android.widget.Spinner;
 
-public class selectPlayerActivity extends AppCompatActivity {
+public class SelectPlayerActivity extends BaseSocketActivity {
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {

@@ -1,12 +1,13 @@
 package de.lmu.settlebattle.catanclient;
 
+import static de.lmu.settlebattle.catanclient.utils.Constants.ACTION_MSG_RECEIVED;
+
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
 import android.support.v4.content.LocalBroadcastManager;
-import de.lmu.settlebattle.catanclient.network.WebSocketService;
 
 public class MainActivity extends BaseSocketActivity {
 
@@ -33,7 +34,7 @@ public class MainActivity extends BaseSocketActivity {
     protected void onStart() {
         super.onStart();
         LocalBroadcastManager.getInstance(this).registerReceiver(broadcastReceiver,
-            new IntentFilter(WebSocketService.ACTION_MSG_RECEIVED));
+            new IntentFilter(ACTION_MSG_RECEIVED));
     }
 
     @Override

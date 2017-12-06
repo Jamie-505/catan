@@ -67,6 +67,26 @@ public class GameController {
     }
     //endregion
 
+    /**
+     *<method name: buyDevelopmentCard>
+     *<description: this method performs the actions required to buy development card>
+     *<preconditions: player has the required cards to buy and his turn is up>
+     *<postconditions: player gets a development card in exchange for his material cards>
+     */
+
+    public void tradeDevelopmentCard(Player player){
+        if (player.canAffordDevCard()){
+            player.buyDevelopmentCard(developmentDeck.withdrawRandomCard());
+            sellDevelopmentCard();
+        }
+
+    }
+    public void sellDevelopmentCard(){
+        this.resourcesDeck.increase(RawMaterialType.ORE, 1);
+        this.resourcesDeck.increase(RawMaterialType.WOOD, 1);
+        this.resourcesDeck.increase(RawMaterialType.WEAT, 1);
+    }
+
     public void initializeBuildingPhase() {
         //players[turnOrder.get(0)].setStatus(StatusConstants.BUILD_SETTLEMENT);
         //players[turnOrder.get(1)].setStatus(StatusConstants.WAIT);

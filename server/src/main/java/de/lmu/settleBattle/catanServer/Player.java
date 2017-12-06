@@ -88,8 +88,11 @@ public class Player extends JSONStringBuilder {
      *<preconditions: player has the required cards to buy and his turn is up>
      *<postconditions: player gets a development card in exchange for his material cards>
      */
-    public void buyDevelopmentCard(){
-        //TODO
+    public void buyDevelopmentCard(DevCardType card){
+        this.rawMaterial.decrease(RawMaterialType.ORE, 1);
+        this.rawMaterial.decrease(RawMaterialType.WOOL, 1);
+        this.rawMaterial.decrease(RawMaterialType.WEAT, 1);
+        this.developmentCardOverview.increase(card, 1);
     }
 
     /**
@@ -301,6 +304,15 @@ public class Player extends JSONStringBuilder {
 
     public  void setGreatestArmy (boolean boo){
         this.greatestArmy = boo;
+    }
+
+    public boolean canAffordDevCard() {
+        if(this.rawMaterial.canAffordDevelopmentCard()){
+            return true;
+
+        }else{
+            return false;
+        }
     }
 
     //endregion

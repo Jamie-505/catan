@@ -8,21 +8,16 @@ public class Board {
     public Building[] buildings;
     public Haven[] havens;
     public Robber robber;
-    public DevelopmentCardOverview cardDeck;
+
+
 
     public Board() {
-        fields = new Field[37];
-
-        //each player gets 5 settlements, 4 cities and 15 streets. with 4 player there are 96 buildings
-        buildings = new Building[96];
+        fields = new Field[19];
+        //each player gets 5 settlements, 4 cities and 15 streets
+        buildings = new Building[24];
         havens = new Haven[7];
         robber = new Robber();
-        cardDeck = new DevelopmentCardOverview();
-    }
 
-    public Board(int playerCount) {
-        this();
-        buildings = new Building[24*playerCount];
     }
 
     /**
@@ -32,8 +27,9 @@ public class Board {
      *<postconditions: none>
      */
     public void initializeBoard (){
-        //TODO
+
     }
+    
 
     /**
      *<method name: none>

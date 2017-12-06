@@ -37,6 +37,6 @@ public class DevelopmentCard  {
      * @return RawMaterialOverview representing costs
      */
     public static RawMaterialOverview getCosts() {
-        return new RawMaterialOverview(0,0,1,1,1);
+        return new RawMaterialOverview(0,1,0,1,1);
     }
 }

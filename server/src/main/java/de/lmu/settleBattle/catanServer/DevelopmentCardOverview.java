@@ -1,5 +1,6 @@
 package de.lmu.settleBattle.catanServer;
 
+import java.util.Random;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 import org.json.JSONObject;
@@ -27,6 +28,9 @@ public class DevelopmentCardOverview extends JSONStringBuilder {
     private int victoryPoint;
 
     //region Constructors
+    private DevCardType[] cards;
+
+
     public DevelopmentCardOverview(){
         this.knight = 14;
         this.invention = 2;
@@ -98,6 +102,16 @@ public class DevelopmentCardOverview extends JSONStringBuilder {
         }
     }
     //endregion
+
+    public DevCardType withdrawRandomCard(){
+
+        DevCardType[] cards = DevCardType.values();
+        Random random = new Random();
+        DevCardType card = cards[random.nextInt(cards.length)];
+        decrease(card, 1);
+        return card;
+
+    }
 
     public int getTotalCount() {
         return invention+knight+monopole+roadConstruction+victoryPoint;

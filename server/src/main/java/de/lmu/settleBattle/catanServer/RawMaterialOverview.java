@@ -89,23 +89,28 @@ public class RawMaterialOverview extends JSONStringBuilder{
      * @param type type of raw material to decrease
      * @param i value to be subtracted
      */
-    public void decrease(RawMaterialType type, int i) {
-        if (i < 0) return;
+    public void decrease(RawMaterialType type, int i) throws Exception {
+
 
         switch(type) {
             case ORE:
+                if(i> this.oreCount) throw new Exception();
                 oreCount = oreCount < i ? 0 : oreCount-i;
                 break;
             case CLAY:
+                if(i> this.clayCount) throw new Exception();
                 clayCount = clayCount < i ? 0 : clayCount-i;
                 break;
             case WEAT:
+                if(i> this.weatCount) throw new Exception();
                 weatCount = weatCount < i ? 0 : weatCount-i;
                 break;
             case WOOD:
+                if(i> this.woodCount) throw new Exception();
                 woodCount = woodCount < i ? 0 : woodCount-i;
                 break;
             case WOOL:
+                if(i> this.woolCount) throw new Exception();
                 woolCount = woolCount < i ? 0 : woolCount-i;
                 break;
         }

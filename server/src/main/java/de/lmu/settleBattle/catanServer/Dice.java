@@ -1,5 +1,4 @@
-package de.lmu.settleBattle;
-import java.util.Random;
+package de.lmu.settleBattle.catanServer;import java.util.Random;
 
 public class Dice {
 

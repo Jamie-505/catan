@@ -1,5 +1,4 @@
-package de.lmu.settleBattle;
-public enum DevCardType {
+package de.lmu.settleBattle.catanServer;public enum DevCardType {
     INVENTION,
     KNIGHT,
     ROAD_CONSTRUCTION,

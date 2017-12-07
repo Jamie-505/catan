@@ -1,5 +1,4 @@
-package de.lmu.settleBattle;
-
+package de.lmu.settleBattle.catanServer;
 public enum Color {
 
     ORANGE,

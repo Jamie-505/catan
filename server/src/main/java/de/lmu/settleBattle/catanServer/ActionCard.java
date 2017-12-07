@@ -1,4 +1,4 @@
-package de.lmu.settleBattle;
+package de.lmu.settleBattle.catanServer;
 
 public class ActionCard extends DevelopmentCard{
 

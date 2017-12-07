@@ -1,5 +1,4 @@
-package de.lmu.settleBattle;
-
+package de.lmu.settleBattle.catanServer;
 public class TradeRequest {
     private static int idCounter = 0;
 

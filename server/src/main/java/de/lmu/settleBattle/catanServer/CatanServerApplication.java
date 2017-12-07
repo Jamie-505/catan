@@ -1,4 +1,4 @@
-package de.lmu.settleBattle;
+package de.lmu.settleBattle.catanServer;
 
 import javafx.application.Application;
 import org.springframework.boot.SpringApplication;
@@ -9,16 +9,13 @@ import org.springframework.boot.web.support.SpringBootServletInitializer;
 
 @EnableAutoConfiguration
 @SpringBootApplication
-public class ServerApp extends SpringBootServletInitializer{
+public class CatanServerApplication extends SpringBootServletInitializer {
 
-  private static Class applicationClass = Application.class;
-
-  @Override
-  protected SpringApplicationBuilder configure(SpringApplicationBuilder application) {
-    return application.sources(Application.class);
-  }
-
-  public static void main(String[] args) {
-		SpringApplication.run(ServerApp.class, args);
+	@Override
+	protected SpringApplicationBuilder configure(SpringApplicationBuilder application) {
+		return application.sources(Application.class);
+	}
+	public static void main(String[] args) {
+		SpringApplication.run(CatanServerApplication.class, args);
 	}
 }

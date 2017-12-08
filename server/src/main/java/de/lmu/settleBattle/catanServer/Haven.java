@@ -1,4 +1,5 @@
 package de.lmu.settleBattle.catanServer;
+
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
@@ -25,10 +26,10 @@ public class Haven extends JSONStringBuilder {
         setName();
     }
     /**
-     *<method name: none>
-     *<description: none>
-     *<preconditions: none>
-     *<postconditions: none>
+     * <method name: none>
+     * <description: none>
+     * <preconditions: none>
+     * <postconditions: none>
      */
 
     public Location[] getLocations() {
@@ -36,10 +37,10 @@ public class Haven extends JSONStringBuilder {
     }
 
     /**
-     *<method name: none>
-     *<description: none>
-     *<preconditions: none>
-     *<postconditions: none>
+     * <method name: none>
+     * <description: none>
+     * <preconditions: none>
+     * <postconditions: none>
      */
 
     public RawMaterialType getHarvest() {
@@ -47,17 +48,17 @@ public class Haven extends JSONStringBuilder {
     }
 
     /**
-     *<method name: none>
-     *<description: none>
-     *<preconditions: none>
-     *<postconditions: none>
+     * <method name: none>
+     * <description: none>
+     * <preconditions: none>
+     * <postconditions: none>
      */
-    public RawMaterialType trade  (RawMaterialType [] rm){
+    public RawMaterialType trade(RawMaterialType[] rm) {
         //TODO
         return null;
     }
 
-    public RawMaterialType trade (TradeRequest tr) {
+    public RawMaterialType trade(TradeRequest tr) {
         if (this.isValidTradeRequest(tr)) {
             //TODO
         }
@@ -65,33 +66,46 @@ public class Haven extends JSONStringBuilder {
     }
 
     /**
-     *<method name: isValidTradeRequest
-     *<description: returns true if the trade request is valid, false if not
-     *<preconditions: none>
-     *<postconditions: none>
+     * <method name: isValidTradeRequest
+     * <description: returns true if the trade request is valid, false if not
+     * <preconditions: none>
+     * <postconditions: none>
      */
-    private boolean isValidTradeRequest(TradeRequest tr){
+    private boolean isValidTradeRequest(TradeRequest tr) {
 
         // a haven can only give one raw material
-        if (tr.getRequestCount() != 1)
+        if (tr.getRequest().getTotalCount() != 1)
             return false;
 
-        switch(harvest) {
+        switch (harvest) {
 
             case WATER:
                 // if this is not a special trading haven then you have to give away 3 raw materials of the
                 // same type to receive one arbitrary raw material
-                if(tr.getOfferCount() == 3)
+                if(tr.getOffer().getTotalCount() == 3) //TODO: check if 3 cards of the same type are offered
                     return true;
 
-            case WOOL: case WOOD: case WEAT: case ORE: case CLAY:
-                // if this is a special trading haven then you have to give away 3 raw materials of the
-                // same type to receive one raw material of type of the harvest
-                // if another raw material type is requested than the harvest type then the
-                // trade request is not valid
-                if (tr.getOfferCount() == 2 &&
-                        tr.getRequest().equals(harvest))
+            case WOOL:
+                if (tr.getOffer().getWoolCount() == 2 && tr.getOffer().getTotalCount() == 2)
                     return true;
+                break;
+
+            case WOOD:
+                if (tr.getOffer().getWoodCount() == 2 && tr.getOffer().getTotalCount() == 2)
+                    return true;
+                break;
+            case WEAT:
+                if (tr.getOffer().getWeatCount() == 2 && tr.getOffer().getTotalCount() == 2)
+                    return true;
+                break;
+            case ORE:
+                if (tr.getOffer().getOreCount() == 2 && tr.getOffer().getTotalCount() == 2)
+                    return true;
+                break;
+            case CLAY:
+                if (tr.getOffer().getClayCount() == 2 && tr.getOffer().getTotalCount() == 2)
+                    return true;
+                break;
         }
 
         return false;
@@ -99,7 +113,9 @@ public class Haven extends JSONStringBuilder {
     //endregion
 
     //region get and set name
-    public String getName() { return this.name; }
+    public String getName() {
+        return this.name;
+    }
 
     private void setName() {
         this.name = harvest == RawMaterialType.WATER ? Constants.HAVEN : harvest.toString() + " " + Constants.HAVEN;

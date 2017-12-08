@@ -116,6 +116,29 @@ public class RawMaterialOverview extends JSONStringBuilder{
                 break;
         }
     }
+
+    public void decrease(RawMaterialOverview overview) {
+        if (this.oreCount < overview.oreCount)
+            throw new IllegalArgumentException("Cannot decrease more ore than existing");
+
+        if (this.weatCount < overview.weatCount)
+            throw new IllegalArgumentException("Cannot decrease more weat than existing");
+
+        if (this.woodCount < overview.woodCount)
+            throw new IllegalArgumentException("Cannot decrease more wood than existing");
+
+        if (this.woolCount < overview.woolCount)
+            throw new IllegalArgumentException("Cannot decrease more wool than existing");
+
+        if (this.clayCount < overview.clayCount)
+            throw new IllegalArgumentException("Cannot decrease more clay than existing");
+
+        this.oreCount -= overview.oreCount;
+        this.clayCount -= overview.clayCount;
+        this.woolCount -= overview.woolCount;
+        this.woodCount -= overview.woodCount;
+        this.weatCount -= overview.weatCount;
+    }
     //endregion
 
     //region canAfford

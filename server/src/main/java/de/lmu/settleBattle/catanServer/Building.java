@@ -54,7 +54,8 @@ public class Building extends JSONStringBuilder {
 
     public void build(Location[] loc) throws IllegalArgumentException {
 
-        if (loc.length == 3) {
+        if (((this.type == BuildingType.SETTLEMENT || this.type == BuildingType.CITY) && loc.length == 3) ||
+                this.type == BuildingType.ROAD && loc.length == 2) {
             this.locations = loc;
         }
 

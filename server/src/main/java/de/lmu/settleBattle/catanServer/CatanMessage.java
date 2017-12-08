@@ -1,0 +1,278 @@
+package de.lmu.settleBattle.catanServer;
+
+import org.json.JSONObject;
+import org.springframework.web.socket.TextMessage;
+
+public class CatanMessage {
+
+    //region serverProtocol
+
+    /**
+     * Creates message containing version and protocol
+     *
+     * @return JSON structured String Object
+     */
+    public static TextMessage serverProtocol() {
+        JSONObject payload = new JSONObject();
+        payload.put(Constants.VERSION, Constants.VERSION_SERVER);
+        payload.put(Constants.PROTOCOL, "1.0");
+        return new TextMessage(JSONUtils.setJSONType(Constants.HANDSHAKE, payload).toString());
+    }
+    //endregion
+
+    //region welcomeNewPlayer
+
+    /**
+     * Json when client needs it's own session details
+     *
+     * @param id
+     * @return JSON structured String
+     */
+    public static TextMessage welcomeNewPlayer(int id) {
+        JSONObject payload = new JSONObject();
+        payload.put("id", id);
+        return new TextMessage(JSONUtils.setJSONType(Constants.GET_ID, payload).toString());
+    }
+    //endregion
+
+    //region throwDices
+
+    /**
+     * creates message to send to all players when a player throws the dices
+     *
+     * @param id
+     * @param diceResult
+     * @return JSON structured String containing the dice result
+     */
+    public static TextMessage throwDice(int id, int[] diceResult) {
+
+        if (diceResult.length != 2)
+            throw new IllegalArgumentException("The array must have length 2");
+
+        JSONObject payload = new JSONObject();
+        payload.put(Constants.PLAYER, id);
+        payload.put(Constants.DICE_THROW, diceResult);
+
+        return new TextMessage(JSONUtils.setJSONType(Constants.DICE_RESULT, payload).toString());
+    }
+    //endregion
+
+    //region statusUpdate
+
+    /**
+     * creates message containing status update
+     *
+     * @param player
+     * @return string message structured like JSON
+     */
+    public static TextMessage statusUpdate(Player player) {
+        JSONObject payload = player.toJSON();
+
+        return new TextMessage(JSONUtils.setJSONType(Constants.STATUS_UPD,
+                JSONUtils.setJSONType(Constants.PLAYER, payload)).toString());
+    }
+
+    /**
+     * creates message containing status update
+     *
+     * @param player
+     * @return string message structured like JSON
+     */
+    public static TextMessage statusUpdateHidden(Player player) {
+        JSONObject payload = player.toJSON_Unknown();
+
+        return new TextMessage(JSONUtils.setJSONType(Constants.STATUS_UPD,
+                JSONUtils.setJSONType(Constants.PLAYER, payload)).toString());
+    }
+
+
+    //endregion
+
+    //region startGame
+    /**
+     * creates message containing start game and card for player
+     * @param board
+     * @return string message structured like JSON
+     *//*
+    public String startGame(Board board) {
+        JSONObject json = new JSONObject();
+        json.put(Constants.CARD, new JSONObject(board.toJSONString()));
+
+        JSONObject ret = new JSONObject();
+        ret.put(Constants.START_CON, json);
+        return ret.toString();
+    }*/
+    //endregion
+
+    //region endGame
+
+    /**
+     * creates message containing end game message and winner id
+     *
+     * @param winner
+     * @return string message structured like JSON
+     */
+    public static TextMessage endGame(Player winner) {
+        JSONObject payload = new JSONObject();
+        payload.put(Constants.NOTIFICATION, String.format(Constants.PLAYER_ID_WON_GAME, winner.getName()));
+        payload.put(Constants.WINNER, winner.getId());
+        return new TextMessage(JSONUtils.setJSONType(Constants.GAME_OVER, payload).toString());
+    }
+    //endregion
+
+    //region error
+    public static TextMessage error(String message) {
+        JSONObject payload = new JSONObject();
+        payload.put(Constants.MESSAGE, message);
+        return new TextMessage(JSONUtils.setJSONType(Constants.ERROR,payload).toString());
+    }
+    //endregion
+
+    //region OK
+    public static  TextMessage OK() {
+        JSONObject payload = new JSONObject();
+        payload.put(Constants.SERVER_RES, Constants.OK);
+        return new TextMessage(payload.toString());
+    }
+    //endregion
+
+    //region costs
+
+    /**
+     * creates message containing costs
+     *
+     * @param playerId
+     * @param overview
+     * @param hideCosts
+     * @return JSON structured String
+     */
+    public static TextMessage costs(int playerId, RawMaterialOverview overview, boolean hideCosts) {
+        JSONObject costsPayload = hideCosts ? overview.toJSON_Unknown() : overview.toJSON();
+
+        JSONObject payload = JSONUtils.setJSONType(Constants.RAW_MATERIALS, costsPayload);
+        payload.put(Constants.PLAYER, playerId);
+
+        return new TextMessage(JSONUtils.setJSONType(Constants.COSTS, payload).toString());
+    }
+    //endregion
+
+    //region harvest
+    public static TextMessage harvest(int playerId, RawMaterialOverview overview, boolean hideHarvest) {
+        JSONObject harvestPayload = hideHarvest ? overview.toJSON_Unknown() : overview.toJSON();
+
+        JSONObject payload = JSONUtils.setJSONType(Constants.RAW_MATERIALS, harvestPayload);
+        payload.put(Constants.PLAYER, playerId);
+
+        return new TextMessage(JSONUtils.setJSONType(Constants.HARVEST, payload).toString());
+    }
+    //endregion
+
+    //region robberMoved
+    public static TextMessage robberMoved(Player player, Robber robber, Player victim) {
+        JSONObject payload = robber.toJSON();
+        payload.put(Constants.PLAYER, player.getId());
+        payload.put(Constants.DESTINATION, victim.getId());
+
+        return new TextMessage(JSONUtils.setJSONType(Constants.ROBBER_AT, payload).toString());
+    }
+    //endregion
+
+    //region newBuilding
+    public static TextMessage newBuilding(Building building) {
+        return new TextMessage(
+                JSONUtils.setJSONType(Constants.NEW_BUILDING, building.toJSON()).toString());
+    }
+    //endregion
+
+    //region developmentCardBought
+    public static TextMessage developmentCardBought(int playerId, DevCardType type) {
+        JSONObject payload = new JSONObject();
+        payload.put(Constants.PLAYER, playerId);
+        payload.put(Constants.CARD_BUY, type.toString());
+        return new TextMessage(payload.toString());
+    }
+    //endregion
+
+    //region longestRoad
+    public static TextMessage longestRoad(int playerId) {
+        JSONObject payload = new JSONObject();
+        payload.put(Constants.PLAYER, playerId);
+
+        return new TextMessage(JSONUtils.setJSONType(Constants.LONGEST_RD, payload).toString());
+    }
+
+    public static TextMessage longestRoad() {
+        JSONObject payload = new JSONObject();
+        return new TextMessage(JSONUtils.setJSONType(Constants.LONGEST_RD, payload).toString());
+    }
+    //endregion
+
+    //region trading
+
+    public static TextMessage newTradeRequest(TradeRequest tr) {
+        JSONObject payload = tr.toJSON();
+        return new TextMessage(JSONUtils.setJSONType(Constants.TRD_OFFER, payload).toString());
+    }
+
+    public static TextMessage tradeRequestAccepted(TradeRequest tr) {
+        JSONObject payload = tr.toJSON();
+        return new TextMessage(JSONUtils.setJSONType(Constants.TRD_ACC, payload).toString());
+    }
+
+    public static TextMessage tradePerformed(TradeRequest tr) {
+        JSONObject payload = tr.toJSON();
+        return new TextMessage(JSONUtils.setJSONType(Constants.TRD_FIN, payload).toString());
+    }
+
+    public static TextMessage tradeCancelled(TradeRequest tr) {
+        JSONObject payload = tr.toJSON();
+        return new TextMessage(JSONUtils.setJSONType(Constants.TRD_ABORTED, payload).toString());
+    }
+    //endregion
+
+    //region action cards
+
+    public static TextMessage knightCard(int playerId, int victimId, Location location) {
+        JSONObject payload = new JSONObject();
+        payload.put(Constants.PLACE, location.toJSON());
+        payload.put(Constants.DESTINATION, victimId);
+        payload.put(Constants.PLAYER, playerId);
+
+        return new TextMessage(JSONUtils.setJSONType(Constants.CARD_KNIGHT, payload).toString());
+    }
+
+
+    public static TextMessage roadContructionCard(Building road) {
+
+        if (road.getType() != BuildingType.ROAD)
+            throw new IllegalArgumentException("Can only build road with this card.");
+
+        JSONObject payload = new JSONObject();
+        payload.put(Constants.PLAYER, road.getOwner());
+        payload.put(Constants.ROAD, road.toJSON());
+
+        return new TextMessage(JSONUtils.setJSONType(Constants.CARD_RD_CON, payload).toString());
+    }
+
+    public static TextMessage monopoleCard(int playerId, RawMaterialType type) {
+        JSONObject payload = new JSONObject();
+        payload.put(Constants.PLAYER, playerId);
+        payload.put(Constants.RAW_MATERIAL, type.toString());
+
+        return new TextMessage(JSONUtils.setJSONType(Constants.MONOPOLE, payload).toString());
+    }
+
+    public static TextMessage inventionCard(int playerId, RawMaterialOverview overview) {
+
+        JSONObject payload = new JSONObject();
+        payload.put(Constants.PLAYER, playerId);
+        payload.put(Constants.RAW_MATERIALS, overview.toJSON());
+
+        return new TextMessage(JSONUtils.setJSONType(Constants.INVENTION, payload).toString());
+    }
+
+    //endregion
+
+//TODO: chatmessages AND Servernachrichten AND startGame()
+
+}

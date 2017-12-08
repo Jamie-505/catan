@@ -2,6 +2,12 @@ package de.lmu.settleBattle.catanServer;
 
 
 public class Constants {
+    //Versions Client/Server
+    public static final String VERSION_SERVER = "CatanBackendServer 0.1 (sepgroup03)";
+    public static final String VERSION_CLIENT = "AndroidClient 0.1 (sepgroup03)";
+    public static final String VERSION = "Version";
+    public static final String PROTOCOL = "Protokoll";
+
     //Status Constants
     public final static String START_GAME = "Spiel starten";
     public final static String WAIT_FOR_GAME_START = "Wartet auf Spielbeginn";
@@ -17,7 +23,7 @@ public class Constants {
     //Message Types
     public final static String BUILD = "Bauen";
     public final static String CARD_BUY = "Entwicklungskarte kaufen";
-    public final static String CARD_KNIGHT = "Räuber ausspielen";
+    public final static String CARD_KNIGHT = "Ritter ausspielen";
     public final static String CARD_RD_CON = "Straßenbaukarte ausspielen";
     public final static String CARD_SOLD = "Entwicklungskarte gekauft";
     public final static String CHAT_IN = "Chatnachricht";
@@ -41,7 +47,7 @@ public class Constants {
     public final static String SERVER_RES = "Serverantwort";
     public final static String START_CON = "Spiel gestartet";
     public final static String STATUS_UPD = "Statusupdate";
-    public final static String TOSS_CARD = "Karte abgeben";
+    public final static String TOSS_CARDS = "Karten abgeben";
     public final static String TRD_ABORTED = "Handelsangebot abgebrochen";
     public final static String TRD_ACC = "Handelsangebot angenommen";
     public final static String TRD_FIN = "Handel ausgefuehrt";
@@ -50,6 +56,11 @@ public class Constants {
     public final static String TRD_REQ = "Handel anbieten";
     public final static String TRD_RES = "Handel annehmen";
     public final static String TRD_SEL = "Handel abschliessen";
+    public final static String ACCEPT = "Annehmen";
+    public final static String FELLOW_PLAYER = "Mitspieler";
+    public final static String OPERATION_NOT_PERMITTED = "Die Operation kann nicht durchgeführt";
+    public final static String ARMY = "Rittermacht";
+    public final static String DEV_CARDS = "Entwicklungskarten";
 
     //Message Objects
     public final static String CARD = "Karte";
@@ -75,6 +86,15 @@ public class Constants {
     public final static String WOOL = "Wolle";
     public final static String NOTIFICATION = "Nachricht";
     public final static String WINNER = "Sieger";
+    public final static String RAW_MATERIALS = "Rohstoffe";
+    public final static String RAW_MATERIAL = "Rohstoff";
+    public final static String DESTINATION = "Ziel";
+    public final static String TRADE_ID = "Handel id";
+    public final static String OFFER = "Angebot";
+    public final static String REQUEST = "Nachfrage";
+    public final static String MESSAGE = "Meldung";
+    public final static String OK = "OK";
+
     //Player Constants
     public final static String PLAYER = "Spieler";
     public final static String PLAYER_ID = "id";
@@ -82,8 +102,8 @@ public class Constants {
     public final static String PLAYER_STATE = "Status";
     public final static String PLAYER_NAME = "Name";
     public final static String PLAYER_ID_WON_GAME = "Spieler %1$s hat das Spiel gewonnen.";
-    public final static String PLAYER_DATA_INVALID = "Die gewählten Daten sind bereits vergeben.";
-
+    public final static String NAME_ALREADY_ASSIGNED = "Name bereits vergeben.";
+    public final static String COLOR_ALREADY_ASSIGNED = "Farbe bereits vergeben.";
 
     //Development cards description
     public final static String KNIGHT_DESC = "";

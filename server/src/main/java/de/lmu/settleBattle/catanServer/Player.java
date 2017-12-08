@@ -2,6 +2,7 @@ package de.lmu.settleBattle.catanServer;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
+import org.json.JSONObject;
 
 public class Player extends JSONStringBuilder {
 
@@ -21,79 +22,102 @@ public class Player extends JSONStringBuilder {
     @SerializedName(Constants.PLAYER_COLOR)
     private Color color;
 
+    @Expose
+    @SerializedName(Constants.VICTORY_PTS)
     private int victoryPoints;
+
     private int victoryPointsTotal;
+
+    @Expose
+    @SerializedName(Constants.ARMY)
     private int armyCount;
+
+    @Expose
+    @SerializedName(Constants.LARGEST_ARMY)
     private boolean greatestArmy;
-    private  boolean longestRoad;
-    private RawMaterialOverview rawMaterial;
-    private DevelopmentCardOverview developmentCardOverview;
+
+    @Expose
+    @SerializedName(Constants.LONGEST_RD)
+    private boolean longestRoad;
+
+    @Expose
+    @SerializedName(Constants.RAW_MATERIALS)
+    private RawMaterialOverview rawMaterialDeck;
+
+    @Expose
+    @SerializedName(Constants.DEV_CARDS)
+    private DevelopmentCardOverview developmentDeck;
+
     private Building[] buildingStock;
     private Haven haven;
     //endregion
 
     //region Constructors
+
     /**
-     *<method name: Player>
-     *<description: deffault constructor without parameters>
-     *<preconditions: none>
-     *<postconditions: new player object is created>
+     * <method name: Player>
+     * <description: deffault constructor without parameters>
+     * <preconditions: none>
+     * <postconditions: new player object is created>
      */
-    public Player (){
+    public Player() {
         this.id = -1;
         this.color = null;
-        this.name = "";
+        this.name = null;
         this.status = "";
         this.victoryPoints = 0;
-        this.victoryPointsTotal =0;
+        this.victoryPointsTotal = 0;
         this.armyCount = 0;
         this.greatestArmy = false;
         this.longestRoad = false;
-        this.rawMaterial = null;
-        this.developmentCardOverview = new DevelopmentCardOverview(0);
+        this.rawMaterialDeck = new RawMaterialOverview(0);
+        this.developmentDeck = new DevelopmentCardOverview(0);
         this.buildingStock = null;
         this.haven = null;
     }
 
     /**
-     *<method name: Player>
-     *<description: constructor>
-     *<preconditions: none>
-     *<postconditions: new Player object is created with the given id>
-     *@param id this is id given from the server
+     * <method name: Player>
+     * <description: constructor>
+     * <preconditions: none>
+     * <postconditions: new Player object is created with the given id>
+     *
+     * @param id this is id given from the server
      */
-    public Player (int id){
+    public Player(int id) {
         this();
         this.id = id;
     }
     //endregion
 
     //region Actions
+
     /**
-     *<method name: throwDice>
-     *<description: this method rolls two dice>
-     *<preconditions: none>
-     *<postconditions: dice are rolled>
-     *@return gives back a random int
+     * <method name: throwDice>
+     * <description: this method rolls two dice>
+     * <preconditions: none>
+     * <postconditions: dice are rolled>
+     *
+     * @return gives back a random int
      */
-    public static int[] throwDice(){
+    public static int[] throwDice() {
         Dice dice = new Dice();
         return dice.roll();
     }
 
 
     /**
-     *<method name: buyDevelopmentCard>
-     *<description: this method performs the actions required to buy development card>
-     *<preconditions: player has the required cards to buy and his turn is up>
-     *<postconditions: player gets a development card in exchange for his material cards>
+     * <method name: buyDevelopmentCard>
+     * <description: this method performs the actions required to buy development card>
+     * <preconditions: player has the required cards to buy and his turn is up>
+     * <postconditions: player gets a development card in exchange for his material cards>
      */
     public void buyDevelopmentCard(DevCardType card) throws Exception {
         try {
-            this.rawMaterial.decrease(RawMaterialType.ORE, 1);
-            this.rawMaterial.decrease(RawMaterialType.WOOL, 1);
-            this.rawMaterial.decrease(RawMaterialType.WEAT, 1);
-            this.developmentCardOverview.increase(card, 1);
+            this.rawMaterialDeck.decrease(RawMaterialType.ORE, 1);
+            this.rawMaterialDeck.decrease(RawMaterialType.WOOL, 1);
+            this.rawMaterialDeck.decrease(RawMaterialType.WEAT, 1);
+            this.developmentDeck.increase(card, 1);
         } catch (Exception e) {
             throw e;
         }
@@ -101,106 +125,123 @@ public class Player extends JSONStringBuilder {
     }
 
     /**
-     *<method name: sendTradeRequest>
-     *<description: player places an offer for other players>
-     *<preconditions: player turn is up and>
-     *<postconditions: trade request is sent>
+     * <method name: sendTradeRequest>
+     * <description: player places an offer for other players>
+     * <preconditions: player turn is up and>
+     * <postconditions: trade request is sent>
      */
-    public TradeRequest sendTradeRequest(TradeRequest tr){ //@return Trade @param TradeRequest
+    public TradeRequest sendTradeRequest(TradeRequest tr) { //@return Trade @param TradeRequest
         //TODO
         return null;
     }
 
     /**
-     *<method name: acceptTradeRequest>
-     *<description: this method is called to accept a trade request>
-     *<preconditions: none>
-     *<postconditions: trade request is accepted>
+     * <method name: acceptTradeRequest>
+     * <description: this method is called to accept a trade request>
+     * <preconditions: none>
+     * <postconditions: trade request is accepted>
      */
-    public void acceptTradeRequest(Object tr){ //@param TradeRequest
+    public void acceptTradeRequest(Object tr) { //@param TradeRequest
         //TODO
     }
 
     /**
-     *<method name: declineTradeRequest>
-     *<description: this method is called to decline a trade request>
-     *<preconditions: none>
-     *<postconditions: none>
+     * <method name: declineTradeRequest>
+     * <description: this method is called to decline a trade request>
+     * <preconditions: none>
+     * <postconditions: none>
      */
-    public void declineTradeRequest(Object tr){ //@param TradeRequest
+    public void declineTradeRequest(Object tr) { //@param TradeRequest
         //TODO
     }
 
     /**
-     *<method name: trade>
-     *<description: none>
-     *<preconditions: none>
-     *<postconditions: none>
+     * <method name: trade>
+     * <description: none>
+     * <preconditions: none>
+     * <postconditions: none>
      */
-    public void trade(Object tr){ //@param TradeRequest
-        //TODO
-    }
-
-    /**
-     *<method name: moveRobber>
-     *<description: player chooses where to move the robber and move it>
-     *<preconditions: number 7 is rolled>
-     *<postconditions: the robber is moved>
-     */
-    public void moveRobber (Location[] lod){
+    public void trade(Object tr) { //@param TradeRequest
         //TODO
     }
 
 
     /**
-     *<method name: robPlayer>
-     *<description: the player choose a card from one of the other players who have settlement where the robber moved >
-     *<preconditions: number 7 is rolled>
-     *<postconditions: player gets a card from another players>
+     * <method name: moveRobber>
+     * <description: player chooses where to move the robber and move it>
+     * <preconditions: number 7 is rolled>
+     * <postconditions: the robber is moved>
      */
-    public void robPlayer(Player plr){
+    public void moveRobber(Location[] lod) {
+        //TODO
+    }
+
+
+    /**
+     * <method name: robPlayer>
+     * <description: the player choose a card from one of the other players who have settlement where the robber moved >
+     * <preconditions: number 7 is rolled>
+     * <postconditions: player gets a card from another players>
+     */
+    public void robPlayer(Player plr) {
         //TODO
     }
 
     /**
-     *<method name: has10VectoryPoints>
-     *<description: this method checks if the player has at least 10 points>
-     *<preconditions: none>
-     *<postconditions: none>
+     * <method name: has10VectoryPoints>
+     * <description: this method checks if the player has at least 10 points>
+     * <preconditions: none>
+     * <postconditions: none>
      */
-    public boolean has10VectoryPoints(){
+    public boolean has10VectoryPoints() {
         //TODO
         return false;
     }
 
+    public void decreaseRawMaterials(RawMaterialOverview overview) throws IllegalArgumentException {
+        this.rawMaterialDeck.decrease(overview);
+    }
+
+
     /**
-     *<method name: sendChatMessage>
-     *<description: this method sends a chat message from the [???] to the [???]>
-     *<preconditions: none>
-     *<postconditions: message is sent to the [???]>
+     * Player has to extract half of their cards if
+     * he has at least 7 raw materials
+     *
+     * @return
      */
-    public void sendChatMessage(String msg){
+    public boolean hasToExtractCards() {
+        return rawMaterialDeck.getTotalCount() >= 7 ? true : false;
+    }
+
+    /**
+     * <method name: sendChatMessage>
+     * <description: this method sends a chat message from the [???] to the [???]>
+     * <preconditions: none>
+     * <postconditions: message is sent to the [???]>
+     */
+    public void sendChatMessage(String msg) {
         //TODO
     }
 
     //endregion
 
     //region Properties
+
     /**
-     *<method name: getId>
-     *<description: this is a getter method for the id>
-     *<preconditions: none>
-     *<postconditions: none>
+     * <method name: getId>
+     * <description: this is a getter method for the id>
+     * <preconditions: none>
+     * <postconditions: none>
      */
     public int getId() {
         return id;
     }
 
     /**
-     *<method name: getArmyCount>
-     *<description: this is a getter method for the army count>
-     *<preconditions: none>
-     *<postconditions: none>
+     * <method name: getArmyCount>
+     * <description: this is a getter method for the army count>
+     * <preconditions: none>
+     * <postconditions: none>
      */
     public int getArmyCount() {
         return armyCount;
@@ -208,112 +249,130 @@ public class Player extends JSONStringBuilder {
 
 
     /**
-     *<method name: getStatus>
-     *<description: this is a getter method for the status>
-     *<preconditions: none>
-     *<postconditions: none>
+     * <method name: getStatus>
+     * <description: this is a getter method for the status>
+     * <preconditions: none>
+     * <postconditions: none>
      */
     public String getStatus() {
         return status;
     }
 
     /**
-     *<method name: setStatus>
-     *<description: this method is a setter method for the status>
-     *<preconditions: none>
-     *<postconditions: none>
+     * <method name: setStatus>
+     * <description: this method is a setter method for the status>
+     * <preconditions: none>
+     * <postconditions: none>
      */
 
-    public void setStatus (String status){
+    public void setStatus(String status) {
         this.status = status;
     }
+
     /**
-     *<method name: getName>
-     *<description: this is a getter method for the name>
-     *<preconditions: none>
-     *<postconditions: none>
+     * <method name: getName>
+     * <description: this is a getter method for the name>
+     * <preconditions: none>
+     * <postconditions: none>
      */
 
     public String getName() {
         return name;
     }
+
     /**
-     *<method name: setName>
-     *<description: this is a setter method for the name>
-     *<preconditions: none>
-     *<postconditions: none>
+     * <method name: setName>
+     * <description: this is a setter method for the name>
+     * <preconditions: none>
+     * <postconditions: none>
      */
 
-    public  void setName (String name){
+    public void setName(String name) {
         this.name = name;
     }
+
     /**
-     *<method name: getColor>
-     *<description: this is a getter method for the color>
-     *<preconditions: none>
-     *<postconditions: none>
+     * <method name: getColor>
+     * <description: this is a getter method for the color>
+     * <preconditions: none>
+     * <postconditions: none>
      */
 
     public Color getColor() {
         return color;
     }
+
     /**
-     *<method name: setColor>
-     *<description: this is a setter method for the color>
-     *<preconditions: none>
-     *<postconditions: none>
+     * <method name: setColor>
+     * <description: this is a setter method for the color>
+     * <preconditions: none>
+     * <postconditions: none>
      */
 
-    public void setColor (Color color){
+    public void setColor(Color color) {
         this.color = color;
     }
 
     /**
-     *<method name: isLongestRoad>
-     *<description: this method checks if a road is the greatest>
-     *<preconditions: none>
-     *<postconditions: none>
+     * <method name: isLongestRoad>
+     * <description: this method checks if a road is the greatest>
+     * <preconditions: none>
+     * <postconditions: none>
      */
-    public boolean isLongestRoad(){
+    public boolean isLongestRoad() {
         return longestRoad;
     }
 
     /**
-     *<method name: setLongestRoad>
-     *<description: this a setter method for the longest road >
-     *<preconditions: none>
-     *<postconditions: none>
+     * <method name: setLongestRoad>
+     * <description: this a setter method for the longest road >
+     * <preconditions: none>
+     * <postconditions: none>
      */
-    public void setLongestRoad (boolean boo){
+    public void setLongestRoad(boolean boo) {
         this.longestRoad = boo;
     }
 
 
     /**
-     *<method name: isGreatestArmy>
-     *<description: this method checks if an army is the greatest>
-     *<preconditions: none>
-     *<postconditions: none>
+     * <method name: isGreatestArmy>
+     * <description: this method checks if an army is the greatest>
+     * <preconditions: none>
+     * <postconditions: none>
      */
 
-    public boolean isGreatestArmy(){
+    public boolean isGreatestArmy() {
         return greatestArmy;
     }
 
     /**
-     *<method name: setGreatestArmy>
-     *<description: this is a setter method for the greatest army>
-     *<preconditions: none>
-     *<postconditions: none>
+     * <method name: setGreatestArmy>
+     * <description: this is a setter method for the greatest army>
+     * <preconditions: none>
+     * <postconditions: none>
      */
 
-    public  void setGreatestArmy (boolean boo){
+    public void setGreatestArmy(boolean boo) {
         this.greatestArmy = boo;
     }
 
     public boolean canAffordDevCard() {
-        return this.rawMaterial.canAffordDevelopmentCard();
+        return this.rawMaterialDeck.canAffordDevelopmentCard();
     }
 
     //endregion
+
+    @Override
+    public String toJSONString_Unknown() {
+        JSONObject hiddenJSON = this.toJSON();
+
+        hiddenJSON.remove(Constants.DEV_CARDS);
+        hiddenJSON.put(Constants.DEV_CARDS, this.developmentDeck.toJSON_Unknown());
+
+        hiddenJSON.remove(Constants.RAW_MATERIALS);
+        hiddenJSON.put(Constants.RAW_MATERIALS, this.rawMaterialDeck.toJSON_Unknown());
+
+        return hiddenJSON.toString();
+    }
+
 }

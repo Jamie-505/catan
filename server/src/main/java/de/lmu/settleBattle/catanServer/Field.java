@@ -16,6 +16,10 @@ public class Field extends JSONStringBuilder {
     @SerializedName(Constants.NUMBER)
     private int number;
 
+    public Field(RawMaterialType harvest) {
+        this.harvest = harvest;
+    }
+
     public Field(Location location, RawMaterialType harvest) {
         this.location = location;
         this.harvest = harvest;
@@ -32,6 +36,10 @@ public class Field extends JSONStringBuilder {
 
     public Location getLocation() {
         return this.location;
+    }
+
+    public void setLocation(Location location){
+        this.location = location;
     }
 
 

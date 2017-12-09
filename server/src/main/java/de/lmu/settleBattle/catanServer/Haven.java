@@ -20,7 +20,10 @@ public class Haven extends JSONStringBuilder {
         this.harvest = harvest;
         setName();
     }
-
+    public Haven(RawMaterialType harvest) {
+        this.harvest = harvest;
+        setName();
+    }
     /**
      *<method name: none>
      *<description: none>
@@ -75,7 +78,7 @@ public class Haven extends JSONStringBuilder {
 
         switch(harvest) {
 
-            case NONE:
+            case WATER:
                 // if this is not a special trading haven then you have to give away 3 raw materials of the
                 // same type to receive one arbitrary raw material
                 if(tr.getOfferCount() == 3)
@@ -99,7 +102,7 @@ public class Haven extends JSONStringBuilder {
     public String getName() { return this.name; }
 
     private void setName() {
-        this.name = harvest == RawMaterialType.NONE ? Constants.HAVEN : harvest.toString() + " " + Constants.HAVEN;
+        this.name = harvest == RawMaterialType.WATER ? Constants.HAVEN : harvest.toString() + " " + Constants.HAVEN;
     }
     //endregion
 }

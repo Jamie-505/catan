@@ -20,6 +20,10 @@ public class Robber extends JSONStringBuilder {
         return this.location;
     }
 
+    public void setLocation(Location location) {
+        this.location = location;
+    }
+
     public void move(Location location) {
         this.location = location;
     }

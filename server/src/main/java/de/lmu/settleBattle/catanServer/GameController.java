@@ -3,7 +3,7 @@ import java.util.*;
 
 public class GameController {
     private Board board;
-    private List<Player> players;
+    private ArrayList<Player> players;
     private int currentPlayerId;
     private HashMap<Integer, Integer> turnOrder;
     private List<String> chatHistory;
@@ -13,7 +13,7 @@ public class GameController {
     public GameController() {
 
         board = new Board();
-        players = new ArrayList();
+        players = new ArrayList<>();
         currentPlayerId = -1;
         turnOrder = new HashMap<>();
         chatHistory = new ArrayList<>();
@@ -33,16 +33,15 @@ public class GameController {
      * @return true if the color and name are free, otherwise false
      */
     public boolean isValidPlayerData(int id, String name, Color color) {
-        for (int i = 0; i < players.size(); i++) {
-
+        for (Player player : players){
             //do not compare player with itself
-            if (players.get(i).getId() == id)
+            if (player.getId() == id)
                 continue;
 
             // if a name or a color is already chosen
             //return false
-            if (players.get(i).getName().equals(name) ||
-                    players.get(i).getColor().equals(color))
+            if (player.getName().equals(name) ||
+                player.getColor().equals(color))
                 return false;
         }
         return true;
@@ -53,7 +52,7 @@ public class GameController {
     public void defineTurnOrder() {
         turnOrder = new HashMap<>();
 
-        List<Integer> randomTurnOrder = new ArrayList();
+        ArrayList<Integer> randomTurnOrder = new ArrayList<>();
 
         for (int i = 0; i < players.size(); i++) {
             randomTurnOrder.add(i);
@@ -76,8 +75,13 @@ public class GameController {
 
     public void tradeDevelopmentCard(Player player){
         if (player.canAffordDevCard()){
-            player.buyDevelopmentCard(developmentDeck.withdrawRandomCard());
-            sellDevelopmentCard();
+            try {
+                player.buyDevelopmentCard(developmentDeck.withdrawRandomCard());
+                sellDevelopmentCard();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
         }
 
     }

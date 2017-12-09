@@ -24,7 +24,8 @@ public enum RawMaterialType {
     @Expose
     @SerializedName("Getreide")
     WEAT,
-    NONE;
+    DESERT,
+    WATER;
 
     @Override
     public String toString(){
@@ -39,8 +40,8 @@ public enum RawMaterialType {
                 return "Wolle";
             case WEAT:
                 return "Getreide";
-            case NONE:
-                return "Keins";
+            case WATER:
+                return "Wasser";
             default: throw new AssertionError( "Unknown building type" + this);
 
         }

@@ -6,43 +6,40 @@ package de.lmu.settleBattle.catanServer;public enum DevCardType {
     VICTORY_POINT;
 
 
-    private static String KNIGHT_DESC = "";
-    private static String ROAD_CONSTRUCTION_DESC = "";
-    private static String INVENTION_DESC = "";
-    private static String MONOPOLE_DESC = "";
-    private static String VICTORY_POINT_DESC = "";
 
-    public String description(DevCardType type){
-        switch (type){
+    public String description(DevCardType type) {
+        switch (type) {
             case INVENTION:
-                return INVENTION_DESC;
+                return Constants.INVENTION_DESC;
             case KNIGHT:
-                return KNIGHT_DESC;
+                return Constants.KNIGHT_DESC;
             case ROAD_CONSTRUCTION:
-                return ROAD_CONSTRUCTION_DESC;
+                return Constants.ROAD_CONSTRUCTION_DESC;
             case MONOPOLE:
-                return MONOPOLE_DESC;
+                return Constants.MONOPOLE_DESC;
             case VICTORY_POINT:
-                return VICTORY_POINT_DESC;
-            default: throw new AssertionError( "Unknown card" + this);
+                return Constants.VICTORY_POINT_DESC;
+            default:
+                throw new AssertionError("Unknown card" + this);
 
         }
     }
 
     @Override
-    public String toString(){
-        switch (this){
+    public String toString() {
+        switch (this) {
             case INVENTION:
-                return "Erfindung";
+                return Constants.INVENTION;
             case KNIGHT:
-                return "Ritter";
+                return Constants.KNIGHT;
             case ROAD_CONSTRUCTION:
-                return "Straßenbau";
+                return Constants.ROAD_CONSTRUCTION;
             case MONOPOLE:
-                return "Monopol";
+                return Constants.MONOPOLE;
             case VICTORY_POINT:
-                return "Siegpunkt";
-            default: throw new AssertionError( "Unknown card" + this);
+                return Constants.VICTORY_PT;
+            default:
+                throw new AssertionError("Unknown card" + this);
 
         }
     }

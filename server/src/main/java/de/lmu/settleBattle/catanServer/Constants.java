@@ -83,4 +83,12 @@ public class Constants {
     public final static String PLAYER_NAME = "Name";
     public final static String PLAYER_ID_WON_GAME = "Spieler %1$s hat das Spiel gewonnen.";
     public final static String PLAYER_DATA_INVALID = "Die gewählten Daten sind bereits vergeben.";
+
+
+    //Development cards description
+    public final static String KNIGHT_DESC = "";
+    public final static String ROAD_CONSTRUCTION_DESC = "Wer diese Karte ausspielt, darf ohne Rohstoff Kosten 2 neue Straßen auf den Spielplan legen. Hierbei  müssen die üblichen Regeln für den Bau von Straßen beachtet werden.";
+    public final static String INVENTION_DESC = "Wer diese Karte ausspielt, darf sich 2 beliebige Rohstoffkarten von den Vorratsstapeln nehmen. Hat der Spieler die Bauphase noch vor sich, darf er diese Rohstoffkarte(n) zum Bauen verwenden";
+    public final static String MONOPOLE_DESC = "Wer diese Karte ausspielt, wählt einen Rohstoff  aus. Alle Mitspieler müssen ihm alle Rohstoffkarten geben,  die sie von dieser Sorte auf der Hand halten. Wer keine  solche Rohstoffkarte besitzt, muss auch nichts abgeben.";
+    public final static String VICTORY_POINT_DESC = "";
 }

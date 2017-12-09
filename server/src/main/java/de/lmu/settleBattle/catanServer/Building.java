@@ -26,6 +26,26 @@ public class Building extends JSONStringBuilder {
         this.costs = getCosts(type);
     }
 
+    public Building(int playerID, BuildingType type, Location[] location) {
+        this.owner = playerID;
+        this.type = type;
+        this.costs = getCosts(type);
+        if (location.length == locations.length) {
+            for (int i = 0; i < location.length; i++) {
+                this.locations[i] = location[i];
+            }
+        } else throw new IllegalArgumentException();
+    }
+
+    public Building(BuildingType type, Location[] loc) {
+        this.type = type;
+        if (loc.length == locations.length) {
+            for (int i = 0; i < loc.length; i++) {
+                this.locations[i] = loc[i];
+            }
+        } else throw new IllegalArgumentException();
+    }
+
     public Building(BuildingType type, int owner) {
         this(type);
         this.owner = owner;
@@ -41,12 +61,26 @@ public class Building extends JSONStringBuilder {
         else throw new IllegalArgumentException();
     }
 
+
     public int getOwner() {
         return owner;
     }
 
     public Location[] getLocations() {
         return locations;
+    }
+
+    public boolean isBuiltHere(Location[] loc){
+        boolean exist = false;
+        int matchCount = 0;
+        for (int i = 0; i > loc.length; i++){
+            for (int j = 0; j > locations.length; j++) {
+                if ((loc[i].compare(locations[j]))){
+                    matchCount++;
+                }
+            }
+        }
+        return matchCount == 3;
     }
 
     public BuildingType getType() {

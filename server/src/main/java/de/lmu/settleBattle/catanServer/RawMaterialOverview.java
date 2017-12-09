@@ -90,28 +90,29 @@ public class RawMaterialOverview extends JSONStringBuilder{
      * @param i value to be subtracted
      */
     public void decrease(RawMaterialType type, int i) throws Exception {
+        if (i < 0) throw new Exception();
 
 
         switch(type) {
             case ORE:
-                if(i> this.oreCount) throw new Exception();
-                oreCount = oreCount < i ? 0 : oreCount-i;
+                if(i>oreCount)throw new Exception();
+                oreCount -= i;
                 break;
             case CLAY:
-                if(i> this.clayCount) throw new Exception();
-                clayCount = clayCount < i ? 0 : clayCount-i;
+                if(i>clayCount)throw new Exception();
+                clayCount -= i;
                 break;
             case WEAT:
-                if(i> this.weatCount) throw new Exception();
-                weatCount = weatCount < i ? 0 : weatCount-i;
+                if(i>weatCount)throw new Exception();
+                    weatCount -= i;
                 break;
             case WOOD:
-                if(i> this.woodCount) throw new Exception();
-                woodCount = woodCount < i ? 0 : woodCount-i;
+                if(i>woodCount)throw new Exception();
+                    woodCount -= i;
                 break;
             case WOOL:
-                if(i> this.woolCount) throw new Exception();
-                woolCount = woolCount < i ? 0 : woolCount-i;
+                if(i>woolCount)throw new Exception();
+                    woolCount -= i;
                 break;
         }
     }
@@ -139,7 +140,7 @@ public class RawMaterialOverview extends JSONStringBuilder{
     }
 
     public boolean canAffordDevelopmentCard() {
-        return canAfford(DevelopmentCard.getCosts());
+        return canAfford(DevelopmentCardOverview.getCosts());
     }
 
     /**

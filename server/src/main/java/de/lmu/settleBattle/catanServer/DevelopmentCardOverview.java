@@ -28,7 +28,7 @@ public class DevelopmentCardOverview extends JSONStringBuilder {
     private int victoryPoint;
 
     //region Constructors
-    private DevCardType[] cards;
+
 
 
     public DevelopmentCardOverview(){
@@ -80,24 +80,29 @@ public class DevelopmentCardOverview extends JSONStringBuilder {
     //endregion
 
     //region decrease
-    public void decrease(DevCardType type, int i) {
-        if (i < 0) return;
+    public void decrease(DevCardType type, int i)  throws Exception {
+        if (i < 0) throw new Exception();
 
         switch(type) {
             case INVENTION:
-                invention = invention < i ? 0 : invention - i;
+                if (i > invention) throw new Exception();
+                invention -= i;
                 break;
             case KNIGHT:
-                knight = knight < i ? 0 : knight - i;
+                if (i > knight) throw new Exception();
+                knight -= i;
                 break;
             case ROAD_CONSTRUCTION:
-                roadConstruction = roadConstruction < i ? 0 : roadConstruction - i;
+                if (i > roadConstruction) throw new Exception();
+                roadConstruction -= i;
                 break;
             case MONOPOLE:
-                monopole = monopole < i ? 0 : monopole - i;
+                if (i > monopole) throw new Exception();
+                monopole -= i;
                 break;
             case VICTORY_POINT:
-                victoryPoint = victoryPoint < i ? 0 : victoryPoint - i;
+                if (i > victoryPoint) throw new Exception();
+                victoryPoint -= i;
                 break;
         }
     }
@@ -108,7 +113,11 @@ public class DevelopmentCardOverview extends JSONStringBuilder {
         DevCardType[] cards = DevCardType.values();
         Random random = new Random();
         DevCardType card = cards[random.nextInt(cards.length)];
-        decrease(card, 1);
+        try {
+            decrease(card, 1);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         return card;
 
     }
@@ -123,4 +132,13 @@ public class DevelopmentCardOverview extends JSONStringBuilder {
         json.put(Constants.UNKNOWN, getTotalCount());
         return json.toString();
     }
+    /**
+     * determines costs to buy a development card
+     * @return RawMaterialOverview representing costs
+     */
+    public static RawMaterialOverview getCosts() {
+        return new RawMaterialOverview(0,1,0,1,1);
+    }
+
 }
+

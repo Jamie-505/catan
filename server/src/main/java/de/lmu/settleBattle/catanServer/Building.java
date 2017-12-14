@@ -23,32 +23,36 @@ public class Building extends JSONStringBuilder {
 
     public Building(BuildingType type) {
         this.type = type;
+        initializeLocations(type);
         this.costs = getCosts(type);
     }
 
-    public Building(int playerID, BuildingType type, Location[] location) {
-        this.owner = playerID;
-        this.type = type;
-        this.costs = getCosts(type);
-        if (location.length == locations.length) {
-            for (int i = 0; i < location.length; i++) {
-                this.locations[i] = location[i];
-            }
+
+    public Building(int owner, BuildingType type, Location[] loc) {
+        this(type, owner);
+
+        if (loc.length == locations.length) {
+            this.locations = loc;
         } else throw new IllegalArgumentException();
     }
 
     public Building(BuildingType type, Location[] loc) {
-        this.type = type;
+        this(type);
+
         if (loc.length == locations.length) {
-            for (int i = 0; i < loc.length; i++) {
-                this.locations[i] = loc[i];
-            }
+            this.locations = loc;
         } else throw new IllegalArgumentException();
     }
 
     public Building(BuildingType type, int owner) {
         this(type);
         this.owner = owner;
+    }
+
+
+    private void initializeLocations(BuildingType type) {
+        int count = type.equals(BuildingType.ROAD) ? 2:3;
+        locations = new Location[count];
     }
     //endregion
 
@@ -71,18 +75,18 @@ public class Building extends JSONStringBuilder {
         return locations;
     }
 
-    public boolean isBuiltHere(Location[] loc){
-        boolean exist = false;
+    public boolean isBuiltAroundHere(Location[] loc){
         int matchCount = 0;
-        for (int i = 0; i > loc.length; i++){
-            for (int j = 0; j > locations.length; j++) {
+        for (int i = 0; i < loc.length; i++){
+            for (int j = 0; j < locations.length; j++) {
                 if ((loc[i].compare(locations[j]))){
                     matchCount++;
                 }
             }
         }
-        return matchCount == 3;
+        return matchCount >= 2;
     }
+
 
     public BuildingType getType() {
         return type;
@@ -106,4 +110,6 @@ public class Building extends JSONStringBuilder {
         }
         return null;
     }
+
+
 }

@@ -1,15 +1,33 @@
 package de.lmu.settleBattle.catanServer;
+import com.google.gson.annotations.Expose;
+import com.google.gson.annotations.SerializedName;
+
+import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeSupport;
 import java.util.*;
 import java.util.Collections;
-import java.util.Random;
 
 
-public class Board {
+public class Board extends JSONStringBuilder {
 
+    private PropertyChangeSupport changes = new PropertyChangeSupport(this);
+
+    @Expose
+    @SerializedName(Constants.FIELDS)
     private Field[] fields;
+
+    @Expose
+    @SerializedName(Constants.BUILDINGS)
     private ArrayList<Building> buildings;
+
+    @Expose
+    @SerializedName(Constants.HAVEN)
     private Haven[] havens;
+
+    @Expose
+    @SerializedName(Constants.ROBBER)
     private Robber robber;
+
     private int[] numberOrder = {5,2,6,3,8,10,9,12,11,4,8,10,9,4,5,6,3,11};
     private Location[] fieldLocations = new Location[37];
     private Location[] havenLocations = new Location[9];
@@ -231,15 +249,48 @@ public class Board {
         Building bld = new Building(playerID, type , loc);
         //check if the location is occupied
         Iterator<Building> iter = buildings.iterator();
-        while (iter.hasNext()) {
-            if (iter.next().isBuiltHere(loc)){
-                isOccupied = true;
+        if (type == BuildingType.SETTLEMENT || type == BuildingType.CITY){
+            if(loc.length != 3) return false;
+            while (iter.hasNext()) {
+                if (iter.next().isBuiltAroundHere(loc)){
+                    isOccupied = true;
+                    break;  //if the field is occupied the rest of the list can be ignored
+                }
+            }
+            if (isOccupied == false){
+                addBuilding(bld);
+                return true;
+            }
+        }else if (type == BuildingType.ROAD){
+            if(loc.length != 2) return false;
+            while (iter.hasNext()) {
+                Building nextBuilding = iter.next();
+                if ((nextBuilding.isBuiltAroundHere(loc) && nextBuilding.getOwner() == playerID)) {
+                    addBuilding(bld);
+                    return true;
+                }
             }
         }
-        if (isOccupied == false){
-            buildings.add(bld);
-            return true;
-        } else return false;
+        return false;
+    }
+
+    public ArrayList<Building> getBuildings() {
+        return buildings;
+    }
+
+    private void addBuilding(Building bld) {
+        buildings.add(bld);
+        changes.firePropertyChange("buildings", "", bld);
+    }
+
+    public void addPropertyChangeListener( PropertyChangeListener l )
+    {
+        changes.addPropertyChangeListener( l );
+    }
+
+    public void removePropertyChangeListener( PropertyChangeListener l )
+    {
+        changes.removePropertyChangeListener( l );
     }
 }
 

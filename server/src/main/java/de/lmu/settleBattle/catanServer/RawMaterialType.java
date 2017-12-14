@@ -6,23 +6,23 @@ import com.google.gson.annotations.SerializedName;
 public enum RawMaterialType {
 
     @Expose
-    @SerializedName("Lehm")
+    @SerializedName(Constants.CLAY)
     CLAY,
 
     @Expose
-    @SerializedName("Erz")
+    @SerializedName(Constants.ORE)
     ORE,
 
     @Expose
-    @SerializedName("Holz")
+    @SerializedName(Constants.WOOD)
     WOOD,
 
     @Expose
-    @SerializedName("Wolle")
+    @SerializedName(Constants.WOOL)
     WOOL,
 
     @Expose
-    @SerializedName("Getreide")
+    @SerializedName(Constants.WEAT)
     WEAT,
     DESERT,
     WATER;
@@ -31,17 +31,17 @@ public enum RawMaterialType {
     public String toString(){
         switch (this){
             case CLAY:
-                return "Lehm";
+                return Constants.CLAY;
             case ORE:
-                return "Erz";
+                return Constants.ORE;
             case WOOD:
-                return "Holz";
+                return Constants.WOOD;
             case WOOL:
-                return "Wolle";
+                return Constants.WOOL;
             case WEAT:
-                return "Getreide";
+                return Constants.WEAT;
             case WATER:
-                return "Wasser";
+                return Constants.WATER;
             default: throw new AssertionError( "Unknown building type" + this);
 
         }

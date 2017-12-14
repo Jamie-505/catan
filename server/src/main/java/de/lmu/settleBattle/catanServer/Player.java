@@ -4,7 +4,13 @@ import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 import org.json.JSONObject;
 
-public class Player extends JSONStringBuilder {
+import javax.swing.*;
+import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeSupport;
+
+public class Player extends JSONStringBuilder implements Comparable, Cloneable {
+
+    private PropertyChangeSupport changes = new PropertyChangeSupport(this);
 
     // region Members
     @Expose
@@ -266,7 +272,20 @@ public class Player extends JSONStringBuilder {
      */
 
     public void setStatus(String status) {
+        String oldStatus = this.status;
+        boolean fire = status.equals(oldStatus) ? false:true;
         this.status = status;
+        if (fire) changes.firePropertyChange( "status", oldStatus, this );
+    }
+
+    public void addPropertyChangeListener( PropertyChangeListener l )
+    {
+        changes.addPropertyChangeListener( l );
+    }
+
+    public void removePropertyChangeListener( PropertyChangeListener l )
+    {
+        changes.removePropertyChangeListener( l );
     }
 
     /**
@@ -310,7 +329,10 @@ public class Player extends JSONStringBuilder {
      */
 
     public void setColor(Color color) {
+        boolean fire = color.equals(this.color) ? false:true;
         this.color = color;
+        if (fire)
+            changes.firePropertyChange( "color", "null", this );
     }
 
     /**
@@ -360,6 +382,14 @@ public class Player extends JSONStringBuilder {
         return this.rawMaterialDeck.canAffordDevelopmentCard();
     }
 
+    public boolean canAfford(Building building) {
+        return this.rawMaterialDeck.canAfford(building);
+    }
+
+    public boolean canAfford(BuildingType type) {
+        return this.rawMaterialDeck.canAfford().contains(type);
+    }
+
     //endregion
 
     @Override
@@ -375,4 +405,19 @@ public class Player extends JSONStringBuilder {
         return hiddenJSON.toString();
     }
 
+    @Override
+    public int compareTo(Object o) {
+        Player player = (Player) o;
+
+        if (player.getId() < this.getId())
+            return 1;
+        else if (player.getId() == this.getId())
+            return 0;
+        return -1;
+    }
+
+    @Override
+    public Object clone() throws CloneNotSupportedException{
+        return super.clone();
+    }
 }

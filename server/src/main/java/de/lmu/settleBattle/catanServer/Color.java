@@ -6,32 +6,32 @@ import com.google.gson.annotations.SerializedName;
 public enum Color {
 
     @Expose
-    @SerializedName("Orange")
+    @SerializedName(Constants.ORANGE)
     ORANGE,
 
     @Expose
-    @SerializedName("Blau")
+    @SerializedName(Constants.BLUE)
     BLUE,
 
     @Expose
-    @SerializedName("Weiß")
+    @SerializedName(Constants.WHITE)
     WHITE,
 
     @Expose
-    @SerializedName("Rot")
+    @SerializedName(Constants.RED)
     RED;
 
     @Override
     public String toString(){
         switch (this){
             case ORANGE:
-                return "Orange";
+                return Constants.ORANGE;
             case BLUE:
-                return "Blau";
+                return Constants.BLUE;
             case WHITE:
-                return "Weiß";
+                return Constants.WHITE;
             case RED:
-                return "Rot";
+                return Constants.RED;
             default: throw new AssertionError( "Unknown color" + this);
 
         }

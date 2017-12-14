@@ -1,9 +1,11 @@
 package de.lmu.settleBattle.catanServer;
 
+import com.google.gson.Gson;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.yaml.snakeyaml.scanner.Constant;
 
 import static org.junit.Assert.*;
 
@@ -22,11 +24,11 @@ public class JSONUtilsTest {
     private static Location l1;
     private static Location l2;
     private static Location l3;
+    private static Board board;
 
     //region initialize
     @BeforeClass
-    public static void initialize()
-    {
+    public static void initialize() {
         player1 = new Player(0);
         player1.setColor(Color.WHITE);
         player1.setName("Lucy");
@@ -36,38 +38,40 @@ public class JSONUtilsTest {
         player2.setStatus(Constants.START_GAME);
 
         city = new Building(BuildingType.CITY, 42);
-        l1 = new Location(1,0);
-        l2 = new Location(1,1);
-        l3 = new Location(2,0);
-        city.build(new Location[] {l1, l2, l3});
+        l1 = new Location(1, 0);
+        l2 = new Location(1, 1);
+        l3 = new Location(2, 0);
+        city.build(new Location[]{l1, l2, l3});
 
         road = new Building(BuildingType.ROAD, 3);
-        road.build(new Location[] {l1, l3});
+        road.build(new Location[]{l1, l3});
 
         field = new Field(l1, RawMaterialType.WOOL, 3);
-        haven = new Haven(new Location[] {l1,l2}, RawMaterialType.CLAY);
+        haven = new Haven(new Location[]{l1, l2}, RawMaterialType.CLAY);
         robber = new Robber();
-        rmOverview = new RawMaterialOverview(0,0,3,4,2);
-        dcOverview = new DevelopmentCardOverview(0,1,2,3,4);
+        rmOverview = new RawMaterialOverview(0, 0, 3, 4, 2);
+        dcOverview = new DevelopmentCardOverview(0, 1, 2, 3, 4);
 
-        tradeRequest = new TradeRequest(rmOverview,rmOverview);
+        tradeRequest = new TradeRequest(rmOverview, rmOverview);
         tradeRequest.setPlayerId(13);
 
         tradeRequest_Accepted = new TradeRequest(rmOverview, rmOverview);
         tradeRequest_Accepted.setPlayerId(2);
         tradeRequest_Accepted.accept(3);
+
+        board = new Board();
     }
     //endregion
 
     @Test
     public void welcomeNewPlayerShouldBeAnsweredRight() throws Exception {
-        JSONObject json = new JSONObject(CatanMessage.welcomeNewPlayer(42).getPayload());
+        JSONObject welcomeJSON = new JSONObject(CatanMessage.welcomeNewPlayer(42).getPayload());
 
-        assertTrue(json.has(Constants.GET_ID));
+        assertTrue(welcomeJSON.has(Constants.GET_ID));
 
-        JSONObject innerJSON = json.getJSONObject(Constants.GET_ID);
+        JSONObject welcome = welcomeJSON.getJSONObject(Constants.GET_ID);
 
-        assertEquals(42, innerJSON.get("id"));
+        assertEquals(42, welcome.get("id"));
     }
 
     @Test
@@ -79,26 +83,26 @@ public class JSONUtilsTest {
     @Test
     public void errorMessageShouldBeAnsweredRight() throws Exception {
         JSONObject errorJSON = JSONUtils.createJSON(CatanMessage.error(Constants.COLOR_ALREADY_ASSIGNED));
-        JSONObject innerError = errorJSON.getJSONObject(Constants.ERROR);
+        JSONObject error = errorJSON.getJSONObject(Constants.ERROR);
         assertEquals(Constants.COLOR_ALREADY_ASSIGNED,
-                innerError.get(Constants.MESSAGE));
+                error.get(Constants.MESSAGE));
     }
 
     @Test
     public void diceRequestShouldBeAnsweredRight() throws Exception {
         assertEquals("{\"Würfelwurf\":{\"Spieler\":42,\"Wurf\":[1,1]}}",
-                CatanMessage.throwDice(42, new int[]{1,1}).getPayload());
+                CatanMessage.throwDice(42, new int[]{1, 1}).getPayload());
     }
 
     @Test
     public void statusUpdateShouldBeBuiltRight() throws Exception {
-        JSONObject json = JSONUtils.createJSON((CatanMessage.statusUpdate(player1)));
-        JSONObject playerJSON = (json.getJSONObject(Constants.STATUS_UPD)).getJSONObject(Constants.PLAYER);
+        JSONObject statusupdate = JSONUtils.createJSON((CatanMessage.statusUpdate(player1)));
+        JSONObject player = (statusupdate.getJSONObject(Constants.STATUS_UPD)).getJSONObject(Constants.PLAYER);
 
-        assertEquals(Constants.START_GAME, playerJSON.get(Constants.PLAYER_STATE));
-        assertEquals("Weiß", playerJSON.get(Constants.PLAYER_COLOR));
-        assertEquals("Lucy", playerJSON.get(Constants.PLAYER_NAME));
-        assertEquals(0, playerJSON.get(Constants.PLAYER_ID));
+        assertEquals(Constants.START_GAME, player.get(Constants.PLAYER_STATE));
+        assertEquals("Weiß", player.get(Constants.PLAYER_COLOR));
+        assertEquals("Lucy", player.get(Constants.PLAYER_NAME));
+        assertEquals(0, player.get(Constants.PLAYER_ID));
     }
 
     //region buildingMessagesShouldBeRight
@@ -108,20 +112,20 @@ public class JSONUtilsTest {
                         "\"Ort\":[{\"x\":1,\"y\":0},{\"x\":1,\"y\":1},{\"x\":2,\"y\":0}]}",
                 city.toJSONString());
 
-        JSONObject json = JSONUtils.createJSON(CatanMessage.newBuilding(city));
-        JSONObject innerObject = json.getJSONObject(Constants.NEW_BUILDING);
+        JSONObject newBuildingJSON = JSONUtils.createJSON(CatanMessage.newBuilding(city));
+        JSONObject newBuilding = newBuildingJSON.getJSONObject(Constants.NEW_BUILDING);
 
-        assertTrue(innerObject.has(Constants.TYPE));
+        assertTrue(newBuilding.has(Constants.TYPE));
 
-        assertEquals(42, innerObject.get(Constants.OWNER));
-        assertEquals(Constants.CITY, innerObject.get(Constants.TYPE));
+        assertEquals(42, newBuilding.get(Constants.OWNER));
+        assertEquals(Constants.CITY, newBuilding.get(Constants.TYPE));
 
-        JSONArray buildingLocation = innerObject.getJSONArray(Constants.PLACE);
-        assertEquals(3, buildingLocation.length());
+        JSONArray buildingLoc = newBuilding.getJSONArray(Constants.PLACE);
+        assertEquals(3, buildingLoc.length());
 
-        assertEquals(1, buildingLocation.getJSONObject(0).get("x"));
-        assertEquals(1, buildingLocation.getJSONObject(1).get("y"));
-        assertEquals(2, buildingLocation.getJSONObject(2).get("x"));
+        assertEquals(1, buildingLoc.getJSONObject(0).get("x"));
+        assertEquals(1, buildingLoc.getJSONObject(1).get("y"));
+        assertEquals(2, buildingLoc.getJSONObject(2).get("x"));
     }
     //endregion
 
@@ -143,20 +147,20 @@ public class JSONUtilsTest {
         JSONObject robberJSON = robber.toJSON();
 
         assertTrue(robberJSON.has(Constants.PLACE));
-        JSONObject innerJSON = robberJSON.getJSONObject(Constants.PLACE);
+        JSONObject robber = robberJSON.getJSONObject(Constants.PLACE);
 
-        assertEquals(innerJSON.get("x"),0);
-        assertEquals(innerJSON.get("y"),0);
+        assertEquals(robber.get("x"), 0);
+        assertEquals(robber.get("y"), 0);
 
-        robberJSON = JSONUtils.createJSON(CatanMessage.robberMoved(player1, robber, player2));
+        robberJSON = JSONUtils.createJSON(CatanMessage.robberMoved(player1, JSONUtilsTest.robber, player2));
 
         assertTrue(robberJSON.has(Constants.ROBBER_AT));
 
-        innerJSON = robberJSON.getJSONObject(Constants.ROBBER_AT);
+        robber = robberJSON.getJSONObject(Constants.ROBBER_AT);
 
-        assertEquals(0, innerJSON.get(Constants.PLAYER));
-        assertEquals(42, innerJSON.get(Constants.DESTINATION));
-        assertTrue(innerJSON.has(Constants.PLACE));
+        assertEquals(0, robber.get(Constants.PLAYER));
+        assertEquals(42, robber.get(Constants.DESTINATION));
+        assertTrue(robber.has(Constants.PLACE));
     }
     //endregion
 
@@ -175,32 +179,32 @@ public class JSONUtilsTest {
         assertEquals(9, rmJSON_Unknown.get(Constants.UNKNOWN));
 
         //test costs
-        JSONObject costsHidden = JSONUtils.createJSON(
+        JSONObject costsHiddenJSON = JSONUtils.createJSON(
                 CatanMessage.costs(42, rmOverview, true));
-        JSONObject innerCostsHidden = (costsHidden.getJSONObject(Constants.COSTS));
+        JSONObject costsHidden = (costsHiddenJSON.getJSONObject(Constants.COSTS));
 
-        assertEquals(9, (innerCostsHidden.getJSONObject(Constants.RAW_MATERIALS))
+        assertEquals(9, (costsHidden.getJSONObject(Constants.RAW_MATERIALS))
                 .get(Constants.UNKNOWN));
-        assertEquals(42, innerCostsHidden.get(Constants.PLAYER));
+        assertEquals(42, costsHidden.get(Constants.PLAYER));
 
-        JSONObject costs = JSONUtils.createJSON(CatanMessage.costs(42, rmOverview, false));
-        JSONObject innerCost = costs.getJSONObject(Constants.COSTS);
+        JSONObject costsJSON = JSONUtils.createJSON(CatanMessage.costs(42, rmOverview, false));
+        JSONObject costs = costsJSON.getJSONObject(Constants.COSTS);
 
-        assertEquals(42, innerCost.get(Constants.PLAYER));
-        assertTrue(innerCost.has(Constants.RAW_MATERIALS));
+        assertEquals(42, costs.get(Constants.PLAYER));
+        assertTrue(costs.has(Constants.RAW_MATERIALS));
 
         //test harvest
-        JSONObject harvest = JSONUtils.createJSON(CatanMessage.harvest(13, rmOverview, false));
-        JSONObject innerHarvest = harvest.getJSONObject(Constants.HARVEST);
+        JSONObject harvestJSON = JSONUtils.createJSON(CatanMessage.harvest(13, rmOverview, false));
+        JSONObject harvest = harvestJSON.getJSONObject(Constants.HARVEST);
 
-        assertEquals(13, innerHarvest.get(Constants.PLAYER));
-        assertTrue(innerHarvest.has(Constants.RAW_MATERIALS));
+        assertEquals(13, harvest.get(Constants.PLAYER));
+        assertTrue(harvest.has(Constants.RAW_MATERIALS));
 
-        JSONObject harvestHidden = JSONUtils.createJSON(CatanMessage.harvest(2, rmOverview, true));
-        JSONObject innerHarvestHidden = harvestHidden.getJSONObject(Constants.HARVEST);
-        assertEquals(9, (innerHarvestHidden.getJSONObject(Constants.RAW_MATERIALS))
+        JSONObject harvestHiddenJSON = JSONUtils.createJSON(CatanMessage.harvest(2, rmOverview, true));
+        JSONObject harvestHidden = harvestHiddenJSON.getJSONObject(Constants.HARVEST);
+        assertEquals(9, (harvestHidden.getJSONObject(Constants.RAW_MATERIALS))
                 .get(Constants.UNKNOWN));
-        assertEquals(2, innerHarvestHidden.get(Constants.PLAYER));
+        assertEquals(2, harvestHidden.get(Constants.PLAYER));
     }
 
     //endregion
@@ -231,28 +235,32 @@ public class JSONUtilsTest {
                 JSONUtils.getMessageType(CatanMessage.serverProtocol()));
 
         assertEquals(Constants.DICE_RESULT,
-                JSONUtils.getMessageType(CatanMessage.throwDice(0, new int[] {1,1})));
+                JSONUtils.getMessageType(CatanMessage.throwDice(0, new int[]{1, 1})));
+
+        assertEquals(Constants.START_CON,
+                JSONUtils.getMessageType(CatanMessage.startGame(new Board())));
     }
     //endregion
 
     @Test
     public void developmentCardBoughtShouldBeCorrect() throws Exception {
-        JSONObject json = JSONUtils.createJSON(CatanMessage.developmentCardBought(4, DevCardType.KNIGHT));
+        JSONObject payload = JSONUtils.createJSON(CatanMessage.developmentCardBought(4, DevCardType.KNIGHT));
 
-        assertEquals(4, json.get(Constants.PLAYER));
-        assertEquals(Constants.KNIGHT, json.get(Constants.CARD_BUY));
+        assertEquals(4, payload.get(Constants.PLAYER));
+        assertEquals(Constants.KNIGHT, payload.get(Constants.CARD_BUY));
     }
 
     //region longestRoadMessageShouldBeCorrect
+    @Test
     public void longestRoadMessageShouldBeCorrect() throws Exception {
         JSONObject emptyRoadJSON = JSONUtils.createJSON(CatanMessage.longestRoad());
         JSONObject playerRoadJSON = JSONUtils.createJSON(CatanMessage.longestRoad(13));
 
         assertTrue(!emptyRoadJSON.getJSONObject(Constants.LONGEST_RD).has(Constants.PLAYER));
 
-        JSONObject innerJSON = playerRoadJSON.getJSONObject(Constants.LONGEST_RD);
-        assertTrue(innerJSON.has(Constants.PLAYER));
-        assertEquals(13, innerJSON.get(Constants.PLAYER));
+        JSONObject playerRoad = playerRoadJSON.getJSONObject(Constants.LONGEST_RD);
+        assertTrue(playerRoad.has(Constants.PLAYER));
+        assertEquals(13, playerRoad.get(Constants.PLAYER));
     }
     //endregion
 
@@ -263,95 +271,107 @@ public class JSONUtilsTest {
         //test new trade request
         JSONObject tradeRequestJSON = JSONUtils.createJSON(CatanMessage.newTradeRequest(tradeRequest));
 
-        JSONObject innerRequest = tradeRequestJSON.getJSONObject(Constants.TRD_OFFER);
-        assertEquals(13, innerRequest.get(Constants.PLAYER));
-        assertEquals(tradeRequest.getId(), innerRequest.get(Constants.TRADE_ID));
+        JSONObject request = tradeRequestJSON.getJSONObject(Constants.TRD_OFFER);
+        assertEquals(13, request.get(Constants.PLAYER));
+        assertEquals(tradeRequest.getId(), request.get(Constants.TRADE_ID));
 
-        assertTrue(innerRequest.has(Constants.OFFER));
-        assertTrue(innerRequest.has(Constants.REQUEST));
+        assertTrue(request.has(Constants.OFFER));
+        assertTrue(request.has(Constants.REQUEST));
 
         //test accepted trade request
         JSONObject tradeAcceptedJSON = JSONUtils.createJSON(CatanMessage.tradeRequestAccepted(tradeRequest_Accepted));
-        JSONObject innerAccepted = tradeAcceptedJSON.getJSONObject(Constants.TRD_ACC);
+        JSONObject trAccepted = tradeAcceptedJSON.getJSONObject(Constants.TRD_ACC);
 
-        assertEquals(tradeRequest_Accepted.getId(), innerAccepted.get(Constants.TRADE_ID));
-        assertEquals(tradeRequest_Accepted.getAcceptedBy(), innerAccepted.get(Constants.FELLOW_PLAYER));
-        assertEquals(tradeRequest_Accepted.isAccepted(), innerAccepted.get(Constants.ACCEPT));
+        assertEquals(tradeRequest_Accepted.getId(), trAccepted.get(Constants.TRADE_ID));
+        assertEquals(tradeRequest_Accepted.getAcceptedBy(), trAccepted.get(Constants.FELLOW_PLAYER));
+        assertEquals(tradeRequest_Accepted.isAccepted(), trAccepted.get(Constants.ACCEPT));
 
         //test performed trade request
         JSONObject tradePerformedJSON = JSONUtils.createJSON(CatanMessage.tradePerformed(tradeRequest_Accepted));
-        JSONObject innerPerformed = tradePerformedJSON.getJSONObject(Constants.TRD_FIN);
+        JSONObject trPerformed = tradePerformedJSON.getJSONObject(Constants.TRD_FIN);
 
-        assertEquals(tradeRequest_Accepted.getAcceptedBy(), innerPerformed.get(Constants.FELLOW_PLAYER));
-        assertEquals(tradeRequest_Accepted.getPlayerId(), innerPerformed.get(Constants.PLAYER));
+        assertEquals(tradeRequest_Accepted.getAcceptedBy(), trPerformed.get(Constants.FELLOW_PLAYER));
+        assertEquals(tradeRequest_Accepted.getPlayerId(), trPerformed.get(Constants.PLAYER));
 
         //test cancelled trade request
         tradeRequest.cancel();
 
         JSONObject tradeCancelledJSON = JSONUtils.createJSON(CatanMessage.tradeCancelled(tradeRequest));
 
-        JSONObject innerCancelled = tradeCancelledJSON.getJSONObject(Constants.TRD_ABORTED);
+        JSONObject trCancelled = tradeCancelledJSON.getJSONObject(Constants.TRD_ABORTED);
 
-        assertEquals(tradeRequest.getId(), innerCancelled.get(Constants.TRADE_ID));
-        assertEquals(tradeRequest.getPlayerId(), innerCancelled.get(Constants.PLAYER));
+        assertEquals(tradeRequest.getId(), trCancelled.get(Constants.TRADE_ID));
+        assertEquals(tradeRequest.getPlayerId(), trCancelled.get(Constants.PLAYER));
     }
     //endregion
 
     //region knightCardMessageShouldBeCorrect
+    @Test
     public void knightCardMessageShouldBeCorrect() throws Exception {
-        //{ "Ritter ausspielen" : { "Ort" : { "x" : 0, "y" : 1 }, "Ziel" : 13, "Spieler" : 42 } }
+        JSONObject knightJSON = JSONUtils.createJSON(CatanMessage.knightCard(1, 4, l1));
+        JSONObject knight = knightJSON.getJSONObject(Constants.CARD_KNIGHT);
 
-        JSONObject knightJSON = JSONUtils.createJSON(CatanMessage.knightCard(1,4, l1));
-        JSONObject innerKnight = knightJSON.getJSONObject(Constants.CARD_KNIGHT);
-
-        assertEquals(1, innerKnight.get(Constants.PLAYER));
-        assertEquals(4, innerKnight.get(Constants.DESTINATION));
-        assertTrue(innerKnight.has(Constants.PLACE));
+        assertEquals(1, knight.get(Constants.PLAYER));
+        assertEquals(4, knight.get(Constants.DESTINATION));
+        assertTrue(knight.has(Constants.PLACE));
     }
     //endregion
 
     //region roadConstructionCardShouldBeCorrects
+    @Test
     public void roadConstructionCardShouldBeCorrect() throws Exception {
-        // { "Straßenbaukarte ausspielen" : { "Spieler" : 42, "Straße1" : [ {"x" : -2, "y" : 0 },{ "x" : -1, "y" : 0 } ] } }
+        JSONObject roadJSON = JSONUtils.createJSON(CatanMessage.roadConstructionCard(road));
+        JSONObject road = roadJSON.getJSONObject(Constants.CARD_RD_CON);
 
-        JSONObject roadJSON = JSONUtils.createJSON(CatanMessage.roadContructionCard(road));
-        JSONObject innerRoad = roadJSON.getJSONObject(Constants.CARD_RD_CON);
-
-        assertTrue(innerRoad.has(Constants.PLAYER));
-        assertTrue(innerRoad.has(Constants.ROAD));
-        assertTrue(innerRoad.getJSONArray(Constants.ROAD).length() == 2);
+        assertTrue(road.has(Constants.PLAYER));
+        assertTrue(road.has(Constants.ROAD));
+        assertTrue(road.getJSONObject(Constants.ROAD)
+                .getJSONArray(Constants.PLACE).length() == 2);
     }
     //endregion
 
     @Test
     public void monopoleCardShouldBeCorrect() throws Exception {
         JSONObject monopoleJSON = JSONUtils.createJSON(CatanMessage.monopoleCard(0, RawMaterialType.WEAT));
-        JSONObject innerMonopole = monopoleJSON.getJSONObject(Constants.MONOPOLE);
+        JSONObject monopole = monopoleJSON.getJSONObject(Constants.MONOPOLE);
 
-        assertTrue(innerMonopole.has(Constants.PLAYER));
-        assertEquals(Constants.WEAT, innerMonopole.get(Constants.RAW_MATERIAL));
+        assertTrue(monopole.has(Constants.PLAYER));
+        assertEquals(Constants.WEAT, monopole.get(Constants.RAW_MATERIAL));
     }
 
     @Test
     public void inventionCardShouldBeCorrect() throws Exception {
         JSONObject inventionJSON = JSONUtils.createJSON(CatanMessage.inventionCard(5, rmOverview));
-        JSONObject innerInvention = inventionJSON.getJSONObject(Constants.INVENTION);
+        JSONObject invention = inventionJSON.getJSONObject(Constants.INVENTION);
 
-        assertTrue(innerInvention.has(Constants.PLAYER));
-        assertTrue(innerInvention.has(Constants.RAW_MATERIALS));
-        assertEquals(2,innerInvention.getJSONObject(Constants.RAW_MATERIALS).get(Constants.WEAT));
+        assertTrue(invention.has(Constants.PLAYER));
+        assertTrue(invention.has(Constants.RAW_MATERIALS));
+        assertEquals(2, invention.getJSONObject(Constants.RAW_MATERIALS).get(Constants.WEAT));
     }
 
-   /* @Test
+    @Test
     public void startGameShouldBeBuiltRight() throws Exception {
-        assertEquals("{\"Spielgestartet\":{\"Karte\":{\n" +
-                        "\"Felder\" : [ ], // Array von Feldern " +
-                        "\"Gebäude\" : [ ], // Array von Gebäuden " +
-                        "\"Häfen\" : [ ], // Array von Häfen " +
-                        "\"Räuber\" : { // Feldposition des Räubers \"x\" : 0, \"y\" : 0 }\n" +
-                        "}}}",
-                jsonUtils.startGame(new RawMaterialOverview(1,1,0,0,0)).replace(" ",""));
-    }
-*/
+        JSONObject startGameJSON = JSONUtils.createJSON(CatanMessage.startGame(board));
+        JSONObject board = startGameJSON.getJSONObject(Constants.START_CON).getJSONObject(Constants.CARD);
 
+        JSONArray fieldsJSON = board.getJSONArray(Constants.FIELDS);
+        JSONArray havensJSON = board.getJSONArray(Constants.HAVEN);
+        JSONObject robberJSON = board.getJSONObject(Constants.ROBBER);
+        JSONArray buildingsJSON = board.getJSONArray(Constants.BUILDINGS);
+
+        assertTrue(robberJSON.has(Constants.PLACE));
+
+        Gson gson = new Gson();
+        Field[] fields = gson.fromJson(fieldsJSON.toString(), Field[].class);
+        Haven[] havens = gson.fromJson(havensJSON.toString(), Haven[].class);
+        Building[] buildings = gson.fromJson(buildingsJSON.toString(), Building[].class);
+
+        assertEquals(37, fields.length);
+        assertEquals(9, havens.length);
+        assertEquals(0, buildings.length);
+
+        assertTrue(fields[18].getLocation().x == 0 &&
+                fields[18].getLocation().y == 0 &&
+                fields[18].getHarvest() == RawMaterialType.DESERT);
+    }
 }

@@ -1,236 +1,287 @@
 package de.lmu.settleBattle.catanServer;
+
 import java.util.*;
 
+import static de.lmu.settleBattle.catanServer.Constants.*;
+
 public class GameController {
-  private Board board;
-  private List<Player> players;
-  private int currentTurnOrderIndex;
-  private HashMap<Integer, Integer> turnOrder;
-  private List<String> chatHistory;
-  private RawMaterialOverview rawMaterialDeck;
-  private DevelopmentCardOverview developmentCardDeck;
+    private Board board;
+    private List<Player> players;
+    private int currentTurn;
+    private List<String> chatHistory;
+    private RawMaterialOverview rawMaterialDeck;
+    private DevelopmentCardOverview developmentCardDeck;
+    private Stack<Player> playerStack;
+    private boolean buildingPhaseActive;
+    private int round;
+    private boolean isGameOver = false;
+    private boolean gameStarted = false;
 
-  public GameController() {
-    board = new Board();
-    players = new ArrayList<>();
-    currentTurnOrderIndex = -1;
-    turnOrder = new HashMap<>();
-    chatHistory = new ArrayList<>();
-    rawMaterialDeck =  new RawMaterialOverview(19);
-    developmentCardDeck = new DevelopmentCardOverview();
-  }
+    public GameController() {
+        board = new Board();
+        players = new ArrayList<>();
+        currentTurn = 0;
+        chatHistory = new ArrayList<>();
+        rawMaterialDeck = new RawMaterialOverview(19);
+        developmentCardDeck = new DevelopmentCardOverview();
+        buildingPhaseActive = false;
+        round = -1;
+    }
 
 
-  /**
-   * <method name: buyDevelopmentCard>
-   * <description: this method performs the actions required to buy development card>
-   * <preconditions: player has the required cards to buy and his turn is up>
-   * <postconditions: player gets a development card in exchange for his material cards>
-   */
+    public boolean startGame() {
+        if (readyToStartGame()) {
+            defineTurnOrder();
+            initializeBuildingPhase();
+            gameStarted = true;
+        }
+        return gameStarted;
+    }
 
-  public void tradeDevelopmentCard(Player player) {
-    if (player.canAffordDevCard()) {
-      try {
-        player.buyDevelopmentCard(developmentCardDeck.withdrawRandomCard());
-        sellDevelopmentCard();
-      } catch (Exception e) {
-        e.printStackTrace();
-      }
+    public void defineTurnOrder() {
+        Collections.shuffle(players);
+        currentTurn = 0;
+    }
+
+    public void initializeBuildingPhase() {
+        playerStack = new Stack<>();
+        buildingPhaseActive = true;
+        round = 1;
 
     }
 
-  }
-
-  public void sellDevelopmentCard() {
-    this.rawMaterialDeck.increase(RawMaterialType.ORE, 1);
-    this.rawMaterialDeck.increase(RawMaterialType.WOOD, 1);
-    this.rawMaterialDeck.increase(RawMaterialType.WEAT, 1);
-  }
-
-  //region defineTurnOrder
-  public void defineTurnOrder() {
-    turnOrder = new HashMap<>();
-
-    ArrayList<Integer> randomTurnOrder = new ArrayList();
-
-    for (int i = 0; i < players.size(); i++) {
-      randomTurnOrder.add(i);
+    public Player getNext() {
+        return this.buildingPhaseActive ? getNext_BuildingPhase() : getNext_Move();
     }
 
-    Collections.shuffle(randomTurnOrder);
-
-    for (int i = 0; i < players.size(); i++) {
-      turnOrder.put(i, randomTurnOrder.get(i));
+    private Player getNext_Move() {
+        currentTurn++;
+        return players.get(this.getCurrentIndex());
     }
 
-    currentTurnOrderIndex = 0;
-  }
-  //endregion
+    private Player getNext_BuildingPhase() {
+        Player player;
+        if (round == 1) {
+            player = this.getNext_Move();
+            playerStack.push(player);
 
-  public void initializeBuildingPhase() {
-    //players[turnOrder.get(0)].setStatus(StatusConstants.BUILD_SETTLEMENT);
-    //players[turnOrder.get(1)].setStatus(StatusConstants.WAIT);
-    //players[turnOrder.get(2)].setStatus(StatusConstants.WAIT);
-    //players[turnOrder.get(3)].setStatus(StatusConstants.WAIT);
-  }
+            if (playerStack.size() == players.size())
+                round++;
+        } else {
+            player = playerStack.pop();
+            currentTurn--;
 
-  ;
-
-  public Player getNext() {
-    currentTurnOrderIndex++;
-    return getPlayer(turnOrder.get(currentTurnOrderIndex%players.size()));
-  }
-
-  public Player getCurrent() {
-    return getPlayer(turnOrder.get(currentTurnOrderIndex));
-  }
-
-  public void initializeNextMove() {
-  }
-
-  ;
-
-  public void distributeRawMaterial() {
-  }
-
-  ;
-
-  public void endGame() {
-  }
-
-  ;
-
-  public void conductTrade(TradeRequest tr) {
-  }
-
-  ;
-
-  /**
-   * sets new status for active player and
-   * sets status of all others to "Warten"
-   * @param id
-   * @param status
-   */
-  public void setPlayerActive(int id, String status) {
-    for (Player player : players) {
-      if (player.getId() == id)
-        player.setStatus(status);
-      else player.setStatus(Constants.WAIT);
+            if (playerStack.size() == 0) {
+                buildingPhaseActive = false;
+                currentTurn=0;
+            }
+        }
+        return player;
     }
-  }
 
 
-  //region isValidPlayerData
+    public boolean placeBuilding(int owner, Location[] locs, BuildingType type) {
+        boolean buildPermission = false;
+        boolean built = false;
 
-  /**
-   * checks if the chosen player data is valid, meaning
-   * if the color or name are already taken
-   *
-   * @param id
-   * @param name
-   * @param color
-   * @return true if the color and name are free, otherwise false
-   */
-  public boolean isValidPlayerData(int id, String name, Color color) {
-    for (Player player : players) {
+        //during the building phase no cities can be built and no raw materials are reduced
+        if (this.buildingPhaseActive && !type.equals(BuildingType.CITY))
+            buildPermission = true;
 
-      //do not compare player with itself
-      if (player.getId() == id)
-        continue;
+        //the player can only built building if he has enough raw materials
+        else if (!this.buildingPhaseActive) {
+            buildPermission = getPlayer(owner).canAfford(type);
+        }
 
-      // if a name or a color is already chosen
-      //return false
-      if (player.getName().equals(name) ||
-          player.getColor().equals(color))
+        if (buildPermission) {
+            built = board.placeBuilding(owner, locs, type);
+
+            //if the building was successfully built and the player needs to pay for it
+            //--> reduce raw materials
+            if (built && !buildingPhaseActive)
+                getPlayer(owner).decreaseRawMaterials(Building.getCosts(type));
+        }
+        return built;
+    }
+
+
+    /**
+     * <method name: buyDevelopmentCard>
+     * <description: this method performs the actions required to buy development card>
+     * <preconditions: player has the required cards to buy and his turn is up>
+     * <postconditions: player gets a development card in exchange for his material cards>
+     */
+
+    public void tradeDevelopmentCard(Player player) {
+        if (player.canAffordDevCard()) {
+            try {
+                player.buyDevelopmentCard(developmentCardDeck.withdrawRandomCard());
+                sellDevelopmentCard();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+        }
+
+    }
+
+    public void sellDevelopmentCard() {
+        this.rawMaterialDeck.increase(RawMaterialType.ORE, 1);
+        this.rawMaterialDeck.increase(RawMaterialType.WOOD, 1);
+        this.rawMaterialDeck.increase(RawMaterialType.WEAT, 1);
+    }
+
+
+    public Player getCurrent() {
+        return players.get(this.getCurrentIndex());
+    }
+
+    public int getCurrentIndex() {
+        return currentTurn % players.size();
+    }
+
+    public void initializeNextMove() {
+    }
+
+
+    public void distributeRawMaterial() {
+    }
+
+
+    public void endGame() {
+    }
+
+    public void conductTrade(TradeRequest tr) {
+    }
+
+    /**
+     * sets new status for active player and
+     * sets status of all others to "Warten"
+     *
+     * @param id
+     * @param status
+     * @return list of players where status changed
+     */
+    public void setPlayerActive(int id, String status) {
+        for (Player player : players) {
+            String newStatus = player.getId() == id ? status : WAIT;
+            player.setStatus(newStatus);
+        }
+    }
+
+
+    //region isValidPlayerData
+
+    public boolean isValidName(String name) {
+        if (name == null || name.equals("")) return false;
+
+        for (Player player : players) {
+            if (player.getName() != null && player.getName().equals(name))
+                return false;
+        }
+
+        return true;
+    }
+
+    public boolean isValidColor(Color color) {
+        if (color == null) return false;
+
+        for (Player player : players) {
+            if (player.getColor() != null && player.getColor() == color)
+                return false;
+        }
+
+        return true;
+    }
+
+    //endregion
+
+    public void addPlayer(Player p) throws IllegalAccessException {
+        if (players.size() < 4)
+            players.add(p);
+
+        else throw new IllegalAccessException("The player cannot be added. There" +
+                "are already 4 players for this game!");
+    }
+
+    public List<Player> getPlayers() {
+        return players;
+    }
+
+    public int getPlayerCount() {
+        return players.size();
+    }
+
+    public Player getPlayer(String sessionId) {
+        return getPlayer(Integer.parseInt(sessionId, 16));
+    }
+
+    public Player getPlayer(int id) {
+        for (Player p : players) {
+            if (p.getId() == id)
+                return p;
+        }
+
+        return null;
+    }
+
+
+    /**
+     * checks if everybody is ready to play
+     *
+     * @return true if every player has status "Spiel gestartet", otherwise false
+     */
+    public boolean readyToStartGame() {
+
+        if (3 <= players.size() && players.size() <= 4) {
+
+            for (Player player : players) {
+                if (!player.getStatus().equals(WAIT_FOR_GAME_START))
+                    return false;
+            }
+            return true;
+        }
+
         return false;
     }
-    return true;
-  }
 
-  public boolean isValidName(String name) {
-    if (name == null || name.equals("")) return false;
-
-    for (Player player : players) {
-      if (player.getName() != null && player.getName().equals(name))
-        return false;
+    public boolean removePlayer(Player p) {
+        return players.remove(p);
     }
 
-    return true;
-  }
+    public ArrayList<Integer> getPlayersWithAtLeast7RawMaterials() {
+        ArrayList<Integer> ids = new ArrayList<>();
 
-  public boolean isValidColor(Color color) {
-    if (color == null) return false;
+        for (Player player : players) {
+            if (player.hasToExtractCards())
+                ids.add(player.getId());
+        }
 
-    for (Player player : players) {
-      if (player.getColor() != null && player.getColor() == color)
-        return false;
+        return ids;
     }
 
-    return true;
-  }
-
-  //endregion
-
-  public void addPlayer(Player p) throws IllegalAccessException {
-    if (players.size() < 4)
-      players.add(p);
-
-    else throw new IllegalAccessException("The player cannot be added. There" +
-        "are already 4 players for this game!");
-  }
-
-  public List<Player> getPlayers() {
-    return players;
-  }
-
-  public int getPlayerCount() {
-    return players.size();
-  }
-
-  public Player getPlayer(String sessionId) {
-    return getPlayer(Integer.parseInt(sessionId, 16));
-  }
-
-  public Player getPlayer(int id) {
-    for (Player p : players) {
-      if (p.getId() == id)
-        return p;
+    public boolean isGameStarted() {
+        return gameStarted;
     }
 
-    return null;
-  }
-
-
-  /**
-   * checks if everybody is ready to play
-   * @return true if every player has status "Spiel gestartet", otherwise false
-   */
-  public boolean readyToStartGame() {
-
-    if (3 <= players.size() && players.size() <= 4) {
-
-      for (Player player : players) {
-        if (!player.getStatus().equals(Constants.START_CON))
-          return false;
-      }
-      return true;
+    public void setGameStarted(boolean gameStarted) {
+        this.gameStarted = gameStarted;
     }
 
-    return false;
-  }
 
-  public boolean removePlayer(Player p) {
-    return players.remove(p);
-  }
-
-  public ArrayList<Integer> getPlayersWithAtLeast7RawMaterials() {
-    ArrayList<Integer> ids = new ArrayList<>();
-
-    for (Player player : players) {
-      if (player.hasToExtractCards())
-        ids.add(player.getId());
+    public boolean isBuildingPhaseActive() {
+        return buildingPhaseActive;
     }
 
-    return ids;
-  }
+    public void setBuildingPhaseActive(boolean buildingPhaseActive) {
+        this.buildingPhaseActive = buildingPhaseActive;
+    }
+
+
+    public Board getBoard() {
+        return board;
+    }
+
+
 }
+

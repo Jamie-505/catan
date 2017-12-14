@@ -72,6 +72,9 @@ public class Constants {
     public final static String CITY = "Stadt";
     public final static String NUMBER = "Zahl";
     public final static String HAVEN = "Hafen";
+    public final static String FIELDS = "Felder";
+    public final static String BUILDINGS = "Gebäude";
+    public final static String ROBBER = "Räuber";
     public final static String UNKNOWN = "Unbekannt";
     public final static String KNIGHT = "Ritter";
     public final static String INVENTION = "Erfindung";
@@ -84,6 +87,7 @@ public class Constants {
     public final static String CLAY = "Lehm";
     public final static String WOOD = "Holz";
     public final static String WOOL = "Wolle";
+    public final static String WATER = "Wasser";
     public final static String NOTIFICATION = "Nachricht";
     public final static String WINNER = "Sieger";
     public final static String RAW_MATERIALS = "Rohstoffe";
@@ -94,6 +98,10 @@ public class Constants {
     public final static String REQUEST = "Nachfrage";
     public final static String MESSAGE = "Meldung";
     public final static String OK = "OK";
+    public final static String ORANGE = "Orange";
+    public final static String BLUE = "Blau";
+    public final static String RED = "Rot";
+    public final static String WHITE = "Weiß";
 
     //Player Constants
     public final static String PLAYER = "Spieler";

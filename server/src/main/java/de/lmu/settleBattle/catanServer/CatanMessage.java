@@ -3,6 +3,8 @@ package de.lmu.settleBattle.catanServer;
 import org.json.JSONObject;
 import org.springframework.web.socket.TextMessage;
 
+import static de.lmu.settleBattle.catanServer.Constants.*;
+
 public class CatanMessage {
 
     //region serverProtocol
@@ -14,9 +16,9 @@ public class CatanMessage {
      */
     public static TextMessage serverProtocol() {
         JSONObject payload = new JSONObject();
-        payload.put(Constants.VERSION, Constants.VERSION_SERVER);
-        payload.put(Constants.PROTOCOL, "1.0");
-        return new TextMessage(JSONUtils.setJSONType(Constants.HANDSHAKE, payload).toString());
+        payload.put(VERSION, VERSION_SERVER);
+        payload.put(PROTOCOL, "1.0");
+        return new TextMessage(JSONUtils.setJSONType(HANDSHAKE, payload).toString());
     }
     //endregion
 
@@ -31,7 +33,61 @@ public class CatanMessage {
     public static TextMessage welcomeNewPlayer(int id) {
         JSONObject payload = new JSONObject();
         payload.put("id", id);
-        return new TextMessage(JSONUtils.setJSONType(Constants.GET_ID, payload).toString());
+        return new TextMessage(JSONUtils.setJSONType(GET_ID, payload).toString());
+    }
+    //endregion
+
+    //region statusUpdateToPlayer
+    public static Player statusUpdateToPlayer(TextMessage message) {
+        JSONObject json = JSONUtils.createJSON(message);
+
+        return SocketUtils.gson.fromJson(
+                json.getJSONObject(STATUS_UPD).getJSONObject(PLAYER).toString(),
+                Player.class);
+    }
+    //endregion
+
+
+    //region newBuildingToBuilding
+    public static Building newBuildingToBuilding(TextMessage message) {
+        JSONObject json = JSONUtils.createJSON(message);
+
+        return SocketUtils.gson.fromJson(
+                json.getJSONObject(NEW_BUILDING).toString(), Building.class);
+    }
+    //endregion
+
+    //region messageToObject
+    public static Object messageToObject(TextMessage message) {
+        String type = JSONUtils.getMessageType(message);
+        Object object = null;
+
+        switch (type) {
+            case STATUS_UPD:
+                object = statusUpdateToPlayer(message);
+                break;
+            case NEW_BUILDING:
+                object = newBuildingToBuilding(message);
+                break;
+
+        }
+
+        return object;
+    }
+    //endregion
+
+    //region extractBoard
+
+    /**
+     * extracts board object from startGame message
+     * @param startGameMsg
+     * @return
+     */
+    public static Board extractBoard(TextMessage startGameMsg) {
+        JSONObject json = JSONUtils.createJSON(startGameMsg);
+
+        return SocketUtils.gson.fromJson(
+                json.getJSONObject(START_CON).getJSONObject(CARD).toString(), Board.class);
     }
     //endregion
 
@@ -50,10 +106,10 @@ public class CatanMessage {
             throw new IllegalArgumentException("The array must have length 2");
 
         JSONObject payload = new JSONObject();
-        payload.put(Constants.PLAYER, id);
-        payload.put(Constants.DICE_THROW, diceResult);
+        payload.put(PLAYER, id);
+        payload.put(DICE_THROW, diceResult);
 
-        return new TextMessage(JSONUtils.setJSONType(Constants.DICE_RESULT, payload).toString());
+        return new TextMessage(JSONUtils.setJSONType(DICE_RESULT, payload).toString());
     }
     //endregion
 
@@ -88,20 +144,17 @@ public class CatanMessage {
 
     //endregion
 
-    //region startGame
+    //region board
     /**
      * creates message containing start game and card for player
      * @param board
      * @return string message structured like JSON
-     *//*
-    public String startGame(Board board) {
-        JSONObject json = new JSONObject();
-        json.put(Constants.CARD, new JSONObject(board.toJSONString()));
+     */
 
-        JSONObject ret = new JSONObject();
-        ret.put(Constants.START_CON, json);
-        return ret.toString();
-    }*/
+    public static TextMessage startGame(Board board) {
+        JSONObject payload = JSONUtils.setJSONType(Constants.CARD, board.toJSON());
+        return new TextMessage(JSONUtils.setJSONType(START_CON, payload).toString());
+    }
     //endregion
 
     //region endGame
@@ -242,7 +295,7 @@ public class CatanMessage {
     }
 
 
-    public static TextMessage roadContructionCard(Building road) {
+    public static TextMessage roadConstructionCard(Building road) {
 
         if (road.getType() != BuildingType.ROAD)
             throw new IllegalArgumentException("Can only build road with this card.");
@@ -273,6 +326,6 @@ public class CatanMessage {
 
     //endregion
 
-//TODO: chatmessages AND Servernachrichten AND startGame()
+//TODO: chatmessages AND Servernachrichten 
 
 }

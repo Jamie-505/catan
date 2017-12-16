@@ -2,10 +2,16 @@ package de.lmu.settlebattle.catanclient.utils;
 
 public final class Constants {
 
+  // Colors
+  public static final String BLUE = "Blau";
+  public static final String ORANGE = "Orange";
+  public static final String RED = "Rot";
+  public static final String WHITE = "Weiß";
+
   // Message Type Constants
   public static final String BUILD = "Bauen";
   public static final String CARD_BUY = "Entwicklungskarte kaufen";
-  public static final String CARD_KNIGHT = "Räuber ausspielen";
+  public static final String CARD_KNIGHT = "Ritter ausspielen";
   public static final String CARD_RD_CON = "Straßenbaukarte ausspielen";
   public static final String CARD_SOLD = "Entwicklungskarte gekauft";
   public static final String CHAT_IN = "Chatnachricht";
@@ -17,6 +23,7 @@ public final class Constants {
   public static final String GAME_OVER = "Spiel beendet";
   public static final String GAME_START = "Spiel gestartet";
   public static final String GAME_READY = "Spiel starten";
+  public static final String GAME_WAIT = "Wartet auf Spielbeginn";
   public static final String GET_ID = "Willkommen";
   public static final String HANDSHAKE = "Hallo";
   public static final String HARVEST = "Ertrag";
@@ -55,6 +62,8 @@ public final class Constants {
   public static final String DISPLAY_ERROR = "displayError";
 	public static final String ERROR_MSG = "errorMsg";
   public static final String NEXT_ACTIVITY = "nextActivity";
+  public static final String PLAYER_UPDATE = "playerUpdate";
+  public static final String PLAYER_WAIT = "playerWait";
 	public static final String PROTOCOL_SUPPORTED = "protocolMatch";
 
   // Error Handling
@@ -86,6 +95,9 @@ public final class Constants {
   public final static String WOOL = "Wolle";
 
   //Player Constants
+  public final static String ARMY = "Rittermacht";
+  public final static String DEV_CARDS = "Entwicklungskarten";
+  public final static String RAW_MATERIALS = "Rohstoffe";
   public final static String PLAYER_ID = "id";
   public final static String PLAYER_COLOR = "Farbe";
   public final static String PLAYER_STATE = "Status";
@@ -94,18 +106,19 @@ public final class Constants {
   public final static String PLAYER_DATA_INVALID = "Die gewählten Daten sind bereits vergeben.";
 
   // Service
-  public static final String JSON_MSG = "JSONMsg";
+  public static final String ALL_PLAYERS = "allPlayers";
   public static final String TO_SERVER = "Send To Server";
   public static final String TO_STORAGE = "Send To Storage";
 
   // Storage
   public static final String KEY_SHARED_PREF = "CATAN_APP";
   public static final String KEY_SESSION_ID = "sessionId";
+  public static final String KEY_PLAYER = "storagePlayer";
 
   // Version Constants
   public static final String VERSION_PROTOCOL = "1.0";
   public static final String VERSION_SERVER = "CatanBackendServer 0.1 (sepgroup03)";
   public static final String VERSION_CLIENT = "AndroidClient 0.1 (sepgroup03)";
-  
+
 
 }

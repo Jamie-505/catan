@@ -31,6 +31,7 @@ public class WebSocketService extends Service {
   private final IBinder binder = new WebSocketsBinder();
   private Storage storage;
   private WebSocketClient webSocketClient;
+  private LocalBroadcastManager localBroadcastManager;
 
   private BroadcastReceiver messageReceiver = new BroadcastReceiver() {
     @Override
@@ -44,12 +45,16 @@ public class WebSocketService extends Service {
     }
   };
 
+  public WebSocketService() {
+    localBroadcastManager = LocalBroadcastManager.getInstance(this);
+  }
+
   @Override
   public int onStartCommand(Intent intent, int flags, int startId) {
     Log.i(TAG, "onStartCommand");
     storage = new Storage(getApplicationContext());
     Intent connectionIntent = new Intent(ACTION_CONNECTION_ESTABLISHED);
-    LocalBroadcastManager.getInstance(this).sendBroadcast(connectionIntent);
+    localBroadcastManager.sendBroadcast(connectionIntent);
     if(!socketConnected){
       startSocket();
       socketConnected = true;
@@ -60,7 +65,7 @@ public class WebSocketService extends Service {
   @Override
   public IBinder onBind(Intent intent) {
     Log.d(TAG, "onBind");
-    LocalBroadcastManager.getInstance(this).registerReceiver(messageReceiver,
+    localBroadcastManager.registerReceiver(messageReceiver,
         new IntentFilter(ACTION_NETWORK_STATE_CHANGED));
     if(!socketConnected){
       startSocket();
@@ -72,7 +77,7 @@ public class WebSocketService extends Service {
   @Override
   public boolean onUnbind(Intent intent) {
     Log.d(TAG, "onUnbind");
-    LocalBroadcastManager.getInstance(this).unregisterReceiver(messageReceiver);
+    localBroadcastManager.unregisterReceiver(messageReceiver);
     return false;
   }
 
@@ -120,20 +125,42 @@ public class WebSocketService extends Service {
 
   private void messageReceived(String message) {
     Object[] mail = JSONUtils.parse(message);
+    Player player;
+    Intent intent;
     switch (mail[0].toString()) {
       case TO_SERVER:
         Intent protocolIntent = new Intent(PROTOCOL_SUPPORTED);
-        LocalBroadcastManager.getInstance(this).sendBroadcast(protocolIntent);
+        localBroadcastManager.sendBroadcast(protocolIntent);
         webSocketClient.send(mail[1].toString());
         break;
       case GAME_READY:
-        Player player = (Player) mail[1];
+        player = (Player) mail[1];
         if (player.id == storage.getSessionId()) {
-          // should cause select player acitivity so switch to lobby
+          // should cause select player activity so switch to lobby
           storage.storePlayer(player);
-          Intent lobbyIntent = new Intent(NEXT_ACTIVITY);
-          LocalBroadcastManager.getInstance(this).sendBroadcast(lobbyIntent);
+          intent = new Intent(NEXT_ACTIVITY);
+        } else {
+          storage.storeOpponent(player);
+          // updates lobby with latest data
+          intent = new Intent(PLAYER_UPDATE);
         }
+        localBroadcastManager.sendBroadcast(intent);
+        break;
+      case GAME_WAIT:
+        player = (Player) mail[1];
+        if (player.id == storage.getSessionId()) {
+          // should cause select player activity so switch to lobby
+          storage.storePlayer(player);
+        } else {
+          storage.storeOpponent(player);
+          // updates lobby with latest data
+        }
+        intent = new Intent(PLAYER_WAIT);
+        localBroadcastManager.sendBroadcast(intent);
+        break;
+      case GAME_START:
+        intent = new Intent(GAME_START);
+        localBroadcastManager.sendBroadcast(intent);
         break;
       case TO_STORAGE:
         Log.d(TAG, ((Player) mail[1]).id + " --> TO_STORAGE");
@@ -153,13 +180,13 @@ public class WebSocketService extends Service {
   private void displayError(String errorMessage) {
     Intent errorIntent = new Intent(DISPLAY_ERROR);
     errorIntent.putExtra(ERROR_MSG, errorMessage);
-    LocalBroadcastManager.getInstance(this).sendBroadcast(errorIntent);
+    localBroadcastManager.sendBroadcast(errorIntent);
   }
 
   private void connectionOpened(){
     socketConnected = true;
     Intent intent = new Intent(ACTION_CONNECTION_ESTABLISHED);
-    LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
+    localBroadcastManager.sendBroadcast(intent);
   }
 
   public void sendMessage(String jsonMsg) {

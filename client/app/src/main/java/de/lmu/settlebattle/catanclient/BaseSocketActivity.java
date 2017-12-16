@@ -11,6 +11,10 @@ import de.lmu.settlebattle.catanclient.network.WebSocketService;
 
 public abstract class BaseSocketActivity extends AppCompatActivity {
 
+  // disable back button so you can't redo any steps
+  @Override
+  public void onBackPressed() {}
+
   private static final String TAG = BaseSocketActivity.class.getSimpleName();
 
   protected WebSocketService mService;

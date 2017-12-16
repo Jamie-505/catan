@@ -36,12 +36,11 @@ public class JSONUtils {
           JSONObject status = jObj.getJSONObject(STATUS_UPD);
           player = gson.fromJson(status.getString(PLAYER), Player.class);
           return handleStatusUpdate(player);
+        case GAME_START:
+          return new Object[] { GAME_START };
         case ERROR:
           Error error = gson.fromJson(jObj.getString(ERROR), Error.class);
           return displayError(error.Message);
-        case GAME_START:
-          // TODO: handle game start
-          // TODO: go to Main Activity, render board, etc...
         default:
           return displayError("Protokoll wird nicht unterstützt");
       }
@@ -55,10 +54,11 @@ public class JSONUtils {
   private static Object[] handleStatusUpdate(Player player) {
     String status = player.status;
     switch (status) {
-      case GAME_READY:
-        return new Object[] { GAME_READY, player };
+      case GAME_START:
+        return new String[] { GAME_START };
+      default:
+        return new Object[] { player.status, player };
     }
-    return null;
   }
 
   private static Object[] displayError(String errorMsg) {
@@ -87,7 +87,10 @@ public class JSONUtils {
   public static String createJSONString(String messageType, HashMap information) {
     try {
       JSONObject jObj = new JSONObject();
-      JSONObject payload = new JSONObject(information);
+      JSONObject payload = new JSONObject();
+      if (information != null) {
+        payload = new JSONObject(information);
+      }
       jObj.put(messageType, payload);
       return jObj.toString();
     } catch (JSONException e) {

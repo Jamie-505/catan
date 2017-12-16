@@ -18,4 +18,7 @@
   <color name="lblFromName">#777777</color>
   <color name="status">#80CCCCCC</color>
   <color name="backgroundwater">#8DBCF3</color>
+  <color name="orange">#ef6c00</color>
+  <color name="red">#b71c1c</color>
+  <color name="blue">#1565c0</color>
 </resources>

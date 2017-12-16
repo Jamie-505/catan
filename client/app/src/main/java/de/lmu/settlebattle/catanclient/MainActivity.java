@@ -69,6 +69,7 @@ import android.graphics.Canvas;
 import android.graphics.Matrix;
 import android.graphics.Point;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Display;
 import android.view.MotionEvent;
 import android.view.View;
@@ -100,7 +101,11 @@ public class MainActivity extends BaseSocketActivity {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_main);
 
-    getActionBar().hide();
+    try {
+      getActionBar().hide();
+    } catch (NullPointerException e) {
+      Log.i(TAG, "No ActionBar to hide...");
+    }
 
     mRelativeLayout = findViewById(R.id.gridLayout);
 

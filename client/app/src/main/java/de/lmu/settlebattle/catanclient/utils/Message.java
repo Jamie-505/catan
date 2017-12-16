@@ -4,6 +4,7 @@ import static de.lmu.settlebattle.catanclient.utils.Constants.*;
 
 import com.google.gson.annotations.SerializedName;
 import java.util.ArrayList;
+import java.util.Map;
 
 public class Message {
 
@@ -17,7 +18,22 @@ public class Message {
     public String status;
 
     @SerializedName(PLAYER_COLOR)
-    String color;
+    public String color;
+
+    @SerializedName(ARMY)
+    public int army;
+
+    @SerializedName(LONGEST_RD)
+    public boolean longestRd;
+
+    @SerializedName(VICTORY_PTS)
+    public int victoryPts;
+
+    @SerializedName(RAW_MATERIALS)
+    public Map<String, Integer> rawMaterials;
+
+    @SerializedName(DEV_CARDS)
+    public Map<String, Integer> devCards;
   }
 
   class Board {}

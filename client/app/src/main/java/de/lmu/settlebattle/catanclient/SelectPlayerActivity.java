@@ -32,7 +32,9 @@ public class SelectPlayerActivity extends BaseSocketActivity {
         displayError(intent.getStringExtra(ERROR_MSG));
       } else if (intent.getAction().equals(NEXT_ACTIVITY)) {
         Intent enterLobby = new Intent(SelectPlayerActivity.this,
-            LobbyActivitiy.class);
+            LobbyActivity.class);
+        String allPlayers = storage.getAllPlayers();
+        enterLobby.putExtra(ALL_PLAYERS, allPlayers);
         startActivity(enterLobby);
       }
     }
@@ -74,16 +76,6 @@ public class SelectPlayerActivity extends BaseSocketActivity {
         return true;
       }
     };
-
-    //onClick Listener um die Farbe zu ändern
-
-		View.OnClickListener myOnClickListener = new View.OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				// Do something here
-			}
-		};
-
 
     confirmBtn.setOnClickListener((View v) -> {
       String pColor = spinner.getSelectedItem().toString();

@@ -29,5 +29,6 @@
   <string name="title_activity_lobby_activitiy">LobbyActivitiy</string>
   <string name="starten">Spiel Starten</string>
   <string name="player_name_input_hint">Bitte gebe deinen Spielernamen hier ein</string>
+  <string name="wait_for_other_players">Warte auf andere Spieler...</string>
 
 </resources>

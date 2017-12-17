@@ -9,21 +9,40 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.app.Activity;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Matrix;
 import android.graphics.Point;
+import android.graphics.drawable.Drawable;
+import android.graphics.drawable.LayerDrawable;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
+import android.os.Handler;
+import android.support.constraint.ConstraintLayout;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
+import android.text.Html;
+import android.text.method.LinkMovementMethod;
+import android.util.Log;
 import android.view.Display;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageButton;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.Button;
+import android.widget.ListView;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.gson.Gson;
@@ -40,6 +59,13 @@ import de.lmu.settlebattle.catanclient.trade.SeaTradeFragment;
 import de.lmu.settlebattle.catanclient.trade.Trade;
 import de.lmu.settlebattle.catanclient.trade.TradeOfferFragment;
 import de.lmu.settlebattle.catanclient.utils.JSONUtils;
+
+import com.otaliastudios.zoom.ZoomImageView;
+import com.otaliastudios.zoom.ZoomLayout;
+import com.otaliastudios.zoom.ZoomLogger;
+import com.sothree.slidinguppanel.SlidingUpPanelLayout;
+import java.util.Arrays;
+import java.util.List;
 
 public class MainActivity extends BaseSocketActivity {
 
@@ -72,11 +98,17 @@ public class MainActivity extends BaseSocketActivity {
   public void onBackPressed() {
     if (fragmentManager.getBackStackEntryCount() > 0) {
       fragmentManager.popBackStack();
-    } else {
-      super.onBackPressed();
     }
+    if (mLayout != null &&
+        (mLayout.getPanelState() == SlidingUpPanelLayout.PanelState.EXPANDED || mLayout.getPanelState() == SlidingUpPanelLayout.PanelState.ANCHORED)) {
+      mLayout.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
+    }
+    super.onBackPressed();
   }
 
+  // Main Panel zum Sliden
+  private SlidingUpPanelLayout mLayout;
+  //Beginn on Create
   @Override
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
@@ -105,7 +137,194 @@ public class MainActivity extends BaseSocketActivity {
     }
 
     initGridView(radius, board.fields);
+
+    setSupportActionBar((Toolbar) findViewById(R.id.main_toolbar));
+    // Liste & Baukostenkarte
+    ListView list;
+    String[] itemname ={
+        "Straße bauen",
+        "Siedlung bauen",
+        "Stadt bauen",
+        "Entwicklungskarte"
+
+    };
+
+    Integer[] imgid={
+        R.drawable.cost_street,
+        R.drawable.cost_settlment,
+        R.drawable.cost_city,
+        R.drawable.cost_devcard
+    };
+
+      CustomListAdapter adapter=new CustomListAdapter(this, itemname, imgid);
+      list=(ListView)findViewById(R.id.list);
+      list.setAdapter(adapter);
+
+      list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+
+        @Override
+        public void onItemClick(AdapterView<?> parent, View view,
+                                int position, long id) {
+          // TODO Auto-generated method stub
+          String Slecteditem= itemname[+position];
+          Toast.makeText(getApplicationContext(), Slecteditem, Toast.LENGTH_SHORT).show();
+
+        }
+      });
+    /*
+
+    ListView lv = (ListView) findViewById(R.id.list);
+    lv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+      @Override
+      public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+        Toast.makeText(MainActivity.this, "onItemClick", Toast.LENGTH_SHORT).show();
+      }
+    });
+
+    List<String> your_array_list = Arrays.asList(
+        "Straße bauen",
+        "Siedlung bauen",
+        "Stadt bauen",
+        "Entwicklungskarte"
+    );
+
+    // This is the array adapter, it takes the context of the activity as a
+    // first parameter, the type of list view as a second parameter and your
+    // array as a third parameter.
+    /* old list view
+    ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(
+        this,
+        android.R.layout.simple_list_item_1,
+        your_array_list );
+
+    lv.setAdapter(arrayAdapter);
+
+    */
+
+    mLayout = (SlidingUpPanelLayout) findViewById(R.id.sliding_layout);
+    mLayout.addPanelSlideListener(new SlidingUpPanelLayout.PanelSlideListener() {
+      @Override
+      public void onPanelSlide(View panel, float slideOffset) {
+        Log.i(TAG, "onPanelSlide, offset " + slideOffset);
+
+      }
+
+
+      @Override
+      public void onPanelStateChanged(View panel, SlidingUpPanelLayout.PanelState previousState, SlidingUpPanelLayout.PanelState newState) {
+        TextView wood = (TextView) findViewById(R.id.woodtxt);
+        wood.setText("4");
+        TextView brick = (TextView) findViewById(R.id.bricktxt);
+        // Platz um die Anzahl der Ressourcen zu Parsen brick.setText(Html.fromHtml(getString(R.string.brick_count)));
+        TextView iron = (TextView) findViewById(R.id.irontxt);
+        //i.setText(Html.fromHtml(getString(R.string.iron_count)));
+        TextView sheep = (TextView) findViewById(R.id.sheeptxt);
+        //sheep.setText(Html.fromHtml(getString(R.string.sheep_count)));
+        TextView card = (TextView) findViewById(R.id.cardtxt);
+        //card.setText(Html.fromHtml(getString(R.string.cards_count)));
+        TextView wheat = (TextView) findViewById(R.id.wheattxt);
+        //wheat.setText(Html.fromHtml(getString(R.string.wheat_count)));
+
+         /*
+        TextView y = (TextView) findViewById(R.id.rsclong);
+        t.setText(Html.fromHtml(getString(R.string.rsc_big)));
+
+        if(mLayout.getPanelState() == SlidingUpPanelLayout.PanelState.ANCHORED||mLayout.getPanelState() == SlidingUpPanelLayout.PanelState.EXPANDED)
+        {
+          t.setVisibility(View.INVISIBLE);
+          y.setVisibility(View.VISIBLE);
+          Log.i(TAG, "Großer Text sollte sichbar sein ");
+        }
+        else {
+          t.setVisibility(View.VISIBLE);
+          y.setVisibility(View.INVISIBLE);
+          Log.i(TAG, "Kurzer Text sollte sichbar sein ");*/
+
+
+
+      }
+    });
+    mLayout.setFadeOnClickListener(new View.OnClickListener() {
+      @Override
+      public void onClick(View view) {
+        mLayout.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
+
+      }
+    });
+
+    mLayout.setAnchorPoint(0.6f);
+    mLayout.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
+
+/*
+    final private Runnable runnable = new Runnable() {
+      public void run() {
+        LayerDrawable myDrawable = (LayerDrawable) getResources().getDrawable(R.drawable.all_layers);
+        Drawable layer =  myDrawable.findDrawableByLayerId(R.id.interesting_layer);
+        if (layer.isVisible()==true)
+        {
+          layer.setVisible(false, false);
+        }
+        else
+        {
+          layer.setVisible(true, false);
+        }
+        TextView txt = (TextView) findViewById(R.id.txtTest);
+        if (txt.getVisibility()==0)
+        {
+          txt.setVisibility(4);
+        }
+        else
+        {
+          txt.setVisibility(0);
+        }
+        Handler handler;
+        handler.postDelayed(this, 5000);
+      }
+    };*/
+
+  /*
+  private void showTile (position,type,[building, corner, color]) {
+
+    LayerDrawable layers = (LayerDrawable) findViewById(R.id.layer_list);
+
+    layers.findDrawableByLayerId(R.id.compoundBackgroundItem).setAlpha(
+            0);
+
+    layers.findDrawableByLayerId(R.id.moreIndicatorItem).setAlpha(0);
+
+    layers.findDrawableByLayerId(R.id.bluetoothItem).setAlpha(0);
+
+    layers.findDrawableByLayerId(R.id.handsetItem).setAlpha(0);
+
+    layers.findDrawableByLayerId(R.id.speakerphoneOnItem).setAlpha(255);
+
+    layers.findDrawableByLayerId(R.id.speakerphoneOffItem).setAlpha(0);
+}
+
+   */
+/*
+    Button f = (Button) findViewById(R.id.follow);
+    f.setText(Html.fromHtml(getString(R.string.follow)));
+    f.setMovementMethod(LinkMovementMethod.getInstance());
+    f.setOnClickListener(new View.OnClickListener() {
+      @Override
+      public void onClick(View v) {
+        Intent i = new Intent(Intent.ACTION_VIEW);
+        i.setData(Uri.parse("http://www.twitter.com/umanoapp"));
+        startActivity(i);
+      }
+    });*/
+
+
   }
+   /*
+  final Button baubtn = (Button) findViewById(R.id.bauen_button);
+ baubtn.setOnClickListener(new View.OnClickListener() {
+    public void onClick(View v) {
+      // Code here executes on main thread after user presses button
+    }
+  mLayout.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
+*/
 
   private void addViewToLayout(View view, Hex hex, Grid grid) {
     //Add to view

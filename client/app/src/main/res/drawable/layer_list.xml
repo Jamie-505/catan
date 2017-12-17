@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="67dp"
+    android:height="67dp">
+    <item android:id="@+id/city_green"
+        android:width="12dp"
+        android:height="12dp">
+        <bitmap android:src="@drawable/city_green"
+            android:gravity="top|center" />
+    </item>
+    <item android:id="@+id/clay_tile">
+        <bitmap android:src="@drawable/clay_highlighted"
+            android:gravity="top|left"
+            android:alpha="0"/>
+    </item>
+    <item android:id="@+id/desert_tile">
+        <bitmap android:src="@drawable/desert_highlighted"
+            android:gravity="top|left"
+            />
+    </item>
+
+</layer-list>

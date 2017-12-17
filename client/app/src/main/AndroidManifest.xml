@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-  package="de.lmu.settlebattle.catanclient">
+    xmlns:tools="http://schemas.android.com/tools"
+    package="de.lmu.settlebattle.catanclient">
 
   <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
   <uses-permission android:name="android.permission.BIND_ACCESSIBILITY_SERVICE" />
@@ -13,6 +14,7 @@
     android:roundIcon="@mipmap/ic_catan_round"
     android:supportsRtl="true"
     android:theme="@style/CatanAppTheme">
+
     <activity
       android:name=".StartActivity">
       <!--android:screenOrientation="portrait" >-->

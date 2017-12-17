@@ -5,17 +5,38 @@
   android:layout_width="match_parent"
   android:layout_height="match_parent">
 
-  <LinearLayout
-    android:id="@+id/boardview"
-    android:layout_width="0dp"
-    android:layout_height="0dp"
-    android:layout_weight="1"
-    android:background="@color/title_gray"
-    android:orientation="horizontal"
-    app:layout_constraintBottom_toBottomOf="parent"
-    app:layout_constraintEnd_toEndOf="parent"
-    app:layout_constraintStart_toStartOf="parent"
-    app:layout_constraintTop_toTopOf="parent" />
+<!--Swipe up Panel Initalisieren-->
+  <com.sothree.slidinguppanel.SlidingUpPanelLayout
+      xmlns:sothree="http://schemas.android.com/apk/res-auto"
+      android:id="@+id/sliding_layout"
+      android:layout_width="match_parent"
+      android:layout_height="match_parent"
+      android:gravity="bottom"
+      sothree:umanoPanelHeight="60dp"
+      sothree:umanoShadowHeight="4dp">
+
+        <!-- MAIN CONTENT -->
+        <android.support.constraint.ConstraintLayout
+            android:id="@+id/boardview"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:background="@color/title_gray"
+            android:orientation="horizontal"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <android.support.v7.widget.Toolbar
+                xmlns:sothree="http://schemas.android.com/apk/res-auto"
+                xmlns:android="http://schemas.android.com/apk/res/android"
+                android:id="@+id/main_toolbar"
+                android:layout_height="50dp"
+                android:background="@color/white"
+                sothree:theme="@style/Widget.AppCompat.ActionBar"
+                android:layout_width="match_parent"
+                android:visibility="invisible"/>
 
   <com.otaliastudios.zoom.ZoomLayout
     android:layout_width="match_parent"
@@ -27,18 +48,22 @@
     app:minZoomType="zoom"
     app:overPinchable="true"
     app:overScrollHorizontal="true"
-    app:overScrollVertical="true">
+    app:overScrollVertical="true"
+    app:layout_constraintBottom_toBottomOf="parent"
+    app:layout_constraintEnd_toEndOf="parent"
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintTop_toTopOf="parent">
 
-    <include
-      layout="@layout/hex_grid_layout"
-      android:layout_width="wrap_content"
-      android:layout_height="wrap_content"
-      app:layout_constraintBottom_toBottomOf="parent"
-      app:layout_constraintEnd_toEndOf="parent"
-      app:layout_constraintStart_toStartOf="parent"
-      app:layout_constraintTop_toTopOf="parent" />
+            <include
+              layout="@layout/hex_grid_layout"
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              app:layout_constraintBottom_toBottomOf="parent"
+              app:layout_constraintEnd_toEndOf="parent"
+              app:layout_constraintStart_toStartOf="parent"
+              app:layout_constraintTop_toTopOf="parent" />
 
-  </com.otaliastudios.zoom.ZoomLayout>
+          </com.otaliastudios.zoom.ZoomLayout>
 
   <ImageButton
     android:id="@+id/throwDiceBtn"
@@ -89,46 +114,218 @@
     app:layout_constraintHorizontal_bias="0.5"
     app:layout_constraintStart_toEndOf="@+id/bauen_button" />
 
-  <LinearLayout
-    android:id="@+id/infobar"
-    android:layout_width="0dp"
-    android:layout_height="30dp"
-    android:layout_marginBottom="8dp"
-    android:layout_marginStart="8dp"
-    android:layout_marginEnd="8dp"
-    android:layout_gravity="bottom"
-    android:background="@color/status"
-    android:orientation="horizontal"
-    android:visibility="visible"
-    app:layout_constraintBottom_toBottomOf="@+id/boardview"
-    app:layout_constraintEnd_toEndOf="@+id/boardview"
-    app:layout_constraintStart_toStartOf="@+id/boardview">
+          <LinearLayout
+            android:id="@+id/infobar"
+            android:layout_width="0dp"
+            android:layout_height="16dp"
+            android:layout_marginBottom="8dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginEnd="8dp"
+            android:layout_gravity="bottom"
+            android:orientation="horizontal"
+            android:visibility="visible"
+            app:layout_constraintBottom_toBottomOf="@+id/boardview"
+            app:layout_constraintEnd_toEndOf="@+id/boardview"
+            app:layout_constraintStart_toStartOf="@+id/boardview">
 
-    <TextView
-      android:id="@+id/textView"
-      android:layout_width="0dp"
-      android:layout_height="wrap_content"
-      android:layout_weight="1"
-      android:layout_gravity="center"
-      android:text="Platzhalter für die Ressourcen"
-      android:textAlignment="center"
-      android:textColor="@android:color/black" />
+
+          </LinearLayout>
+          </android.support.constraint.ConstraintLayout>
+
+
+        <!-- Sliding Layout -->
+        <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#ffffff"
+        android:orientation="vertical"
+        android:clickable="true"
+        android:focusable="false"
+        android:id="@+id/dragView">
+
+           <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="68dp">
+
+
+               <android.support.constraint.ConstraintLayout
+                   xmlns:android="http://schemas.android.com/apk/res/android"
+                   xmlns:app="http://schemas.android.com/apk/res-auto"
+                   android:layout_width="match_parent"
+                   android:layout_height="match_parent"
+                   android:layout_marginTop="12dp">
+
+                   <ImageView
+                       android:id="@+id/wheat"
+                       android:layout_width="28dp"
+                       android:layout_height="28dp"
+                       android:src="@drawable/ic_001_wheat"
+                       app:layout_constraintEnd_toStartOf="@+id/wheattxt"
+                       app:layout_constraintHorizontal_bias="0.5"
+                       app:layout_constraintStart_toStartOf="parent" />
+
+                   <TextView
+                       android:id="@+id/wheattxt"
+                       android:layout_width="28dp"
+                       android:layout_height="match_parent"
+                       android:text="@string/wheat_count"
+                       android:textColor="@color/title_gray"
+                       android:textSize="28sp"
+                       app:layout_constraintEnd_toStartOf="@+id/wood"
+                       app:layout_constraintHorizontal_bias="0.5"
+                       app:layout_constraintStart_toEndOf="@+id/wheat"
+                       android:paddingRight="8dp"/>
+
+                   <ImageView
+                       android:id="@+id/wood"
+                       android:layout_width="28dp"
+                       android:layout_height="28dp"
+                       android:src="@drawable/ic_002_nature"
+                       app:layout_constraintEnd_toStartOf="@+id/woodtxt"
+                       app:layout_constraintHorizontal_bias="0.5"
+                       app:layout_constraintStart_toEndOf="@+id/wheattxt"
+                       />
+
+                   <TextView
+                       android:id="@+id/woodtxt"
+                       android:layout_width="28dp"
+                       android:layout_height="match_parent"
+                       android:text="@string/wheat_count"
+                       android:textColor="@color/title_gray"
+                       android:textSize="28sp"
+                       app:layout_constraintEnd_toStartOf="@+id/iron"
+                       app:layout_constraintHorizontal_bias="0.5"
+                       app:layout_constraintStart_toEndOf="@+id/wood"
+                       android:paddingRight="8dp"/>
+
+                   <ImageView
+                       android:id="@+id/iron"
+                       android:layout_width="28dp"
+                       android:layout_height="28dp"
+                       android:src="@drawable/ic_005_stone"
+                       app:layout_constraintEnd_toStartOf="@+id/irontxt"
+                       app:layout_constraintHorizontal_bias="0.5"
+                       app:layout_constraintStart_toEndOf="@+id/woodtxt" />
+
+                   <TextView
+                       android:id="@+id/irontxt"
+                       android:layout_width="28dp"
+                       android:layout_height="match_parent"
+                       android:text="@string/wheat_count"
+                       android:textColor="@color/title_gray"
+                       android:textSize="28sp"
+                       app:layout_constraintEnd_toStartOf="@+id/sheep"
+                       app:layout_constraintHorizontal_bias="0.5"
+                       app:layout_constraintStart_toEndOf="@+id/iron"
+                       android:paddingRight="8dp"/>
+
+                   <ImageView
+                       android:id="@+id/sheep"
+                       android:layout_width="28dp"
+                       android:layout_height="28dp"
+                       android:src="@drawable/ic_004_animal"
+                       app:layout_constraintEnd_toStartOf="@+id/sheeptxt"
+                       app:layout_constraintHorizontal_bias="0.5"
+                       app:layout_constraintStart_toEndOf="@+id/irontxt" />
+
+                   <TextView
+                       android:id="@+id/sheeptxt"
+                       android:layout_width="28dp"
+                       android:layout_height="match_parent"
+                       android:text="@string/wheat_count"
+                       android:textColor="@color/title_gray"
+                       android:textSize="28sp"
+                       app:layout_constraintEnd_toStartOf="@+id/brick"
+                       app:layout_constraintHorizontal_bias="0.5"
+                       app:layout_constraintStart_toEndOf="@+id/sheep"
+                       android:paddingRight="8dp"/>
+
+                   <ImageView
+                       android:id="@+id/brick"
+                       android:layout_width="28dp"
+                       android:layout_height="28dp"
+                       android:src="@drawable/ic_003_wall"
+                       app:layout_constraintEnd_toStartOf="@+id/bricktxt"
+                       app:layout_constraintHorizontal_bias="0.5"
+                       app:layout_constraintStart_toEndOf="@+id/sheeptxt" />
+
+                   <TextView
+                       android:id="@+id/bricktxt"
+                       android:layout_width="28dp"
+                       android:layout_height="match_parent"
+                       android:text="@string/wheat_count"
+                       android:textColor="@color/title_gray"
+                       android:textSize="28sp"
+                       app:layout_constraintEnd_toStartOf="@+id/card"
+                       app:layout_constraintHorizontal_bias="0.5"
+                       app:layout_constraintStart_toEndOf="@+id/brick"
+                       />
+
+                   <ImageView
+                       android:id="@+id/card"
+                       android:layout_width="28dp"
+                       android:layout_height="28dp"
+                       android:src="@drawable/ic_hand"
+                       app:layout_constraintEnd_toStartOf="@+id/cardtxt"
+                       app:layout_constraintHorizontal_bias="0.5"
+                       app:layout_constraintStart_toEndOf="@+id/bricktxt"
+                       android:contentDescription="TODO" />
+
+                   <TextView
+                       android:id="@+id/cardtxt"
+                       android:layout_width="28dp"
+                       android:layout_height="match_parent"
+                       android:text="@string/wheat_count"
+                       android:textColor="@color/title_gray"
+                       android:textSize="28sp"
+                       app:layout_constraintEnd_toStartOf="parent"
+                       app:layout_constraintHorizontal_bias="0.5"
+                       app:layout_constraintStart_toEndOf="@+id/card"
+                       />
+
+
+               </android.support.constraint.ConstraintLayout>
+
 
   </LinearLayout>
 
-  <FrameLayout
-    android:id="@+id/fragmentContainer"
-    android:elevation="40dp"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:layout_marginTop="32dp"
-    android:layout_marginBottom="8dp"
-    android:layout_marginStart="32dp"
-    android:layout_marginEnd="32dp"
-    android:background="#000000"
-    app:layout_constraintBottom_toTopOf="parent"
-    app:layout_constraintEnd_toEndOf="parent"
-    app:layout_constraintHorizontal_bias="0.5"
-    app:layout_constraintStart_toStartOf="parent"
-    app:layout_constraintTop_toTopOf="parent" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="2dp"
+            android:background="?android:attr/listDivider"/>
+        <TextView
+            android:id="@+id/bauen"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/bauen_und_baukosten"
+            android:textAppearance="@style/Base.TextAppearance.AppCompat.Headline"
+            android:textColor="@color/title_gray"
+            android:textAlignment="center"
+            android:padding="10dp"
+            android:gravity="center"
+            />
+        <ListView
+            android:id="@+id/list"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1">
+        </ListView>
+    </LinearLayout>
+  </com.sothree.slidinguppanel.SlidingUpPanelLayout>
+<FrameLayout
+android:id="@+id/fragmentContainer"
+android:elevation="40dp"
+android:layout_width="wrap_content"
+android:layout_height="wrap_content"
+android:layout_marginTop="32dp"
+android:layout_marginBottom="8dp"
+android:layout_marginStart="32dp"
+android:layout_marginEnd="32dp"
+android:background="#000000"
+app:layout_constraintBottom_toTopOf="parent"
+app:layout_constraintEnd_toEndOf="parent"
+app:layout_constraintHorizontal_bias="0.5"
+app:layout_constraintStart_toStartOf="parent"
+app:layout_constraintTop_toTopOf="parent" />
 </android.support.constraint.ConstraintLayout>

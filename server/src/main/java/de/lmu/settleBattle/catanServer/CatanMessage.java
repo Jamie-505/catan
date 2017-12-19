@@ -134,7 +134,7 @@ public class CatanMessage {
      * @param player
      * @return string message structured like JSON
      */
-    public static TextMessage statusUpdateHidden(Player player) {
+    public static TextMessage statusUpdatePublic(Player player) {
         JSONObject payload = player.toJSON_Unknown();
 
         return new TextMessage(JSONUtils.setJSONType(Constants.STATUS_UPD,

@@ -47,6 +47,27 @@ public class RawMaterialOverview extends JSONStringBuilder{
         this.woolCount = wool;
         this.weatCount = weat;
     }
+
+    public RawMaterialOverview(RawMaterialType type, int initAmount) {
+        this();
+        switch (type) {
+            case WEAT:
+                weatCount = initAmount;
+                break;
+            case CLAY:
+                clayCount = initAmount;
+                break;
+            case ORE:
+                oreCount = initAmount;
+                break;
+            case WOOL:
+                woolCount = initAmount;
+                break;
+            case WOOD:
+                woodCount = initAmount;
+                break;
+        }
+    }
     //endregion
 
     public int getTotalCount() {
@@ -81,6 +102,16 @@ public class RawMaterialOverview extends JSONStringBuilder{
                 break;
         }
     }
+
+
+    public void increase(RawMaterialOverview overview) {
+        this.oreCount += overview.oreCount;
+        this.clayCount += overview.clayCount;
+        this.woolCount += overview.woolCount;
+        this.woodCount += overview.woodCount;
+        this.weatCount += overview.weatCount;
+    }
+
     //endregion
 
     //region decrease

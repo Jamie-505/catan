@@ -90,21 +90,22 @@ public class GameControllerTest {
     public void getNext() throws Exception {
         List<Player> list = gameController.getPlayers();
 
-        gameController.getNext();
-
-        assertTrue(list.get(1).getId() == gameController.getCurrent().getId());
-
-        gameController.getNext();
-        assertTrue(list.get(2).getId() == gameController.getCurrent().getId());
-
-        gameController.getNext();
         assertTrue(list.get(0).getId() == gameController.getCurrent().getId());
 
         gameController.getNext();
+        assertTrue(list.get(1).getId() == gameController.getCurrent().getId());
+
+        gameController.getNext();
+        assertTrue(list.get(2).getId() == gameController.getCurrent().getId());
+
+        gameController.getNext();
         assertTrue(list.get(2).getId() == gameController.getCurrent().getId());
 
         gameController.getNext();
         assertTrue(list.get(1).getId() == gameController.getCurrent().getId());
+
+        gameController.getNext();
+        assertTrue(list.get(0).getId() == gameController.getCurrent().getId());
 
         gameController.getNext();
         assertTrue(list.get(0).getId() == gameController.getCurrent().getId());

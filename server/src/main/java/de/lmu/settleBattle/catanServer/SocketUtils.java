@@ -2,15 +2,11 @@ package de.lmu.settleBattle.catanServer;
 
 import com.google.gson.Gson;
 import org.json.JSONObject;
-import org.springframework.boot.autoconfigure.info.ProjectInfoProperties;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 
 import java.io.IOException;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import static de.lmu.settleBattle.catanServer.Constants.PLAYER;
 
@@ -33,9 +29,10 @@ public class SocketUtils {
     }
 
     //region build
-    public boolean build (WebSocketSession session, TextMessage message) throws IOException {
+    public boolean build(WebSocketSession session, TextMessage message) throws IOException {
         int id = toInt(session.getId());
-        Building building = gson.fromJson(JSONUtils.createJSON(message).getJSONObject(Constants.BUILD).toString(), Building.class);
+        Building building = gson.fromJson(JSONUtils.createJSON(message)
+                .getJSONObject(Constants.BUILD).toString(), Building.class);
         boolean built = this.gameCtrl.placeBuilding(id, building.getLocations(), building.getType());
 
         if (built) {
@@ -139,6 +136,14 @@ public class SocketUtils {
     //endregion*/
 
     //region tossRawMaterials
+
+    /**
+     * a player has to toss raw materials
+     *
+     * @param session
+     * @param message
+     * @return
+     */
     public boolean tossRawMaterials(WebSocketSession session, TextMessage message) {
         JSONObject json = JSONUtils.createJSON(message);
         JSONObject rawMaterialJSON = json.getJSONObject(Constants.RAW_MATERIALS);
@@ -153,6 +158,7 @@ public class SocketUtils {
         return true;
     }
     //endregion
+
 
     //region setStatus
     public void setStatus(String id, String status) {

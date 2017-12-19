@@ -4,7 +4,6 @@ import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 import org.json.JSONObject;
 
-import javax.swing.*;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 
@@ -205,7 +204,13 @@ public class Player extends JSONStringBuilder implements Comparable, Cloneable {
     }
 
     public void decreaseRawMaterials(RawMaterialOverview overview) throws IllegalArgumentException {
+        changes.firePropertyChange("RawMaterialDecrease", overview, this);
         this.rawMaterialDeck.decrease(overview);
+    }
+
+    public void increaseRawMaterials(RawMaterialOverview overview) throws IllegalArgumentException {
+        changes.firePropertyChange("RawMaterialIncrease", overview, this);
+        this.rawMaterialDeck.increase(overview);
     }
 
 

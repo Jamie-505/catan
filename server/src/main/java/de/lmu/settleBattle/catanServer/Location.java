@@ -40,6 +40,15 @@ public class Location extends JSONStringBuilder {
         return y;
     }
 
+    @Override
+    public boolean equals(Object object) {
+        if (object instanceof Location) {
+            Location loc = (Location) object;
+            return loc.x == this.x && loc.y == this.y;
+        }
+        return false;
+    }
+
     public boolean compare(Location loc){
         return (this.x == loc.x && this.y == loc.y);
     }

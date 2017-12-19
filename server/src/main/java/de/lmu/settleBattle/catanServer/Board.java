@@ -274,6 +274,87 @@ public class Board extends JSONStringBuilder {
         return false;
     }
 
+    public Field[] getFields() {
+        return fields;
+    }
+
+    public Haven[] getHavens() {
+        return havens;
+    }
+
+    public Robber getRobber() {
+        return robber;
+    }
+
+    //region getFieldsWithNumber
+    /**
+     * get fields that are mapped with diced number
+     * @param number
+     * @return field array containing all fields that are mapped with number
+     */
+    public Field[] getFieldsWithNumber(int number) {
+        Field[] fieldArray = new Field[2];
+        int maxSize = 2;
+
+        if (number == 2 || number == 12) {
+            fieldArray = new Field[1];
+            maxSize = 1;
+        }
+
+        int index = 0;
+
+        for (int i = 0; i < fields.length; i++) {
+            if (fields[i].getNumber() == number) {
+                fieldArray[index] = fields[i];
+                index++;
+            }
+
+            if (index == maxSize)
+                break;
+        }
+
+        return fieldArray;
+    }
+    //endregion
+
+    //region getBuildingsOnDistributingFields
+    /**
+     * returns all buildings that are placed on fields that
+     * are mapped with the diced number and on where the
+     * robber is not placed on
+     * @param number
+     * @return
+     */
+    public Map<Building, RawMaterialType> getBuildingsOnDistributingFields(int number) {
+        Map<Building, RawMaterialType> buildingList = new HashMap<>();
+
+        Field[] fields = getFieldsWithNumber(number);
+
+        for (Field field : fields) {
+
+            //fields on which robber is placed do not distribute raw materials
+            if (field.getLocation().equals(robber.getLocation()))
+                continue;
+
+            for (Building bld : this.getBuildings()) {
+
+                //exclude road from distribution
+                if (bld.getType().equals(BuildingType.ROAD))
+                    continue;
+
+                //player retrieves raw materials for building
+                for (Location loc : bld.getLocations()) {
+                    if (loc.equals(field.getLocation())) {
+                        buildingList.put(bld, field.getHarvest());
+                    }
+                }
+            }
+        }
+
+        return buildingList;
+    }
+    //endregion
+
     public ArrayList<Building> getBuildings() {
         return buildings;
     }

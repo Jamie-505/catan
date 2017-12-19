@@ -2,25 +2,16 @@ package de.lmu.settleBattle.catanServer;
 
 import static de.lmu.settleBattle.catanServer.Constants.*;
 
-import java.awt.*;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
 import java.io.IOException;
 import java.util.*;
-import java.util.List;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import org.json.JSONObject;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
-
-import javax.swing.*;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 
 @Component
 public class CatanSocketHandler extends TextWebSocketHandler {
@@ -49,8 +40,13 @@ public class CatanSocketHandler extends TextWebSocketHandler {
         this.sessions = Collections.synchronizedSet(new HashSet<WebSocketSession>());
     }
 
-    public SocketUtils getUtils() { return utils; }
-    public GameController getGameCtrl() { return getUtils().getGameCtrl(); }
+    public SocketUtils getUtils() {
+        return utils;
+    }
+
+    public GameController getGameCtrl() {
+        return getUtils().getGameCtrl();
+    }
 
     //region afterConnectionEstablished
     @Override
@@ -69,6 +65,24 @@ public class CatanSocketHandler extends TextWebSocketHandler {
                 sendStatusUpdate(p);
                 System.out.printf("Property '%s': '%s' -> '%s'%n",
                         e.getPropertyName(), e.getOldValue(), p.getStatus());
+
+                switch (e.getPropertyName()) {
+                    //if there was a decrease/increase of raw materials send harvest/cost messages
+                    case "RawMaterialIncrease":
+                        RawMaterialOverview harvest = (RawMaterialOverview) e.getOldValue();
+                        sendMessageToAll(Integer.toHexString(player.getId()),   //parse id back to hex string (session id)
+                                CatanMessage.harvest(player.getId(), harvest, false),
+                                CatanMessage.harvest(player.getId(), harvest, true));
+                        break;
+
+                    case "RawMaterialDecrease":
+                        RawMaterialOverview costs = (RawMaterialOverview) e.getOldValue();
+                        sendMessageToAll(Integer.toHexString(player.getId()),   //parse id back to hex string (session id)
+                                CatanMessage.costs(player.getId(), costs, false),
+                                CatanMessage.costs(player.getId(), costs, true));
+                        break;
+                }
+
             } catch (IOException ex) {
                 System.out.printf("An exception occured %s", ex.getMessage());
             }
@@ -103,30 +117,35 @@ public class CatanSocketHandler extends TextWebSocketHandler {
 
             switch (type) {
                 case HANDSHAKE:
-                    if(utils.performHandshake(session))
+                    if (utils.performHandshake(session))
                         sendFellowPlayers(session);
                     break;
+
                 case PLAYER:
                     utils.assignPlayerData(session, message);
                     break;
-                case DICE_RESULT:
-                    this.dice(session);
-                    break;
+
                 case START_GAME:
-                    boolean ready = utils.handleStartGameMessage(session, message);
-                    if (ready) {
+                    if (utils.handleStartGameMessage(session, message)) {
                         sendMessageToAll(CatanMessage.startGame(utils.getGameCtrl().getBoard()));
                         utils.startGame();
                     }
                     break;
+
                 case BUILD:
                     OK = utils.build(session, message);
                     if (!OK) errorMessage = "Das Gebäude kann nicht gebaut werden.";
                     break;
+
+                case DICE_RESULT:
+                    this.dice(session);
+                    break;
+
                 case TOSS_CARDS:
                     OK = utils.tossRawMaterials(session, message);
                     if (!OK) errorMessage = "Die Rohstoffe konnten nicht reduziert werden.";
                     break;
+
                 case END_TURN:
                     Player next = utils.getGameCtrl().getNext();
                     utils.nextMove(next.getId(), DICE);
@@ -140,7 +159,6 @@ public class CatanSocketHandler extends TextWebSocketHandler {
         } catch (IOException e) {
             e.printStackTrace();
         }
-
     }
 
     //endregion
@@ -170,9 +188,18 @@ public class CatanSocketHandler extends TextWebSocketHandler {
 
         sendMessageToAll(diceMessage);
 
+        int sum = dice[0] + dice[1];
+
         //the robber is activated
-        if ((dice[0] + dice[1]) == 7)
-            utils.extractCardsDueToRobber();
+        if (sum == 7) utils.extractCardsDueToRobber();
+
+            //distribute raw materials
+        else {
+            Map<Integer, RawMaterialOverview> distribution =
+                    utils.getGameCtrl().mapOwnerWithHarvest(sum);
+
+            utils.getGameCtrl().distributeRawMaterial(distribution);
+        }
     }
     //endregion
 
@@ -196,7 +223,7 @@ public class CatanSocketHandler extends TextWebSocketHandler {
 
                 if (utils.toInt(session.getId()) == player.getId()) {
                     message = CatanMessage.statusUpdate(player);
-                } else message = CatanMessage.statusUpdateHidden(player);
+                } else message = CatanMessage.statusUpdatePublic(player);
 
                 System.out.printf("Send Message to %s: %s", utils.toInt(session.getId()), message.toString());
                 session.sendMessage(message);
@@ -209,7 +236,7 @@ public class CatanSocketHandler extends TextWebSocketHandler {
             TextMessage message;
             if (utils.toInt(session.getId()) == player.getId()) {
                 message = CatanMessage.statusUpdate(player);
-            } else message = CatanMessage.statusUpdateHidden(player);
+            } else message = CatanMessage.statusUpdatePublic(player);
 
             System.out.printf("Send Message to %s: %s", utils.toInt(session.getId()), message.toString());
             session.sendMessage(message);
@@ -218,6 +245,7 @@ public class CatanSocketHandler extends TextWebSocketHandler {
     //endregion
 
     //region sendMessageToAll
+
     /**
      * Method to send message to all connected clients
      *
@@ -240,11 +268,37 @@ public class CatanSocketHandler extends TextWebSocketHandler {
             }
         }
     }
+
+    /**
+     * sends normal message to current player and hidden message to everyone else
+     *
+     * @param sessionId
+     * @param privateMessage
+     * @param publicMessage
+     */
+    public void sendMessageToAll(String sessionId, TextMessage privateMessage, TextMessage publicMessage) {
+        // Looping through all the sessions and sending the message individually
+        for (WebSocketSession s : sessions) {
+
+            try {
+                TextMessage sentMessage = s.getId().equals(sessionId) ? privateMessage : publicMessage;
+
+                System.out.println("Sending Message To: " + s.getId() + ", "
+                        + sentMessage);
+                s.sendMessage(sentMessage);
+
+            } catch (IOException e) {
+                System.out.println("error in sending. " + s.getId() + ", "
+                        + e.getMessage());
+                e.printStackTrace();
+            }
+        }
+    }
     //endregion
 
-    private void sendFellowPlayers(WebSocketSession session) throws IOException{
+    private void sendFellowPlayers(WebSocketSession session) throws IOException {
         for (Player player : utils.getGameCtrl().getPlayers())
-            if(player.getId() != utils.toInt(session.getId()))
+            if (player.getId() != utils.toInt(session.getId()))
                 session.sendMessage(CatanMessage.statusUpdate(player));
     }
 
@@ -261,13 +315,24 @@ public class CatanSocketHandler extends TextWebSocketHandler {
     //endregion
 
     //region sendError
-    private void sendError(WebSocketSession session, String errorMessage) {
+    private void sendError(WebSocketSession session, String errorDescription) {
         try {
-            session.sendMessage(CatanMessage.error(errorMessage));
-            System.out.printf("Send Message to %s: %s", utils.toInt(session.getId()), errorMessage);
+            session.sendMessage(CatanMessage.error(errorDescription));
+            System.out.printf("Send Message to %s: %s", utils.toInt(session.getId()), errorDescription);
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+    //endregion
+
+    //region sendCostMessages
+    public void sendCostMessages(WebSocketSession session, TextMessage message) {
+        Building building = gson.fromJson(JSONUtils.createJSON(message)
+                .getJSONObject(Constants.BUILD).toString(), Building.class);
+
+        sendMessageToAll(session.getId(),
+                CatanMessage.costs(utils.toInt(session.getId()), building.getCost(), false),
+                CatanMessage.costs(utils.toInt(session.getId()), building.getCost(), true));
     }
     //endregion
 

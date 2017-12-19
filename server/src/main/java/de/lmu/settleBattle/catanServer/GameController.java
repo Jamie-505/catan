@@ -62,20 +62,28 @@ public class GameController {
     private Player getNext_BuildingPhase() {
         Player player;
         if (round == 1) {
-            player = this.getNext_Move();
-            playerStack.push(player);
+            playerStack.push(getCurrent());
+            if (playerStack.size() == players.size()) {
+                round = 2;
+                player = playerStack.pop();
+            }
+            else player = this.getNext_Move();
 
-            if (playerStack.size() == players.size())
-                round++;
-        } else {
+        } else if (round == 2){
             player = playerStack.pop();
             currentTurn--;
 
             if (playerStack.size() == 0) {
-                buildingPhaseActive = false;
+                //set round 3 before initial building phase ends so that first player can start game
+                round = 3;
                 currentTurn=0;
             }
         }
+        else {  //all players have placed their buildings and the first player has turn
+            buildingPhaseActive = false;
+            player = getCurrent();
+        }
+
         return player;
     }
 
@@ -140,13 +148,38 @@ public class GameController {
         return currentTurn % players.size();
     }
 
-    public void initializeNextMove() {
+    //region mapOwnerWithHarvest
+    public Map<Integer, RawMaterialOverview> mapOwnerWithHarvest(int number) {
+        Map<Integer, RawMaterialOverview> distribution = new HashMap<>();
+
+        Map<Building, RawMaterialType> buildings =
+                board.getBuildingsOnDistributingFields(number);
+
+        for (Building bld : buildings.keySet()) {
+            int amount = bld.getType().equals(BuildingType.CITY) ? 2 : 1;
+
+            if (distribution.containsKey(bld.getOwner())) {
+                RawMaterialOverview overview = distribution.get(bld.getOwner());
+                overview.increase(buildings.get(bld), amount);
+                distribution.replace(bld.getOwner(), overview);
+
+            } else distribution.put(bld.getOwner(),
+                    new RawMaterialOverview(buildings.get(bld), amount));
+        }
+
+        return distribution;
     }
+    //endregion
 
+    public void distributeRawMaterial(Map<Integer, RawMaterialOverview> distribution) {
 
-    public void distributeRawMaterial() {
+        for (Player p : players) {
+            if (distribution.containsKey(p.getId())) {
+                RawMaterialOverview harvest = distribution.get(p.getId());
+                p.increaseRawMaterials(harvest);
+            }
+        }
     }
-
 
     public void endGame() {
     }
@@ -268,7 +301,6 @@ public class GameController {
         this.gameStarted = gameStarted;
     }
 
-
     public boolean isBuildingPhaseActive() {
         return buildingPhaseActive;
     }
@@ -277,11 +309,8 @@ public class GameController {
         this.buildingPhaseActive = buildingPhaseActive;
     }
 
-
     public Board getBoard() {
         return board;
     }
-
-
 }
 

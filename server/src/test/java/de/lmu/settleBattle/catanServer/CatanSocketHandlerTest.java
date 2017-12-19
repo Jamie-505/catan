@@ -136,7 +136,6 @@ public class CatanSocketHandlerTest {
 
         handler.getGameCtrl().startGame();
 
-
         Player player = handler.getGameCtrl().getCurrent();
         handler.getUtils().nextMove(player.getId(), Constants.BUILD_SETTLEMENT);
     }

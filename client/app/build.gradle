@@ -1,14 +1,14 @@
 apply plugin: 'com.android.application'
 ext {
-    supportLibVersion = '26.0.2'  // variable that can be referenced to keep support libs consistent
+    supportLibVersion = '25.4.0'  // variable that can be referenced to keep support libs consistent
 }
 
 android {
-    compileSdkVersion 26
+    compileSdkVersion 25
     defaultConfig {
         applicationId "de.lmu.settlebattle.catanclient"
-        minSdkVersion 22
-        targetSdkVersion 26
+        minSdkVersion 24
+        targetSdkVersion 25
         multiDexEnabled = false
         versionCode 1
         versionName "1.0"

@@ -9,9 +9,9 @@
   <string name="payload">Message</string>
   <string name="send">Send</string>
   <string name="title">Catan App</string>
-  <string name="gameName">Die Siedler</string>
-  <string name="welcomeText">Willkommen zur Android Version von die Siedler. Du kannst nun eine Runde spielen.</string>
-  <string name="startGame">Spiel starten</string>
+  <string name="game_name">Die Siedler</string>
+  <string name="welcome_text">Willkommen zur Android Version von die Siedler. Du kannst nun eine Runde spielen.</string>
+  <string name="start_game">Spiel starten</string>
   <string name="snackbar_text">Farbe bereits ausgewählt</string>
     <string name="snackbar_farbe">Farbe bereits ausgewählt</string>
   <string name="snackbar_action">Automatische Farbe</string>
@@ -26,9 +26,18 @@
     <item>Blau</item>
     <item>Weiß</item>
   </string-array>
+  <string-array name="raw_materials">
+    <item>Erz</item>
+    <item>Getreide</item>
+    <item>Holz</item>
+    <item>Lehm</item>
+    <item>Wolle</item>
+  </string-array>
   <string name="title_activity_lobby_activitiy">LobbyActivitiy</string>
   <string name="starten">Spiel Starten</string>
   <string name="player_name_input_hint">Bitte gebe deinen Spielernamen hier ein</string>
-  <string name="wait_for_other_players">Warte auf andere Spieler...</string>
+  <string name="wait_for_other_players">Warte auf andere Spieler…</string>
+  <string name="offer_resource">Tausche</string>
+  <string name="request_trade">gegen</string>
 
 </resources>

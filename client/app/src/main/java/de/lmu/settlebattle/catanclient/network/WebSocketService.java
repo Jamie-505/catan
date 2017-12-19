@@ -1,7 +1,7 @@
 package de.lmu.settlebattle.catanclient.network;
 
 import static de.lmu.settlebattle.catanclient.utils.Constants.*;
-import de.lmu.settlebattle.catanclient.utils.Message.Player;
+import de.lmu.settlebattle.catanclient.player.Player;
 
 import android.app.Service;
 import android.content.BroadcastReceiver;
@@ -13,7 +13,7 @@ import android.os.IBinder;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import de.lmu.settlebattle.catanclient.utils.JSONUtils;
-import de.lmu.settlebattle.catanclient.utils.Storage;
+import de.lmu.settlebattle.catanclient.player.Storage;
 import java.net.URI;
 import java.net.URISyntaxException;
 import org.java_websocket.client.WebSocketClient;
@@ -64,6 +64,12 @@ public class WebSocketService extends Service {
 
   @Override
   public IBinder onBind(Intent intent) {
+    if (storage == null) {
+      storage = new Storage(getApplicationContext());
+    }
+    if (localBroadcastManager == null) {
+      localBroadcastManager = LocalBroadcastManager.getInstance(this);
+    }
     Log.d(TAG, "onBind");
     localBroadcastManager.registerReceiver(messageReceiver,
         new IntentFilter(ACTION_NETWORK_STATE_CHANGED));
@@ -128,10 +134,17 @@ public class WebSocketService extends Service {
     Player player;
     Intent intent;
     switch (mail[0].toString()) {
-      case TO_SERVER:
-        Intent protocolIntent = new Intent(PROTOCOL_SUPPORTED);
-        localBroadcastManager.sendBroadcast(protocolIntent);
-        webSocketClient.send(mail[1].toString());
+      case BUILD_TRADE:
+        player = (Player) mail[1];
+        if (player.id == storage.getSessionId()) {
+          // should cause select player activity so switch to lobby
+          storage.storePlayer(player);
+        } else {
+          storage.storeOpponent(player);
+          // updates lobby with latest data
+        }
+        intent = new Intent(PLAYER_UPDATE);
+        localBroadcastManager.sendBroadcast(intent);
         break;
       case GAME_READY:
         player = (Player) mail[1];
@@ -146,6 +159,10 @@ public class WebSocketService extends Service {
         }
         localBroadcastManager.sendBroadcast(intent);
         break;
+      case GAME_START:
+        intent = new Intent(GAME_START);
+        localBroadcastManager.sendBroadcast(intent);
+        break;
       case GAME_WAIT:
         player = (Player) mail[1];
         if (player.id == storage.getSessionId()) {
@@ -158,9 +175,14 @@ public class WebSocketService extends Service {
         intent = new Intent(PLAYER_WAIT);
         localBroadcastManager.sendBroadcast(intent);
         break;
-      case GAME_START:
-        intent = new Intent(GAME_START);
+      case OK:
+        intent = new Intent(OK);
         localBroadcastManager.sendBroadcast(intent);
+        break;
+      case TO_SERVER:
+        Intent protocolIntent = new Intent(PROTOCOL_SUPPORTED);
+        localBroadcastManager.sendBroadcast(protocolIntent);
+        webSocketClient.send(mail[1].toString());
         break;
       case TO_STORAGE:
         Log.d(TAG, ((Player) mail[1]).id + " --> TO_STORAGE");

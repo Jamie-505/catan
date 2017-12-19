@@ -61,7 +61,14 @@ public class StartActivity extends Activity {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.startscreen);
 
-    btnConnect = findViewById(R.id.connectButton);
+    try {
+      getActionBar().hide();
+    } catch (NullPointerException e) {
+      Log.i(TAG, "No ActionBar to hide...");
+    }
+
+
+    btnConnect = (Button) findViewById(R.id.connectButton);
 
     btnConnect.setOnClickListener((View v) -> {
       if (!connected) {

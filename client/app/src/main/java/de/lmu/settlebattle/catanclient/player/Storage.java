@@ -1,4 +1,4 @@
-package de.lmu.settlebattle.catanclient.utils;
+package de.lmu.settlebattle.catanclient.player;
 
 import static de.lmu.settlebattle.catanclient.utils.Constants.KEY_PLAYER;
 import static de.lmu.settlebattle.catanclient.utils.Constants.KEY_SESSION_ID;
@@ -8,7 +8,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import com.google.gson.Gson;
-import de.lmu.settlebattle.catanclient.utils.Message.Player;
+import de.lmu.settlebattle.catanclient.player.Player;
 import java.util.ArrayList;
 
 public class Storage {

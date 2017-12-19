@@ -16,9 +16,6 @@ import android.view.View;
 
 import android.view.ViewConfiguration;
 
-import de.lmu.settlebattle.catanclient.AndroidCompatibility;
-
-
 
 public class PanZoomView extends View {
 
@@ -30,7 +27,7 @@ public class PanZoomView extends View {
     protected float mPosX;
     protected float mPosY;
     protected float mPosX0 = 0;
-    protected float mPosY0 = 0;;
+    protected float mPosY0 = 0;
     protected float mFocusX;
     protected float mFocusY;
     
@@ -226,7 +223,7 @@ public boolean onTouchEvent (MotionEvent ev) {
 
            mInitialTouchX = x;
            mInitialTouchY = y;
-           if (AppConfig.DEBUG) Log.d (Constants.LOG_UI, "initial x, y : " + mInitialTouchX + ", " + mInitialTouchY);
+           if (AppConfig.DEBUG) Log.d (de.lmu.settlebattle.catanclient.utils.Constants.LOG_UI, "initial x, y : " + mInitialTouchX + ", " + mInitialTouchY);
            mDoTouchUp = true;
         }
         break;
@@ -239,7 +236,7 @@ public boolean onTouchEvent (MotionEvent ev) {
 
         if (!mIsMove && (Math.abs(mInitialTouchX - x) > SCROLL_THRESHOLD
                          || Math.abs (mInitialTouchY - y) > SCROLL_THRESHOLD)) {
-                if (AppConfig.DEBUG) Log.d (Constants.LOG_UI, "movement detected");
+                if (AppConfig.DEBUG) Log.d (de.lmu.settlebattle.catanclient.utils.Constants.LOG_UI, "movement detected");
                 mIsMove = true;
         }
 
@@ -372,7 +369,7 @@ protected void setupToDraw (Context context, AttributeSet attrs, int defStyle) {
     if (resourceId == 0) return;
     Resources res = context.getResources ();
     Theme theme = context.getTheme ();
-    mSampleImage = AndroidCompatibility.getDrawable(res, resourceId, theme);
+    mSampleImage = res.getDrawable(resourceId, theme);
 
     if (mSampleImage != null) {
     	mSampleImage.setBounds(0, 0, mSampleImage.getIntrinsicWidth(), 

@@ -1,9 +1,11 @@
 package de.lmu.settlebattle.catanclient;
 
+import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.os.Bundle;
 import android.os.IBinder;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -15,9 +17,21 @@ public abstract class BaseSocketActivity extends AppCompatActivity {
   @Override
   public void onBackPressed() {}
 
+  @Override
+  protected void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
+
+    try {
+      getActionBar().hide();
+    } catch (NullPointerException e) {
+      Log.i(TAG, "No ActionBar to hide...");
+    }
+
+  }
+
   private static final String TAG = BaseSocketActivity.class.getSimpleName();
 
-  protected WebSocketService mService;
+  public WebSocketService mService;
 
   private ServiceConnection mConnection = new ServiceConnection() {
     @Override

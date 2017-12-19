@@ -229,7 +229,8 @@ public void drawOnCanvas (Canvas canvas) {
          if (j == 9) {
            int dxi = (int) Math.round (dx);
            int dyi = (int) Math.round (dy);
-           Log.d (Constants.LOG_NAME, "Square i-j: " + i + "-" + j + " at x, y : " + dxi + " " + dyi);
+           Log.d (
+               de.lmu.settlebattle.catanclient.utils.Constants.LOG_NAME, "Square i-j: " + i + "-" + j + " at x, y : " + dxi + " " + dyi);
          }
         dx = dx + mSquareWidth;
        }
@@ -447,7 +448,8 @@ public void onTouchDown (float downX, float downY) {
  */
 
 public void onTouchUp (float downX, float downY, float upX, float upY) {
-   if (AppConfig.DEBUG) Log.d (Constants.LOG_NAME, " upX: " + upX + " upY: " + upY);
+   if (AppConfig.DEBUG) Log.d (
+       de.lmu.settlebattle.catanclient.utils.Constants.LOG_NAME, " upX: " + upX + " upY: " + upY);
 
    // Save the time in case we are going to call the listener.
    // We need to know the difference between a long press and a regular press.
@@ -457,7 +459,7 @@ public void onTouchUp (float downX, float downY, float upX, float upY) {
    // Figure out if this was a long press.
    long nUpTime = System.nanoTime ();
    boolean isLongPress = (nUpTime - nDownTime) > mLongPressTimeOut;
-   Log.d (Constants.LOG_UI, "Check long press up,down,timeout: " + nUpTime + ", " + nDownTime
+   Log.d (de.lmu.settlebattle.catanclient.utils.Constants.LOG_UI, "Check long press up,down,timeout: " + nUpTime + ", " + nDownTime
                             + ", " + mLongPressTimeOut + " diff: " + (nUpTime - nDownTime));
 
    // Convert view coordinates to canvas coordinates and, eventually,
@@ -512,7 +514,7 @@ public void onTouchUp (float downX, float downY, float upX, float upY) {
    x2 = mPosX - mPosX0;
    y2 = mPosY - mPosY0;
    if (AppConfig.DEBUG) {
-      Log.d (Constants.LOG_UI, "GameBoardView x2-y2: " + x2 + " - " + y2 
+      Log.d (de.lmu.settlebattle.catanclient.utils.Constants.LOG_UI, "GameBoardView x2-y2: " + x2 + " - " + y2
                                + " mPosX: " + mPosX + " mPosX0: " + mPosX0);
    }   
 
@@ -528,14 +530,14 @@ public void onTouchUp (float downX, float downY, float upX, float upY) {
    //int sUpY2 = (int) Math.floor (fy) + 1;
 
    if (AppConfig.DEBUG) {
-      Log.d (Constants.LOG_UI, "JSON AN SERVER s.x: " + sUpX + " s.y: " + sUpY
+      Log.d (de.lmu.settlebattle.catanclient.utils.Constants.LOG_UI, "JSON AN SERVER s.x: " + sUpX + " s.y: " + sUpY
                                + " down s.x " + (sDownX) + " down s.y: " + (sDownY) + " JSON AN SERVER HIER");
       //Log.d (Constants.LOG_UI, "ScanView.onTouchUp(1) OLD s.x: " + sUpX2 + " s.y: " + sUpY2); 
 
    }
    // The sUp and sDown values are index values relative to the canvas origin.
    if (AppConfig.DEBUG) 
-      Log.d (Constants.LOG_UI, "ScanView.onTouchUp(2) s.x: " + sUpX + " s.y: " + sUpY 
+      Log.d (de.lmu.settlebattle.catanclient.utils.Constants.LOG_UI, "ScanView.onTouchUp(2) s.x: " + sUpX + " s.y: " + sUpY
                                 + " down s.x " + sDownX + " down s.y: " + sDownY + "JSON AN SERVER HIER");
 
    // Next check to see if there is a listener for these events.

@@ -3,9 +3,10 @@ package de.lmu.settlebattle.catanclient.utils;
 import static de.lmu.settlebattle.catanclient.utils.Constants.*;
 
 import com.google.gson.Gson;
-import de.lmu.settlebattle.catanclient.utils.Message.Player;
+import de.lmu.settlebattle.catanclient.player.Player;
 import de.lmu.settlebattle.catanclient.utils.Message.Error;
 import java.util.HashMap;
+import java.util.Map;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -37,10 +38,12 @@ public class JSONUtils {
           player = gson.fromJson(status.getString(PLAYER), Player.class);
           return handleStatusUpdate(player);
         case GAME_START:
-          return new Object[] { GAME_START };
+          return new String[] { GAME_START };
         case ERROR:
           Error error = gson.fromJson(jObj.getString(ERROR), Error.class);
           return displayError(error.Message);
+        case SERVER_RES:
+          return new String[] { OK };
         default:
           return displayError("Protokoll wird nicht unterstützt");
       }
@@ -97,6 +100,12 @@ public class JSONUtils {
       e.printStackTrace();
       return null;
     }
+  }
+
+  public static String createJSONString(String messageType, Object body) {
+    Map<String, Object> msgMap = new HashMap<>();
+    msgMap.put(messageType, body);
+    return gson.toJson(msgMap);
   }
 
 //

@@ -1,79 +1,26 @@
 package de.lmu.settlebattle.catanclient;
 
-//import android.content.BroadcastReceiver;
-//import android.content.Context;
-//import android.content.Intent;
-//import android.content.IntentFilter;
-//import android.os.Bundle;
-//import android.support.constraint.ConstraintLayout;
-//import android.support.design.widget.Snackbar;
-//import android.support.v4.content.LocalBroadcastManager;
-//import android.view.View;
-//import android.widget.Button;
-//import de.lmu.settlebattle.catanclient.network.WebSocketService;
-//
-//public class MainActivity extends BaseSocketActivity {
-//
-//  // LogCat tag
-////  private static final String TAG = MainActivity.class.getSimpleName();
-//
-////  private Storage storage;
-//
-//  private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
-//    @Override
-//    public void onReceive(Context context, Intent intent) {
-//    }
-//  };
-//
-//  @Override
-//  protected void onCreate(Bundle savedInstanceState) {
-//    super.onCreate(savedInstanceState);
-//
-//    setContentView(R.layout.activity_main);
-//
-//    //final ConstraintLayout contain= (ConstraintLayout) findViewById(R.id.contain);
-//    Button handelnButton = (Button) findViewById(R.id.handeln_button);
-//    Button bauenButton = (Button) findViewById(R.id.bauen_button);
-//	  System.out.println("hello_world onCreate");
-//// TODO: Funktioniert atm nicht, unbekannte gründe
-//    handelnButton.setOnClickListener(new View.OnClickListener() {
-//      @Override
-//      public void onClick(View view) {
-//	      System.out.println("hello_world button");
-//       // Snackbar.make(contain, "Handeln button wurde geklickt", Snackbar.LENGTH_SHORT).show();
-//           }
-//    });
-//  }
-//
-//    @Override
-//    protected void onStart() {
-//        super.onStart();
-//        LocalBroadcastManager.getInstance(this).registerReceiver(broadcastReceiver,
-//            new IntentFilter(WebSocketService.ACTION_MSG_RECEIVED));
-//    }
-//
-//    @Override
-//    protected void onPause() {
-//        super.onPause();
-//    }
-//
-//    @Override
-//    protected void onStop() {
-//        LocalBroadcastManager.getInstance(this).unregisterReceiver(broadcastReceiver);
-//        super.onStop();
-//    }
-//}
+import static de.lmu.settlebattle.catanclient.utils.Constants.*;
 
+import android.app.Fragment;
+import android.app.FragmentTransaction;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Matrix;
 import android.graphics.Point;
 import android.os.Bundle;
+import android.support.design.widget.Snackbar;
+import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import android.view.Display;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
 
@@ -82,32 +29,66 @@ import de.lmu.settlebattle.catanclient.grid.DemoObjects;
 import de.lmu.settlebattle.catanclient.grid.Hex;
 import de.lmu.settlebattle.catanclient.grid.Grid;
 import de.lmu.settlebattle.catanclient.grid.StorageMap;
-
-import com.otaliastudios.zoom.ZoomImageView;
-import com.otaliastudios.zoom.ZoomLayout;
-import com.otaliastudios.zoom.ZoomLogger;
+import de.lmu.settlebattle.catanclient.player.Storage;
+import de.lmu.settlebattle.catanclient.trade.SeaTradeFragment;
 
 public class MainActivity extends BaseSocketActivity {
 
   // LogCat tag
   private static final String TAG = MainActivity.class.getSimpleName();
-
-  // TODO: need to use zoom panview
+  private static final String SEA_TRADE_FRAGMENT = "seaTradeFragment";
 
   private RelativeLayout mRelativeLayout;
+  private Storage storage ;
+  SeaTradeFragment seaTradeFragment = new SeaTradeFragment();
+  private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
+    @Override
+    public void onReceive(Context context, Intent intent) {
+      String action = intent.getAction();
+      switch (action) {
+        case DISPLAY_ERROR:
+          displayError(intent.getStringExtra(ERROR_MSG));
+          break;
+        case OK:
+          hideFragment(seaTradeFragment);
+          break;
+        case PLAYER_UPDATE:
+          Log.d(TAG, storage.getAllPlayers());
+          // TODO update the player views
+          break;
+
+      }
+    }
+  };
+
+  private void hideFragment(Fragment fragment) {
+    FragmentTransaction ft = getFragmentManager().beginTransaction();
+    ft.hide(fragment);
+    ft.commit();
+
+  }
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_main);
+    storage = new Storage(this);
+    setIntentFilters();
 
-    try {
-      getActionBar().hide();
-    } catch (NullPointerException e) {
-      Log.i(TAG, "No ActionBar to hide...");
-    }
+    Button handelnBtn = (Button) findViewById(R.id.handeln_button);
+    Button bauenBtn = (Button) findViewById(R.id.bauen_button);
+    mRelativeLayout = (RelativeLayout) findViewById(R.id.gridLayout);
+    seaTradeFragment = new SeaTradeFragment();
 
-    mRelativeLayout = findViewById(R.id.gridLayout);
+    handelnBtn.setOnClickListener((View v) -> {
+      FragmentTransaction ft = getFragmentManager().beginTransaction();
+      if (getFragmentManager().findFragmentByTag(SEA_TRADE_FRAGMENT) == null) {
+        ft.add(R.id.fragmentContainer, seaTradeFragment, SEA_TRADE_FRAGMENT);
+      } else {
+        ft.show(seaTradeFragment);
+      }
+      ft.commit();
+    });
 
     int radius = 3;
 
@@ -119,14 +100,20 @@ public class MainActivity extends BaseSocketActivity {
     initGridView(radius);
   }
 
+  private void setIntentFilters() {
+    IntentFilter filter = new IntentFilter();
+    filter.addAction(PLAYER_UPDATE);
+    filter.addAction(OK);
+    filter.addAction(DISPLAY_ERROR);
+    LocalBroadcastManager.getInstance(this)
+        .registerReceiver(broadcastReceiver, filter);
+  }
+
   private void initGridView(int radius) {
     int scale = setGridDimensions(radius);
 
     //Init node elements
     Grid grid = setGridNodes(radius, scale);
-
-    //Init zoom buttons
-//    setGridButtons(grid);
   }
 
   private int setGridDimensions(int radius) {
@@ -171,64 +158,6 @@ public class MainActivity extends BaseSocketActivity {
 
     return rotatedBitmap;
   }
-
-
-
-//  private void setGridButtons(final Grid grid) {
-//    int scale = Grid.getGridWidth(grid.radius, grid.scale, grid.shape) / 16;
-//
-//    View zoomOutButton = findViewById(R.id.zoomOutButton);
-//    ViewGroup.LayoutParams params = zoomOutButton.getLayoutParams();
-//    params.width = scale;
-//    params.height = scale;
-//
-//    View zoomInButton = findViewById(R.id.zoomInButton);
-//    params = zoomInButton.getLayoutParams();
-//    params.width = scale;
-//    params.height = scale;
-//
-//    zoomOutButton.setOnClickListener(new View.OnClickListener() {
-//      @Override
-//      public void onClick(View v) {
-//        int newRadius = grid.radius+1;
-//        if(newRadius > 12) return;
-//
-//        //Restart the activity with the new parameters
-//        Intent intent = new Intent(MainActivity.this, MainActivity.class);
-//        intent.putExtra("GRID_RADIUS", newRadius);
-//        intent.putExtra("GRID_SHAPE", grid.shape.name());
-//        startActivity(intent);
-//        finish();
-//
-//        //Remove all the elements from the view except the side buttons
-////                final ViewGroup viewGroup = (ViewGroup) findViewById(R.id.container_layout);
-////                viewGroup.removeAllViews();
-////                mRelativeLayout = (RelativeLayout) View.inflate(MainActivity.this, R.layout.hex_grid_layout, null);
-////                viewGroup.addView(mRelativeLayout);
-////                viewGroup.invalidate();
-//      }
-//    });
-
-//    zoomInButton.setOnClickListener(new View.OnClickListener() {
-//      @Override
-//      public void onClick(View v) {
-//        int newRadius = grid.radius-1;
-//        if(newRadius < 0) return;
-//
-//        //Restart the activity with the new parameters
-//        Intent intent = new Intent(MainActivity.this, MainActivity.class);
-//        intent.putExtra("GRID_RADIUS", newRadius);
-//        intent.putExtra("GRID_SHAPE", grid.shape.name());
-//        startActivity(intent);
-//        finish();
-//
-//        //Remove all the elements from the view except the side buttons
-////                mRelativeLayout.removeAllViews();
-////                initGridView(newRadius, grid.shape);
-////                mRelativeLayout.invalidate();
-//      }
-//    });
-//  }
 
   private Grid setGridNodes(int radius, int scale) {
     try {
@@ -316,5 +245,11 @@ public class MainActivity extends BaseSocketActivity {
 
   private void OnGridHexClick(Hex hex) {
     Toast.makeText(MainActivity.this, "Es wurde: " + hex + "gedrückt.", Toast.LENGTH_SHORT).show();
+  }
+
+  public void displayError(String eMsg){
+    View layout = findViewById(R.id.contain);
+    Snackbar snackbar = Snackbar.make(layout, eMsg, Snackbar.LENGTH_LONG);
+    snackbar.show();
   }
 }

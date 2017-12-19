@@ -1,5 +1,7 @@
 package de.lmu.settlebattle.catanclient.utils;
 
+import de.lmu.settlebattle.catanclient.AppConfig;
+
 public final class Constants {
 
   // Colors
@@ -62,6 +64,7 @@ public final class Constants {
   public static final String DISPLAY_ERROR = "displayError";
 	public static final String ERROR_MSG = "errorMsg";
   public static final String NEXT_ACTIVITY = "nextActivity";
+  public static final String OK = "ok";
   public static final String PLAYER_UPDATE = "playerUpdate";
   public static final String PLAYER_WAIT = "playerWait";
 	public static final String PROTOCOL_SUPPORTED = "protocolMatch";
@@ -70,7 +73,7 @@ public final class Constants {
   public static final String MESSAGE = "Meldung";
   public static final String PROTOCOL_MISSMATCH = "Protocol Version Unsupported";
 
-  //Message Objects
+  // Message Objects
   public final static String CARD = "Karte";
   public final static String CITY = "Stadt";
   public final static String CLAY = "Lehm";
@@ -79,10 +82,12 @@ public final class Constants {
   public final static String MONOPOLE = "Monopol";
   public final static String NOTIFICATION = "Nachricht";
   public final static String NUMBER = "Zahl";
+  public final static String OFFER = "Angebot";
   public final static String ORE = "Erz";
   public final static String OWNER = "Eigentümer";
   public final static String PLACE = "Ort";
   public final static String PROTOCOL = "Protokoll";
+  public final static String REQUEST = "Nachfrage";
   public final static String ROAD = "Straße";
   public final static String ROAD_CONSTRUCTION = "Straßenbau";
   public final static String SETTLEMENT = "Siedlung";
@@ -94,8 +99,9 @@ public final class Constants {
   public final static String WOOD = "Holz";
   public final static String WOOL = "Wolle";
 
-  //Player Constants
+  // Player Constants
   public final static String ARMY = "Rittermacht";
+  public final static String BUILD_TRADE = "Handeln oder Bauen";
   public final static String DEV_CARDS = "Entwicklungskarten";
   public final static String RAW_MATERIALS = "Rohstoffe";
   public final static String PLAYER_ID = "id";
@@ -121,4 +127,15 @@ public final class Constants {
   public static final String VERSION_CLIENT = "AndroidClient 0.1 (sepgroup03)";
 
 
+  public static final boolean IMMERSIVE_MODE_ENABLED = AppConfig.IMMERSIVE_MODE;
+  /**
+   * Für die Log Datei
+   */
+
+  public static final String LOG_NAME = "Die Siedler";
+  /**
+   * Um nach Fehlern für die Log Datei in der UI zu suchen
+   */
+
+  public static final String LOG_UI = "Die Siedler UI";
 }

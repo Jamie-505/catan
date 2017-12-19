@@ -19,7 +19,7 @@ import android.widget.TextView;
 import android.content.BroadcastReceiver;
 
 import de.lmu.settlebattle.catanclient.utils.JSONUtils;
-import de.lmu.settlebattle.catanclient.utils.Storage;
+import de.lmu.settlebattle.catanclient.player.Storage;
 import java.util.HashMap;
 
 public class SelectPlayerActivity extends BaseSocketActivity {
@@ -53,7 +53,7 @@ public class SelectPlayerActivity extends BaseSocketActivity {
     LocalBroadcastManager.getInstance(this)
         .registerReceiver(broadcastReceiver, filter);
 
-		Spinner spinner = findViewById(R.id.farben);
+		Spinner spinner = (Spinner) findViewById(R.id.farben);
     // Create an ArrayAdapter using the string array and a default spinner layout
 		ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
 				R.array.farben_array, android.R.layout.simple_spinner_item);
@@ -62,8 +62,8 @@ public class SelectPlayerActivity extends BaseSocketActivity {
     // Apply the adapter to the spinner
 		spinner.setAdapter(adapter);
 
-    Button confirmBtn = findViewById(R.id.enterLobbyBtn);
-		EditText pNameField = findViewById(R.id.input_player_name);
+    Button confirmBtn = (Button) findViewById(R.id.enterLobbyBtn);
+		EditText pNameField = (EditText) findViewById(R.id.input_player_name);
 
     EditText.OnEditorActionListener enterListener = new EditText.OnEditorActionListener() {
       @Override

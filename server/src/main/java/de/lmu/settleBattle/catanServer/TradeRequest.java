@@ -2,10 +2,11 @@ package de.lmu.settleBattle.catanServer;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
-import org.json.JSONObject;
 
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
+import java.util.HashMap;
+import java.util.Map;
 
 public class TradeRequest extends JSONStringBuilder {
     private static int idCounter = 0;
@@ -39,27 +40,25 @@ public class TradeRequest extends JSONStringBuilder {
     @SerializedName(Constants.REQUEST)
     private RawMaterialOverview request;
 
-    @Expose
-    @SerializedName(Constants.ACCEPT)
-    private boolean accepted;
-
-    @Expose
-    @SerializedName(Constants.FELLOW_PLAYER)
-    private int acceptedBy;
-
     private boolean cancelled;
 
     private boolean executed;
-    private int executedWith;
+
+    @Expose
+    @SerializedName(Constants.FELLOW_PLAYER)
+    private Integer executedWith;
+
+    private Map<Integer, Boolean> answers;
+
 
     public TradeRequest(RawMaterialOverview offer, RawMaterialOverview request) {
         this.id = idCounter++;
         this.offer = offer;
         this.request = request;
-        this.acceptedBy = -1;
-        this.accepted = false;
         this.cancelled = false;
         this.executed = false;
+        answers = new HashMap<>();
+        executedWith = null;
     }
     //endregion
 
@@ -75,35 +74,30 @@ public class TradeRequest extends JSONStringBuilder {
         return this.request;
     }
 
-    public boolean isAccepted() {
-        return accepted;
+    public boolean isAccepted() { return answers.values().contains(true); }
+    public boolean getAcceptedBy(int fellowPlayerId) { return answers.get(fellowPlayerId); }
+    public boolean accept(boolean accept, int fellowPlayerId) {
+
+        if (this.playerId == fellowPlayerId || this.cancelled || this.executed) return false;
+
+        //set fire = true if something changed
+        boolean fire = (!this.answers.containsKey(fellowPlayerId) ||
+                this.answers.get(fellowPlayerId) != accept) ? true : false;
+
+        if (fire) {
+            this.answers.put(fellowPlayerId, accept);
+            changes.firePropertyChange("TR Accept", fellowPlayerId, this);
+        }
+
+        return true;
     }
 
     public int getPlayerId() { return playerId; }
     public void setPlayerId(int playerId) { this.playerId = playerId; }
 
-    public int getAcceptedBy() {
-        return this.acceptedBy;
-    }
-
     public void setOffer(RawMaterialOverview offer) { this.offer = offer; }
     public void setRequest(RawMaterialOverview request) {
         this.request = request;
-    }
-
-    public boolean accept(int playerId) {
-
-        if (this.cancelled || this.executed) return false;
-
-        boolean fire = (!this.accepted || this.acceptedBy!=playerId) ? true:false;
-
-        this.accepted = true;
-        this.acceptedBy = playerId;
-
-        if (fire)
-            changes.firePropertyChange("TR Accept", false, this);
-
-        return true;
     }
 
     public void cancel() {
@@ -115,30 +109,24 @@ public class TradeRequest extends JSONStringBuilder {
     }
     public boolean isCancelled() { return this.cancelled; }
 
-    public boolean canBeExecuted(int fellowPlayerId) {
-        boolean ret = true;
-
-        if (this.cancelled || this.executed ||
-                this.acceptedBy != fellowPlayerId || !this.accepted) ret = false;
-
-        return ret;
+    public boolean canBeExecutedBy(int fellowPlayerId) {
+        return !this.cancelled && !this.executed && this.answers.containsKey(fellowPlayerId) &&
+                this.answers.get(fellowPlayerId);
     }
-
     public void execute(int fellowPlayerId) {
-        if (!this.accepted)
-            throw new IllegalArgumentException("Cannot execute trade if no one has accepted it yet.");
+        if (this.playerId == fellowPlayerId)
+            throw new IllegalArgumentException("This trade cannot be executed with the same player who offered it!");
 
-        if (executed || cancelled)
-            throw new IllegalArgumentException("Already executed or cancelled");
+        if (!this.canBeExecutedBy(fellowPlayerId))
+            throw new IllegalArgumentException("This trade cannot be executed by fellow player " + fellowPlayerId);
 
-        this.acceptedBy = fellowPlayerId;
-        this.executed = true;
         this.executedWith = fellowPlayerId;
+        this.executed = true;
 
         changes.firePropertyChange("TR Execute", false, this);
     }
-
     public boolean isExecuted() { return this.executed; }
+    public Integer getExecutedWith() { return this.executedWith; }
 
     public boolean isXTo1(int offerCount) {
         if (this.getOffer().hasOnly(offerCount)) {

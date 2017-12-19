@@ -2,7 +2,6 @@ package de.lmu.settleBattle.catanServer;
 
 import org.junit.Before;
 import org.junit.Test;
-import de.lmu.settleBattle.catanServer.Constants;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -54,9 +53,9 @@ public class GameControllerTest {
     public void setPlayerActive() throws Exception {
         gameController.setPlayerActive(player1.getId(), Constants.BUILD_SETTLEMENT);
 
-        assertTrue(gameController.getPlayer(1).getStatus()== Constants.BUILD_SETTLEMENT);
-        assertTrue(gameController.getPlayer(2).getStatus()== Constants.WAIT);
-        assertTrue(gameController.getPlayer(3).getStatus()== Constants.WAIT);
+        assertTrue(gameController.getPlayer(1).getStatus() == Constants.BUILD_SETTLEMENT);
+        assertTrue(gameController.getPlayer(2).getStatus() == Constants.WAIT);
+        assertTrue(gameController.getPlayer(3).getStatus() == Constants.WAIT);
     }
 
     @Test
@@ -69,12 +68,15 @@ public class GameControllerTest {
         assertTrue(!gameController.readyToStartGame());
     }
 
-    @Test
-    public void startGame() throws Exception {
-
+    public void initializeGame() {
         gameController.startGame();
         Player player = gameController.getCurrent();
         gameController.setPlayerActive(player.getId(), Constants.BUILD_SETTLEMENT);
+    }
+
+    @Test
+    public void startGame() throws Exception {
+        initializeGame();
 
         List<Player> list = gameController.getPlayers();
 

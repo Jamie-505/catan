@@ -47,8 +47,7 @@ public class CatanMessage {
     }
     //endregion
 
-    public static TradeRequest seatradeToTradeRequest(
-            String tradeType, TextMessage message) {
+    public static TradeRequest seatradeToTradeRequest(String tradeType, TextMessage message) {
         JSONObject json = JSONUtils.createJSON(message);
 
         return SocketUtils.gson.fromJson(
@@ -88,6 +87,7 @@ public class CatanMessage {
 
     /**
      * extracts board object from startGame message
+     *
      * @param startGameMsg
      * @return
      */
@@ -153,8 +153,10 @@ public class CatanMessage {
     //endregion
 
     //region board
+
     /**
      * creates message containing start game and card for player
+     *
      * @param board
      * @return string message structured like JSON
      */
@@ -185,12 +187,12 @@ public class CatanMessage {
     public static TextMessage error(String message) {
         JSONObject payload = new JSONObject();
         payload.put(Constants.MESSAGE, message);
-        return new TextMessage(JSONUtils.setJSONType(Constants.ERROR,payload).toString());
+        return new TextMessage(JSONUtils.setJSONType(Constants.ERROR, payload).toString());
     }
     //endregion
 
     //region OK
-    public static  TextMessage OK() {
+    public static TextMessage OK() {
         JSONObject payload = new JSONObject();
         payload.put(Constants.SERVER_RES, Constants.OK);
         return new TextMessage(payload.toString());
@@ -272,6 +274,15 @@ public class CatanMessage {
     public static TextMessage trade(TradeRequest tr, String tradeAction) {
         JSONObject payload = tr.toJSON();
         return new TextMessage(JSONUtils.setJSONType(tradeAction, payload).toString());
+    }
+
+    public static TextMessage tradeAccept(TradeRequest tr, int acceptedBy) {
+        JSONObject payload = tr.toJSON();
+
+        payload.put(ACCEPT, tr.getAcceptedBy(acceptedBy));
+        payload.put(FELLOW_PLAYER, acceptedBy);
+
+        return new TextMessage(JSONUtils.setJSONType(TRD_ACC, payload).toString());
     }
     //endregion
 

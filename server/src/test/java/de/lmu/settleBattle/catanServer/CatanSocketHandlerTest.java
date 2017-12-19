@@ -195,7 +195,7 @@ public class CatanSocketHandlerTest {
 
         handler.sendMessageToAll(CatanMessage.startGame(handler.getGameCtrl().getBoard()));
         Board board = CatanMessage.extractBoard(session1.getLast());
-        assertTrue(board.getBuildings().size() == 0);
+        assertTrue(board.getBuildingsSize() == 0);
 
         handler.getUtils().startGame();
 
@@ -249,10 +249,10 @@ public class CatanSocketHandlerTest {
         int fromIndex = session.getLastIndex();
         //check if settlement was built
         Board board = handler.getGameCtrl().getBoard();
-        int builtBuildingCnt = board.getBuildings().size();
+        int builtBuildingCnt = board.getBuildingsSize();
 
         boolean sBuilt = handler.getUtils().build(session, sendBuildMessage(building));
-        assertTrue(board.getBuildings().size() == builtBuildingCnt);
+        assertTrue(board.getBuildingsSize() == builtBuildingCnt);
         assertTrue(!sBuilt);
 
         String expectedStatus = type.equals(BuildingType.SETTLEMENT) ? BUILD_STREET : BUILD_SETTLEMENT;
@@ -273,10 +273,10 @@ public class CatanSocketHandlerTest {
         int fromIndex = session.getLastIndex();
         //check if settlement was built
         Board board = handler.getGameCtrl().getBoard();
-        int builtBuildingCnt = board.getBuildings().size();
+        int builtBuildingCnt = board.getBuildingsSize();
 
         boolean sBuilt = handler.getUtils().build(session, sendBuildMessage(building));
-        assertTrue(board.getBuildings().size() == builtBuildingCnt+1);
+        assertTrue(board.getBuildingsSize() == builtBuildingCnt+1);
         assertTrue(sBuilt);
 
         String expectedStatus = type.equals(BuildingType.SETTLEMENT) ? BUILD_STREET : BUILD_SETTLEMENT;
@@ -293,7 +293,7 @@ public class CatanSocketHandlerTest {
 
         for (Object o : objects) {
             if (o instanceof Building)
-                assertTrue(((Building) o).isBuiltAroundHere(builtLocs) == builtExpected);
+                assertTrue(((Building) o).isBuiltAroundHere(builtLocs, true) == builtExpected);
 
             else if (o instanceof Player) {
                 changedPlayers.add((Player) o);

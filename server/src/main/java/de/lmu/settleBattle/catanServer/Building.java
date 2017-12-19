@@ -1,4 +1,5 @@
 package de.lmu.settleBattle.catanServer;
+
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
@@ -19,7 +20,8 @@ public class Building extends JSONStringBuilder {
     private RawMaterialOverview costs;
 
     //region Constructors
-    public Building() { }
+    public Building() {
+    }
 
     public Building(BuildingType type) {
         this.type = type;
@@ -51,7 +53,7 @@ public class Building extends JSONStringBuilder {
 
 
     private void initializeLocations(BuildingType type) {
-        int count = type.equals(BuildingType.ROAD) ? 2:3;
+        int count = type.equals(BuildingType.ROAD) ? 2 : 3;
         locations = new Location[count];
     }
     //endregion
@@ -61,9 +63,7 @@ public class Building extends JSONStringBuilder {
         if (((this.type == BuildingType.SETTLEMENT || this.type == BuildingType.CITY) && loc.length == 3) ||
                 this.type == BuildingType.ROAD && loc.length == 2) {
             this.locations = loc;
-        }
-
-        else throw new IllegalArgumentException();
+        } else throw new IllegalArgumentException();
     }
 
 
@@ -75,16 +75,79 @@ public class Building extends JSONStringBuilder {
         return locations;
     }
 
-    public boolean isBuiltAroundHere(Location[] loc){
-        int matchCount = 0;
-        for (int i = 0; i < loc.length; i++){
-            for (int j = 0; j < locations.length; j++) {
-                if ((loc[i].compare(locations[j]))){
-                    matchCount++;
+    public boolean edgesAreAdjacent(Location[] loc) {
+
+        for (int i = 0; i < loc.length; i++) {
+            for (int j = 0; j < this.locations.length; j++) {
+                if (loc[i].equals(this.locations[j])) {
+                    int iLocal = j == 0 ? 1 : 0;
+                    int iRemote = i == 0 ? 1 : 0;
+
+                    boolean xEquals = loc[iRemote].getX() == this.locations[iLocal].getX();
+                    boolean yEquals = loc[iRemote].getY() == this.locations[iLocal].getY();
+
+                    if (xEquals && yEquals) return false;
+
+                    else if ((xEquals && Math.abs(loc[iRemote].getY() - this.locations[iLocal].getY()) == 1 ||
+                            yEquals && Math.abs(loc[iRemote].getX() - this.locations[iLocal].getX()) == 1) ||
+                            Math.abs(loc[iRemote].getX() - this.locations[iLocal].getX()) == 1 &&
+                                    Math.abs(loc[iRemote].getY() - this.locations[iLocal].getY()) == 1)
+                        return true;
                 }
             }
         }
-        return matchCount >= 2;
+        return false;
+    }
+
+
+    /**
+     * returns true if two Location[] Objects are adjacent and exactlyHere == false or
+     * two Location[] Objects are equal and exactlyHere == true
+     * otherwise false
+     *
+     * @param loc
+     * @param exactlyHere
+     * @return
+     */
+    public boolean isBuiltAroundHere(Location[] loc, boolean exactlyHere) {
+        int matchCount = 0;
+        boolean edgesAreAdjacent = false;
+
+        if (this.type.equals(BuildingType.ROAD) && loc.length == 2 && !exactlyHere)
+            edgesAreAdjacent = edgesAreAdjacent(loc);
+
+        else {
+            for (int i = 0; i < loc.length; i++) {
+                for (int j = 0; j < locations.length; j++) {
+                    if ((loc[i].compare(locations[j]))) {
+                        matchCount++;
+                    }
+                }
+            }
+        }
+
+        if (exactlyHere) {
+            //if edge and corner are compared they can't be placed exactly on the same location
+            if (this.type.equals(BuildingType.ROAD) && loc.length != 2 ||
+                    !this.type.equals(BuildingType.ROAD) && loc.length == 2)
+                return false;
+
+            //one edge and one corner
+            if (this.type.equals(BuildingType.ROAD) || loc.length == 2) return matchCount > 1;
+
+            //two corners
+            else return matchCount > 2;
+
+        } else {
+            //two edges
+            if (this.type.equals(BuildingType.ROAD) && loc.length == 2) return edgesAreAdjacent;
+
+            //one edge and one corner
+            else if (this.type.equals(BuildingType.ROAD) || loc.length == 2) return matchCount > 1;
+
+            //two corners
+            else return matchCount >= 2;
+        }
     }
 
 
@@ -92,15 +155,18 @@ public class Building extends JSONStringBuilder {
         return type;
     }
 
-    public RawMaterialOverview getCost(){ return costs; }
+    public RawMaterialOverview getCost() {
+        return costs;
+    }
 
     /**
      * get costs of a special Building type
+     *
      * @param type BuildingType
      * @return RawMaterialOverview object
      */
     public static RawMaterialOverview getCosts(BuildingType type) {
-        switch(type) {
+        switch (type) {
             case ROAD:
                 return new RawMaterialOverview(1, 0, 1, 0, 0);
             case SETTLEMENT:

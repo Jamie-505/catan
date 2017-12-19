@@ -9,6 +9,7 @@ import java.util.*;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import org.json.JSONObject;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
@@ -147,7 +148,7 @@ public class CatanSocketHandler extends TextWebSocketHandler {
                     if (!OK) errorMessage = "Das Gebäude kann nicht gebaut werden.";
                     break;
 
-                case DICE_RESULT:
+                case ROLL_DICE:
                     this.dice(session);
                     break;
 
@@ -163,23 +164,25 @@ public class CatanSocketHandler extends TextWebSocketHandler {
 
                 case TRD_REQ:
                     TradeRequest tradeRequest = utils.tradeOffer(session, message);
-                    addTradeRequest(tradeRequest);
+                    OK = addTradeRequest(tradeRequest);
+                    if (!OK) sendError(session, "Das Handelsangebot ist ungültig.");
                     break;
 
                 case TRD_RES:
                     OK = utils.tradeAccepted(session, message);
                     if (!OK) sendError(session,
-                            "This trade is either already conducted or was cancelled.");
+                            "Der Spieler kann das Handelsangebot nicht annehmen, da er entweder " +
+                                    "die geforderten Rohstoffe nicht besitzt oder die Handels-ID ungültig ist.");
                     break;
 
                 case TRD_SEL:
                     OK = utils.tradeConduction(session, message);
-                    if (!OK) sendError(session, "The trade could not be conducted.");
+                    if (!OK) sendError(session, "Der Handel konnte nicht durchgeführt werden. Haben beide Parteien genügend Rohstoffe?");
                     break;
 
                 case TRD_REJ:
                     OK = utils.tradeCancelled(message);
-                    if (!OK) sendError(session, "This trade request does not exist.");
+                    if (!OK) sendError(session, "Die Handels-ID exitsiert nicht.");
                     break;
 
                 case END_TURN:
@@ -362,13 +365,22 @@ public class CatanSocketHandler extends TextWebSocketHandler {
     //endregion
 
     //region trading
-    public void addTradeRequest(TradeRequest tradeRequest) {
+    public boolean addTradeRequest(TradeRequest tradeRequest) {
+
+        //at least one raw material must be requested/offered
+        if (tradeRequest.getOffer().getTotalCount() < 1 || tradeRequest.getRequest().getTotalCount() < 1)
+            return false;
+
+        //has player offered raw materials ?
+        Player player = utils.getGameCtrl().getPlayer(tradeRequest.getPlayerId());
+        if (!player.canAfford(tradeRequest.getOffer())) return false;
 
         tradeRequest.addPropertyChangeListener(evt -> {
             TradeRequest trChanged = (TradeRequest)evt.getNewValue();
             switch(evt.getPropertyName()) {
                 case "TR Accept":
-                    sendMessageToAll(CatanMessage.trade(trChanged, TRD_ACC));
+                    Integer id = (Integer)evt.getOldValue();
+                    if (id != null) { sendMessageToAll(CatanMessage.tradeAccept(trChanged, id)); }
                     break;
 
                 case "TR Cancel":
@@ -383,6 +395,8 @@ public class CatanSocketHandler extends TextWebSocketHandler {
 
         utils.getTradeRequests().add(tradeRequest);
         sendMessageToAll(CatanMessage.trade(tradeRequest, TRD_OFFER));
+
+        return true;
     }
 
 

@@ -211,6 +211,10 @@ public class Player extends JSONStringBuilder implements Comparable, Cloneable {
         //TODO
     }
 
+    public void addHaven(Haven haven) {
+        haven.setOccupied(true);
+        this.havens.add(haven);
+    }
 
     /**
      * <method name: robPlayer>
@@ -243,10 +247,6 @@ public class Player extends JSONStringBuilder implements Comparable, Cloneable {
         this.rawMaterialDeck.increase(overview);
     }
 
-    public boolean hasEnoughRawMaterials(RawMaterialOverview overview) {
-        return this.rawMaterialDeck.canAfford(overview);
-    }
-
     /**
      * Player has to extract half of their cards if
      * he has at least 7 raw materials
@@ -272,6 +272,7 @@ public class Player extends JSONStringBuilder implements Comparable, Cloneable {
         return this.rawMaterialDeck.canAfford().contains(type);
     }
 
+    public boolean canAfford(RawMaterialOverview overview) { return this.rawMaterialDeck.canAfford(overview); }
 
     //region Properties
 

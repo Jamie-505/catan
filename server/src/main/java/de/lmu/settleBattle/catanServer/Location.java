@@ -15,6 +15,9 @@ public class Location extends JSONStringBuilder {
     }
 
     public Location (int x, int y){
+        if (!isValidLoc(x,y))
+            throw new IllegalArgumentException("The location coordinates do not have the required values.");
+
         this.x = x;
         this.y = y;
     }
@@ -38,6 +41,25 @@ public class Location extends JSONStringBuilder {
      */
     public int getY(){
         return y;
+    }
+
+    public void setX(int x) { this.x = x; }
+    public void setY(int y) { this.y = y; }
+
+    public int getSum() {
+        return this.getX() + this.getY();
+    }
+
+    public boolean isValidLoc(int x, int y) {
+        boolean ret = true;
+
+        if (Math.abs(x) > 3 || Math.abs(y) > 3)
+            ret = false;
+
+        if (Math.abs(x+y) > 3)
+            ret = false;
+
+        return ret;
     }
 
     @Override

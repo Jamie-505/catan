@@ -1,7 +1,5 @@
 package de.lmu.settleBattle.catanServer;
 
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
 import java.util.*;
 
 import static de.lmu.settleBattle.catanServer.Constants.*;
@@ -88,7 +86,7 @@ public class GameController {
     }
 
 
-    public boolean placeBuilding(int owner, Location[] locs, BuildingType type) {
+    public boolean placeBuilding(int ownerId, Location[] locs, BuildingType type) {
         boolean buildPermission = false;
         boolean built = false;
 
@@ -98,16 +96,29 @@ public class GameController {
 
             //the player can only built building if he has enough raw materials
         else if (!this.buildingPhaseActive) {
-            buildPermission = getPlayer(owner).canAfford(type);
+            buildPermission = getPlayer(ownerId).canAfford(type);
         }
 
         if (buildPermission) {
-            built = board.placeBuilding(owner, locs, type);
+            built = board.placeBuilding(ownerId, locs, type, this.buildingPhaseActive);
 
             //if the building was successfully built and the player needs to pay for it
             //--> reduce raw materials
-            if (built && !buildingPhaseActive)
-                getPlayer(owner).decreaseRawMaterials(Building.getCosts(type));
+            if (built) {
+                Player owner = getPlayer(ownerId);
+                Building building = new Building(ownerId, type, locs);
+
+                //add building to haven array in player so he can trade with it
+                //havens are only added for settlements (if a city is placed then the haven was already
+                //added when the settlement was placed)
+                if (board.isConnectedToHaven(building) && type.equals(BuildingType.SETTLEMENT)) {
+                    Haven haven = board.getConnectedHaven(building);
+                    owner.addHaven(haven);
+                }
+
+                if (!buildingPhaseActive)
+                    owner.decreaseRawMaterials(Building.getCosts(type));
+            }
         }
         return built;
     }
@@ -128,9 +139,7 @@ public class GameController {
             } catch (Exception e) {
                 e.printStackTrace();
             }
-
         }
-
     }
 
     public void sellDevelopmentCard() {
@@ -190,9 +199,9 @@ public class GameController {
         Player offerent = getPlayer(offerentId);
         Player fellowPlayer = getPlayer(fellowPlayerId);
 
-        if (offerent.hasEnoughRawMaterials(tradeRequest.getOffer()) &&
-                fellowPlayer.hasEnoughRawMaterials(tradeRequest.getRequest()) &&
-                tradeRequest.canBeExecuted(fellowPlayerId)) {
+        if (offerent.canAfford(tradeRequest.getOffer()) &&
+                fellowPlayer.canAfford(tradeRequest.getRequest()) &&
+                tradeRequest.canBeExecutedBy(fellowPlayerId)) {
 
             offerent.trade(tradeRequest.getOffer(), tradeRequest.getRequest());
             fellowPlayer.trade(tradeRequest.getRequest(), tradeRequest.getOffer());
@@ -241,7 +250,7 @@ public class GameController {
         offer = new RawMaterialOverview(offerType, offerAmount);
         request = new RawMaterialOverview(requestType, 1);
 
-        if (player.hasEnoughRawMaterials(offer)) {
+        if (player.canAfford(offer)) {
             try {
                 player.trade(offer, request);
                 return true;

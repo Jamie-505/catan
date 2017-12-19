@@ -15,16 +15,21 @@ public class Haven extends JSONStringBuilder {
     @SerializedName(Constants.TYPE)
     private String name;
 
-    public Haven(Location[] locations, RawMaterialType harvest) {
-        if (locations.length != 2) throw new IllegalArgumentException("locations must contain 2 Location objects");
-        this.locations = locations;
-        this.harvest = harvest;
-        setName();
-    }
+    private boolean isOccupied;
+
     public Haven(RawMaterialType harvest) {
         this.harvest = harvest;
+        this.isOccupied = false;
         setName();
     }
+
+    public Haven(Location[] locations, RawMaterialType harvest) {
+        this(harvest);
+        if (locations.length != 2) throw new IllegalArgumentException("locations must contain 2 Location objects");
+        this.locations = locations;
+        setName();
+    }
+
     /**
      * <method name: none>
      * <description: none>
@@ -56,6 +61,10 @@ public class Haven extends JSONStringBuilder {
     public RawMaterialType trade(RawMaterialType[] rm) {
         //TODO
         return null;
+    }
+
+    public void setOccupied(boolean isOccupied) {
+        this.isOccupied = isOccupied;
     }
 
     public RawMaterialType trade(TradeRequest tr) {

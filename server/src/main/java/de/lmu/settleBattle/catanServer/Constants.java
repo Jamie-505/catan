@@ -101,7 +101,7 @@ public class Constants {
     public final static String ORANGE = "Orange";
     public final static String BLUE = "Blau";
     public final static String RED = "Rot";
-    public final static String WHITE = "Weiß";
+    public final static String WHITE = "Weis";
 
     //Player Constants
     public final static String PLAYER = "Spieler";

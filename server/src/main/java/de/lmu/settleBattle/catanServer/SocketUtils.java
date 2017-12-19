@@ -173,6 +173,11 @@ public class SocketUtils {
 
     public boolean seatrade(WebSocketSession session, TextMessage message) {
         TradeRequest tradeRequest = CatanMessage.seatradeToTradeRequest(SEA_TRADE, message);
+
+        //at least one raw material must be offered/requested
+        if (tradeRequest.getOffer().getTotalCount() < 1 || tradeRequest.getRequest().getTotalCount() < 1)
+            return false;
+
         Player player = gameCtrl.getPlayer(session.getId());
         return gameCtrl.seaTrade(player, tradeRequest);
     }
@@ -187,8 +192,22 @@ public class SocketUtils {
 
 
     public boolean tradeAccepted(WebSocketSession session, TextMessage message) {
-        TradeRequest tradeRequest = CatanMessage.seatradeToTradeRequest(TRD_RES, message);
-        return tradeRequest.accept(toInt(session.getId()));
+        JSONObject payload = JSONUtils.createJSON(message).getJSONObject(TRD_RES);
+        int tradeId = (Integer)payload.get(TRADE_ID);
+        boolean accept = (Boolean)payload.get(ACCEPT);
+
+        TradeRequest tr = getTradeRequest(tradeId);
+
+        if (tr != null) {
+
+            //player can only accept trade offer if he can afford the request
+            Player player = gameCtrl.getPlayer(session.getId());
+            if (player.canAfford(tr.getRequest())) {
+                tr.accept(accept, toInt(session.getId()));
+                return true;
+            }
+        }
+        return false;
     }
 
     public boolean tradeCancelled(TextMessage message) {
@@ -207,7 +226,7 @@ public class SocketUtils {
     public boolean tradeConduction(WebSocketSession session, TextMessage message) {
         boolean conducted = false;
 
-        JSONObject payload = JSONUtils.createJSON(message);
+        JSONObject payload = JSONUtils.createJSON(message).getJSONObject(TRD_SEL);
         Integer id = (Integer) payload.get(TRADE_ID);
         Integer fellowId = (Integer) payload.get(FELLOW_PLAYER);
         TradeRequest tr = getTradeRequest(id);

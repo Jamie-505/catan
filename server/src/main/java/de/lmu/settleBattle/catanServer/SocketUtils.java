@@ -8,13 +8,18 @@ import org.springframework.web.socket.WebSocketSession;
 import java.io.IOException;
 import java.util.*;
 
-import static de.lmu.settleBattle.catanServer.Constants.PLAYER;
+import static de.lmu.settleBattle.catanServer.Constants.*;
 
 public class SocketUtils {
 
     // set to store all live sessions
     private GameController gameCtrl;
     public static Gson gson = new Gson();
+    public List<TradeRequest> tradeRequests = new ArrayList<>();
+
+    public List<TradeRequest> getTradeRequests() {
+        return tradeRequests;
+    }
 
     public SocketUtils() {
         this.gameCtrl = new GameController();
@@ -159,11 +164,68 @@ public class SocketUtils {
     }
     //endregion
 
-
     //region setStatus
     public void setStatus(String id, String status) {
         Player player = gameCtrl.getPlayer(id);
         player.setStatus(status);
     }
     //endregion
+
+    public boolean seatrade(WebSocketSession session, TextMessage message) {
+        TradeRequest tradeRequest = CatanMessage.seatradeToTradeRequest(SEA_TRADE, message);
+        Player player = gameCtrl.getPlayer(session.getId());
+        return gameCtrl.seaTrade(player, tradeRequest);
+    }
+
+    public TradeRequest tradeOffer(WebSocketSession session, TextMessage message) {
+        TradeRequest tr = CatanMessage.seatradeToTradeRequest(TRD_REQ, message);
+        TradeRequest tradeRequest = new TradeRequest(tr.getOffer(), tr.getRequest());
+        tradeRequest.setPlayerId(toInt(session.getId()));
+
+        return tradeRequest;
+    }
+
+
+    public boolean tradeAccepted(WebSocketSession session, TextMessage message) {
+        TradeRequest tradeRequest = CatanMessage.seatradeToTradeRequest(TRD_RES, message);
+        return tradeRequest.accept(toInt(session.getId()));
+    }
+
+    public boolean tradeCancelled(TextMessage message) {
+        JSONObject payload = JSONUtils.createJSON(message).getJSONObject(TRD_REJ);
+        int tradeId = (Integer)payload.get(TRADE_ID);
+        TradeRequest tr = getTradeRequest(tradeId);
+
+        if (tr != null) {
+            tr.cancel();
+            tradeRequests.remove(tr);
+            return true;
+        }
+        return false;
+    }
+
+    public boolean tradeConduction(WebSocketSession session, TextMessage message) {
+        boolean conducted = false;
+
+        JSONObject payload = JSONUtils.createJSON(message);
+        Integer id = (Integer) payload.get(TRADE_ID);
+        Integer fellowId = (Integer) payload.get(FELLOW_PLAYER);
+        TradeRequest tr = getTradeRequest(id);
+
+        if (tr != null) {
+            conducted = gameCtrl.domesticTrade(tr, toInt(session.getId()), fellowId);
+            if (conducted) tradeRequests.remove(tr);
+        }
+        return conducted;
+    }
+
+
+    public TradeRequest getTradeRequest(int tradeId) {
+        for (TradeRequest tr : tradeRequests) {
+            if (tr.getId() == tradeId)
+                return tr;
+        }
+        return null;
+    }
+
 }

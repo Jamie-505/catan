@@ -1,5 +1,7 @@
 package de.lmu.settleBattle.catanServer;
 
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.util.*;
 
 import static de.lmu.settleBattle.catanServer.Constants.*;
@@ -66,20 +68,18 @@ public class GameController {
             if (playerStack.size() == players.size()) {
                 round = 2;
                 player = playerStack.pop();
-            }
-            else player = this.getNext_Move();
+            } else player = this.getNext_Move();
 
-        } else if (round == 2){
+        } else if (round == 2) {
             player = playerStack.pop();
             currentTurn--;
 
             if (playerStack.size() == 0) {
                 //set round 3 before initial building phase ends so that first player can start game
                 round = 3;
-                currentTurn=0;
+                currentTurn = 0;
             }
-        }
-        else {  //all players have placed their buildings and the first player has turn
+        } else {  //all players have placed their buildings and the first player has turn
             buildingPhaseActive = false;
             player = getCurrent();
         }
@@ -96,7 +96,7 @@ public class GameController {
         if (this.buildingPhaseActive && !type.equals(BuildingType.CITY))
             buildPermission = true;
 
-        //the player can only built building if he has enough raw materials
+            //the player can only built building if he has enough raw materials
         else if (!this.buildingPhaseActive) {
             buildPermission = getPlayer(owner).canAfford(type);
         }
@@ -182,10 +182,77 @@ public class GameController {
     }
 
     public void endGame() {
+        this.isGameOver = true;
     }
 
-    public void conductTrade(TradeRequest tr) {
+    //region domesticTrade
+    public boolean domesticTrade(TradeRequest tradeRequest, int offerentId, int fellowPlayerId) {
+        Player offerent = getPlayer(offerentId);
+        Player fellowPlayer = getPlayer(fellowPlayerId);
+
+        if (offerent.hasEnoughRawMaterials(tradeRequest.getOffer()) &&
+                fellowPlayer.hasEnoughRawMaterials(tradeRequest.getRequest()) &&
+                tradeRequest.canBeExecuted(fellowPlayerId)) {
+
+            offerent.trade(tradeRequest.getOffer(), tradeRequest.getRequest());
+            fellowPlayer.trade(tradeRequest.getRequest(), tradeRequest.getOffer());
+
+            tradeRequest.execute(fellowPlayerId);
+            return true;
+        }
+
+        return false;
     }
+    //endregion
+
+    //region seatrade
+
+    /**
+     * performs sea trade
+     * client does not haven any logic and thus sends a RawMaterialOverview offer
+     * and one re
+     *
+     * @param player
+     * @param tradeRequest
+     * @return
+     */
+    public boolean seaTrade(Player player, TradeRequest tradeRequest) {
+
+        //client sends raw material overview containing 1 clay/ore/.. ore for request/offer
+        if (tradeRequest.getRequest().getTotalCount() != 1 &&
+                tradeRequest.getOffer().getTotalCount() != 1)
+            return false;
+
+        RawMaterialType requestType = tradeRequest.getRequest().getType();
+        RawMaterialType offerType = tradeRequest.getOffer().getType();
+
+        if (!requestType.isValidTradingType() || !offerType.isValidTradingType()
+                || requestType.equals(offerType)) return false;
+
+        //check if player has 2:1 haven for trading
+        Haven haven = player.get2To1Haven(offerType);
+        RawMaterialOverview offer, request;
+        int offerAmount = 2;
+
+        if (haven == null) {
+            offerAmount = player.hasXTo1Haven(3) ? 3 : 4;
+        }
+
+        offer = new RawMaterialOverview(offerType, offerAmount);
+        request = new RawMaterialOverview(requestType, 1);
+
+        if (player.hasEnoughRawMaterials(offer)) {
+            try {
+                player.trade(offer, request);
+                return true;
+            } catch (IllegalArgumentException ex) {
+                ex.printStackTrace();
+            }
+        }
+
+        return false;
+    }
+    //endregion
 
     /**
      * sets new status for active player and
@@ -195,6 +262,7 @@ public class GameController {
      * @param status
      * @return list of players where status changed
      */
+
     public void setPlayerActive(int id, String status) {
         for (Player player : players) {
             String newStatus = player.getId() == id ? status : WAIT;

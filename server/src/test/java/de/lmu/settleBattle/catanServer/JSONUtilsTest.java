@@ -5,7 +5,6 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.yaml.snakeyaml.scanner.Constant;
 
 import static org.junit.Assert.*;
 
@@ -269,7 +268,7 @@ public class JSONUtilsTest {
     public void tradeMessagesShouldBeCorrect() throws Exception {
 
         //test new trade request
-        JSONObject tradeRequestJSON = JSONUtils.createJSON(CatanMessage.newTradeRequest(tradeRequest));
+        JSONObject tradeRequestJSON = JSONUtils.createJSON(CatanMessage.trade(tradeRequest, Constants.TRD_OFFER));
 
         JSONObject request = tradeRequestJSON.getJSONObject(Constants.TRD_OFFER);
         assertEquals(13, request.get(Constants.PLAYER));
@@ -279,7 +278,7 @@ public class JSONUtilsTest {
         assertTrue(request.has(Constants.REQUEST));
 
         //test accepted trade request
-        JSONObject tradeAcceptedJSON = JSONUtils.createJSON(CatanMessage.tradeRequestAccepted(tradeRequest_Accepted));
+        JSONObject tradeAcceptedJSON = JSONUtils.createJSON(CatanMessage.trade(tradeRequest_Accepted, Constants.TRD_ACC));
         JSONObject trAccepted = tradeAcceptedJSON.getJSONObject(Constants.TRD_ACC);
 
         assertEquals(tradeRequest_Accepted.getId(), trAccepted.get(Constants.TRADE_ID));
@@ -287,7 +286,7 @@ public class JSONUtilsTest {
         assertEquals(tradeRequest_Accepted.isAccepted(), trAccepted.get(Constants.ACCEPT));
 
         //test performed trade request
-        JSONObject tradePerformedJSON = JSONUtils.createJSON(CatanMessage.tradePerformed(tradeRequest_Accepted));
+        JSONObject tradePerformedJSON = JSONUtils.createJSON(CatanMessage.trade(tradeRequest_Accepted, Constants.TRD_FIN));
         JSONObject trPerformed = tradePerformedJSON.getJSONObject(Constants.TRD_FIN);
 
         assertEquals(tradeRequest_Accepted.getAcceptedBy(), trPerformed.get(Constants.FELLOW_PLAYER));
@@ -296,8 +295,7 @@ public class JSONUtilsTest {
         //test cancelled trade request
         tradeRequest.cancel();
 
-        JSONObject tradeCancelledJSON = JSONUtils.createJSON(CatanMessage.tradeCancelled(tradeRequest));
-
+        JSONObject tradeCancelledJSON = JSONUtils.createJSON(CatanMessage.trade(tradeRequest, Constants.TRD_ABORTED));
         JSONObject trCancelled = tradeCancelledJSON.getJSONObject(Constants.TRD_ABORTED);
 
         assertEquals(tradeRequest.getId(), trCancelled.get(Constants.TRADE_ID));

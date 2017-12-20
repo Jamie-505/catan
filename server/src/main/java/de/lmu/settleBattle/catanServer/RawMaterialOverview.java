@@ -7,7 +7,7 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.List;
 
-public class RawMaterialOverview extends JSONStringBuilder{
+public class RawMaterialOverview extends JSONStringBuilder {
 
     @Expose
     @SerializedName(Constants.WOOD)
@@ -32,12 +32,12 @@ public class RawMaterialOverview extends JSONStringBuilder{
     //region Constructors
     public RawMaterialOverview() {
         this.clayCount = this.oreCount = this.woodCount =
-        this.woolCount = this.weatCount = 0;
+                this.woolCount = this.weatCount = 0;
     }
 
     public RawMaterialOverview(int initAmount) {
         this.clayCount = this.oreCount = this.woodCount =
-        this.woolCount = this.weatCount = initAmount;
+                this.woolCount = this.weatCount = initAmount;
     }
 
     public RawMaterialOverview(int clay, int ore, int wood, int wool, int weat) {
@@ -71,20 +71,20 @@ public class RawMaterialOverview extends JSONStringBuilder{
     //endregion
 
     public int getTotalCount() {
-        return clayCount+oreCount+woodCount+weatCount+woolCount;
+        return clayCount + oreCount + woodCount + weatCount + woolCount;
     }
 
     //region increase
     /**
      * increases a raw material amount
      * @param type type of raw material to increase
-     * @param i value to be added
+     * @param i    value to be added
      */
     public void increase(RawMaterialType type, int i) {
         //the method increase must not decrease an amount
-        if (i < 0) return;
+        if (i < 0) throw new IllegalArgumentException("increase cannot be called with negative value");
 
-        switch(type) {
+        switch (type) {
             case ORE:
                 oreCount += i;
                 break;
@@ -118,37 +118,35 @@ public class RawMaterialOverview extends JSONStringBuilder{
     /**
      * decreases a raw material amount
      * @param type type of raw material to decrease
-     * @param i value to be subtracted
+     * @param i    value to be subtracted
      */
     public void decrease(RawMaterialType type, int i) throws Exception {
-        if (i < 0) throw new Exception();
+        if (i < 0) throw new IllegalArgumentException("decrease cannot be called with negative value");
 
+        int typeCount = getTypeCount(type);
+        if (i > typeCount) throw new IllegalArgumentException("Cannot decrease more ore than existing");
 
-        switch(type) {
+        switch (type) {
             case ORE:
-                if(i>oreCount)throw new Exception();
                 oreCount -= i;
                 break;
             case CLAY:
-                if(i>clayCount)throw new Exception();
                 clayCount -= i;
                 break;
             case WEAT:
-                if(i>weatCount)throw new Exception();
-                    weatCount -= i;
+                weatCount -= i;
                 break;
             case WOOD:
-                if(i>woodCount)throw new Exception();
-                    woodCount -= i;
+                woodCount -= i;
                 break;
             case WOOL:
-                if(i>woolCount)throw new Exception();
-                    woolCount -= i;
+                woolCount -= i;
                 break;
         }
     }
 
-    public void decrease(RawMaterialOverview overview) {
+    public void decrease(RawMaterialOverview overview)
+            throws IllegalArgumentException {
         if (this.oreCount < overview.oreCount)
             throw new IllegalArgumentException("Cannot decrease more ore than existing");
 
@@ -265,6 +263,94 @@ public class RawMaterialOverview extends JSONStringBuilder{
         JSONObject json = new JSONObject();
         json.put(Constants.UNKNOWN, getTotalCount());
         return json.toString();
+    }
+
+    //region hasOnly
+    /**
+     * returns true if raw material overview has only raw materials
+     * with a special type and typeCount == count
+     * @param count
+     * @param type
+     * @return
+     */
+    public boolean hasOnly(int count, RawMaterialType type) {
+        int typeCount = getTypeCount(type);
+        return typeCount == count && getTotalCount() == count;
+    }
+
+    /**
+     * returns true if raw material overview has only raw materials
+     * of one raw material type with typeCount == count, otherwise false
+     * @param count
+     * @return
+     */
+    public boolean hasOnly(int count) {
+        return oreCount == count && getTotalCount() == count ||
+                clayCount == count && getTotalCount() == count ||
+                woodCount == count && getTotalCount() == count ||
+                woolCount == count && getTotalCount() == count ||
+                weatCount == count && getTotalCount() == count;
+    }
+
+    /**
+     * returns true if raw material overview contains only raw
+     * materials with a special type
+     * @param type
+     * @return
+     */
+    public boolean hasOnly(RawMaterialType type) {
+        int typeCount = getTypeCount(type);
+        return typeCount == getTotalCount();
+    }
+    //endregion
+
+    public RawMaterialType getType() {
+        RawMaterialType type = RawMaterialType.WATER;
+
+        if (this.hasOnly(RawMaterialType.CLAY))
+            type = RawMaterialType.CLAY;
+
+        else if (this.hasOnly(RawMaterialType.WOOD))
+            type = RawMaterialType.WOOD;
+
+        else if (this.hasOnly(RawMaterialType.WOOL))
+            type = RawMaterialType.WOOL;
+
+        else if (this.hasOnly(RawMaterialType.WEAT))
+            type = RawMaterialType.WEAT;
+
+        else if (this.hasOnly(RawMaterialType.ORE))
+            type = RawMaterialType.ORE;
+
+        return type;
+    }
+
+    /**
+     * returns raw material amount of a special type
+     * @param type
+     * @return
+     */
+    public int getTypeCount(RawMaterialType type) {
+        int typeCount = 0;
+
+        switch (type) {
+            case ORE:
+                typeCount = oreCount;
+                break;
+            case WEAT:
+                typeCount = weatCount;
+                break;
+            case WOOD:
+                typeCount = woodCount;
+                break;
+            case WOOL:
+                typeCount = woolCount;
+                break;
+            case CLAY:
+                typeCount = clayCount;
+                break;
+        }
+        return typeCount;
     }
 }
 

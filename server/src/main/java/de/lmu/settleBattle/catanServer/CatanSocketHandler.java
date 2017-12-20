@@ -2,6 +2,8 @@ package de.lmu.settleBattle.catanServer;
 
 import static de.lmu.settleBattle.catanServer.Constants.*;
 
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.io.IOException;
 import java.util.*;
 
@@ -40,13 +42,8 @@ public class CatanSocketHandler extends TextWebSocketHandler {
         this.sessions = Collections.synchronizedSet(new HashSet<WebSocketSession>());
     }
 
-    public SocketUtils getUtils() {
-        return utils;
-    }
-
-    public GameController getGameCtrl() {
-        return getUtils().getGameCtrl();
-    }
+    public SocketUtils getUtils() { return utils; }
+    public GameController getGameCtrl() { return getUtils().getGameCtrl(); }
 
     //region afterConnectionEstablished
     @Override
@@ -67,19 +64,31 @@ public class CatanSocketHandler extends TextWebSocketHandler {
                         e.getPropertyName(), e.getOldValue(), p.getStatus());
 
                 switch (e.getPropertyName()) {
+
+                    case "Trade Decrease":
+                        RawMaterialOverview costs = (RawMaterialOverview) e.getOldValue();
+                        sendMessageToAll(CatanMessage.costs(utils.toInt(session.getId()),
+                                costs, false));
+                        break;
+                    case "Trade Increase":
+                        RawMaterialOverview harvest = (RawMaterialOverview) e.getOldValue();
+                        sendMessageToAll(CatanMessage.harvest(utils.toInt(session.getId()),
+                                harvest, false));
+                        break;
+
                     //if there was a decrease/increase of raw materials send harvest/cost messages
                     case "RawMaterialIncrease":
-                        RawMaterialOverview harvest = (RawMaterialOverview) e.getOldValue();
+                        RawMaterialOverview harvest2 = (RawMaterialOverview) e.getOldValue();
                         sendMessageToAll(Integer.toHexString(player.getId()),   //parse id back to hex string (session id)
-                                CatanMessage.harvest(player.getId(), harvest, false),
-                                CatanMessage.harvest(player.getId(), harvest, true));
+                                CatanMessage.harvest(player.getId(), harvest2, false),
+                                CatanMessage.harvest(player.getId(), harvest2, true));
                         break;
 
                     case "RawMaterialDecrease":
-                        RawMaterialOverview costs = (RawMaterialOverview) e.getOldValue();
+                        RawMaterialOverview costs2 = (RawMaterialOverview) e.getOldValue();
                         sendMessageToAll(Integer.toHexString(player.getId()),   //parse id back to hex string (session id)
-                                CatanMessage.costs(player.getId(), costs, false),
-                                CatanMessage.costs(player.getId(), costs, true));
+                                CatanMessage.costs(player.getId(), costs2, false),
+                                CatanMessage.costs(player.getId(), costs2, true));
                         break;
                 }
 
@@ -90,6 +99,7 @@ public class CatanSocketHandler extends TextWebSocketHandler {
 
         try {
             utils.getGameCtrl().addPlayer(player);
+
             // sending session id to the client that just connected
             TextMessage verifyProtocol = CatanMessage.serverProtocol();
             System.out.printf("Send Message to %s: %s", player.getId(), verifyProtocol.toString());
@@ -144,6 +154,32 @@ public class CatanSocketHandler extends TextWebSocketHandler {
                 case TOSS_CARDS:
                     OK = utils.tossRawMaterials(session, message);
                     if (!OK) errorMessage = "Die Rohstoffe konnten nicht reduziert werden.";
+                    break;
+
+                case SEA_TRADE:
+                    OK = utils.seatrade(session, message);
+                    if (!OK) errorMessage = "Der Seehandel kann nicht durchgeführt werden";
+                    break;
+
+                case TRD_REQ:
+                    TradeRequest tradeRequest = utils.tradeOffer(session, message);
+                    addTradeRequest(tradeRequest);
+                    break;
+
+                case TRD_RES:
+                    OK = utils.tradeAccepted(session, message);
+                    if (!OK) sendError(session,
+                            "This trade is either already conducted or was cancelled.");
+                    break;
+
+                case TRD_SEL:
+                    OK = utils.tradeConduction(session, message);
+                    if (!OK) sendError(session, "The trade could not be conducted.");
+                    break;
+
+                case TRD_REJ:
+                    OK = utils.tradeCancelled(message);
+                    if (!OK) sendError(session, "This trade request does not exist.");
                     break;
 
                 case END_TURN:
@@ -323,6 +359,33 @@ public class CatanSocketHandler extends TextWebSocketHandler {
             e.printStackTrace();
         }
     }
+    //endregion
+
+    //region trading
+    public void addTradeRequest(TradeRequest tradeRequest) {
+
+        tradeRequest.addPropertyChangeListener(evt -> {
+            TradeRequest trChanged = (TradeRequest)evt.getNewValue();
+            switch(evt.getPropertyName()) {
+                case "TR Accept":
+                    sendMessageToAll(CatanMessage.trade(trChanged, TRD_ACC));
+                    break;
+
+                case "TR Cancel":
+                    sendMessageToAll(CatanMessage.trade(trChanged, TRD_ABORTED));
+                    break;
+
+                case "TR Execute":
+                    sendMessageToAll(CatanMessage.trade(trChanged, TRD_FIN));
+                    break;
+            }
+        });
+
+        utils.getTradeRequests().add(tradeRequest);
+        sendMessageToAll(CatanMessage.trade(tradeRequest, TRD_OFFER));
+    }
+
+
     //endregion
 
     //region sendCostMessages

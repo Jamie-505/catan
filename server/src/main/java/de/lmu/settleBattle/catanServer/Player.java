@@ -6,10 +6,21 @@ import org.json.JSONObject;
 
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
+import java.util.ArrayList;
 
 public class Player extends JSONStringBuilder implements Comparable, Cloneable {
 
+    //region property change listener
     private PropertyChangeSupport changes = new PropertyChangeSupport(this);
+
+    public void addPropertyChangeListener(PropertyChangeListener l) {
+        changes.addPropertyChangeListener(l);
+    }
+
+    public void removePropertyChangeListener(PropertyChangeListener l) {
+        changes.removePropertyChangeListener(l);
+    }
+    //endregion
 
     // region Members
     @Expose
@@ -54,7 +65,7 @@ public class Player extends JSONStringBuilder implements Comparable, Cloneable {
     private DevelopmentCardOverview developmentDeck;
 
     private Building[] buildingStock;
-    private Haven haven;
+    private ArrayList<Haven> havens;
     //endregion
 
     //region Constructors
@@ -78,7 +89,7 @@ public class Player extends JSONStringBuilder implements Comparable, Cloneable {
         this.rawMaterialDeck = new RawMaterialOverview(0);
         this.developmentDeck = new DevelopmentCardOverview(0);
         this.buildingStock = null;
-        this.haven = null;
+        this.havens = new ArrayList<>();
     }
 
     /**
@@ -129,47 +140,66 @@ public class Player extends JSONStringBuilder implements Comparable, Cloneable {
 
     }
 
-    /**
-     * <method name: sendTradeRequest>
-     * <description: player places an offer for other players>
-     * <preconditions: player turn is up and>
-     * <postconditions: trade request is sent>
-     */
-    public TradeRequest sendTradeRequest(TradeRequest tr) { //@return Trade @param TradeRequest
-        //TODO
-        return null;
-    }
-
-    /**
-     * <method name: acceptTradeRequest>
-     * <description: this method is called to accept a trade request>
-     * <preconditions: none>
-     * <postconditions: trade request is accepted>
-     */
-    public void acceptTradeRequest(Object tr) { //@param TradeRequest
-        //TODO
-    }
-
-    /**
-     * <method name: declineTradeRequest>
-     * <description: this method is called to decline a trade request>
-     * <preconditions: none>
-     * <postconditions: none>
-     */
-    public void declineTradeRequest(Object tr) { //@param TradeRequest
-        //TODO
-    }
-
+    //region trade
     /**
      * <method name: trade>
      * <description: none>
      * <preconditions: none>
      * <postconditions: none>
      */
-    public void trade(Object tr) { //@param TradeRequest
-        //TODO
-    }
+    public void trade(RawMaterialOverview offer, RawMaterialOverview request)
+            throws IllegalArgumentException {
 
+        this.rawMaterialDeck.decrease(offer);
+        changes.firePropertyChange("Trade Decrease",
+                offer, this);
+
+        this.rawMaterialDeck.increase(request);
+        changes.firePropertyChange("Trade Increase",
+                request, this);
+    }
+    //endregion
+
+    //region hasXTo1Haven
+    /**
+     * returns if the player can trade 3:1 or 2:1
+     * @param count
+     * @return
+     */
+    public boolean hasXTo1Haven(int count) {
+        if (count != 3 && count !=2)
+            throw new IllegalArgumentException("There is no "+ count + " to 1 haven");
+
+        if (count == 3){
+            for (Haven haven : havens) {
+                if (haven.getHarvest().equals(RawMaterialType.WATER))
+                    return true;
+            }
+        }
+
+        else {
+            for (Haven haven : havens)
+                //if he has any haven which has not the type WATER he can trade 2:1
+                if (!haven.getHarvest().equals(RawMaterialType.WATER))
+                    return true;
+        }
+
+        return false;
+    }
+    //endregion
+
+    public Haven get2To1Haven(RawMaterialType type) {
+
+        if (type.equals(RawMaterialType.WATER))
+            return null;
+
+        for (Haven haven : havens) {
+            if (haven.getHarvest().equals(type))
+                return haven;
+        }
+
+        return null;
+    }
 
     /**
      * <method name: moveRobber>
@@ -193,12 +223,12 @@ public class Player extends JSONStringBuilder implements Comparable, Cloneable {
     }
 
     /**
-     * <method name: has10VectoryPoints>
+     * <method name: has10VictoryPoints>
      * <description: this method checks if the player has at least 10 points>
      * <preconditions: none>
      * <postconditions: none>
      */
-    public boolean has10VectoryPoints() {
+    public boolean has10VictoryPoints() {
         //TODO
         return false;
     }
@@ -213,6 +243,9 @@ public class Player extends JSONStringBuilder implements Comparable, Cloneable {
         this.rawMaterialDeck.increase(overview);
     }
 
+    public boolean hasEnoughRawMaterials(RawMaterialOverview overview) {
+        return this.rawMaterialDeck.canAfford(overview);
+    }
 
     /**
      * Player has to extract half of their cards if
@@ -224,17 +257,21 @@ public class Player extends JSONStringBuilder implements Comparable, Cloneable {
         return rawMaterialDeck.getTotalCount() >= 7 ? true : false;
     }
 
-    /**
-     * <method name: sendChatMessage>
-     * <description: this method sends a chat message from the [???] to the [???]>
-     * <preconditions: none>
-     * <postconditions: message is sent to the [???]>
-     */
-    public void sendChatMessage(String msg) {
-        //TODO
+    //endregion
+
+
+    public boolean canAffordDevCard() {
+        return this.rawMaterialDeck.canAffordDevelopmentCard();
     }
 
-    //endregion
+    public boolean canAfford(Building building) {
+        return this.rawMaterialDeck.canAfford(building);
+    }
+
+    public boolean canAfford(BuildingType type) {
+        return this.rawMaterialDeck.canAfford().contains(type);
+    }
+
 
     //region Properties
 
@@ -278,19 +315,9 @@ public class Player extends JSONStringBuilder implements Comparable, Cloneable {
 
     public void setStatus(String status) {
         String oldStatus = this.status;
-        boolean fire = status.equals(oldStatus) ? false:true;
+        boolean fire = status.equals(oldStatus) ? false : true;
         this.status = status;
-        if (fire) changes.firePropertyChange( "status", oldStatus, this );
-    }
-
-    public void addPropertyChangeListener( PropertyChangeListener l )
-    {
-        changes.addPropertyChangeListener( l );
-    }
-
-    public void removePropertyChangeListener( PropertyChangeListener l )
-    {
-        changes.removePropertyChangeListener( l );
+        if (fire) changes.firePropertyChange("status", oldStatus, this);
     }
 
     /**
@@ -334,10 +361,10 @@ public class Player extends JSONStringBuilder implements Comparable, Cloneable {
      */
 
     public void setColor(Color color) {
-        boolean fire = color.equals(this.color) ? false:true;
+        boolean fire = color.equals(this.color) ? false : true;
         this.color = color;
         if (fire)
-            changes.firePropertyChange( "color", "null", this );
+            changes.firePropertyChange("color", "null", this);
     }
 
     /**
@@ -382,19 +409,6 @@ public class Player extends JSONStringBuilder implements Comparable, Cloneable {
     public void setGreatestArmy(boolean boo) {
         this.greatestArmy = boo;
     }
-
-    public boolean canAffordDevCard() {
-        return this.rawMaterialDeck.canAffordDevelopmentCard();
-    }
-
-    public boolean canAfford(Building building) {
-        return this.rawMaterialDeck.canAfford(building);
-    }
-
-    public boolean canAfford(BuildingType type) {
-        return this.rawMaterialDeck.canAfford().contains(type);
-    }
-
     //endregion
 
     @Override
@@ -422,7 +436,7 @@ public class Player extends JSONStringBuilder implements Comparable, Cloneable {
     }
 
     @Override
-    public Object clone() throws CloneNotSupportedException{
+    public Object clone() throws CloneNotSupportedException {
         return super.clone();
     }
 }

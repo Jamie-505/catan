@@ -46,4 +46,10 @@ public enum RawMaterialType {
 
         }
     }
+
+    public boolean isValidTradingType() {
+        return this.equals(RawMaterialType.CLAY) || this.equals(RawMaterialType.ORE) ||
+                this.equals(RawMaterialType.WEAT) || this.equals(RawMaterialType.WOOL) ||
+                this.equals(RawMaterialType.WOOD);
+    }
 }

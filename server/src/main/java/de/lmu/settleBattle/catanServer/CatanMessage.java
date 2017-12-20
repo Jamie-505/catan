@@ -47,6 +47,14 @@ public class CatanMessage {
     }
     //endregion
 
+    public static TradeRequest seatradeToTradeRequest(
+            String tradeType, TextMessage message) {
+        JSONObject json = JSONUtils.createJSON(message);
+
+        return SocketUtils.gson.fromJson(
+                json.getJSONObject(tradeType).toString(),
+                TradeRequest.class);
+    }
 
     //region newBuildingToBuilding
     public static Building newBuildingToBuilding(TextMessage message) {
@@ -260,26 +268,10 @@ public class CatanMessage {
     }
     //endregion
 
-    //region trading
-
-    public static TextMessage newTradeRequest(TradeRequest tr) {
+    //region trade
+    public static TextMessage trade(TradeRequest tr, String tradeAction) {
         JSONObject payload = tr.toJSON();
-        return new TextMessage(JSONUtils.setJSONType(Constants.TRD_OFFER, payload).toString());
-    }
-
-    public static TextMessage tradeRequestAccepted(TradeRequest tr) {
-        JSONObject payload = tr.toJSON();
-        return new TextMessage(JSONUtils.setJSONType(Constants.TRD_ACC, payload).toString());
-    }
-
-    public static TextMessage tradePerformed(TradeRequest tr) {
-        JSONObject payload = tr.toJSON();
-        return new TextMessage(JSONUtils.setJSONType(Constants.TRD_FIN, payload).toString());
-    }
-
-    public static TextMessage tradeCancelled(TradeRequest tr) {
-        JSONObject payload = tr.toJSON();
-        return new TextMessage(JSONUtils.setJSONType(Constants.TRD_ABORTED, payload).toString());
+        return new TextMessage(JSONUtils.setJSONType(tradeAction, payload).toString());
     }
     //endregion
 

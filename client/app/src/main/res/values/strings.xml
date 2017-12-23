@@ -39,5 +39,6 @@
   <string name="wait_for_other_players">Warte auf andere Spieler…</string>
   <string name="offer_resource">Tausche</string>
   <string name="request_trade">gegen</string>
+  <string name="ok">OK</string>
 
 </resources>

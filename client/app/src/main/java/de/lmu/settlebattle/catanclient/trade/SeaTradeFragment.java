@@ -12,23 +12,18 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.Spinner;
 import de.lmu.settlebattle.catanclient.MainActivity;
+import de.lmu.settlebattle.catanclient.MainActivityFragment;
 import de.lmu.settlebattle.catanclient.R;
 
 
-public class SeaTradeFragment extends Fragment {
+public class SeaTradeFragment extends MainActivityFragment {
 
   MainActivity mainActivity;
 
   @Override
-  public void onCreate(Bundle savedInstance) {
-    super.onCreate(savedInstance);
-
-  }
-
-  @Override
   public View onCreateView(LayoutInflater inflater, ViewGroup container,
       Bundle savedInstanceState) {
-    View fragmentView = inflater.inflate(R.layout.sea_trade_fragement_view, container, false);
+    View fragmentView = inflater.inflate(R.layout.fragment_sea_trade, container, false);
     // Inflate the layout for this fragment
     mainActivity = (MainActivity) getActivity();
 
@@ -51,7 +46,6 @@ public class SeaTradeFragment extends Fragment {
       sendTradeRequest(offer, req);
     });
 
-
     return fragmentView;
   }
 
@@ -62,12 +56,5 @@ public class SeaTradeFragment extends Fragment {
 
     String tradeMsg = createJSONString(SEA_TRADE, seaTrade);
     mainActivity.mService.sendMessage(tradeMsg);
-  }
-
-  public static SeaTradeFragment newInstance() {
-    SeaTradeFragment seaTradeFragment = new SeaTradeFragment();
-    Bundle args = new Bundle();
-    seaTradeFragment.setArguments(args);
-    return seaTradeFragment;
   }
 }

@@ -87,6 +87,86 @@ public class WebSocketService extends Service {
     return false;
   }
 
+  private void broadcast(Intent intent) {
+    localBroadcastManager.sendBroadcast(intent);
+  }
+
+  private void broadcast(String action) {
+    localBroadcastManager.sendBroadcast(new Intent(action));
+  }
+
+  private void messageReceived(String message) {
+    Object[] mail = JSONUtils.parse(message);
+    Player player;
+    switch (mail[0].toString()) {
+      case BUILD_TRADE:
+        player = (Player) mail[1];
+        if (player.id == storage.getSessionId()) {
+          // should cause select player activity so switch to lobby
+          storage.storePlayer(player);
+        } else {
+          storage.storeOpponent(player);
+          // updates lobby with latest data
+        }
+        broadcast(PLAYER_UPDATE);
+        break;
+      case DICE_RESULT:
+        Intent diceResult = new Intent(DICE_RESULT);
+        diceResult.putExtra(DICE_THROW, mail[1].toString());
+        broadcast(diceResult);
+        break;
+      case ERROR:
+        displayError(mail[1].toString());
+        break;
+      case GAME_READY:
+        player = (Player) mail[1];
+        if (player.id == storage.getSessionId()) {
+          // should cause select player activity so switch to lobby
+          storage.storePlayer(player);
+          broadcast(NEXT_ACTIVITY);
+        } else {
+          storage.storeOpponent(player);
+          // updates lobby with latest data
+          broadcast(PLAYER_UPDATE);
+        }
+        break;
+      case GAME_START:
+        broadcast(GAME_START);
+        break;
+      case GAME_WAIT:
+        player = (Player) mail[1];
+        if (player.id == storage.getSessionId()) {
+          // should cause select player activity so switch to lobby
+          storage.storePlayer(player);
+        } else {
+          storage.storeOpponent(player);
+          // updates lobby with latest data
+        }
+        broadcast(PLAYER_WAIT);
+        break;
+      case OK:
+        broadcast(OK);
+        break;
+      case ROLL_DICE:
+        player = (Player) mail[1];
+        if (player.id == storage.getSessionId()) {
+          broadcast(ROLL_DICE);
+        } else {
+          broadcast(PLAYER_WAIT);
+        }
+        break;
+      case TO_SERVER:
+        broadcast(PROTOCOL_SUPPORTED);
+        webSocketClient.send(mail[1].toString());
+        break;
+      case TO_STORAGE:
+        Log.d(TAG, ((Player) mail[1]).id + " --> TO_STORAGE");
+        storage.storePlayer((Player) mail[1]);
+        break;
+      default:
+        break;
+    }
+  }
   private void startSocket() {
     URI uri;
     try{
@@ -129,71 +209,6 @@ public class WebSocketService extends Service {
     }
   }
 
-  private void messageReceived(String message) {
-    Object[] mail = JSONUtils.parse(message);
-    Player player;
-    Intent intent;
-    switch (mail[0].toString()) {
-      case BUILD_TRADE:
-        player = (Player) mail[1];
-        if (player.id == storage.getSessionId()) {
-          // should cause select player activity so switch to lobby
-          storage.storePlayer(player);
-        } else {
-          storage.storeOpponent(player);
-          // updates lobby with latest data
-        }
-        intent = new Intent(PLAYER_UPDATE);
-        localBroadcastManager.sendBroadcast(intent);
-        break;
-      case GAME_READY:
-        player = (Player) mail[1];
-        if (player.id == storage.getSessionId()) {
-          // should cause select player activity so switch to lobby
-          storage.storePlayer(player);
-          intent = new Intent(NEXT_ACTIVITY);
-        } else {
-          storage.storeOpponent(player);
-          // updates lobby with latest data
-          intent = new Intent(PLAYER_UPDATE);
-        }
-        localBroadcastManager.sendBroadcast(intent);
-        break;
-      case GAME_START:
-        intent = new Intent(GAME_START);
-        localBroadcastManager.sendBroadcast(intent);
-        break;
-      case GAME_WAIT:
-        player = (Player) mail[1];
-        if (player.id == storage.getSessionId()) {
-          // should cause select player activity so switch to lobby
-          storage.storePlayer(player);
-        } else {
-          storage.storeOpponent(player);
-          // updates lobby with latest data
-        }
-        intent = new Intent(PLAYER_WAIT);
-        localBroadcastManager.sendBroadcast(intent);
-        break;
-      case OK:
-        intent = new Intent(OK);
-        localBroadcastManager.sendBroadcast(intent);
-        break;
-      case TO_SERVER:
-        Intent protocolIntent = new Intent(PROTOCOL_SUPPORTED);
-        localBroadcastManager.sendBroadcast(protocolIntent);
-        webSocketClient.send(mail[1].toString());
-        break;
-      case TO_STORAGE:
-        Log.d(TAG, ((Player) mail[1]).id + " --> TO_STORAGE");
-        storage.storePlayer((Player) mail[1]);
-        break;
-      case ERROR:
-        displayError(mail[1].toString());
-      default:
-        break;
-    }
-  }
 
   /**
    * broadcasts errors to any Activity so they can be displayed
@@ -215,6 +230,7 @@ public class WebSocketService extends Service {
     Log.d(TAG, "Send to server -> " + jsonMsg);
     webSocketClient.send(jsonMsg);
   }
+
 
   public final class WebSocketsBinder extends Binder {
     public WebSocketService getService() {

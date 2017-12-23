@@ -3,6 +3,7 @@ package de.lmu.settlebattle.catanclient.utils;
 import static de.lmu.settlebattle.catanclient.utils.Constants.*;
 
 import com.google.gson.Gson;
+import de.lmu.settlebattle.catanclient.dice.Dice;
 import de.lmu.settlebattle.catanclient.player.Player;
 import de.lmu.settlebattle.catanclient.utils.Message.Error;
 import java.util.HashMap;
@@ -28,26 +29,28 @@ public class JSONUtils {
       String msgType = jObj.keys().next();
 
       switch (msgType) {
-        case HANDSHAKE:
-          return completeHandshake(jObj.getJSONObject(HANDSHAKE));
+        case DICE_RESULT:
+          String dice = jObj.getString(DICE_RESULT);
+          return new String[] { DICE_RESULT, dice };
+        case ERROR:
+          Error error = gson.fromJson(jObj.getString(ERROR), Error.class);
+          return displayError(error.Message);
+        case GAME_START:
+          return new String[] { GAME_START };
         case GET_ID:
           Player player = gson.fromJson(jObj.getString(GET_ID), Player.class);
           return new Object[] { TO_STORAGE, player };
+        case HANDSHAKE:
+          return completeHandshake(jObj.getJSONObject(HANDSHAKE));
+        case SERVER_RES:
+          return new String[] { OK };
         case STATUS_UPD:
           JSONObject status = jObj.getJSONObject(STATUS_UPD);
           player = gson.fromJson(status.getString(PLAYER), Player.class);
           return handleStatusUpdate(player);
-        case GAME_START:
-          return new String[] { GAME_START };
-        case ERROR:
-          Error error = gson.fromJson(jObj.getString(ERROR), Error.class);
-          return displayError(error.Message);
-        case SERVER_RES:
-          return new String[] { OK };
         default:
           return displayError("Protokoll wird nicht unterstützt");
       }
-
     } catch (Exception e) {
       e.printStackTrace();
     }
@@ -59,6 +62,8 @@ public class JSONUtils {
     switch (status) {
       case GAME_START:
         return new String[] { GAME_START };
+      case ROLL_DICE:
+        return new Object[] { ROLL_DICE, player };
       default:
         return new Object[] { player.status, player };
     }
@@ -74,13 +79,9 @@ public class JSONUtils {
         HashMap<String, String> clientInfo = new HashMap<>();
         clientInfo.put("Version", VERSION_CLIENT);
         String msg = createJSONString(HANDSHAKE, clientInfo);
-
         return new String[] { TO_SERVER, msg };
       }
-
       return new String[] { ERROR, PROTOCOL_MISSMATCH };
-
-
     } catch (Exception e) {
       e.printStackTrace();
     }

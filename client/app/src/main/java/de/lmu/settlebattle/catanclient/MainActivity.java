@@ -3,6 +3,7 @@ package de.lmu.settlebattle.catanclient;
 import static de.lmu.settlebattle.catanclient.utils.Constants.*;
 
 import android.app.Fragment;
+import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -21,9 +22,11 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
 
+import de.lmu.settlebattle.catanclient.dice.DiceResultFragment;
 import de.lmu.settlebattle.catanclient.grid.Cube;
 import de.lmu.settlebattle.catanclient.grid.DemoObjects;
 import de.lmu.settlebattle.catanclient.grid.Hex;
@@ -31,42 +34,39 @@ import de.lmu.settlebattle.catanclient.grid.Grid;
 import de.lmu.settlebattle.catanclient.grid.StorageMap;
 import de.lmu.settlebattle.catanclient.player.Storage;
 import de.lmu.settlebattle.catanclient.trade.SeaTradeFragment;
+import de.lmu.settlebattle.catanclient.utils.JSONUtils;
 
 public class MainActivity extends BaseSocketActivity {
 
   // LogCat tag
   private static final String TAG = MainActivity.class.getSimpleName();
-  private static final String SEA_TRADE_FRAGMENT = "seaTradeFragment";
 
-  private RelativeLayout mRelativeLayout;
   private Storage storage ;
-  SeaTradeFragment seaTradeFragment = new SeaTradeFragment();
   private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
     @Override
     public void onReceive(Context context, Intent intent) {
-      String action = intent.getAction();
-      switch (action) {
-        case DISPLAY_ERROR:
-          displayError(intent.getStringExtra(ERROR_MSG));
-          break;
-        case OK:
-          hideFragment(seaTradeFragment);
-          break;
-        case PLAYER_UPDATE:
-          Log.d(TAG, storage.getAllPlayers());
-          // TODO update the player views
-          break;
-
-      }
+      reactToIntent(intent);
     }
   };
 
-  private void hideFragment(Fragment fragment) {
-    FragmentTransaction ft = getFragmentManager().beginTransaction();
-    ft.hide(fragment);
-    ft.commit();
+  // Visual Elements
+  private Button bauenBtn;
+  private Button handelnBtn;
+  private DiceResultFragment diceFragment = new DiceResultFragment();
+  private FragmentManager fragmentManager = getFragmentManager();
+  private ImageButton diceBtn;
+  private RelativeLayout mRelativeLayout;
+  private SeaTradeFragment seaTradeFragment = new SeaTradeFragment();
 
+  @Override
+  public void onBackPressed() {
+    if (fragmentManager.getBackStackEntryCount() > 0) {
+      fragmentManager.popBackStack();
+    } else {
+      super.onBackPressed();
+    }
   }
+
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -75,20 +75,12 @@ public class MainActivity extends BaseSocketActivity {
     storage = new Storage(this);
     setIntentFilters();
 
-    Button handelnBtn = (Button) findViewById(R.id.handeln_button);
-    Button bauenBtn = (Button) findViewById(R.id.bauen_button);
+    handelnBtn = (Button) findViewById(R.id.handeln_button);
+    bauenBtn = (Button) findViewById(R.id.bauen_button);
     mRelativeLayout = (RelativeLayout) findViewById(R.id.gridLayout);
-    seaTradeFragment = new SeaTradeFragment();
+    diceBtn = (ImageButton) findViewById(R.id.throwDiceBtn);
 
-    handelnBtn.setOnClickListener((View v) -> {
-      FragmentTransaction ft = getFragmentManager().beginTransaction();
-      if (getFragmentManager().findFragmentByTag(SEA_TRADE_FRAGMENT) == null) {
-        ft.add(R.id.fragmentContainer, seaTradeFragment, SEA_TRADE_FRAGMENT);
-      } else {
-        ft.show(seaTradeFragment);
-      }
-      ft.commit();
-    });
+    setClickListener();
 
     int radius = 3;
 
@@ -100,13 +92,33 @@ public class MainActivity extends BaseSocketActivity {
     initGridView(radius);
   }
 
-  private void setIntentFilters() {
-    IntentFilter filter = new IntentFilter();
-    filter.addAction(PLAYER_UPDATE);
-    filter.addAction(OK);
-    filter.addAction(DISPLAY_ERROR);
-    LocalBroadcastManager.getInstance(this)
-        .registerReceiver(broadcastReceiver, filter);
+  private void addViewToLayout(View view, Hex hex, Grid grid) {
+    //Add to view
+    RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(grid.width, grid.height);
+    params.addRule(RelativeLayout.RIGHT_OF, R.id.centerLayout);
+    params.addRule(RelativeLayout.BELOW, R.id.centerLayout);
+    mRelativeLayout.addView(view, params);
+
+    //Set coordinates
+    Point p = grid.hexToPixel(hex);
+    params.leftMargin = -grid.centerOffsetX + p.x;
+    params.topMargin = -grid.centerOffsetY + p.y;
+  }
+
+  public void displayError(String eMsg){
+    View layout = findViewById(R.id.contain);
+    Snackbar snackbar = Snackbar.make(layout, eMsg, Snackbar.LENGTH_LONG);
+    snackbar.show();
+  }
+
+  private void hideActiveElements() {
+    diceBtn.setVisibility(View.INVISIBLE);
+  }
+
+  private void hideFragment(Fragment fragment) {
+    FragmentTransaction ft = fragmentManager.beginTransaction();
+    ft.hide(fragment);
+    ft.commit();
   }
 
   private void initGridView(int radius) {
@@ -114,6 +126,78 @@ public class MainActivity extends BaseSocketActivity {
 
     //Init node elements
     Grid grid = setGridNodes(radius, scale);
+  }
+
+  private void OnGridHexClick(Hex hex) {
+    Toast.makeText(MainActivity.this, "Es wurde: " + hex + "gedrückt.", Toast.LENGTH_SHORT).show();
+  }
+
+  private void reactToIntent(Intent intent) {
+    String action = intent.getAction();
+    if (action != null) {
+      switch (action) {
+        case DICE_RESULT:
+          Bundle diceBundle = new Bundle();
+          diceBundle.putString(DICE_THROW, intent.getStringExtra(DICE_THROW));
+          diceFragment.setArguments(diceBundle);
+          showFragment(diceFragment);
+          break;
+        case DISPLAY_ERROR:
+          displayError(intent.getStringExtra(ERROR_MSG));
+          break;
+        case OK:
+          hideFragment(seaTradeFragment);
+          break;
+        case PLAYER_UPDATE:
+          Log.d(TAG, storage.getAllPlayers());
+          // TODO update the player views
+          break;
+        case PLAYER_WAIT:
+          hideActiveElements();
+        case ROLL_DICE:
+          showView(diceBtn);
+          break;
+      }
+    } else {
+      Log.e(TAG, "Received intend had no action");
+    }
+  }
+
+  public Bitmap rotateBitmap(Bitmap original, float degrees) {
+    int width = original.getWidth();
+    int height = original.getHeight();
+
+    Matrix matrix = new Matrix();
+    matrix.preRotate(degrees);
+
+    Bitmap rotatedBitmap = Bitmap.createBitmap(original, 0, 0, width, height, matrix, true);
+    Canvas canvas = new Canvas(rotatedBitmap);
+    canvas.drawBitmap(original, 5.0f, 0.0f, null);
+
+    return rotatedBitmap;
+  }
+
+  private void setClickListener() {
+    handelnBtn.setOnClickListener((View v) -> {
+      showFragment(seaTradeFragment);
+    });
+
+    diceBtn.setOnClickListener((View v) -> {
+      String diceMsg = JSONUtils.createJSONString(ROLL_DICE, new Object());
+      mService.sendMessage(diceMsg);
+    });
+  }
+
+  private void setIntentFilters() {
+    IntentFilter filter = new IntentFilter();
+    filter.addAction(DISPLAY_ERROR);
+    filter.addAction(OK);
+    filter.addAction(PLAYER_UPDATE);
+    filter.addAction(PLAYER_WAIT);
+    filter.addAction(ROLL_DICE);
+    filter.addAction(DICE_RESULT);
+    LocalBroadcastManager.getInstance(this)
+        .registerReceiver(broadcastReceiver, filter);
   }
 
   private int setGridDimensions(int radius) {
@@ -142,21 +226,6 @@ public class MainActivity extends BaseSocketActivity {
     params.height = Grid.getGridHeight(radius, scale);
 
     return scale;
-  }
-
-
-  public Bitmap rotateBitmap(Bitmap original, float degrees) {
-    int width = original.getWidth();
-    int height = original.getHeight();
-
-    Matrix matrix = new Matrix();
-    matrix.preRotate(degrees);
-
-    Bitmap rotatedBitmap = Bitmap.createBitmap(original, 0, 0, width, height, matrix, true);
-    Canvas canvas = new Canvas(rotatedBitmap);
-    canvas.drawBitmap(original, 5.0f, 0.0f, null);
-
-    return rotatedBitmap;
   }
 
   private Grid setGridNodes(int radius, int scale) {
@@ -230,26 +299,18 @@ public class MainActivity extends BaseSocketActivity {
     return null;
   }
 
-  private void addViewToLayout(View view, Hex hex, Grid grid) {
-    //Add to view
-    RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(grid.width, grid.height);
-    params.addRule(RelativeLayout.RIGHT_OF, R.id.centerLayout);
-    params.addRule(RelativeLayout.BELOW, R.id.centerLayout);
-    mRelativeLayout.addView(view, params);
-
-    //Set coordinates
-    Point p = grid.hexToPixel(hex);
-    params.leftMargin = -grid.centerOffsetX + p.x;
-    params.topMargin = -grid.centerOffsetY + p.y;
+  private void showFragment(MainActivityFragment f) {
+    FragmentTransaction ft = fragmentManager.beginTransaction();
+    ft.addToBackStack(f.tag());
+    if (fragmentManager.findFragmentByTag(f.tag()) == null) {
+      ft.add(R.id.fragmentContainer, f, f.tag());
+    } else {
+      ft.show(f);
+    }
+    ft.commit();
   }
 
-  private void OnGridHexClick(Hex hex) {
-    Toast.makeText(MainActivity.this, "Es wurde: " + hex + "gedrückt.", Toast.LENGTH_SHORT).show();
-  }
-
-  public void displayError(String eMsg){
-    View layout = findViewById(R.id.contain);
-    Snackbar snackbar = Snackbar.make(layout, eMsg, Snackbar.LENGTH_LONG);
-    snackbar.show();
+  private void showView(View v) {
+    v.setVisibility(View.VISIBLE);
   }
 }

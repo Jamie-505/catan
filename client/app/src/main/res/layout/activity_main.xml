@@ -40,6 +40,18 @@
 
   </com.otaliastudios.zoom.ZoomLayout>
 
+  <!--android:visibility="invisible"-->
+  <ImageButton
+    android:id="@+id/throwDiceBtn"
+    android:layout_width="65dp"
+    android:layout_height="65dp"
+    android:layout_marginBottom="8dp"
+    android:layout_marginStart="8dp"
+    android:scaleType="fitCenter"
+    app:layout_constraintBottom_toTopOf="@+id/bauen_button"
+    app:layout_constraintStart_toStartOf="parent"
+    app:srcCompat="@drawable/throw_dice" />
+
   <Button
     android:id="@+id/bauen_button"
     style="@style/Widget.AppCompat.Button.Colored"

@@ -77,6 +77,7 @@ public final class Constants {
   public final static String CARD = "Karte";
   public final static String CITY = "Stadt";
   public final static String CLAY = "Lehm";
+  public final static String DICE_THROW = "Wurf";
   public final static String HAVEN = "Hafen";
   public final static String KNIGHT = "Ritter";
   public final static String MONOPOLE = "Monopol";

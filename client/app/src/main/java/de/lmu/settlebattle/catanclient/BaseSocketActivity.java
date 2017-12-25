@@ -10,6 +10,7 @@ import android.os.IBinder;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import de.lmu.settlebattle.catanclient.network.WebSocketService;
+import de.lmu.settlebattle.catanclient.player.Storage;
 
 public abstract class BaseSocketActivity extends AppCompatActivity {
 

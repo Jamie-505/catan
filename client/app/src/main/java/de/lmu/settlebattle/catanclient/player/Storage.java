@@ -76,4 +76,8 @@ public class Storage {
     }
     return gson.toJson(allPlayers);
   }
+
+  public void clear() {
+    sharedPrefs.edit().clear().apply();
+  }
 }

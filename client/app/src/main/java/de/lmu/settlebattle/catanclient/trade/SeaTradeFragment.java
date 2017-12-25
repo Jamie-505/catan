@@ -3,7 +3,6 @@ package de.lmu.settlebattle.catanclient.trade;
 import static de.lmu.settlebattle.catanclient.utils.Constants.SEA_TRADE;
 import static de.lmu.settlebattle.catanclient.utils.JSONUtils.createJSONString;
 
-import android.app.Fragment;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -52,7 +51,7 @@ public class SeaTradeFragment extends MainActivityFragment {
   private void sendTradeRequest(String offerRes, String reqRes) {
     RawMaterialOverview offer = new RawMaterialOverview(offerRes, 1);
     RawMaterialOverview req = new RawMaterialOverview(reqRes, 1);
-    SeaTrade seaTrade = new SeaTrade(offer, req);
+    Trade seaTrade = new Trade(offer, req);
 
     String tradeMsg = createJSONString(SEA_TRADE, seaTrade);
     mainActivity.mService.sendMessage(tradeMsg);

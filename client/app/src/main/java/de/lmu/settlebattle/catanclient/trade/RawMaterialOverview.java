@@ -14,8 +14,8 @@ public class RawMaterialOverview {
   @SerializedName(WOOL)
   private int woolCount;
 
-  @SerializedName(WEAT)
-  private int weatCount;
+  @SerializedName(WHEAT)
+  private int wheatCount;
 
   @SerializedName(ORE)
   private int oreCount;
@@ -23,27 +23,35 @@ public class RawMaterialOverview {
   //region Constructors
   public RawMaterialOverview() {
     this.clayCount = this.oreCount = this.woodCount =
-        this.woolCount = this.weatCount = 0;
+        this.woolCount = this.wheatCount = 0;
   }
 
   public RawMaterialOverview(int initAmount) {
     this.clayCount = this.oreCount = this.woodCount =
-        this.woolCount = this.weatCount = initAmount;
+        this.woolCount = this.wheatCount = initAmount;
   }
 
-  public RawMaterialOverview(int clay, int ore, int wood, int wool, int weat) {
+  public RawMaterialOverview(int clay, int ore, int wheat, int wood, int wool) {
     this.clayCount = clay;
     this.oreCount = ore;
     this.woodCount = wood;
     this.woolCount = wool;
-    this.weatCount = weat;
+    this.wheatCount = wheat;
+  }
+
+  public RawMaterialOverview(int[] qnts) {
+    this.clayCount = qnts[0];
+    this.oreCount = qnts[1];
+    this.wheatCount = qnts[2];
+    this.woodCount = qnts[3];
+    this.woolCount = qnts[4];
   }
 
   public RawMaterialOverview(String type, int initAmount) {
     this();
     switch (type) {
-      case WEAT:
-        weatCount = initAmount;
+      case WHEAT:
+        wheatCount = initAmount;
         break;
       case CLAY:
         clayCount = initAmount;
@@ -58,5 +66,9 @@ public class RawMaterialOverview {
         woodCount = initAmount;
         break;
     }
+  }
+
+  public int[] getQnts() {
+    return new int[] { this.clayCount, this.oreCount, this.wheatCount, this.woodCount, this.woolCount };
   }
 }

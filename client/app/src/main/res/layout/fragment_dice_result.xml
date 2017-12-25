@@ -1,45 +1,40 @@
 <?xml version="1.0" encoding="utf-8"?>
 <android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
   xmlns:app="http://schemas.android.com/apk/res-auto"
-  xmlns:tools="http://schemas.android.com/tools"
-  android:id="@+id/diceContainer"
   android:layout_width="wrap_content"
-  android:layout_height="wrap_content"
-  tools:layout_editor_absoluteY="25dp">
+  android:layout_height="wrap_content">
 
   <!-- this part disables the clicking on the tiles behind the fragment -->
   <android.support.constraint.ConstraintLayout
-    android:id="@+id/diceSum"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:layout_marginTop="24dp"
+    android:layout_width="0dp"
+    android:layout_height="0dp"
     android:clickable="true"
     android:focusable="true"
-    android:minHeight="25dp"
-    android:visibility="visible"
-    app:layout_constraintBottom_toBottomOf="@id/constraintLayout"
-    app:layout_constraintTop_toTopOf="@id/constraintLayout" />
-
-  <android.support.constraint.ConstraintLayout
-    android:id="@+id/constraintLayout"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:layout_marginStart="8dp"
-    android:layout_marginEnd="8dp"
-    app:layout_constraintBottom_toBottomOf="@id/diceContainer"
+    app:layout_constraintBottom_toBottomOf="parent"
     app:layout_constraintEnd_toEndOf="parent"
     app:layout_constraintStart_toStartOf="parent"
-    app:layout_constraintTop_toTopOf="@id/diceContainer">
+    app:layout_constraintTop_toTopOf="parent" />
+
+  <android.support.constraint.ConstraintLayout
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    app:layout_constraintBottom_toBottomOf="parent"
+    app:layout_constraintEnd_toEndOf="parent"
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintTop_toTopOf="parent">
 
     <TextView
       android:id="@+id/diceSumTxt"
       android:layout_width="wrap_content"
-      android:layout_height="16dp"
+      android:layout_height="wrap_content"
+      android:text="7"
       android:layout_marginTop="8dp"
+      android:layout_marginBottom="8dp"
       android:layout_marginStart="8dp"
       android:layout_marginEnd="8dp"
       android:ems="25"
       android:textAlignment="center"
+      app:layout_constraintBottom_toTopOf="@+id/dice1Image"
       app:layout_constraintEnd_toEndOf="parent"
       app:layout_constraintStart_toStartOf="parent"
       app:layout_constraintTop_toTopOf="parent" />
@@ -48,14 +43,11 @@
       android:id="@+id/dice1Image"
       android:layout_width="86dp"
       android:layout_height="86dp"
-      android:layout_marginTop="16dp"
+      android:layout_marginTop="8dp"
       android:layout_marginBottom="8dp"
-      android:layout_marginStart="16dp"
-      android:layout_marginEnd="8dp"
-      android:layout_marginLeft="16dp"
+      android:layout_marginStart="8dp"
       app:layout_constraintBottom_toTopOf="@+id/diceOkBtn"
       app:layout_constraintEnd_toStartOf="@+id/dice2Image"
-      app:layout_constraintLeft_toLeftOf="parent"
       app:layout_constraintStart_toStartOf="parent"
       app:layout_constraintTop_toBottomOf="@+id/diceSumTxt"
       app:srcCompat="@drawable/dice1" />
@@ -65,11 +57,11 @@
       android:layout_width="86dp"
       android:layout_height="86dp"
       android:layout_marginTop="8dp"
-      android:layout_marginEnd="16dp"
-      android:layout_marginRight="24dp"
+      android:layout_marginBottom="8dp"
+      android:layout_marginEnd="8dp"
       app:layout_constraintBottom_toTopOf="@+id/diceOkBtn"
       app:layout_constraintEnd_toEndOf="parent"
-      app:layout_constraintRight_toRightOf="parent"
+      app:layout_constraintStart_toEndOf="@+id/dice1Image"
       app:layout_constraintTop_toBottomOf="@+id/diceSumTxt"
       app:srcCompat="@drawable/dice2" />
 
@@ -77,13 +69,12 @@
       android:id="@+id/diceOkBtn"
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
-      android:layout_marginTop="8dp"
       android:layout_marginBottom="8dp"
       android:text="@string/ok"
       app:layout_constraintBottom_toBottomOf="parent"
       app:layout_constraintLeft_toLeftOf="parent"
       app:layout_constraintRight_toRightOf="parent"
-      app:layout_constraintTop_toBottomOf="@+id/dice2Image" />
+      app:layout_constraintTop_toBottomOf="@id/dice2Image"/>
 
   </android.support.constraint.ConstraintLayout>
 

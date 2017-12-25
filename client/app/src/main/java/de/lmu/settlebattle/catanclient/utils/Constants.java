@@ -4,12 +4,6 @@ import de.lmu.settlebattle.catanclient.AppConfig;
 
 public final class Constants {
 
-  // Colors
-  public static final String BLUE = "Blau";
-  public static final String ORANGE = "Orange";
-  public static final String RED = "Rot";
-  public static final String WHITE = "Weiß";
-
   // Message Type Constants
   public static final String BUILD = "Bauen";
   public static final String CARD_BUY = "Entwicklungskarte kaufen";
@@ -34,6 +28,7 @@ public final class Constants {
   public static final String LONGEST_RD = "Längste Handelsstrasse";
   public static final String MONOPOL = "Monopol";
   public static final String NEW_BUILDING ="Bauvorgang";
+  public static final String OPPONENT ="Mitspieler";
   public static final String PLAYER = "Spieler";
   public static final String ROBBER_AT = "Räuber versetzt";
   public static final String ROBBER_TO ="Räuber versetzten";
@@ -44,14 +39,17 @@ public final class Constants {
   public static final String ERROR_COLOR = "Farbe bereits"; //genutzt
 	public static final String ERROR_NAME = "Name bereits"; //genutzt
   public static final String TOSS_CARD = "Karte abgeben";
+  public static final String TRADE = "trade";
   public static final String TRD_ABORTED = "Handelsangebot abgebrochen";
   public static final String TRD_ACC = "Handelsangebot angenommen";
   public static final String TRD_FIN = "Handel ausgefuehrt";
+  public static final String TRD_ID = "Handel id";
   public static final String TRD_OFFER = "Handelsangebot";
   public static final String TRD_REJ = "Handel abbrechen";
   public static final String TRD_REQ = "Handel anbieten";
   public static final String TRD_RES = "Handel annehmen";
   public static final String TRD_SEL = "Handel abschliessen";
+  public static final String TRD_SENT = "Handel wird angeboten";
   public static final String VICTORY_PTS = "Siegpunkte";
 
   // Broadcast
@@ -61,7 +59,7 @@ public final class Constants {
   public static final String ACTION_MSG_TO_SEND = "sendMsg";
   public static final String ACTION_NAME_ASSIGNED = "nameAssigned";
   public static final String ACTION_NETWORK_STATE_CHANGED = "networkStateChanged";
-  public static final String DISPLAY_ERROR = "displayError";
+  public static final String DISPLAY_ERROR = "displayMessage";
 	public static final String ERROR_MSG = "errorMsg";
   public static final String NEXT_ACTIVITY = "nextActivity";
   public static final String OK = "ok";
@@ -74,6 +72,7 @@ public final class Constants {
   public static final String PROTOCOL_MISSMATCH = "Protocol Version Unsupported";
 
   // Message Objects
+  public final static String ACCEPT = "Annehmen";
   public final static String CARD = "Karte";
   public final static String CITY = "Stadt";
   public final static String CLAY = "Lehm";
@@ -95,7 +94,7 @@ public final class Constants {
   public final static String TYPE = "Typ";
   public final static String UNKNOWN = "Unbekannt";
   public final static String VICTORY_PT = "Siegpunkt";
-  public final static String WEAT = "Getreide";
+  public final static String WHEAT = "Getreide";
   public final static String WINNER = "Sieger";
   public final static String WOOD = "Holz";
   public final static String WOOL = "Wolle";

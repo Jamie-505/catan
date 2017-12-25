@@ -3,7 +3,7 @@
   <string name="author_name">By SettleBattle</string>
   <string name="btn_join">Beitreten</string>
   <string name="btn_send">Send</string>
-  <string name="btn_connect">Verbindung wird hergestellt</string>
+  <string name="btn_connect">Verbindung wird hergestellt…</string>
   <string name="chat_history">Chat History</string>
   <string name="enter_name">Enter your name</string>
   <string name="payload">Message</string>
@@ -24,8 +24,10 @@
     <item>Orange</item>
     <item>Rot</item>
     <item>Blau</item>
-    <item>Weiß</item>
+    <item>Weis</item>
   </string-array>
+
+  <!-- Sea Trade Auswahl -->
   <string-array name="raw_materials">
     <item>Erz</item>
     <item>Getreide</item>
@@ -33,12 +35,28 @@
     <item>Lehm</item>
     <item>Wolle</item>
   </string-array>
+
+  <!-- Binnenhandel -->
+  <string name="ore">Erz</string>
+  <string name="wheat">Getreide</string>
+  <string name="wood">Holz</string>
+  <string name="clay">Lehm</string>
+  <string name="wool">Wolle</string>
+  <string name="offer_trade">Handel anbieten</string>
+  <string name="trade_sent">Handel wird angeboten…</string>
+  <string name="accept">Akzeptieren</string>
+  <string name="decline">Ablehnen</string>
+
   <string name="title_activity_lobby_activitiy">LobbyActivitiy</string>
   <string name="starten">Spiel Starten</string>
   <string name="player_name_input_hint">Bitte gebe deinen Spielernamen hier ein</string>
   <string name="wait_for_other_players">Warte auf andere Spieler…</string>
-  <string name="offer_resource">Tausche</string>
-  <string name="request_trade">gegen</string>
+  <string name="offer_resource">ich gebe</string>
+  <string name="request_trade">ich verlange</string>
   <string name="ok">OK</string>
+  <string name="offer_txt">Angebot:</string>
+  <string name="req_text">Nachfrage:</string>
+  <string name="wants_to_trade">möchte handeln</string>
+  <string name="cancel">Abbrechen</string>
 
 </resources>

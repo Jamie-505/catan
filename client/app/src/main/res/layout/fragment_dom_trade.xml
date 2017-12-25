@@ -1,0 +1,501 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+  xmlns:app="http://schemas.android.com/apk/res-auto"
+  android:layout_width="wrap_content"
+  android:layout_height="wrap_content">
+
+  <!-- this part disables the clicking on the tiles behind the fragment -->
+  <android.support.constraint.ConstraintLayout
+    android:layout_width="0dp"
+    android:layout_height="0dp"
+    android:clickable="true"
+    android:focusable="true"
+    app:layout_constraintBottom_toBottomOf="parent"
+    app:layout_constraintEnd_toEndOf="parent"
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintTop_toTopOf="parent" />
+
+  <android.support.constraint.ConstraintLayout
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    app:layout_constraintBottom_toBottomOf="parent"
+    app:layout_constraintEnd_toEndOf="parent"
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintTop_toTopOf="parent">
+
+
+    <android.support.v7.widget.CardView
+      android:id="@+id/requestContainer"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:layout_marginTop="8dp"
+      android:layout_marginStart="8dp"
+      android:layout_marginEnd="8dp"
+      app:cardCornerRadius="8dp"
+      app:cardElevation="8dp"
+      app:cardUseCompatPadding="true"
+      app:contentPadding="8dp"
+      app:layout_constraintBottom_toTopOf="@id/offerContainer"
+      app:layout_constraintEnd_toEndOf="parent"
+      app:layout_constraintStart_toStartOf="parent"
+      app:layout_constraintTop_toTopOf="parent">
+
+      <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+        <TextView
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content"
+          android:text="@string/request_trade"
+          android:textAlignment="center"
+          android:textSize="18sp" />
+        <LinearLayout
+          android:layout_width="match_parent"
+          android:layout_height="match_parent"
+          android:gravity="center"
+          android:orientation="horizontal">
+          <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:paddingStart="4dp"
+            android:paddingEnd="4dp"
+            android:gravity="center"
+            android:orientation="vertical">
+            <TextView
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:text="@string/ore"
+              android:textAlignment="center"
+              android:textSize="24sp" />
+            <EditText
+              android:id="@+id/reqOreCnt"
+              android:layout_width="match_parent"
+              android:layout_height="wrap_content"
+              android:ems="10"
+              android:inputType="number"
+              android:selectAllOnFocus="true"
+              android:singleLine="true"
+              android:text="0"
+              android:textAlignment="center"
+              android:textSize="24sp" />
+          </LinearLayout>
+
+          <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:paddingStart="4dp"
+            android:paddingEnd="4dp"
+            android:gravity="center"
+            android:orientation="vertical">
+            <TextView
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:text="@string/wheat"
+              android:textSize="24sp" />
+            <EditText
+              android:id="@+id/reqWheatCnt"
+              android:layout_width="match_parent"
+              android:layout_height="wrap_content"
+              android:ems="10"
+              android:inputType="number"
+              android:selectAllOnFocus="true"
+              android:singleLine="true"
+              android:text="0"
+              android:textAlignment="center"
+              android:textAllCaps="false"
+              android:textSize="24sp" />
+          </LinearLayout>
+
+          <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:paddingStart="4dp"
+            android:paddingEnd="4dp"
+            android:gravity="center"
+            android:orientation="vertical">
+            <TextView
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:text="@string/wood"
+              android:textSize="24sp" />
+            <EditText
+              android:id="@+id/reqWoodCnt"
+              android:layout_width="match_parent"
+              android:layout_height="wrap_content"
+              android:ems="10"
+              android:inputType="number"
+              android:selectAllOnFocus="true"
+              android:singleLine="true"
+              android:text="0"
+              android:textAlignment="center"
+              android:textSize="24sp" />
+          </LinearLayout>
+
+          <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:paddingStart="4dp"
+            android:paddingEnd="4dp"
+            android:gravity="center"
+            android:orientation="vertical">
+            <TextView
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:text="@string/clay"
+              android:textSize="24sp" />
+            <EditText
+              android:id="@+id/reqClayCnt"
+              android:layout_width="match_parent"
+              android:layout_height="wrap_content"
+              android:ems="10"
+              android:inputType="number"
+              android:selectAllOnFocus="true"
+              android:singleLine="true"
+              android:text="0"
+              android:textAlignment="center"
+              android:textSize="24sp" />
+          </LinearLayout>
+
+          <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:paddingStart="4dp"
+            android:paddingEnd="4dp"
+            android:gravity="center"
+            android:orientation="vertical">
+            <TextView
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:text="@string/wool"
+              android:textAlignment="center"
+              android:textSize="24sp" />
+            <EditText
+              android:id="@+id/reqWoolCnt"
+              android:layout_width="match_parent"
+              android:layout_height="wrap_content"
+              android:ems="10"
+              android:inputType="number"
+              android:selectAllOnFocus="true"
+              android:singleLine="true"
+              android:text="0"
+              android:textAlignment="center"
+              android:textSize="24sp" />
+          </LinearLayout>
+        </LinearLayout>
+      </LinearLayout>
+
+    </android.support.v7.widget.CardView>
+
+    <android.support.v7.widget.CardView
+      android:id="@+id/offerContainer"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:layout_marginStart="8dp"
+      android:layout_marginEnd="8dp"
+      app:cardCornerRadius="8dp"
+      app:cardElevation="8dp"
+      app:cardUseCompatPadding="true"
+      app:contentPadding="8dp"
+      app:layout_constraintBottom_toTopOf="@id/actionContainer"
+      app:layout_constraintEnd_toEndOf="parent"
+      app:layout_constraintStart_toStartOf="parent"
+      app:layout_constraintTop_toBottomOf="@id/requestContainer">
+
+      <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+        <TextView
+          android:id="@+id/offerText"
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content"
+          android:text="@string/offer_resource"
+          android:textAlignment="center"
+          android:textSize="18sp" />
+        <LinearLayout
+          android:layout_width="match_parent"
+          android:layout_height="match_parent"
+          android:orientation="horizontal">
+          <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:paddingStart="4dp"
+            android:paddingEnd="4dp"
+            android:gravity="center"
+            android:orientation="vertical">
+            <TextView
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:text="@string/ore"
+              android:textSize="24sp" />
+            <EditText
+              android:id="@+id/offerOreCnt"
+              android:layout_width="match_parent"
+              android:layout_height="wrap_content"
+              android:ems="10"
+              android:inputType="number"
+              android:selectAllOnFocus="true"
+              android:singleLine="true"
+              android:text="0"
+              android:textAlignment="center"
+              android:textSize="24sp" />
+          </LinearLayout>
+
+          <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:paddingStart="4dp"
+            android:paddingEnd="4dp"
+            android:gravity="center_horizontal|center"
+            android:orientation="vertical">
+            <TextView
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:text="@string/wheat"
+              android:textSize="24sp" />
+            <EditText
+              android:id="@+id/offerWheatCnt"
+              android:layout_width="match_parent"
+              android:layout_height="wrap_content"
+              android:ems="10"
+              android:inputType="number"
+              android:selectAllOnFocus="true"
+              android:singleLine="true"
+              android:text="0"
+              android:textAlignment="center"
+              android:textSize="24sp" />
+          </LinearLayout>
+
+          <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:paddingStart="4dp"
+            android:paddingEnd="4dp"
+            android:gravity="center"
+            android:orientation="vertical">
+            <TextView
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:text="@string/wood"
+              android:textSize="24sp" />
+            <EditText
+              android:id="@+id/offerWoodCnt"
+              android:layout_width="match_parent"
+              android:layout_height="wrap_content"
+              android:ems="10"
+              android:inputType="number"
+              android:selectAllOnFocus="true"
+              android:singleLine="true"
+              android:text="0"
+              android:textAlignment="center"
+              android:textSize="24sp" />
+          </LinearLayout>
+
+          <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:paddingStart="4dp"
+            android:paddingEnd="4dp"
+            android:gravity="center"
+            android:orientation="vertical">
+            <TextView
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:text="@string/clay"
+              android:textSize="24sp" />
+            <EditText
+              android:id="@+id/offerClayCnt"
+              android:layout_width="match_parent"
+              android:layout_height="wrap_content"
+              android:ems="10"
+              android:inputType="number"
+              android:selectAllOnFocus="true"
+              android:singleLine="true"
+              android:text="0"
+              android:textAlignment="center"
+              android:textSize="24sp" />
+          </LinearLayout>
+
+          <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:paddingStart="4dp"
+            android:paddingEnd="4dp"
+            android:gravity="center"
+            android:orientation="vertical">
+            <TextView
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:text="@string/wool"
+              android:textSize="24sp" />
+            <EditText
+              android:id="@+id/offerWoolCnt"
+              android:layout_width="match_parent"
+              android:layout_height="wrap_content"
+              android:ems="10"
+              android:inputType="number"
+              android:selectAllOnFocus="true"
+              android:singleLine="true"
+              android:text="0"
+              android:textAlignment="center"
+              android:textSize="24sp" />
+          </LinearLayout>
+        </LinearLayout>
+      </LinearLayout>
+
+    </android.support.v7.widget.CardView>
+
+    <android.support.constraint.ConstraintLayout
+      android:id="@+id/actionContainer"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:layout_marginTop="8dp"
+      android:layout_marginBottom="8dp"
+      app:layout_constraintBottom_toBottomOf="parent"
+      app:layout_constraintEnd_toEndOf="parent"
+      app:layout_constraintStart_toStartOf="parent"
+      app:layout_constraintTop_toBottomOf="@id/offerContainer">
+
+      <Button
+        android:id="@+id/sendTradeBtn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:elevation="8dp"
+        android:text="@string/offer_trade"
+        android:textAlignment="center"
+        android:visibility="visible"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"/>
+
+      <android.support.v7.widget.CardView
+        android:id="@+id/tradeStatus"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp"
+        android:visibility="gone"
+        app:cardCornerRadius="8dp"
+        app:cardElevation="8dp"
+        app:cardUseCompatPadding="true"
+        app:contentPadding="8dp"
+        app:layout_constraintBottom_toTopOf="@id/cancelBtn"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <LinearLayout
+          android:layout_width="match_parent"
+          android:layout_height="match_parent"
+          android:orientation="vertical">
+          <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/wait_for_other_players"
+            android:textAlignment="center"
+            android:textSize="18sp" />
+          <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="horizontal">
+            <LinearLayout
+              android:id="@+id/p0"
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:layout_weight="1"
+              android:visibility="gone"
+              android:paddingStart="4dp"
+              android:paddingEnd="4dp"
+              android:gravity="center"
+              android:orientation="vertical">
+              <TextView
+                android:id="@+id/p0Name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="24sp" />
+              <ImageButton
+                android:id="@+id/p0Status"
+                android:layout_width="45dp"
+                android:layout_height="45dp"
+                android:src="@drawable/ic_hourglass"/>
+            </LinearLayout>
+
+            <LinearLayout
+              android:id="@+id/p1"
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:layout_weight="1"
+              android:visibility="gone"
+              android:paddingStart="4dp"
+              android:paddingEnd="4dp"
+              android:gravity="center"
+              android:orientation="vertical">
+              <TextView
+                android:id="@+id/p1Name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="24sp" />
+              <ImageButton
+                android:id="@+id/p1Status"
+                android:layout_width="45dp"
+                android:layout_height="45dp"
+                android:src="@drawable/ic_hourglass"/>
+            </LinearLayout>
+
+            <LinearLayout
+              android:id="@+id/p2"
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:layout_weight="1"
+              android:visibility="gone"
+              android:paddingStart="4dp"
+              android:paddingEnd="4dp"
+              android:gravity="center"
+              android:orientation="vertical">
+              <TextView
+                android:id="@+id/p2Name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="24sp" />
+              <ImageButton
+                android:id="@+id/p2Status"
+                android:layout_width="45dp"
+                android:layout_height="45dp"
+                android:src="@drawable/ic_hourglass"/>
+            </LinearLayout>
+          </LinearLayout>
+        </LinearLayout>
+      </android.support.v7.widget.CardView>
+
+      <Button
+        android:id="@+id/cancelBtn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:elevation="8dp"
+        android:text="@string/cancel"
+        android:textAlignment="center"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tradeStatus"/>
+
+    </android.support.constraint.ConstraintLayout>
+
+  </android.support.constraint.ConstraintLayout>
+
+
+</android.support.constraint.ConstraintLayout>

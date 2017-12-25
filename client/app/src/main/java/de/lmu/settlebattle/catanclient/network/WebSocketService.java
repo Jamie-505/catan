@@ -1,6 +1,8 @@
 package de.lmu.settlebattle.catanclient.network;
 
 import static de.lmu.settlebattle.catanclient.utils.Constants.*;
+
+import com.google.gson.Gson;
 import de.lmu.settlebattle.catanclient.player.Player;
 
 import android.app.Service;
@@ -12,6 +14,7 @@ import android.os.Binder;
 import android.os.IBinder;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
+import de.lmu.settlebattle.catanclient.trade.Trade;
 import de.lmu.settlebattle.catanclient.utils.JSONUtils;
 import de.lmu.settlebattle.catanclient.player.Storage;
 import java.net.URI;
@@ -23,12 +26,12 @@ import org.java_websocket.handshake.ServerHandshake;
 
 public class WebSocketService extends Service {
 
-
   private final String TAG = WebSocketService.class.getSimpleName();
 
   private boolean socketConnected = false;
 
   private final IBinder binder = new WebSocketsBinder();
+  private Gson gson = new Gson();
   private Storage storage;
   private WebSocketClient webSocketClient;
   private LocalBroadcastManager localBroadcastManager;
@@ -54,6 +57,9 @@ public class WebSocketService extends Service {
     Log.i(TAG, "onStartCommand");
     storage = new Storage(getApplicationContext());
     Intent connectionIntent = new Intent(ACTION_CONNECTION_ESTABLISHED);
+    if (localBroadcastManager == null) {
+      localBroadcastManager = LocalBroadcastManager.getInstance(this);
+    }
     localBroadcastManager.sendBroadcast(connectionIntent);
     if(!socketConnected){
       startSocket();
@@ -162,6 +168,27 @@ public class WebSocketService extends Service {
       case TO_STORAGE:
         Log.d(TAG, ((Player) mail[1]).id + " --> TO_STORAGE");
         storage.storePlayer((Player) mail[1]);
+        break;
+      case TRD_ABORTED:
+        broadcast(TRD_ABORTED);
+        break;
+      case TRD_ACC:
+      case TRD_FIN:
+        Trade trade = (Trade) mail[1];
+        Intent i = new Intent(mail[0].toString());
+        i.putExtra(TRADE, gson.toJson(trade));
+        broadcast(i);
+        break;
+      case TRD_OFFER:
+        trade = (Trade) mail[1];
+        Intent tradeIntent;
+        if (storage.getSessionId() == trade.player) {
+          tradeIntent = new Intent(TRD_SENT);
+        } else {
+          tradeIntent = new Intent(TRD_OFFER);
+        }
+        tradeIntent.putExtra(TRADE, gson.toJson(trade));
+        broadcast(tradeIntent);
         break;
       default:
         break;

@@ -14,7 +14,7 @@ import de.lmu.settlebattle.catanclient.MainActivityFragment;
 import de.lmu.settlebattle.catanclient.R;
 
 
-public class DiceResultFragment extends MainActivityFragment {
+public class DiceFragment extends MainActivityFragment {
 
   private Dice dice;
   private Gson gson = new Gson();

@@ -26,14 +26,19 @@ import android.widget.ImageButton;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
 
-import de.lmu.settlebattle.catanclient.dice.DiceResultFragment;
+import com.google.gson.Gson;
+import de.lmu.settlebattle.catanclient.dice.DiceFragment;
 import de.lmu.settlebattle.catanclient.grid.Cube;
 import de.lmu.settlebattle.catanclient.grid.DemoObjects;
 import de.lmu.settlebattle.catanclient.grid.Hex;
 import de.lmu.settlebattle.catanclient.grid.Grid;
 import de.lmu.settlebattle.catanclient.grid.StorageMap;
+import de.lmu.settlebattle.catanclient.player.Player;
 import de.lmu.settlebattle.catanclient.player.Storage;
+import de.lmu.settlebattle.catanclient.trade.DomTradeFragment;
 import de.lmu.settlebattle.catanclient.trade.SeaTradeFragment;
+import de.lmu.settlebattle.catanclient.trade.Trade;
+import de.lmu.settlebattle.catanclient.trade.TradeOfferFragment;
 import de.lmu.settlebattle.catanclient.utils.JSONUtils;
 
 public class MainActivity extends BaseSocketActivity {
@@ -41,7 +46,7 @@ public class MainActivity extends BaseSocketActivity {
   // LogCat tag
   private static final String TAG = MainActivity.class.getSimpleName();
 
-  private Storage storage ;
+  public Storage storage ;
   private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
     @Override
     public void onReceive(Context context, Intent intent) {
@@ -51,12 +56,16 @@ public class MainActivity extends BaseSocketActivity {
 
   // Visual Elements
   private Button bauenBtn;
-  private Button handelnBtn;
-  private DiceResultFragment diceFragment = new DiceResultFragment();
+  private Button domTradeBtn;
+  private Button seaTradeBtn;
+  private DomTradeFragment domTradeFragment = new DomTradeFragment();
+  private DiceFragment diceFragment = new DiceFragment();
   private FragmentManager fragmentManager = getFragmentManager();
+  private Gson gson = new Gson();
   private ImageButton diceBtn;
   private RelativeLayout mRelativeLayout;
   private SeaTradeFragment seaTradeFragment = new SeaTradeFragment();
+  private TradeOfferFragment tradeOfferFragment = new TradeOfferFragment();
 
   @Override
   public void onBackPressed() {
@@ -75,10 +84,11 @@ public class MainActivity extends BaseSocketActivity {
     storage = new Storage(this);
     setIntentFilters();
 
-    handelnBtn = (Button) findViewById(R.id.handeln_button);
     bauenBtn = (Button) findViewById(R.id.bauen_button);
-    mRelativeLayout = (RelativeLayout) findViewById(R.id.gridLayout);
     diceBtn = (ImageButton) findViewById(R.id.throwDiceBtn);
+    domTradeBtn = (Button) findViewById(R.id.domTradeBtn);
+    seaTradeBtn = (Button) findViewById(R.id.handeln_button);
+    mRelativeLayout = (RelativeLayout) findViewById(R.id.gridLayout);
 
     setClickListener();
 
@@ -105,9 +115,9 @@ public class MainActivity extends BaseSocketActivity {
     params.topMargin = -grid.centerOffsetY + p.y;
   }
 
-  public void displayError(String eMsg){
+  public void displayMessage(String msg){
     View layout = findViewById(R.id.contain);
-    Snackbar snackbar = Snackbar.make(layout, eMsg, Snackbar.LENGTH_LONG);
+    Snackbar snackbar = Snackbar.make(layout, msg, Snackbar.LENGTH_LONG);
     snackbar.show();
   }
 
@@ -143,7 +153,7 @@ public class MainActivity extends BaseSocketActivity {
           showFragment(diceFragment);
           break;
         case DISPLAY_ERROR:
-          displayError(intent.getStringExtra(ERROR_MSG));
+          displayMessage(intent.getStringExtra(ERROR_MSG));
           break;
         case OK:
           hideFragment(seaTradeFragment);
@@ -156,6 +166,17 @@ public class MainActivity extends BaseSocketActivity {
           hideActiveElements();
         case ROLL_DICE:
           showView(diceBtn);
+          break;
+        case TRD_FIN:
+          onBackPressed();
+          Trade t = gson.fromJson(intent.getStringExtra(TRADE), Trade.class);
+          showTradeSummary(t);
+          break;
+        case TRD_OFFER:
+          Bundle tradeBundle = new Bundle();
+          tradeBundle.putString(TRADE, intent.getStringExtra(TRADE));
+          tradeOfferFragment.setArguments(tradeBundle);
+          showFragment(tradeOfferFragment);
           break;
       }
     } else {
@@ -178,24 +199,26 @@ public class MainActivity extends BaseSocketActivity {
   }
 
   private void setClickListener() {
-    handelnBtn.setOnClickListener((View v) -> {
-      showFragment(seaTradeFragment);
-    });
-
     diceBtn.setOnClickListener((View v) -> {
       String diceMsg = JSONUtils.createJSONString(ROLL_DICE, new Object());
       mService.sendMessage(diceMsg);
     });
+
+    domTradeBtn.setOnClickListener((View v) -> showFragment(domTradeFragment));
+    seaTradeBtn.setOnClickListener((View v) -> showFragment(seaTradeFragment));
   }
 
   private void setIntentFilters() {
     IntentFilter filter = new IntentFilter();
+    filter.addAction(DICE_RESULT);
     filter.addAction(DISPLAY_ERROR);
     filter.addAction(OK);
     filter.addAction(PLAYER_UPDATE);
     filter.addAction(PLAYER_WAIT);
     filter.addAction(ROLL_DICE);
-    filter.addAction(DICE_RESULT);
+    filter.addAction(TRD_ABORTED);
+    filter.addAction(TRD_FIN);
+    filter.addAction(TRD_OFFER);
     LocalBroadcastManager.getInstance(this)
         .registerReceiver(broadcastReceiver, filter);
   }
@@ -308,6 +331,19 @@ public class MainActivity extends BaseSocketActivity {
       ft.show(f);
     }
     ft.commit();
+  }
+
+  private void showTradeSummary(Trade t) {
+    Player p1 = storage.getOpponent(t.player);
+    Player p2 = storage.getOpponent(t.opponent);
+    if (p1 == null) {
+      p1 = storage.getPlayer();
+    } else if (p2 == null) {
+      p2 = storage.getPlayer();
+    }
+    String msg = String.format("Handel zwischen %s und %s wurde abgeschlossen",
+        p1.name, p2.name);
+    displayMessage(msg);
   }
 
   private void showView(View v) {

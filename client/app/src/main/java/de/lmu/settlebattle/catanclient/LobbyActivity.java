@@ -19,16 +19,12 @@ import com.google.gson.reflect.TypeToken;
 import de.lmu.settlebattle.catanclient.player.Player;
 import de.lmu.settlebattle.catanclient.player.Storage;
 import java.lang.reflect.Type;
-import java.util.HashMap;
 
 public class LobbyActivity extends BaseSocketActivity {
 
   private Player[] players = new Player[4];
   private Gson gson = new Gson();
   private Storage storage;
-
-  // needed to set the colors -.-
-  HashMap<String, Integer> colors = new HashMap<>();
 
   private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
     @Override
@@ -51,11 +47,6 @@ public class LobbyActivity extends BaseSocketActivity {
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_lobby);
-
-    colors.put(BLUE, getResources().getColor(R.color.blue));
-    colors.put(ORANGE, getResources().getColor(R.color.orange));
-    colors.put(RED, getResources().getColor(R.color.red));
-    colors.put(WHITE, getResources().getColor(R.color.white));
 
     storage = new Storage(getApplicationContext());
 
@@ -86,7 +77,9 @@ public class LobbyActivity extends BaseSocketActivity {
     TextView playerName = (TextView) findViewById(R.id.playerName);
     playerName.setText(players[0].name);
     ImageButton playerColor = (ImageButton) findViewById(R.id.playerStatus);
-    playerColor.setBackgroundColor(colors.get(players[0].color));
+    int colorId = getResources().getIdentifier(players[0].color.toLowerCase()
+        , "color", getPackageName());
+    playerColor.setBackgroundColor(getResources().getColor(colorId));
     if (players[0].status.equals(GAME_WAIT)) {
       playerColor.setImageDrawable(getResources().getDrawable(R.drawable.ic_success));
     }
@@ -96,7 +89,8 @@ public class LobbyActivity extends BaseSocketActivity {
     for (int i = 1; i < players.length; i++) {
       try {
         if (players[i] != null) {
-          ConstraintLayout opponentCard = (ConstraintLayout) findViewById(getResources().getIdentifier(
+          ConstraintLayout opponentCard =
+              (ConstraintLayout) findViewById(getResources().getIdentifier(
               "player" + (i + 1), "id", getPackageName()));
           opponentCard.setVisibility(View.VISIBLE);
 
@@ -104,9 +98,11 @@ public class LobbyActivity extends BaseSocketActivity {
               "p" + (i + 1) + "Name", "id", getPackageName()));
           opponentName.setText(players[i].name);
 
+          int oColorId = getResources().getIdentifier(players[i].color.toLowerCase()
+              , "color", getPackageName());
           ImageButton opponentColor = (ImageButton) findViewById(getResources().getIdentifier(
               "p" + (i + 1) + "Status","id", getPackageName()));
-          opponentColor.setBackgroundColor(colors.get(players[i].color));
+          opponentColor.setBackgroundColor(getResources().getColor(oColorId));
           if (players[i].status.equals(GAME_WAIT)) {
             opponentColor.setImageDrawable(getResources().getDrawable(R.drawable.ic_success));
           }

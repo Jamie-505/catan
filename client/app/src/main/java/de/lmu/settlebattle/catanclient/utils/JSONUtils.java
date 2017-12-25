@@ -5,6 +5,7 @@ import static de.lmu.settlebattle.catanclient.utils.Constants.*;
 import com.google.gson.Gson;
 import de.lmu.settlebattle.catanclient.dice.Dice;
 import de.lmu.settlebattle.catanclient.player.Player;
+import de.lmu.settlebattle.catanclient.trade.Trade;
 import de.lmu.settlebattle.catanclient.utils.Message.Error;
 import java.util.HashMap;
 import java.util.Map;
@@ -42,12 +43,23 @@ public class JSONUtils {
           return new Object[] { TO_STORAGE, player };
         case HANDSHAKE:
           return completeHandshake(jObj.getJSONObject(HANDSHAKE));
+        case TRD_OFFER:
+          Trade trade = gson.fromJson(jObj.getString(TRD_OFFER), Trade.class);
+          return new Object[] { TRD_OFFER, trade };
+        case TRD_ABORTED:
+        case TRD_ACC:
+        case TRD_FIN:
+          trade = gson.fromJson(jObj.getString(msgType), Trade.class);
+          return new Object[] { msgType, trade };
         case SERVER_RES:
           return new String[] { OK };
         case STATUS_UPD:
           JSONObject status = jObj.getJSONObject(STATUS_UPD);
           player = gson.fromJson(status.getString(PLAYER), Player.class);
           return handleStatusUpdate(player);
+        case HARVEST:
+        case COSTS:
+          return new String[] {"TODO"};
         default:
           return displayError("Protokoll wird nicht unterstützt");
       }

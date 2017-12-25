@@ -10,6 +10,7 @@ import static de.lmu.settlebattle.catanclient.utils.Constants.RAW_MATERIALS;
 import static de.lmu.settlebattle.catanclient.utils.Constants.VICTORY_PTS;
 
 import com.google.gson.annotations.SerializedName;
+import de.lmu.settlebattle.catanclient.trade.RawMaterialOverview;
 import java.util.Map;
 
 public class Player {
@@ -34,7 +35,7 @@ public class Player {
   public int victoryPts;
 
   @SerializedName(RAW_MATERIALS)
-  public Map<String, Integer> rawMaterials;
+  public RawMaterialOverview rawMaterials;
 
   @SerializedName(DEV_CARDS)
   public Map<String, Integer> devCards;

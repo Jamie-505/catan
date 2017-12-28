@@ -109,4 +109,16 @@ public class BoardTest {
             assertTrue(board.getBuildingsSize() == expectedSize);
         }
     }
+
+    @Test
+    public void robberTest() {
+        Location desert = new Location(0,0);
+        assertFalse(board.getRobber().isValidNewLocation(desert));
+
+        Location water = new Location(0,-3);
+        assertFalse(board.getRobber().isValidNewLocation(water));
+
+        Location land = new Location(-2,0);
+        assertTrue(board.getRobber().isValidNewLocation(land));
+    }
 }

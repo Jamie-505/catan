@@ -6,6 +6,7 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.IOException;
 import java.util.*;
+import java.util.function.ToIntBiFunction;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -43,8 +44,13 @@ public class CatanSocketHandler extends TextWebSocketHandler {
         this.sessions = Collections.synchronizedSet(new HashSet<WebSocketSession>());
     }
 
-    public SocketUtils getUtils() { return utils; }
-    public GameController getGameCtrl() { return getUtils().getGameCtrl(); }
+    public SocketUtils getUtils() {
+        return utils;
+    }
+
+    public GameController getGameCtrl() {
+        return getUtils().getGameCtrl();
+    }
 
     //region afterConnectionEstablished
     @Override
@@ -152,6 +158,11 @@ public class CatanSocketHandler extends TextWebSocketHandler {
                     this.dice(session);
                     break;
 
+                case ROBBER_TO:
+                    OK = utils.moveRobber(session, message);
+                    if (!OK) errorMessage = "Der Räuber kann nicht versetzt werden.";
+                    break;
+
                 case TOSS_CARDS:
                     OK = utils.tossRawMaterials(session, message);
                     if (!OK) errorMessage = "Die Rohstoffe konnten nicht reduziert werden.";
@@ -177,7 +188,8 @@ public class CatanSocketHandler extends TextWebSocketHandler {
 
                 case TRD_SEL:
                     OK = utils.tradeConduction(session, message);
-                    if (!OK) sendError(session, "Der Handel konnte nicht durchgeführt werden. Haben beide Parteien genügend Rohstoffe?");
+                    if (!OK)
+                        sendError(session, "Der Handel konnte nicht durchgeführt werden. Haben beide Parteien genügend Rohstoffe?");
                     break;
 
                 case TRD_REJ:
@@ -221,6 +233,12 @@ public class CatanSocketHandler extends TextWebSocketHandler {
 
     //region dice
     public void dice(WebSocketSession session) throws IOException {
+        int id = utils.toInt(session.getId());
+
+        //check if client is allowed to dice
+        if (!getGameCtrl().getCurrent().equals(getGameCtrl().getPlayer(id)))
+            sendError(session, "Du bist nicht am Zug!");
+
         int[] dice = Player.throwDice();
         TextMessage diceMessage = CatanMessage.throwDice(
                 utils.getGameCtrl().getPlayer(session.getId()).getId(), dice);
@@ -238,6 +256,9 @@ public class CatanSocketHandler extends TextWebSocketHandler {
                     utils.getGameCtrl().mapOwnerWithHarvest(sum);
 
             utils.getGameCtrl().distributeRawMaterial(distribution);
+
+            //after raw material distribution player can continue his turn
+            getGameCtrl().setPlayerActive(id, TRADE_OR_BUILD);
         }
     }
     //endregion
@@ -376,11 +397,13 @@ public class CatanSocketHandler extends TextWebSocketHandler {
         if (!player.canAfford(tradeRequest.getOffer())) return false;
 
         tradeRequest.addPropertyChangeListener(evt -> {
-            TradeRequest trChanged = (TradeRequest)evt.getNewValue();
-            switch(evt.getPropertyName()) {
+            TradeRequest trChanged = (TradeRequest) evt.getNewValue();
+            switch (evt.getPropertyName()) {
                 case "TR Accept":
-                    Integer id = (Integer)evt.getOldValue();
-                    if (id != null) { sendMessageToAll(CatanMessage.tradeAccept(trChanged, id)); }
+                    Integer id = (Integer) evt.getOldValue();
+                    if (id != null) {
+                        sendMessageToAll(CatanMessage.tradeAccept(trChanged, id));
+                    }
                     break;
 
                 case "TR Cancel":

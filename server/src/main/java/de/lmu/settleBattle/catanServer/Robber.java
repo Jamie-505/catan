@@ -20,19 +20,18 @@ public class Robber extends JSONStringBuilder {
         return this.location;
     }
 
-    public void setLocation(Location location) {
-        this.location = location;
+    public boolean move(Location newLoc) {
+        boolean ret = false;
+
+        if (isValidNewLocation(newLoc)) {
+            this.location = newLoc;
+            ret = true;
+        }
+
+        return ret;
     }
 
-    public void move(Location location) {
-        this.location = location;
-    }
-
-    public void robPlayer(Player robber, Player victim) {
-        //TODO
-    }
-
-    public void robAll() {
-        //TODO
+    public boolean isValidNewLocation(Location loc) {
+        return (!loc.isWaterField() && !this.getLocation().equals(loc));
     }
 }

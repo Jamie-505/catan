@@ -58,7 +58,6 @@ public class Constants {
     public final static String TRD_SEL = "Handel abschliessen";
     public final static String ACCEPT = "Annehmen";
     public final static String FELLOW_PLAYER = "Mitspieler";
-    public final static String OPERATION_NOT_PERMITTED = "Die Operation kann nicht durchgeführt";
     public final static String ARMY = "Rittermacht";
     public final static String DEV_CARDS = "Entwicklungskarten";
 

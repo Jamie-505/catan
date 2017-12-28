@@ -46,10 +46,6 @@ public class Location extends JSONStringBuilder {
     public void setX(int x) { this.x = x; }
     public void setY(int y) { this.y = y; }
 
-    public int getSum() {
-        return this.getX() + this.getY();
-    }
-
     public boolean isValidLoc(int x, int y) {
         boolean ret = true;
 
@@ -60,6 +56,10 @@ public class Location extends JSONStringBuilder {
             ret = false;
 
         return ret;
+    }
+
+    public boolean isWaterField() {
+        return Math.abs(x) == 3 || Math.abs(y) == 3 || Math.abs(x+y) == 3;
     }
 
     @Override

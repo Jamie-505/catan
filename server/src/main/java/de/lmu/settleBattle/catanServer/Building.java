@@ -60,8 +60,8 @@ public class Building extends JSONStringBuilder {
 
     public void build(Location[] loc) throws IllegalArgumentException {
 
-        if (((this.type == BuildingType.SETTLEMENT || this.type == BuildingType.CITY) && loc.length == 3) ||
-                this.type == BuildingType.ROAD && loc.length == 2) {
+        if (((this.isSettlement() || this.isCity()) && loc.length == 3) ||
+                this.isRoad() && loc.length == 2) {
             this.locations = loc;
         } else throw new IllegalArgumentException();
     }
@@ -113,7 +113,7 @@ public class Building extends JSONStringBuilder {
         int matchCount = 0;
         boolean edgesAreAdjacent = false;
 
-        if (this.type.equals(BuildingType.ROAD) && loc.length == 2 && !exactlyHere)
+        if (this.isRoad() && loc.length == 2 && !exactlyHere)
             edgesAreAdjacent = edgesAreAdjacent(loc);
 
         else {
@@ -128,28 +128,32 @@ public class Building extends JSONStringBuilder {
 
         if (exactlyHere) {
             //if edge and corner are compared they can't be placed exactly on the same location
-            if (this.type.equals(BuildingType.ROAD) && loc.length != 2 ||
-                    !this.type.equals(BuildingType.ROAD) && loc.length == 2)
+            if (this.isRoad() && loc.length != 2 || !this.isRoad() && loc.length == 2)
                 return false;
 
             //one edge and one corner
-            if (this.type.equals(BuildingType.ROAD) || loc.length == 2) return matchCount > 1;
+            if (this.isRoad() || loc.length == 2) return matchCount > 1;
 
             //two corners
             else return matchCount > 2;
 
         } else {
             //two edges
-            if (this.type.equals(BuildingType.ROAD) && loc.length == 2) return edgesAreAdjacent;
+            if (this.isRoad() && loc.length == 2) return edgesAreAdjacent;
 
             //one edge and one corner
-            else if (this.type.equals(BuildingType.ROAD) || loc.length == 2) return matchCount > 1;
+            else if (this.isRoad() || loc.length == 2) return matchCount > 1;
 
             //two corners
             else return matchCount >= 2;
         }
     }
 
+    public boolean isSettlement() { return this.type.equals(BuildingType.SETTLEMENT); }
+
+    public boolean isCity() { return this.type.equals(BuildingType.CITY); }
+
+    public boolean isRoad() { return this.type.equals(BuildingType.ROAD); }
 
     public BuildingType getType() {
         return type;

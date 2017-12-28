@@ -7,6 +7,8 @@ import org.json.JSONObject;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
 
 public class Player extends JSONStringBuilder implements Comparable, Cloneable {
 
@@ -141,6 +143,7 @@ public class Player extends JSONStringBuilder implements Comparable, Cloneable {
     }
 
     //region trade
+
     /**
      * <method name: trade>
      * <description: none>
@@ -161,23 +164,23 @@ public class Player extends JSONStringBuilder implements Comparable, Cloneable {
     //endregion
 
     //region hasXTo1Haven
+
     /**
      * returns if the player can trade 3:1 or 2:1
+     *
      * @param count
      * @return
      */
     public boolean hasXTo1Haven(int count) {
-        if (count != 3 && count !=2)
-            throw new IllegalArgumentException("There is no "+ count + " to 1 haven");
+        if (count != 3 && count != 2)
+            throw new IllegalArgumentException("There is no " + count + " to 1 haven");
 
-        if (count == 3){
+        if (count == 3) {
             for (Haven haven : havens) {
                 if (haven.getHarvest().equals(RawMaterialType.WATER))
                     return true;
             }
-        }
-
-        else {
+        } else {
             for (Haven haven : havens)
                 //if he has any haven which has not the type WATER he can trade 2:1
                 if (!haven.getHarvest().equals(RawMaterialType.WATER))
@@ -201,16 +204,6 @@ public class Player extends JSONStringBuilder implements Comparable, Cloneable {
         return null;
     }
 
-    /**
-     * <method name: moveRobber>
-     * <description: player chooses where to move the robber and move it>
-     * <preconditions: number 7 is rolled>
-     * <postconditions: the robber is moved>
-     */
-    public void moveRobber(Location[] lod) {
-        //TODO
-    }
-
     public void addHaven(Haven haven) {
         haven.setOccupied(true);
         this.havens.add(haven);
@@ -222,8 +215,26 @@ public class Player extends JSONStringBuilder implements Comparable, Cloneable {
      * <preconditions: number 7 is rolled>
      * <postconditions: player gets a card from another players>
      */
-    public void robPlayer(Player plr) {
-        //TODO
+    public boolean robPlayer(Player player) {
+        List<RawMaterialType> types = player.getRawMaterialTypes();
+        if (types.size() == 0) return false;
+
+        Random random = new Random();
+        RawMaterialType type = types.get(random.nextInt(types.size()));
+
+        RawMaterialOverview overview = new RawMaterialOverview(type, 1);
+        player.decreaseRawMaterials(overview);
+        this.increaseRawMaterials(overview);
+
+        return true;
+    }
+
+    public List<RawMaterialType> getRawMaterialTypes() {
+        return this.rawMaterialDeck.getTypes();
+    }
+
+    public int getRawMaterialCount() {
+        return this.rawMaterialDeck.getTotalCount();
     }
 
     /**
@@ -272,7 +283,9 @@ public class Player extends JSONStringBuilder implements Comparable, Cloneable {
         return this.rawMaterialDeck.canAfford().contains(type);
     }
 
-    public boolean canAfford(RawMaterialOverview overview) { return this.rawMaterialDeck.canAfford(overview); }
+    public boolean canAfford(RawMaterialOverview overview) {
+        return this.rawMaterialDeck.canAfford(overview);
+    }
 
     //region Properties
 
@@ -439,5 +452,10 @@ public class Player extends JSONStringBuilder implements Comparable, Cloneable {
     @Override
     public Object clone() throws CloneNotSupportedException {
         return super.clone();
+    }
+
+    //____________FOR TESTING___________________________
+    public void setRawMaterialDeck(RawMaterialOverview rmo) {
+        this.rawMaterialDeck = rmo;
     }
 }

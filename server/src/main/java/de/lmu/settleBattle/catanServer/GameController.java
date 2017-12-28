@@ -1,5 +1,9 @@
 package de.lmu.settleBattle.catanServer;
 
+import org.springframework.web.socket.TextMessage;
+import org.springframework.web.socket.WebSocketSession;
+
+import java.io.IOException;
 import java.util.*;
 
 import static de.lmu.settleBattle.catanServer.Constants.*;
@@ -50,6 +54,15 @@ public class GameController {
 
     }
 
+    //region turn order handling
+    public Player getCurrent() {
+        return players.get(this.getCurrentIndex());
+    }
+
+    public int getCurrentIndex() {
+        return currentTurn % players.size();
+    }
+
     public Player getNext() {
         return this.buildingPhaseActive ? getNext_BuildingPhase() : getNext_Move();
     }
@@ -85,7 +98,25 @@ public class GameController {
         return player;
     }
 
+    /**
+     * sets new status for active player and
+     * sets status of all others to "Warten"
+     *
+     * @param id
+     * @param status
+     * @return list of players where status changed
+     */
 
+    public void setPlayerActive(int id, String status) {
+        for (Player player : players) {
+            String newStatus = player.getId() == id ? status : WAIT;
+            player.setStatus(newStatus);
+        }
+    }
+
+    //endregion
+
+    //region place buildings handling
     public boolean placeBuilding(int ownerId, Location[] locs, BuildingType type) {
         boolean buildPermission = false;
         boolean built = false;
@@ -122,7 +153,9 @@ public class GameController {
         }
         return built;
     }
+    //endregion
 
+    //region development card handling
 
     /**
      * <method name: buyDevelopmentCard>
@@ -147,17 +180,9 @@ public class GameController {
         this.rawMaterialDeck.increase(RawMaterialType.WOOD, 1);
         this.rawMaterialDeck.increase(RawMaterialType.WEAT, 1);
     }
+    //endregion
 
-
-    public Player getCurrent() {
-        return players.get(this.getCurrentIndex());
-    }
-
-    public int getCurrentIndex() {
-        return currentTurn % players.size();
-    }
-
-    //region mapOwnerWithHarvest
+    //region field distribution handling
     public Map<Integer, RawMaterialOverview> mapOwnerWithHarvest(int number) {
         Map<Integer, RawMaterialOverview> distribution = new HashMap<>();
 
@@ -165,7 +190,7 @@ public class GameController {
                 board.getBuildingsOnDistributingFields(number);
 
         for (Building bld : buildings.keySet()) {
-            int amount = bld.getType().equals(BuildingType.CITY) ? 2 : 1;
+            int amount = bld.isCity() ? 2 : 1;
 
             if (distribution.containsKey(bld.getOwner())) {
                 RawMaterialOverview overview = distribution.get(bld.getOwner());
@@ -178,7 +203,6 @@ public class GameController {
 
         return distribution;
     }
-    //endregion
 
     public void distributeRawMaterial(Map<Integer, RawMaterialOverview> distribution) {
 
@@ -189,12 +213,9 @@ public class GameController {
             }
         }
     }
+    //endregion
 
-    public void endGame() {
-        this.isGameOver = true;
-    }
-
-    //region domesticTrade
+    //region trade handling
     public boolean domesticTrade(TradeRequest tradeRequest, int offerentId, int fellowPlayerId) {
         Player offerent = getPlayer(offerentId);
         Player fellowPlayer = getPlayer(fellowPlayerId);
@@ -212,9 +233,6 @@ public class GameController {
 
         return false;
     }
-    //endregion
-
-    //region seatrade
 
     /**
      * performs sea trade
@@ -263,24 +281,7 @@ public class GameController {
     }
     //endregion
 
-    /**
-     * sets new status for active player and
-     * sets status of all others to "Warten"
-     *
-     * @param id
-     * @param status
-     * @return list of players where status changed
-     */
-
-    public void setPlayerActive(int id, String status) {
-        for (Player player : players) {
-            String newStatus = player.getId() == id ? status : WAIT;
-            player.setStatus(newStatus);
-        }
-    }
-
-
-    //region isValidPlayerData
+    //region player object handling
 
     public boolean isValidName(String name) {
         if (name == null || name.equals("")) return false;
@@ -303,8 +304,6 @@ public class GameController {
 
         return true;
     }
-
-    //endregion
 
     public void addPlayer(Player p) throws IllegalAccessException {
         if (players.size() < 4)
@@ -335,6 +334,20 @@ public class GameController {
         return null;
     }
 
+    public boolean removePlayer(Player p) {
+        return players.remove(p);
+    }
+
+    public ArrayList<Integer> getPlayersWithAtLeast7RawMaterials() {
+        ArrayList<Integer> ids = new ArrayList<>();
+
+        for (Player player : players) {
+            if (player.hasToExtractCards())
+                ids.add(player.getId());
+        }
+
+        return ids;
+    }
 
     /**
      * checks if everybody is ready to play
@@ -355,21 +368,94 @@ public class GameController {
         return false;
     }
 
-    public boolean removePlayer(Player p) {
-        return players.remove(p);
+    //endregion
+
+    //region robber handling
+
+    /**
+     * moves robber and exchanges raw materials
+     *
+     * @param currentId id of player moving the robber
+     * @param targetId  id of player being robbed
+     * @param newLoc    new location of robber
+     * @return
+     */
+    public boolean moveRobber(int currentId, int targetId, Location newLoc) {
+        boolean robSuccessful = false;
+
+        //check if player has turn
+        if (getCurrent().getId() != currentId) return false;
+
+        //move robber to target location
+        if (board.getRobber().move(newLoc)) {
+            Player targetPlayer = getPlayer(targetId);
+            Player currentPlayer = getCurrent();
+            HashSet<Integer> owners = board.getOwnersToRobFrom(currentId, newLoc);
+
+            //target was given
+            if (targetPlayer != null && owners.contains(targetId)) {
+
+                //it might be that the target player does not possess any raw materials
+                //in this case the rob is stated as successful though because the target
+                //was specifically determined by the client
+                currentPlayer.robPlayer(targetPlayer);
+                robSuccessful = true;
+
+            } else {
+                int matchCount = 0;
+
+                //get first player who can be robbed and rob random raw material
+                for (int owner : owners) {
+                    Player robbedPlayer = getPlayer(owner);
+
+                    if (robbedPlayer != null && robbedPlayer.getRawMaterialCount() > 0) {
+                        currentPlayer.robPlayer(robbedPlayer);
+                        robSuccessful = true;
+                        break;
+                    } else matchCount++;
+                }
+
+                //nobody can be robbed because nobody has a settlement/city there or nobody has any raw materials
+                if (!robSuccessful && matchCount == owners.size()) robSuccessful = true;
+            }
+        }
+        return robSuccessful;
     }
 
-    public ArrayList<Integer> getPlayersWithAtLeast7RawMaterials() {
-        ArrayList<Integer> ids = new ArrayList<>();
+    /**
+     * player tosses cards after a roll of 7 if he has at least 7 raw materials
+     * @param id
+     * @param overview
+     * @return
+     */
+    public boolean tossRawMaterialCards(int id, RawMaterialOverview overview) {
+        Player player = getPlayer(id);
+        if (player == null || !player.canAfford(overview)) return false;
 
-        for (Player player : players) {
-            if (player.hasToExtractCards())
-                ids.add(player.getId());
+        boolean ret = false;
+
+        try {
+            player.decreaseRawMaterials(overview);
+
+            //if player still has 7 cards or more he must still toss cards and his status won't be changed
+            if (!player.hasToExtractCards()) {
+
+                //set new status for player
+                String newStatus = player.getId() == getCurrent().getId() ? TRADE_OR_BUILD : WAIT;
+                player.setStatus(newStatus);
+                ret = true;
+            }
+
+        } catch (IllegalArgumentException ex) {
+            ex.printStackTrace();
+            ret = false;
         }
 
-        return ids;
+        return ret;
     }
+    //endregion
 
+    //region properties
     public boolean isGameStarted() {
         return gameStarted;
     }
@@ -389,5 +475,11 @@ public class GameController {
     public Board getBoard() {
         return board;
     }
+
+    public void endGame() {
+        this.isGameOver = true;
+    }
+
+    //endregion
 }
 

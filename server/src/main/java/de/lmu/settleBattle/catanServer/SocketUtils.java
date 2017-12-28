@@ -46,7 +46,7 @@ public class SocketUtils {
                 Player next = gameCtrl.getCurrent();
                 String status = Constants.BUILD_STREET;
 
-                if (building.getType().equals(BuildingType.ROAD)) {
+                if (building.isRoad()) {
                     next = gameCtrl.getNext();
                     status = Constants.BUILD_SETTLEMENT;
                 }
@@ -130,40 +130,6 @@ public class SocketUtils {
     }
     //endregion
 
-    //region extractCardsDueToRobber
-    public void extractCardsDueToRobber() throws IOException {
-        for (Player player : gameCtrl.getPlayers()) {
-            if (player.hasToExtractCards()) {
-                player.setStatus(Constants.EXTRACT_CARDS_DUE_TO_ROBBER);
-            }
-        }
-    }
-    //endregion*/
-
-    //region tossRawMaterials
-
-    /**
-     * a player has to toss raw materials
-     *
-     * @param session
-     * @param message
-     * @return
-     */
-    public boolean tossRawMaterials(WebSocketSession session, TextMessage message) {
-        JSONObject json = JSONUtils.createJSON(message);
-        JSONObject rawMaterialJSON = json.getJSONObject(Constants.RAW_MATERIALS);
-        RawMaterialOverview overview = gson.fromJson(rawMaterialJSON.toString(), RawMaterialOverview.class);
-        Player player = gameCtrl.getPlayer(toInt(session.getId()));
-
-        try {
-            player.decreaseRawMaterials(overview);
-        } catch (IllegalArgumentException ex) {
-            return false;
-        }
-        return true;
-    }
-    //endregion
-
     //region setStatus
     public void setStatus(String id, String status) {
         Player player = gameCtrl.getPlayer(id);
@@ -171,6 +137,7 @@ public class SocketUtils {
     }
     //endregion
 
+    //region trading
     public boolean seatrade(WebSocketSession session, TextMessage message) {
         TradeRequest tradeRequest = CatanMessage.seatradeToTradeRequest(SEA_TRADE, message);
 
@@ -189,7 +156,6 @@ public class SocketUtils {
 
         return tradeRequest;
     }
-
 
     public boolean tradeAccepted(WebSocketSession session, TextMessage message) {
         JSONObject payload = JSONUtils.createJSON(message).getJSONObject(TRD_RES);
@@ -212,7 +178,7 @@ public class SocketUtils {
 
     public boolean tradeCancelled(TextMessage message) {
         JSONObject payload = JSONUtils.createJSON(message).getJSONObject(TRD_REJ);
-        int tradeId = (Integer)payload.get(TRADE_ID);
+        int tradeId = (Integer) payload.get(TRADE_ID);
         TradeRequest tr = getTradeRequest(tradeId);
 
         if (tr != null) {
@@ -238,7 +204,6 @@ public class SocketUtils {
         return conducted;
     }
 
-
     public TradeRequest getTradeRequest(int tradeId) {
         for (TradeRequest tr : tradeRequests) {
             if (tr.getId() == tradeId)
@@ -246,5 +211,40 @@ public class SocketUtils {
         }
         return null;
     }
+    //endregion
+
+    //region robber functions
+    public boolean moveRobber(WebSocketSession session, TextMessage message) {
+        JSONObject payload = JSONUtils.createJSON(message).getJSONObject(ROBBER_TO);
+        Location loc = gson.fromJson(payload.getJSONObject(PLACE).toString(), Location.class);
+
+        int id = payload.has(DESTINATION) ? (Integer) payload.get(DESTINATION) : -1;
+
+        return gameCtrl.moveRobber(toInt(session.getId()), id, loc);
+    }
+
+    public void extractCardsDueToRobber() throws IOException {
+        for (Player player : gameCtrl.getPlayers()) {
+            if (player.hasToExtractCards()) {
+                player.setStatus(Constants.EXTRACT_CARDS_DUE_TO_ROBBER);
+            }
+        }
+    }
+
+    /**
+     * a player has to toss raw materials
+     *
+     * @param session
+     * @param message
+     * @return
+     */
+    public boolean tossRawMaterials(WebSocketSession session, TextMessage message) {
+        JSONObject json = JSONUtils.createJSON(message);
+        JSONObject rawMaterialJSON = json.getJSONObject(Constants.RAW_MATERIALS);
+        RawMaterialOverview overview = gson.fromJson(rawMaterialJSON.toString(), RawMaterialOverview.class);
+
+        return gameCtrl.tossRawMaterialCards(toInt(session.getId()), overview);
+    }
+    //endregion
 
 }

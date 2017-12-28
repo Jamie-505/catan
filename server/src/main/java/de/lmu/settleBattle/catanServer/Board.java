@@ -86,7 +86,6 @@ public class Board extends JSONStringBuilder {
 //        }
 //        return locations;
 //    }
-
     /**
      * this method initialize the field
      */
@@ -306,24 +305,25 @@ public class Board extends JSONStringBuilder {
             }
         }
 
-        if (type == BuildingType.SETTLEMENT && cornerIsOccupied == false) {
+        if (type.equals(BuildingType.SETTLEMENT) && !cornerIsOccupied) {
             //in the initial phase a settlement can be placed anywhere
             //afterwards it can only placed on corners that are connected to roads of the player
             if (initialPhase || edgeIsAround && foundEdge.getOwner() == playerID) {
                 return this.addBuilding(bld);
             }
 
-        } else if (type == BuildingType.CITY) {
+        } else if (type.equals(BuildingType.CITY)) {
             if (initialPhase) {
                 return false;
                 //Upgrading a settlement happens here
-            } else if (cornerIsOccupied && foundCorner.getOwner() == playerID && foundCorner.getType() == BuildingType.SETTLEMENT) {
+            } else if (cornerIsOccupied && foundCorner.getOwner() == playerID &&
+                    foundCorner.isSettlement()) {
                 return this.addBuilding(bld);
             }
-        } else if (type == BuildingType.ROAD && edgeIsOccupied == false) {
+        } else if (type.equals(BuildingType.ROAD) && !edgeIsOccupied) {
             // roads can only be placed on edges that are connected to a settlement/city of the player or
             // another road of the player
-            if (cornerIsOccupied == true && foundCorner.getOwner() == playerID ||
+            if (cornerIsOccupied && foundCorner.getOwner() == playerID ||
                     edgeIsAround && foundEdge.getOwner() == playerID) {
                 return this.addBuilding(bld);
             }
@@ -338,10 +338,6 @@ public class Board extends JSONStringBuilder {
 
     public ArrayList<Building> getSettlements() {
         return settlements;
-    }
-
-    public void addRoad(Building s) {
-        if (s.getType().equals(BuildingType.ROAD)) roads.add(s);
     }
 
     public ArrayList<Building> getCities() {
@@ -423,7 +419,7 @@ public class Board extends JSONStringBuilder {
 
                 //exclude road from distribution
                 //this case cannot occur, but now it's tested
-                if (bld.getType().equals(BuildingType.ROAD))
+                if (bld.isRoad())
                     throw new IllegalArgumentException("No road should be in settlements or cities list");
 
                 //player retrieves raw materials for building
@@ -460,8 +456,45 @@ public class Board extends JSONStringBuilder {
                 }
         }
 
+
         if (ret) changes.firePropertyChange("buildings", "", bld);
         return ret;
+    }
+
+    /**
+     * get owners of settlements or cities near a specific Location
+     * @param loc
+     * @return
+     */
+    public HashSet<Integer> getOwnersToRobFrom(int currentId, Location loc) {
+        HashSet<Integer> owners = new HashSet<>();
+        ArrayList<Building> buildings = getSettlementsAndCities();
+
+        for (Building bld : buildings) {
+
+            //cannot rob himself
+            if (bld.getOwner() == currentId) continue;
+
+            for (Location l : bld.getLocations()) {
+                if (l.equals(loc) && !bld.isRoad()) {
+                    owners.add(bld.getOwner());
+                    continue;
+                }
+            }
+        }
+
+        return owners;
+    }
+
+    /**
+     * @return array list containing all settlements and cities on board
+     */
+    public ArrayList<Building> getSettlementsAndCities() {
+        ArrayList<Building> buildings = new ArrayList<>();
+        buildings.addAll(settlements);
+        buildings.addAll(cities);
+
+        return buildings;
     }
 
     public void addPropertyChangeListener(PropertyChangeListener l) {
@@ -476,15 +509,11 @@ public class Board extends JSONStringBuilder {
         return roads.size() + settlements.size() + cities.size();
     }
 
-    public boolean isWaterField(Location loc) {
-        return (Math.abs(loc.getX()) == 3 || Math.abs(loc.getY())== 3 || Math.abs(loc.getSum())== 3);
-    }
-
     public int getWaterFieldCount(Location[] locs) {
         int matchCount = 0;
 
         for (Location loc : locs) {
-            if (isWaterField(loc)) matchCount++;
+            if (loc.isWaterField()) matchCount++;
         }
 
         return matchCount;
@@ -499,4 +528,10 @@ public class Board extends JSONStringBuilder {
         if (locs.length != 2) return false;
         return getWaterFieldCount(locs) < 2;
     }
+
+
+
+    //____________FOR TESTING___________________________
+    public void addRoad(Building bld) { if (bld.isRoad()) roads.add(bld); }
+    public void addSettlement(Building bld) {if (bld.isSettlement()) settlements.add(bld); }
 }

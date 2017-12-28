@@ -352,5 +352,17 @@ public class RawMaterialOverview extends JSONStringBuilder {
         }
         return typeCount;
     }
+
+    public List<RawMaterialType> getTypes() {
+        List<RawMaterialType> types = new ArrayList<>();
+
+        if (oreCount > 0) types.add(RawMaterialType.ORE);
+        if (weatCount > 0) types.add(RawMaterialType.WEAT);
+        if (woolCount > 0) types.add(RawMaterialType.WOOL);
+        if (woodCount > 0) types.add(RawMaterialType.WOOD);
+        if (clayCount > 0) types.add(RawMaterialType.CLAY);
+
+        return types;
+    }
 }
 

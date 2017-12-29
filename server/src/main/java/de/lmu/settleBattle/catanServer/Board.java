@@ -86,7 +86,6 @@ public class Board extends JSONStringBuilder {
 //        }
 //        return locations;
 //    }
-
     /**
      * this method initialize the field
      */

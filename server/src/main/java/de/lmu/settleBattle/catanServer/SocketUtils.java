@@ -224,7 +224,11 @@ public class SocketUtils {
 
     //region robber functions
     public boolean moveRobber(WebSocketSession session, TextMessage message) {
-        JSONObject payload = JSONUtils.createJSON(message).getJSONObject(ROBBER_TO);
+        return moveRobber(session, message, ROBBER_TO);
+    }
+
+    public boolean moveRobber(WebSocketSession session, TextMessage message, String type) {
+        JSONObject payload = JSONUtils.createJSON(message).getJSONObject(type);
         Location loc = gson.fromJson(payload.getJSONObject(PLACE).toString(), Location.class);
 
         int id = payload.has(DESTINATION) ? (Integer) payload.get(DESTINATION) : -1;
@@ -266,6 +270,18 @@ public class SocketUtils {
 
         return gameCtrl.applyMonopoleCard(monoPlayer, type);
     }
+
+    public boolean applyKnightCard(WebSocketSession session, TextMessage message) throws Exception {
+        Player player = gameCtrl.getPlayer(session.getId());
+
+        if (player.playKnight()) {
+            gameCtrl.assignGreatestArmy(player);
+            return moveRobber(session, message, CARD_KNIGHT);
+        }
+
+        return false;
+    }
+
     //endregion
 
 }

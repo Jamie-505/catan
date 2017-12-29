@@ -3,6 +3,8 @@ package de.lmu.settleBattle.catanServer;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
+import java.util.Random;
+
 public enum RawMaterialType {
 
     @Expose

@@ -296,6 +296,11 @@ public class CatanMessage {
         return new TextMessage(JSONUtils.setJSONType(Constants.CARD_KNIGHT, payload).toString());
     }
 
+    public static TextMessage knightCard(int playerId, TextMessage message) {
+        JSONObject payload = JSONUtils.createJSON(message).getJSONObject(Constants.CARD_KNIGHT);
+        payload.put(Constants.PLAYER, playerId);
+        return new TextMessage(JSONUtils.setJSONType(Constants.CARD_KNIGHT, payload).toString());
+    }
 
     public static TextMessage roadConstructionCard(Building road1, Building road2) throws Exception {
 

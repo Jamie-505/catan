@@ -14,6 +14,12 @@ import java.util.Stack;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
+import org.springframework.web.socket.TextMessage;
+import org.springframework.web.socket.WebSocketSession;
+
+import java.io.IOException;
+import java.util.*;
+
 import static de.lmu.settleBattle.catanServer.Constants.*;
 
 public class GameController implements PropertyChangeListener {
@@ -28,6 +34,7 @@ public class GameController implements PropertyChangeListener {
     private int round;
     private boolean isGameOver = false;
     private boolean gameStarted = false;
+    private Player greatestArmyPlayer;
 
     public GameController() {
         board = new Board();
@@ -188,6 +195,7 @@ public class GameController implements PropertyChangeListener {
 
     /**
      * updates status of player if the building phase is active or just ended
+     *
      * @param id
      */
     private void updateStatus(int id) {
@@ -277,7 +285,7 @@ public class GameController implements PropertyChangeListener {
         Map<Integer, RawMaterialOverview> distribution = new HashMap<>();
 
         Map<Building, RawMaterialType> buildings =
-            board.getBuildingsOnDistributingFields(number);
+                board.getBuildingsOnDistributingFields(number);
 
         for (Building bld : buildings.keySet()) {
             int amount = bld.isCity() ? 2 : 1;
@@ -288,7 +296,7 @@ public class GameController implements PropertyChangeListener {
                 distribution.replace(bld.getOwner(), overview);
 
             } else distribution.put(bld.getOwner(),
-                new RawMaterialOverview(buildings.get(bld), amount));
+                    new RawMaterialOverview(buildings.get(bld), amount));
         }
 
         return distribution;
@@ -311,8 +319,8 @@ public class GameController implements PropertyChangeListener {
         Player fellowPlayer = getPlayer(fellowPlayerId);
 
         if (offerent.canAfford(tradeRequest.getOffer()) &&
-            fellowPlayer.canAfford(tradeRequest.getRequest()) &&
-            tradeRequest.canBeExecutedBy(fellowPlayerId)) {
+                fellowPlayer.canAfford(tradeRequest.getRequest()) &&
+                tradeRequest.canBeExecutedBy(fellowPlayerId)) {
 
             offerent.trade(tradeRequest.getOffer(), tradeRequest.getRequest());
             fellowPlayer.trade(tradeRequest.getRequest(), tradeRequest.getOffer());
@@ -337,14 +345,14 @@ public class GameController implements PropertyChangeListener {
 
         //client sends raw material overview containing 1 clay/ore/.. ore for request/offer
         if (tradeRequest.getRequest().getTotalCount() != 1 &&
-            tradeRequest.getOffer().getTotalCount() != 1)
+                tradeRequest.getOffer().getTotalCount() != 1)
             return false;
 
         RawMaterialType requestType = tradeRequest.getRequest().getType();
         RawMaterialType offerType = tradeRequest.getOffer().getType();
 
         if (!requestType.isValidTradingType() || !offerType.isValidTradingType()
-            || requestType.equals(offerType)) return false;
+                || requestType.equals(offerType)) return false;
 
         //check if player has 2:1 haven for trading
         Haven haven = player.get2To1Haven(offerType);
@@ -515,12 +523,12 @@ public class GameController implements PropertyChangeListener {
 
     /**
      * player tosses cards after a roll of 7 if he has at least 7 raw materials
+     *
      * @param id
      * @param overview
      * @return
      */
     public boolean tossRawMaterialCards(int id, RawMaterialOverview overview) {
-
         Player player = getPlayer(id);
         boolean ret = board.getRobber().robPlayer(player, overview);
 
@@ -606,6 +614,51 @@ public class GameController implements PropertyChangeListener {
 
     public RawMaterialOverview getRawMaterialDeck() {
         return this.rawMaterialDeck;
+    }
+
+    public boolean assignGreatestArmy(Player player) throws Exception {
+        boolean done = false;
+
+        if (player.getArmyCount() < 3) return true;
+
+        if (this.greatestArmyPlayer == null) {
+            player.increaseVictoryPoints(2);
+            player.setGreatestArmy(true);
+            this.greatestArmyPlayer = player;
+            done = true;
+        } else {
+
+            if (this.getPlayerWithHighestArmyCount() == player && this.greatestArmyPlayer != player) {
+
+                try {
+                    greatestArmyPlayer.decreaseVictoryPoints(2);
+                    greatestArmyPlayer.setGreatestArmy(false);
+                    player.increaseVictoryPoints(2);
+                    player.setGreatestArmy(true);
+                    this.greatestArmyPlayer = player;
+                    done = true;
+                }
+                catch(Exception ex) {
+                    ex.printStackTrace();
+                    done = false;
+                }
+            }
+        }
+
+        return done;
+
+    }
+
+    private Player getPlayerWithHighestArmyCount() {
+        Player topPlayer = players.get(0);
+
+        for (Player player : players) {
+            if (player.getArmyCount() > topPlayer.getArmyCount()) {
+                topPlayer = player;
+            }
+        }
+
+        return topPlayer;
     }
 
     public boolean isGameOver() {

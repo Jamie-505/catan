@@ -8,11 +8,12 @@ import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 public class Player extends JSONStringBuilder implements Comparable, Cloneable {
 
     //region property change listener
-    protected PropertyChangeSupport changes = new PropertyChangeSupport(this);
+    private PropertyChangeSupport changes = new PropertyChangeSupport(this);
 
     public void addPropertyChangeListener(PropertyChangeListener l) {
         changes.addPropertyChangeListener(l);
@@ -25,37 +26,37 @@ public class Player extends JSONStringBuilder implements Comparable, Cloneable {
 
     // region Members
     @Expose
-    protected int id;
+    private int id;
 
     @Expose
     @SerializedName(Constants.PLAYER_NAME)
-    protected String name;
+    private String name;
 
     @Expose
     @SerializedName(Constants.PLAYER_STATE)
-    protected String status;
+    private String status;
 
     @Expose
     @SerializedName(Constants.PLAYER_COLOR)
-    protected Color color;
+    private Color color;
 
     @Expose
     @SerializedName(Constants.VICTORY_PTS)
-    protected int victoryPoints;
+    private int victoryPoints;
 
     protected int victoryPointsDevCards;
 
     @Expose
     @SerializedName(Constants.ARMY)
-    protected int armyCount;
+    private int armyCount;
 
     @Expose
     @SerializedName(Constants.LARGEST_ARMY)
-    protected boolean greatestArmy;
+    private boolean greatestArmy;
 
     @Expose
     @SerializedName(Constants.LONGEST_RD)
-    protected boolean longestRoad;
+    private boolean longestRoad;
 
     @Expose
     @SerializedName(Constants.RAW_MATERIALS)
@@ -158,7 +159,6 @@ public class Player extends JSONStringBuilder implements Comparable, Cloneable {
     }
 
     //region trade
-
     /**
      * <method name: trade>
      * <description: none>
@@ -179,10 +179,8 @@ public class Player extends JSONStringBuilder implements Comparable, Cloneable {
     //endregion
 
     //region hasXTo1Haven
-
     /**
      * returns if the player can trade 3:1 or 2:1
-     *
      * @param count
      * @return
      */
@@ -266,6 +264,40 @@ public class Player extends JSONStringBuilder implements Comparable, Cloneable {
 
     public boolean hasRoadConstructionCard() {
         return this.developmentDeck.hasRoadConstructionCard();
+    }
+
+    private int increaseArmyCount() {
+        return armyCount++;
+    }
+
+    /**
+     * plays knight card if player possesses one
+     * @return
+     */
+    public boolean playKnight() {
+        boolean done = false;
+        try {
+            if (developmentDeck.hasKnightCard()) {
+                developmentDeck.decrease(DevCardType.KNIGHT, 1);
+                increaseArmyCount();
+                done = true;
+            }
+        }
+        catch (Exception ex) {
+            ex.printStackTrace();
+            done = false;
+        }
+        return done;
+    }
+
+    public void decreaseVictoryPoints(int i) throws Exception {
+        if(this.victoryPoints <= 0) throw new Exception();
+        this.victoryPoints = victoryPoints - i;
+    }
+
+    public void increaseVictoryPoints(int i) {
+        this.victoryPoints = victoryPoints + i;
+
     }
 
     /**
@@ -486,6 +518,22 @@ public class Player extends JSONStringBuilder implements Comparable, Cloneable {
     @Override
     public String toString() {
         return "ID: "+ id + "_Name:" + this.getName() + "_Farbe:" + this.getColor() + "_Status:" +this.getStatus();
+    }
+
+    public RawMaterialType removeRandomResource() throws Exception {
+        Random r = new Random();
+        int random = r.nextInt(6);
+        RawMaterialType type = RawMaterialType.values()[random];
+        this.rawMaterialDeck.decrease(type, 1);
+        return type;
+    }
+
+    public DevelopmentCardOverview getDevelopmentDeck(){
+        return developmentDeck;
+    }
+
+    public void removeKnightCard() throws Exception {
+        this.developmentDeck.decrease(DevCardType.KNIGHT,1);
     }
 
     //____________FOR TESTING___________________________

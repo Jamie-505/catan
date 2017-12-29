@@ -112,6 +112,12 @@ public class CatanSocketHandler extends TextWebSocketHandler implements Property
                     if (!OK) errorMessage = "Die Karte Erfindung kann nicht ausgespielt werden.";
                     break;
 
+                case CARD_KNIGHT:
+                    sendMessageToAll(CatanMessage.knightCard(utils.toInt(session.getId()), message));
+                    OK = utils.applyKnightCard(session, message);
+                    if (!OK) errorMessage = "Die Ritterkarte konnte nicht ausgespielt werden.";
+                    break;
+
                 case ROLL_DICE:
                     OK = getGameCtrl().dice(utils.toInt(session.getId()));
                     if (!OK) errorMessage = "Du bist nicht am Zug";

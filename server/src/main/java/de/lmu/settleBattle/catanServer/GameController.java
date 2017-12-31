@@ -11,8 +11,12 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Stack;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 
-public class GameController {
+import static de.lmu.settleBattle.catanServer.Constants.*;
+
+public class GameController implements PropertyChangeListener {
     private Board board;
     private List<Player> players;
     private int currentTurn;
@@ -42,6 +46,7 @@ public class GameController {
             defineTurnOrder();
             initializeBuildingPhase();
             gameStarted = true;
+            setPlayerActive(getCurrent().getId(), BUILD_SETTLEMENT);
         }
         return gameStarted;
     }
@@ -67,23 +72,24 @@ public class GameController {
         return currentTurn % players.size();
     }
 
-    public Player getNext() {
-        return this.buildingPhaseActive ? getNext_BuildingPhase() : getNext_Move();
+    public Player nextMove() {
+        return this.buildingPhaseActive ? next_initialPhase() : next_gameStarted();
     }
 
-    private Player getNext_Move() {
+    private Player next_gameStarted() {
         currentTurn++;
+        if (!buildingPhaseActive) setPlayerActive(getCurrent().getId(), DICE);
         return players.get(this.getCurrentIndex());
     }
 
-    private Player getNext_BuildingPhase() {
+    private Player next_initialPhase() {
         Player player;
         if (round == 1) {
             playerStack.push(getCurrent());
             if (playerStack.size() == players.size()) {
                 round = 2;
                 player = playerStack.pop();
-            } else player = this.getNext_Move();
+            } else player = this.next_gameStarted();
 
         } else if (round == 2) {
             player = playerStack.pop();
@@ -95,8 +101,8 @@ public class GameController {
                 currentTurn = 0;
             }
         } else {  //all players have placed their buildings and the first player has turn
-            buildingPhaseActive = false;
             player = getCurrent();
+            setBuildingPhaseActive(false);
         }
 
         return player;
@@ -112,10 +118,18 @@ public class GameController {
      */
 
     public void setPlayerActive(int id, String status) {
-        for (Player player : players) {
-            String newStatus = player.getId() == id ? status : WAIT;
-            player.setStatus(newStatus);
+        setPlayerActive(getPlayer(id), status);
+    }
+
+    public void setPlayerActive(Player player, String status) {
+        //due to property change listeners first all stati need to be set to WAIT
+        //and afterwards active player status must be set
+        for (Player p : players) {
+            p.setStatus(WAIT);
         }
+
+        player.setStatus(status);
+
     }
 
     //endregion
@@ -145,19 +159,52 @@ public class GameController {
 
                 //add building to haven array in player so he can trade with it
                 //havens are only added for settlements (if a city is placed then the haven was already
-                //added when the settlement was placed)
+                //added when the sLocs was placed)
                 if (board.isConnectedToHaven(building) && type.equals(BuildingType.SETTLEMENT)) {
                     Haven haven = board.getConnectedHaven(building);
                     owner.addHaven(haven);
                 }
 
-                if (!buildingPhaseActive)
+                //increase victory points
+                if (!building.isRoad()) {
+                    // always add 1 victory point because:
+                    // a new settlement brings 1 victory point and
+                    // if a city was built then the owner has already received 1 victory point for the settlement he built before
+                    owner.addVictoryPoints(1);
+                }
+
+
+                //decrease raw materials
+                if(!buildingPhaseActive && getCurrent().getStatus().equals(BUILD_STREET))
                     owner.decreaseRawMaterials(Building.getCosts(type));
+
+
+                updateStatus(owner.getId());
             }
         }
         return built;
     }
     //endregion
+
+    /**
+     * updates status of player if the building phase is active or just ended
+     * @param id
+     */
+    private void updateStatus(int id) {
+        if (getCurrent().getId() != id) return;
+
+        if (buildingPhaseActive) {
+            String status = Constants.BUILD_STREET;
+            Player player = getCurrent();
+
+            if (player.getStatus().equals(BUILD_STREET)) {
+                player = nextMove();
+                status =  buildingPhaseActive ? BUILD_SETTLEMENT : DICE;
+            }
+
+            setPlayerActive(player.getId(), status);
+        }
+    }
 
     //region development card handling
 
@@ -182,7 +229,7 @@ public class GameController {
     public void sellDevelopmentCard() {
         this.rawMaterialDeck.increase(RawMaterialType.ORE, 1);
         this.rawMaterialDeck.increase(RawMaterialType.WOOD, 1);
-        this.rawMaterialDeck.increase(RawMaterialType.WEAT, 1);
+        this.rawMaterialDeck.increase(RawMaterialType.WHEAT, 1);
     }
     //endregion
 
@@ -310,15 +357,27 @@ public class GameController {
     }
 
     public void addPlayer(Player p) throws IllegalAccessException {
-        if (players.size() < 4)
+        if (players.size() < 4) {
+
             players.add(p);
 
-        else throw new IllegalAccessException("The player cannot be added. There" +
-            "are already 4 players for this game!");
+            if (p.isKI()) p.addPropertyChangeListener(this);
+
+        } else throw new IllegalAccessException("The player cannot be added. There" +
+                "are already 4 players for this game!");
     }
 
     public List<Player> getPlayers() {
         return players;
+    }
+
+    public void setKI(int id) {
+        setKI(getPlayer(id));
+    }
+
+    public void setKI(Player player) {
+        player.setKI(true);
+        player.addPropertyChangeListener(this);
     }
 
     public int getPlayerCount() {
@@ -326,7 +385,7 @@ public class GameController {
     }
 
     public Player getPlayer(String sessionId) {
-        return getPlayer(Integer.parseInt(sessionId, 16));
+        return getPlayer(SocketUtils.toInt(sessionId));
     }
 
     public Player getPlayer(int id) {
@@ -340,17 +399,6 @@ public class GameController {
 
     public boolean removePlayer(Player p) {
         return players.remove(p);
-    }
-
-    public ArrayList<Integer> getPlayersWithAtLeast7RawMaterials() {
-        ArrayList<Integer> ids = new ArrayList<>();
-
-        for (Player player : players) {
-            if (player.hasToExtractCards())
-                ids.add(player.getId());
-        }
-
-        return ids;
     }
 
     /**
@@ -384,7 +432,7 @@ public class GameController {
      * @param newLoc    new location of robber
      * @return
      */
-    public boolean moveRobber(int currentId, int targetId, Location newLoc) {
+    public boolean activateRobber(int currentId, int targetId, Location newLoc) {
         boolean robSuccessful = false;
 
         //check if player has turn
@@ -402,7 +450,7 @@ public class GameController {
                 //it might be that the target player does not possess any raw materials
                 //in this case the rob is stated as successful though because the target
                 //was specifically determined by the client
-                currentPlayer.robPlayer(targetPlayer);
+                board.getRobber().robPlayer(currentPlayer, targetPlayer);
                 robSuccessful = true;
 
             } else {
@@ -410,16 +458,16 @@ public class GameController {
 
                 //get first player who can be robbed and rob random raw material
                 for (int owner : owners) {
-                    Player robbedPlayer = getPlayer(owner);
+                    targetPlayer = getPlayer(owner);
 
-                    if (robbedPlayer != null && robbedPlayer.getRawMaterialCount() > 0) {
-                        currentPlayer.robPlayer(robbedPlayer);
+                    if (targetPlayer != null && targetPlayer.getRawMaterialCount() > 0) {
+                        board.getRobber().robPlayer(currentPlayer, targetPlayer);
                         robSuccessful = true;
                         break;
                     } else matchCount++;
                 }
 
-                //nobody can be robbed because nobody has a settlement/city there or nobody has any raw materials
+                //nobody can be robbed because nobody has a sLocs/city there or nobody has any raw materials
                 if (!robSuccessful && matchCount == owners.size()) robSuccessful = true;
             }
         }
@@ -428,35 +476,69 @@ public class GameController {
 
     /**
      * player tosses cards after a roll of 7 if he has at least 7 raw materials
+     *
      * @param id
      * @param overview
      * @return
      */
     public boolean tossRawMaterialCards(int id, RawMaterialOverview overview) {
+
         Player player = getPlayer(id);
-        if (player == null || !player.canAfford(overview)) return false;
+        boolean ret = board.getRobber().robPlayer(player, overview);
 
-        boolean ret = false;
+        //if player still has 7 cards or more he must still toss cards and his status won't be changed
+        if (!player.hasToExtractCards() && ret) {
 
-        try {
-            player.decreaseRawMaterials(overview);
-
-            //if player still has 7 cards or more he must still toss cards and his status won't be changed
-            if (!player.hasToExtractCards()) {
-
-                //set new status for player
-                String newStatus = player.getId() == getCurrent().getId() ? TRADE_OR_BUILD : WAIT;
-                player.setStatus(newStatus);
-                ret = true;
-            }
-
-        } catch (IllegalArgumentException ex) {
-            ex.printStackTrace();
-            ret = false;
+            //set new status for player
+            String newStatus = player.getId() == getCurrent().getId() ? TRADE_OR_BUILD : WAIT;
+            player.setStatus(newStatus);
+            ret = true;
         }
 
         return ret;
     }
+    //endregion
+
+    //region dice
+    public boolean dice(int id) {
+        if (getCurrent().getId() != id) return false;
+
+        int[] dice = getCurrent().throwDice();
+        int sum = dice[0] + dice[1];
+
+        //the robber is activated
+        if (sum == 7) {
+            //others have to extract cards
+            extractCardsDueToRobber();
+
+            //update status of current player
+            if (!getCurrent().getStatus().equals(EXTRACT_CARDS_DUE_TO_ROBBER))
+                getCurrent().setStatus(TRADE_OR_BUILD);
+        }
+
+        //distribute raw materials
+        else {
+            Map<Integer, RawMaterialOverview> distribution =
+                    mapOwnerWithHarvest(sum);
+
+            distributeRawMaterial(distribution);
+
+            //after raw material distribution player can continue his turn
+            setPlayerActive(id, TRADE_OR_BUILD);
+        }
+
+        return true;
+
+    }
+
+    public void extractCardsDueToRobber() {
+        for (Player player : getPlayers()) {
+            if (player.hasToExtractCards()) {
+                player.setStatus(EXTRACT_CARDS_DUE_TO_ROBBER);
+            }
+        }
+    }
+
     //endregion
 
     //region properties
@@ -472,8 +554,9 @@ public class GameController {
         return buildingPhaseActive;
     }
 
-    public void setBuildingPhaseActive(boolean buildingPhaseActive) {
-        this.buildingPhaseActive = buildingPhaseActive;
+    public void setBuildingPhaseActive(boolean active)
+    {
+        this.buildingPhaseActive = active;
     }
 
     public Board getBoard() {
@@ -482,6 +565,75 @@ public class GameController {
 
     public void endGame() {
         this.isGameOver = true;
+    }
+
+    public boolean isGameOver() {
+        return this.isGameOver;
+    }
+
+    @Override
+    public void propertyChange(PropertyChangeEvent evt) {
+
+        Player ki = (Player) evt.getNewValue();
+        if (!ki.isKI()) return;
+
+        if (!evt.getPropertyName().equals("status"))
+            return;
+
+        switch (ki.getStatus()) {
+            case START_GAME:
+                ki.setStatus(WAIT_FOR_GAME_START);
+                break;
+
+            case EXTRACT_CARDS_DUE_TO_ROBBER:
+                //KI has to extract cards
+                board.getRobber().robPlayer(ki);
+
+                String status = getCurrent().getId() == ki.getId() ? TRADE_OR_BUILD : WAIT;
+                ki.setStatus(status);
+                break;
+
+            case DICE:
+                dice(ki.getId());
+                break;
+
+            case BUILD_SETTLEMENT:
+                placeBuilding(ki.getId(), board.getRandomFreeSettlementLoc(),
+                        BuildingType.SETTLEMENT);
+                break;
+
+            case BUILD_STREET:
+                try {
+                    placeBuilding(ki.getId(), board.getFreeRoadLoc(ki.getId()), BuildingType.ROAD);
+                } catch (IllegalAccessException ex) {
+                    ex.printStackTrace();
+                }
+                break;
+
+            case TRADE_OR_BUILD:
+                if (ki.canAfford(BuildingType.SETTLEMENT)) {
+                    placeBuilding(ki.getId(), board.getRandomFreeSettlementLoc(), BuildingType.SETTLEMENT);
+                } else if (ki.canAfford(BuildingType.ROAD)) {
+                    try {
+                        placeBuilding(ki.getId(), board.getFreeRoadLoc(ki.getId()), BuildingType.ROAD);
+                    } catch (IllegalAccessException ex) {
+                        ex.printStackTrace();
+                    }
+                } else {
+                    tradeDevelopmentCard(ki);
+                }
+
+                nextMove();
+
+                break;
+
+            case ROBBER_TO:
+                boolean moved = activateRobber(ki.getId(), -1, new Location());
+                if (!moved) moved = activateRobber(ki.getId(), -1, new Location(1, 1));
+
+                if (!moved) throw new IllegalArgumentException("Der Räuber kann nicht versetzt werden.");
+                break;
+        }
     }
 
     //endregion

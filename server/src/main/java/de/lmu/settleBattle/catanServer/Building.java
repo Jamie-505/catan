@@ -77,6 +77,8 @@ public class Building extends JSONStringBuilder {
 
     public boolean edgesAreAdjacent(Location[] loc) {
 
+        if (!this.isRoad() || loc.length != 2) return false;
+
         for (int i = 0; i < loc.length; i++) {
             for (int j = 0; j < this.locations.length; j++) {
                 if (loc[i].equals(this.locations[j])) {

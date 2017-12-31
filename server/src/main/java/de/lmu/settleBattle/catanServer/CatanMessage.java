@@ -328,6 +328,10 @@ public class CatanMessage {
 
     //endregion
 
-//TODO: chatmessages AND Servernachrichten 
 
+    public static TextMessage sendBuildMessage(Building building) {
+        JSONObject payload = new JSONObject();
+
+        return new TextMessage(payload.put(BUILD, building.toJSON()).toString());
+    }
 }

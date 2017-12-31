@@ -20,13 +20,13 @@ public class Field extends JSONStringBuilder {
         this.harvest = harvest;
     }
 
-    public Field(Location location, RawMaterialType harvest) {
+    public Field(RawMaterialType harvest, Location location) {
+        this(harvest);
         this.location = location;
-        this.harvest = harvest;
     }
 
-    public Field(Location location, RawMaterialType harvest, int number) {
-        this(location, harvest);
+    public Field(RawMaterialType harvest, Location location, int number) {
+        this(harvest, location);
         this.number = number;
     }
 

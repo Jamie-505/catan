@@ -81,7 +81,7 @@ public class Constants {
     public final static String ROAD_CONSTRUCTION = "Straßenbau";
     public final static String VICTORY_PTS = "Siegpunkte";
     public final static String VICTORY_PT = "Siegpunkt";
-    public final static String WEAT = "Getreide";
+    public final static String WHEAT = "Getreide";
     public final static String ORE = "Erz";
     public final static String CLAY = "Lehm";
     public final static String WOOD = "Holz";

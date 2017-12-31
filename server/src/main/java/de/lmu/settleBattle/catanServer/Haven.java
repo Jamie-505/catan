@@ -91,7 +91,7 @@ public class Haven extends JSONStringBuilder {
             case WATER:
                 // if this is not a special trading haven then you have to give away 3 raw materials of the
                 // same type to receive one arbitrary raw material
-                if(tr.getOffer().getTotalCount() == 3) //TODO: check if 3 cards of the same type are offered
+                if(tr.getOffer().getTotalCount() == 3)
                     return true;
 
             case WOOL:
@@ -103,8 +103,8 @@ public class Haven extends JSONStringBuilder {
                 if (tr.getOffer().getWoodCount() == 2 && tr.getOffer().getTotalCount() == 2)
                     return true;
                 break;
-            case WEAT:
-                if (tr.getOffer().getWeatCount() == 2 && tr.getOffer().getTotalCount() == 2)
+            case WHEAT:
+                if (tr.getOffer().getWheatCount() == 2 && tr.getOffer().getTotalCount() == 2)
                     return true;
                 break;
             case ORE:

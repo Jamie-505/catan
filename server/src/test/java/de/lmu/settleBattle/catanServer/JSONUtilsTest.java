@@ -45,7 +45,7 @@ public class JSONUtilsTest {
     road = new Building(BuildingType.ROAD, 3);
     road.build(new Location[]{l1, l3});
 
-    field = new Field(l1, RawMaterialType.WOOL, 3);
+    field = new Field(RawMaterialType.WOOL, l1, 3);
     haven = new Haven(new Location[]{l1, l2}, RawMaterialType.CLAY);
     robber = new Robber();
     rmOverview = new RawMaterialOverview(0, 0, 3, 4, 2);
@@ -170,7 +170,7 @@ public class JSONUtilsTest {
     assertEquals(3, rmJSON.get(Constants.WOOD));
     assertEquals(0, rmJSON.get(Constants.CLAY));
     assertEquals(4, rmJSON.get(Constants.WOOL));
-    assertEquals(2, rmJSON.get(Constants.WEAT));
+    assertEquals(2, rmJSON.get(Constants.WHEAT));
     assertEquals(0, rmJSON.get(Constants.ORE));
 
     JSONObject rmJSON_Unknown = rmOverview.toJSON_Unknown();
@@ -330,11 +330,11 @@ public class JSONUtilsTest {
 
   @Test
   public void monopoleCardShouldBeCorrect() throws Exception {
-    JSONObject monopoleJSON = JSONUtils.createJSON(CatanMessage.monopoleCard(0, RawMaterialType.WEAT));
+    JSONObject monopoleJSON = JSONUtils.createJSON(CatanMessage.monopoleCard(0, RawMaterialType.WHEAT));
     JSONObject monopole = monopoleJSON.getJSONObject(Constants.MONOPOLE);
 
     assertTrue(monopole.has(Constants.PLAYER));
-    assertEquals(Constants.WEAT, monopole.get(Constants.RAW_MATERIAL));
+    assertEquals(Constants.WHEAT, monopole.get(Constants.RAW_MATERIAL));
   }
 
   @Test
@@ -344,7 +344,7 @@ public class JSONUtilsTest {
 
     assertTrue(invention.has(Constants.PLAYER));
     assertTrue(invention.has(Constants.RAW_MATERIALS));
-    assertEquals(2, invention.getJSONObject(Constants.RAW_MATERIALS).get(Constants.WEAT));
+    assertEquals(2, invention.getJSONObject(Constants.RAW_MATERIALS).get(Constants.WHEAT));
   }
 
   @Test

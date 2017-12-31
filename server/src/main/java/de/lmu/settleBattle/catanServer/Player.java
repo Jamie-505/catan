@@ -8,12 +8,11 @@ import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 
 public class Player extends JSONStringBuilder implements Comparable, Cloneable {
 
     //region property change listener
-    private PropertyChangeSupport changes = new PropertyChangeSupport(this);
+    protected PropertyChangeSupport changes = new PropertyChangeSupport(this);
 
     public void addPropertyChangeListener(PropertyChangeListener l) {
         changes.addPropertyChangeListener(l);
@@ -26,48 +25,50 @@ public class Player extends JSONStringBuilder implements Comparable, Cloneable {
 
     // region Members
     @Expose
-    private int id;
+    protected int id;
 
     @Expose
     @SerializedName(Constants.PLAYER_NAME)
-    private String name;
+    protected String name;
 
     @Expose
     @SerializedName(Constants.PLAYER_STATE)
-    private String status;
+    protected String status;
 
     @Expose
     @SerializedName(Constants.PLAYER_COLOR)
-    private Color color;
+    protected Color color;
 
     @Expose
     @SerializedName(Constants.VICTORY_PTS)
-    private int victoryPoints;
+    protected int victoryPoints;
 
-    private int victoryPointsTotal;
+    protected int victoryPointsDevCards;
 
     @Expose
     @SerializedName(Constants.ARMY)
-    private int armyCount;
+    protected int armyCount;
 
     @Expose
     @SerializedName(Constants.LARGEST_ARMY)
-    private boolean greatestArmy;
+    protected boolean greatestArmy;
 
     @Expose
     @SerializedName(Constants.LONGEST_RD)
-    private boolean longestRoad;
+    protected boolean longestRoad;
 
     @Expose
     @SerializedName(Constants.RAW_MATERIALS)
-    private RawMaterialOverview rawMaterialDeck;
+    protected RawMaterialOverview rawMaterialDeck;
 
     @Expose
     @SerializedName(Constants.DEV_CARDS)
-    private DevelopmentCardOverview developmentDeck;
+    protected DevelopmentCardOverview developmentDeck;
 
-    private Building[] buildingStock;
-    private ArrayList<Haven> havens;
+    protected Building[] buildingStock;
+    protected ArrayList<Haven> havens;
+
+    private boolean isKI;
     //endregion
 
     //region Constructors
@@ -84,7 +85,7 @@ public class Player extends JSONStringBuilder implements Comparable, Cloneable {
         this.name = null;
         this.status = "";
         this.victoryPoints = 0;
-        this.victoryPointsTotal = 0;
+        this.victoryPointsDevCards = 0;
         this.armyCount = 0;
         this.greatestArmy = false;
         this.longestRoad = false;
@@ -92,6 +93,7 @@ public class Player extends JSONStringBuilder implements Comparable, Cloneable {
         this.developmentDeck = new DevelopmentCardOverview(0);
         this.buildingStock = null;
         this.havens = new ArrayList<>();
+        this.isKI = false;
     }
 
     /**
@@ -106,6 +108,11 @@ public class Player extends JSONStringBuilder implements Comparable, Cloneable {
         this();
         this.id = id;
     }
+
+    public Player(int id, boolean isKI) {
+        this(id);
+        this.isKI = isKI;
+    }
     //endregion
 
     //region Actions
@@ -118,11 +125,19 @@ public class Player extends JSONStringBuilder implements Comparable, Cloneable {
      *
      * @return gives back a random int
      */
-    public static int[] throwDice() {
+    public int[] throwDice() {
         Dice dice = new Dice();
-        return dice.roll();
+
+        int[] result = dice.roll();
+
+        changes.firePropertyChange(Constants.DICE, result, this);
+
+        return result;
     }
 
+    public void endMove() {
+        changes.firePropertyChange(Constants.END_TURN, "", this);
+    }
 
     /**
      * <method name: buyDevelopmentCard>
@@ -134,7 +149,7 @@ public class Player extends JSONStringBuilder implements Comparable, Cloneable {
         try {
             this.rawMaterialDeck.decrease(RawMaterialType.ORE, 1);
             this.rawMaterialDeck.decrease(RawMaterialType.WOOL, 1);
-            this.rawMaterialDeck.decrease(RawMaterialType.WEAT, 1);
+            this.rawMaterialDeck.decrease(RawMaterialType.WHEAT, 1);
             this.developmentDeck.increase(card, 1);
         } catch (Exception e) {
             throw e;
@@ -209,26 +224,6 @@ public class Player extends JSONStringBuilder implements Comparable, Cloneable {
         this.havens.add(haven);
     }
 
-    /**
-     * <method name: robPlayer>
-     * <description: the player choose a card from one of the other players who have settlement where the robber moved >
-     * <preconditions: number 7 is rolled>
-     * <postconditions: player gets a card from another players>
-     */
-    public boolean robPlayer(Player player) {
-        List<RawMaterialType> types = player.getRawMaterialTypes();
-        if (types.size() == 0) return false;
-
-        Random random = new Random();
-        RawMaterialType type = types.get(random.nextInt(types.size()));
-
-        RawMaterialOverview overview = new RawMaterialOverview(type, 1);
-        player.decreaseRawMaterials(overview);
-        this.increaseRawMaterials(overview);
-
-        return true;
-    }
-
     public List<RawMaterialType> getRawMaterialTypes() {
         return this.rawMaterialDeck.getTypes();
     }
@@ -244,8 +239,11 @@ public class Player extends JSONStringBuilder implements Comparable, Cloneable {
      * <postconditions: none>
      */
     public boolean has10VictoryPoints() {
-        //TODO
-        return false;
+        return (this.victoryPoints + this.victoryPointsDevCards) >= 10;
+    }
+
+    public void addVictoryPoints(int vicPtsGain) {
+        this.victoryPoints += vicPtsGain;
     }
 
     public void decreaseRawMaterials(RawMaterialOverview overview) throws IllegalArgumentException {
@@ -381,6 +379,12 @@ public class Player extends JSONStringBuilder implements Comparable, Cloneable {
             changes.firePropertyChange("color", "null", this);
     }
 
+    public boolean isKI() {
+        return isKI;
+    }
+
+    public void setKI(boolean isKI) { this.isKI = isKI; }
+
     /**
      * <method name: isLongestRoad>
      * <description: this method checks if a road is the greatest>
@@ -452,6 +456,11 @@ public class Player extends JSONStringBuilder implements Comparable, Cloneable {
     @Override
     public Object clone() throws CloneNotSupportedException {
         return super.clone();
+    }
+
+    @Override
+    public String toString() {
+        return "ID: "+ id + "_Name:" + this.getName() + "_Farbe:" + this.getColor() + "_Status:" +this.getStatus();
     }
 
     //____________FOR TESTING___________________________

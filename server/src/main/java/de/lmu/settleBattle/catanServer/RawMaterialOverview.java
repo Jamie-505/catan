@@ -6,6 +6,7 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 public class RawMaterialOverview extends JSONStringBuilder {
 
@@ -22,8 +23,8 @@ public class RawMaterialOverview extends JSONStringBuilder {
     private int woolCount;
 
     @Expose
-    @SerializedName(Constants.WEAT)
-    private int weatCount;
+    @SerializedName(Constants.WHEAT)
+    private int wheatCount;
 
     @Expose
     @SerializedName(Constants.ORE)
@@ -32,27 +33,27 @@ public class RawMaterialOverview extends JSONStringBuilder {
     //region Constructors
     public RawMaterialOverview() {
         this.clayCount = this.oreCount = this.woodCount =
-                this.woolCount = this.weatCount = 0;
+                this.woolCount = this.wheatCount = 0;
     }
 
     public RawMaterialOverview(int initAmount) {
         this.clayCount = this.oreCount = this.woodCount =
-                this.woolCount = this.weatCount = initAmount;
+                this.woolCount = this.wheatCount = initAmount;
     }
 
-    public RawMaterialOverview(int clay, int ore, int wood, int wool, int weat) {
+    public RawMaterialOverview(int clay, int ore, int wood, int wool, int wheat) {
         this.clayCount = clay;
         this.oreCount = ore;
         this.woodCount = wood;
         this.woolCount = wool;
-        this.weatCount = weat;
+        this.wheatCount = wheat;
     }
 
     public RawMaterialOverview(RawMaterialType type, int initAmount) {
         this();
         switch (type) {
-            case WEAT:
-                weatCount = initAmount;
+            case WHEAT:
+                wheatCount = initAmount;
                 break;
             case CLAY:
                 clayCount = initAmount;
@@ -71,7 +72,7 @@ public class RawMaterialOverview extends JSONStringBuilder {
     //endregion
 
     public int getTotalCount() {
-        return clayCount + oreCount + woodCount + weatCount + woolCount;
+        return clayCount + oreCount + woodCount + wheatCount + woolCount;
     }
 
     //region increase
@@ -91,8 +92,8 @@ public class RawMaterialOverview extends JSONStringBuilder {
             case CLAY:
                 clayCount += i;
                 break;
-            case WEAT:
-                weatCount += i;
+            case WHEAT:
+                wheatCount += i;
                 break;
             case WOOD:
                 woodCount += i;
@@ -109,7 +110,7 @@ public class RawMaterialOverview extends JSONStringBuilder {
         this.clayCount += overview.clayCount;
         this.woolCount += overview.woolCount;
         this.woodCount += overview.woodCount;
-        this.weatCount += overview.weatCount;
+        this.wheatCount += overview.wheatCount;
     }
 
     //endregion
@@ -120,7 +121,7 @@ public class RawMaterialOverview extends JSONStringBuilder {
      * @param type type of raw material to decrease
      * @param i    value to be subtracted
      */
-    public void decrease(RawMaterialType type, int i) throws Exception {
+    public void decrease(RawMaterialType type, int i) throws IllegalArgumentException {
         if (i < 0) throw new IllegalArgumentException("decrease cannot be called with negative value");
 
         int typeCount = getTypeCount(type);
@@ -133,8 +134,8 @@ public class RawMaterialOverview extends JSONStringBuilder {
             case CLAY:
                 clayCount -= i;
                 break;
-            case WEAT:
-                weatCount -= i;
+            case WHEAT:
+                wheatCount -= i;
                 break;
             case WOOD:
                 woodCount -= i;
@@ -150,8 +151,8 @@ public class RawMaterialOverview extends JSONStringBuilder {
         if (this.oreCount < overview.oreCount)
             throw new IllegalArgumentException("Cannot decrease more ore than existing");
 
-        if (this.weatCount < overview.weatCount)
-            throw new IllegalArgumentException("Cannot decrease more weat than existing");
+        if (this.wheatCount < overview.wheatCount)
+            throw new IllegalArgumentException("Cannot decrease more wheat than existing");
 
         if (this.woodCount < overview.woodCount)
             throw new IllegalArgumentException("Cannot decrease more wood than existing");
@@ -166,7 +167,7 @@ public class RawMaterialOverview extends JSONStringBuilder {
         this.clayCount -= overview.clayCount;
         this.woolCount -= overview.woolCount;
         this.woodCount -= overview.woodCount;
-        this.weatCount -= overview.weatCount;
+        this.wheatCount -= overview.wheatCount;
     }
     //endregion
 
@@ -181,7 +182,7 @@ public class RawMaterialOverview extends JSONStringBuilder {
     }
 
     public boolean canAfford(RawMaterialOverview rmo) {
-        if (this.weatCount < rmo.weatCount ||
+        if (this.wheatCount < rmo.wheatCount ||
                 this.woolCount < rmo.woolCount ||
                 this.woodCount < rmo.woodCount ||
                 this.oreCount < rmo.oreCount ||
@@ -224,8 +225,8 @@ public class RawMaterialOverview extends JSONStringBuilder {
         return clayCount;
     }
 
-    public int getWeatCount() {
-        return weatCount;
+    public int getWheatCount() {
+        return wheatCount;
     }
 
     public int getWoodCount() {
@@ -244,8 +245,8 @@ public class RawMaterialOverview extends JSONStringBuilder {
         this.oreCount = oreCount;
     }
 
-    public void setWeatCount(int weatCount) {
-        this.weatCount = weatCount;
+    public void setWheatCount(int wheatCount) {
+        this.wheatCount = wheatCount;
     }
 
     public void setWoodCount(int woodCount) {
@@ -289,7 +290,7 @@ public class RawMaterialOverview extends JSONStringBuilder {
                 clayCount == count && getTotalCount() == count ||
                 woodCount == count && getTotalCount() == count ||
                 woolCount == count && getTotalCount() == count ||
-                weatCount == count && getTotalCount() == count;
+                wheatCount == count && getTotalCount() == count;
     }
 
     /**
@@ -316,8 +317,8 @@ public class RawMaterialOverview extends JSONStringBuilder {
         else if (this.hasOnly(RawMaterialType.WOOL))
             type = RawMaterialType.WOOL;
 
-        else if (this.hasOnly(RawMaterialType.WEAT))
-            type = RawMaterialType.WEAT;
+        else if (this.hasOnly(RawMaterialType.WHEAT))
+            type = RawMaterialType.WHEAT;
 
         else if (this.hasOnly(RawMaterialType.ORE))
             type = RawMaterialType.ORE;
@@ -337,8 +338,8 @@ public class RawMaterialOverview extends JSONStringBuilder {
             case ORE:
                 typeCount = oreCount;
                 break;
-            case WEAT:
-                typeCount = weatCount;
+            case WHEAT:
+                typeCount = wheatCount;
                 break;
             case WOOD:
                 typeCount = woodCount;
@@ -357,12 +358,23 @@ public class RawMaterialOverview extends JSONStringBuilder {
         List<RawMaterialType> types = new ArrayList<>();
 
         if (oreCount > 0) types.add(RawMaterialType.ORE);
-        if (weatCount > 0) types.add(RawMaterialType.WEAT);
+        if (wheatCount > 0) types.add(RawMaterialType.WHEAT);
         if (woolCount > 0) types.add(RawMaterialType.WOOL);
         if (woodCount > 0) types.add(RawMaterialType.WOOD);
         if (clayCount > 0) types.add(RawMaterialType.CLAY);
 
         return types;
+    }
+
+    public RawMaterialType withdrawRandomCard() throws IllegalArgumentException {
+
+        List<RawMaterialType> cards = this.getTypes();
+        Random random = new Random();
+        RawMaterialType card = cards.get(random.nextInt(cards.size()));
+
+        decrease(card, 1);
+
+        return card;
     }
 }
 

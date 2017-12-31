@@ -74,4 +74,9 @@ public class Location extends JSONStringBuilder {
     public boolean compare(Location loc){
         return (this.x == loc.x && this.y == loc.y);
     }
+
+    @Override
+    public String toString() {
+        return "x:" + x + "_y:" + y;
+    }
 }

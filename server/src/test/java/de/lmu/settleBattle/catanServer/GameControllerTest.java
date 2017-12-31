@@ -3,9 +3,9 @@ package de.lmu.settleBattle.catanServer;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.util.ArrayList;
 import java.util.List;
 
+import static de.lmu.settleBattle.catanServer.Constants.*;
 import static org.junit.Assert.*;
 
 public class GameControllerTest {
@@ -51,7 +51,7 @@ public class GameControllerTest {
 
     @Test
     public void setPlayerActive() throws Exception {
-        gameController.setPlayerActive(player1.getId(), Constants.BUILD_SETTLEMENT);
+        gameController.setPlayerActive(player1, Constants.BUILD_SETTLEMENT);
 
         assertTrue(gameController.getPlayer(1).getStatus() == Constants.BUILD_SETTLEMENT);
         assertTrue(gameController.getPlayer(2).getStatus() == Constants.WAIT);
@@ -70,8 +70,6 @@ public class GameControllerTest {
 
     public void initializeGame() {
         gameController.startGame();
-        Player player = gameController.getCurrent();
-        gameController.setPlayerActive(player.getId(), Constants.BUILD_SETTLEMENT);
     }
 
     @Test
@@ -88,94 +86,193 @@ public class GameControllerTest {
         getNext();
     }
 
-    //region getNext
+    //region nextMove
     public void getNext() throws Exception {
         List<Player> list = gameController.getPlayers();
 
         assertTrue(list.get(0).getId() == gameController.getCurrent().getId());
 
-        gameController.getNext();
+        gameController.nextMove();
         assertTrue(list.get(1).getId() == gameController.getCurrent().getId());
 
-        gameController.getNext();
+        gameController.nextMove();
         assertTrue(list.get(2).getId() == gameController.getCurrent().getId());
 
-        gameController.getNext();
+        gameController.nextMove();
         assertTrue(list.get(2).getId() == gameController.getCurrent().getId());
 
-        gameController.getNext();
+        gameController.nextMove();
         assertTrue(list.get(1).getId() == gameController.getCurrent().getId());
 
-        gameController.getNext();
+        gameController.nextMove();
         assertTrue(list.get(0).getId() == gameController.getCurrent().getId());
 
-        gameController.getNext();
+        gameController.nextMove();
         assertTrue(list.get(0).getId() == gameController.getCurrent().getId());
 
-        gameController.getNext();
+        gameController.nextMove();
         assertTrue(list.get(1).getId() == gameController.getCurrent().getId());
 
-        gameController.getNext();
+        gameController.nextMove();
         assertTrue(list.get(2).getId() == gameController.getCurrent().getId());
 
-        gameController.getNext();
+        gameController.nextMove();
         assertTrue(list.get(0).getId() == gameController.getCurrent().getId());
     }
     //endregion
 
+    //region moveRobber
     @Test
     public void moveRobber() {
         int currentId = gameController.getCurrent().getId();
 
         //board contains no settlements so there is no one to rob
-        assertTrue(gameController.moveRobber(currentId, 7, new Location(-1,0)));
+        assertTrue(gameController.activateRobber(currentId, 7, new Location(-1, 0)));
 
         //only one player can be robbed, target is specified
         int robbedId = currentId == 2 ? 3 : 2;
-        gameController.getPlayer(robbedId).setRawMaterialDeck(new RawMaterialOverview(0,0,2,0,0));
+        gameController.getPlayer(robbedId).setRawMaterialDeck(new RawMaterialOverview(0, 0, 2, 0, 0));
 
-        Building s1 = new Building(robbedId, BuildingType.SETTLEMENT, new Location[] {new Location(2,0), new Location(1,1), new Location(2,1)});
+        Building s1 = new Building(robbedId, BuildingType.SETTLEMENT, new Location[]{new Location(2, 0), new Location(1, 1), new Location(2, 1)});
         gameController.getBoard().addSettlement(s1);
 
-        assertTrue(gameController.moveRobber(currentId, robbedId, new Location(2,0)));
+        assertTrue(gameController.activateRobber(currentId, robbedId, new Location(2, 0)));
         assertTrue(gameController.getPlayer(robbedId).getRawMaterialCount() == 1);
 
         //only one player can be robbed, target is not specified
-        Building s2 = new Building(robbedId, BuildingType.SETTLEMENT, new Location[] {new Location(-3,0), new Location(-2,0), new Location(-2,-1)});
+        Building s2 = new Building(robbedId, BuildingType.SETTLEMENT, new Location[]{new Location(-3, 0), new Location(-2, 0), new Location(-2, -1)});
         gameController.getBoard().addSettlement(s2);
 
-        assertTrue(gameController.moveRobber(currentId, 7, new Location(-2,0)));
+        assertTrue(gameController.activateRobber(currentId, 7, new Location(-2, 0)));
         assertTrue(gameController.getPlayer(robbedId).getRawMaterialCount() == 0);
 
         int thirdId = currentId == 1 ? 3 : 1;
 
         //more players can be robbed, target is not specified
-        Building s3 = new Building(robbedId, BuildingType.SETTLEMENT, new Location[] {new Location(-1,1), new Location(0,0), new Location(-1,0)});
-        Building s4 = new Building(thirdId, BuildingType.SETTLEMENT, new Location[] {new Location(1,-1), new Location(0,0), new Location(1,0)});
+        Building s3 = new Building(robbedId, BuildingType.SETTLEMENT, new Location[]{new Location(-1, 1), new Location(0, 0), new Location(-1, 0)});
+        Building s4 = new Building(thirdId, BuildingType.SETTLEMENT, new Location[]{new Location(1, -1), new Location(0, 0), new Location(1, 0)});
         gameController.getBoard().addSettlement(s3);
         gameController.getBoard().addSettlement(s4);
         Player p1 = gameController.getPlayer(robbedId);
         Player p2 = gameController.getPlayer(thirdId);
-        p1.setRawMaterialDeck(new RawMaterialOverview(1,1,1,0,1));
-        p2.setRawMaterialDeck(new RawMaterialOverview(2,0,2,0,0));
+        p1.setRawMaterialDeck(new RawMaterialOverview(1, 1, 1, 0, 1));
+        p2.setRawMaterialDeck(new RawMaterialOverview(2, 0, 2, 0, 0));
 
         int robbedRmCount = p1.getRawMaterialCount();
         int thirdRmCount = p2.getRawMaterialCount();
 
-        assertTrue(gameController.moveRobber(currentId, 7, new Location(0,0)));
+        assertTrue(gameController.activateRobber(currentId, 7, new Location(0, 0)));
 
         //one of them got robbed
-        assertTrue(p1.getRawMaterialCount() == robbedRmCount-1 || p2.getRawMaterialCount() == thirdRmCount-1);
-        assertFalse(p1.getRawMaterialCount() == robbedRmCount-1 && p2.getRawMaterialCount() == thirdRmCount-1);
+        assertTrue(p1.getRawMaterialCount() == robbedRmCount - 1 || p2.getRawMaterialCount() == thirdRmCount - 1);
+        assertFalse(p1.getRawMaterialCount() == robbedRmCount - 1 && p2.getRawMaterialCount() == thirdRmCount - 1);
 
         //do not rob own player, robber will be moved but no raw materials will be de/increased
-        Building s5 = new Building(currentId, BuildingType.SETTLEMENT, new Location[] {new Location(-1,-1), new Location(0,-1), new Location(0,-2)});
-        Building s6 = new Building(currentId, BuildingType.SETTLEMENT, new Location[] {new Location(0,-2), new Location(0,-3), new Location(1,-3)});
+        Building s5 = new Building(currentId, BuildingType.SETTLEMENT, new Location[]{new Location(-1, -1), new Location(0, -1), new Location(0, -2)});
+        Building s6 = new Building(currentId, BuildingType.SETTLEMENT, new Location[]{new Location(0, -2), new Location(0, -3), new Location(1, -3)});
         gameController.getBoard().addSettlement(s5);
         gameController.getBoard().addSettlement(s6);
 
         int currentRmCount = gameController.getCurrent().getRawMaterialCount();
-        assertTrue(gameController.moveRobber(currentId, -1, new Location(0,-2)));
+        assertTrue(gameController.activateRobber(currentId, -1, new Location(0, -2)));
         assertTrue(currentRmCount == gameController.getCurrent().getRawMaterialCount());
     }
+    //endregion
+
+
+    //region KI
+    @Test
+    public void KI_initialPhase() throws Exception {
+        gameController.setKI(player1);
+        gameController.setKI(player2);
+
+        Player player4 = new Player(4, true);
+        player4.setName("Hering");
+        player4.setColor(Color.RED);
+
+        gameController.addPlayer(player4);
+        player4.setStatus(START_GAME);
+
+        assertEquals(WAIT_FOR_GAME_START, player4.getStatus());
+
+        initializeGame();
+
+        //after game initialization game is started an KIs place buildings until player3 has turn
+        assertEquals(BUILD_SETTLEMENT, player3.getStatus());
+        assertEquals(WAIT, player4.getStatus());
+        assertEquals(WAIT, player2.getStatus());
+        assertEquals(WAIT, player1.getStatus());
+
+        //player 3 places his first settlement and afterwards should have status BUILD_STREET
+        int sCnt = gameController.getBoard().getSettlements().size();
+        int rCnt = gameController.getBoard().getRoads().size();
+        gameController.placeBuilding(player3.getId(), gameController.getBoard().getRandomFreeSettlementLoc(), BuildingType.SETTLEMENT);
+
+        assertEquals(sCnt+1, gameController.getBoard().getSettlements().size());
+        assertEquals(rCnt, gameController.getBoard().getRoads().size());
+        assertEquals(0, gameController.getBoard().getCities().size());
+
+        assertEquals(BUILD_STREET, player3.getStatus());
+        assertEquals(WAIT, player4.getStatus());
+        assertEquals(WAIT, player2.getStatus());
+        assertEquals(WAIT, player1.getStatus());
+
+        //player 3 places his second road
+        gameController.placeBuilding(player3.getId(), gameController.getBoard().getFreeRoadLoc(player3.getId()), BuildingType.ROAD);
+
+        assertEquals(BUILD_SETTLEMENT, player3.getStatus());
+        assertEquals(WAIT, player4.getStatus());
+        assertEquals(WAIT, player2.getStatus());
+        assertEquals(WAIT, player1.getStatus());
+
+
+        //player 3 places his second settlement
+        sCnt = gameController.getBoard().getSettlements().size();
+        rCnt = gameController.getBoard().getRoads().size();
+        gameController.placeBuilding(player3.getId(), gameController.getBoard().getRandomFreeSettlementLoc(), BuildingType.SETTLEMENT);
+
+        assertEquals(sCnt+1, gameController.getBoard().getSettlements().size());
+        assertEquals(rCnt, gameController.getBoard().getRoads().size());
+        assertEquals(0, gameController.getBoard().getCities().size());
+
+        assertEquals(BUILD_STREET, player3.getStatus());
+        assertEquals(WAIT, player4.getStatus());
+        assertEquals(WAIT, player2.getStatus());
+        assertEquals(WAIT, player1.getStatus());
+
+        //player 3 places his second road
+        gameController.placeBuilding(player3.getId(), gameController.getBoard().getFreeRoadLoc(player3.getId()), BuildingType.ROAD);
+
+        assertTrue(gameController.getBoard().getSettlements().size() >= 8);
+        assertTrue(gameController.getBoard().getRoads().size() >= 8);
+        assertFalse(gameController.isBuildingPhaseActive());
+
+        assertEquals(DICE, player3.getStatus());
+        assertEquals(WAIT, player4.getStatus());
+        assertEquals(WAIT, player2.getStatus());
+        assertEquals(WAIT, player1.getStatus());
+
+        //player 3 must dice and his status will be set to TRADE_OR_BUILD
+        gameController.dice(player3.getId());
+
+        assertEquals(TRADE_OR_BUILD, player3.getStatus());
+    }
+
+    @Test
+    public void KI_statusupdates() {
+        gameController.setKI(player3);
+        player3.setRawMaterialDeck(new RawMaterialOverview(1,4,5,3,0));
+        player3.setStatus(EXTRACT_CARDS_DUE_TO_ROBBER);
+
+        assertEquals(7, player3.getRawMaterialCount());
+
+        Location loc = gameController.getBoard().getRobber().getLocation();
+
+        Player player = gameController.getCurrent();
+        gameController.setKI(player);
+        gameController.setPlayerActive(player, ROBBER_TO);
+
+        assertFalse(loc.equals(gameController.getBoard().getRobber().getLocation()));
+    }
+    //endregion
 }

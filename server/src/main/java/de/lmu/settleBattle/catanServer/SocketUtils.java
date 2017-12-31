@@ -29,33 +29,15 @@ public class SocketUtils {
         return gameCtrl;
     }
 
-    public int toInt(String string) {
+    public static int toInt(String string) {
         return Integer.parseInt(string, 16);
     }
 
     //region build
-    public boolean build(WebSocketSession session, TextMessage message) throws IOException {
-        int id = toInt(session.getId());
+    public boolean build(int id, TextMessage message) throws IOException {
         Building building = gson.fromJson(JSONUtils.createJSON(message)
                 .getJSONObject(Constants.BUILD).toString(), Building.class);
-        boolean built = this.gameCtrl.placeBuilding(id, building.getLocations(), building.getType());
-
-        if (built) {
-            //in the building phase the current player can build a road after a settlement
-            if (gameCtrl.isBuildingPhaseActive()) {
-                Player next = gameCtrl.getCurrent();
-                String status = Constants.BUILD_STREET;
-
-                if (building.isRoad()) {
-                    next = gameCtrl.getNext();
-                    status = Constants.BUILD_SETTLEMENT;
-                }
-
-                nextMove(next.getId(), status);
-            }
-        }
-
-        return built;
+        return this.gameCtrl.placeBuilding(id, building.getLocations(), building.getType());
     }
     //endregion
 
@@ -98,21 +80,6 @@ public class SocketUtils {
                 session.sendMessage(CatanMessage.error(Constants.COLOR_ALREADY_ASSIGNED));
             }
         }
-    }
-    //endregion
-
-    //region nextMove
-    public void nextMove(int idOfNextPlayer, String statusForNextPlayer) throws IOException {
-        gameCtrl.setPlayerActive(idOfNextPlayer, statusForNextPlayer);
-    }
-    //endregion
-
-    //region startGame
-    public void startGame() throws IOException {
-        gameCtrl.startGame();
-
-        Player player = gameCtrl.getCurrent();
-        nextMove(player.getId(), Constants.BUILD_SETTLEMENT);
     }
     //endregion
 
@@ -220,15 +187,7 @@ public class SocketUtils {
 
         int id = payload.has(DESTINATION) ? (Integer) payload.get(DESTINATION) : -1;
 
-        return gameCtrl.moveRobber(toInt(session.getId()), id, loc);
-    }
-
-    public void extractCardsDueToRobber() throws IOException {
-        for (Player player : gameCtrl.getPlayers()) {
-            if (player.hasToExtractCards()) {
-                player.setStatus(Constants.EXTRACT_CARDS_DUE_TO_ROBBER);
-            }
-        }
+        return gameCtrl.activateRobber(toInt(session.getId()), id, loc);
     }
 
     /**

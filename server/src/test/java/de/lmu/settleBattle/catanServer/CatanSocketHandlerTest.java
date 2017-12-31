@@ -37,12 +37,6 @@ public class CatanSocketHandlerTest {
         }
     }
 
-    private TextMessage sendBuildMessage(Building building) {
-        JSONObject payload = new JSONObject();
-
-        return new TextMessage(payload.put(BUILD, building.toJSON()).toString());
-    }
-
     //region startGameMessage
     private TextMessage startGameMessage() {
         JSONObject payload = new JSONObject();
@@ -81,7 +75,7 @@ public class CatanSocketHandlerTest {
     }
     //endregion
 
-    /*
+
     @Test
     public void performHandshake() throws Exception {
         JSONObject payload = wsMessageToJSON(session1.getSentMessages().get(1));
@@ -89,15 +83,15 @@ public class CatanSocketHandlerTest {
 
         JSONObject payload2 = wsMessageToJSON(session1.getSentMessages().get(2));
         assertTrue(payload2.has(Constants.STATUS_UPD));
-        assertEquals(Constants.START_GAME, pStartGame.getStatus());
-    }*/
+        assertEquals(Constants.START_GAME, handler.getGameCtrl().getCurrent().getStatus());
+    }
 
 
     private TestWebSocketSession getCurrentSession() {
         Player player = handler.getGameCtrl().getCurrent();
 
         for (TestWebSocketSession s : sessions) {
-            if (handler.getUtils().toInt(s.getId()) == player.getId())
+            if (SocketUtils.toInt(s.getId()) == player.getId())
                 return s;
         }
 
@@ -135,9 +129,6 @@ public class CatanSocketHandlerTest {
         p3.setStatus(WAIT_FOR_GAME_START);
 
         handler.getGameCtrl().startGame();
-
-        Player player = handler.getGameCtrl().getCurrent();
-        handler.getUtils().nextMove(player.getId(), Constants.BUILD_SETTLEMENT);
     }
 
     //endregion
@@ -197,7 +188,7 @@ public class CatanSocketHandlerTest {
         Board board = CatanMessage.extractBoard(session1.getLast());
         assertTrue(board.getBuildingsSize() == 0);
 
-        handler.getUtils().startGame();
+        handler.getUtils().getGameCtrl().startGame();
 
         p3 = CatanMessage.statusUpdateToPlayer(session3.getLast());
         p2 = CatanMessage.statusUpdateToPlayer(session3.get(session3.getLastIndex() - 1));
@@ -209,14 +200,6 @@ public class CatanSocketHandlerTest {
                         (p3.getStatus().equals(WAIT) && p2.getStatus().equals(WAIT) && p1.getStatus().equals(BUILD_SETTLEMENT)));
     }
     //endregion
-
-    @Test
-    public void extractCardsDueToRobber() throws Exception {
-    }
-
-    @Test
-    public void tossRawMaterials() throws Exception {
-    }
 
     //region build_BuildingPhase
     @Test
@@ -244,14 +227,14 @@ public class CatanSocketHandlerTest {
         String id = session.getId();
 
         Building building = new Building(
-                handler.getUtils().toInt(session.getId()), type, locs);
+                SocketUtils.toInt(session.getId()), type, locs);
 
         int fromIndex = session.getLastIndex();
-        //check if settlement was built
+        //check if sLocs was built
         Board board = handler.getGameCtrl().getBoard();
         int builtBuildingCnt = board.getBuildingsSize();
 
-        boolean sBuilt = handler.getUtils().build(session, sendBuildMessage(building));
+        boolean sBuilt = handler.getUtils().build(SocketUtils.toInt(session.getId()), CatanMessage.sendBuildMessage(building));
         assertTrue(board.getBuildingsSize() == builtBuildingCnt);
         assertTrue(!sBuilt);
 
@@ -271,11 +254,11 @@ public class CatanSocketHandlerTest {
                 handler.getUtils().toInt(session.getId()), type, locs);
 
         int fromIndex = session.getLastIndex();
-        //check if settlement was built
+        //check if sLocs was built
         Board board = handler.getGameCtrl().getBoard();
         int builtBuildingCnt = board.getBuildingsSize();
 
-        boolean sBuilt = handler.getUtils().build(session, sendBuildMessage(building));
+        boolean sBuilt = handler.getUtils().build(SocketUtils.toInt(session.getId()), CatanMessage.sendBuildMessage(building));
         assertTrue(board.getBuildingsSize() == builtBuildingCnt+1);
         assertTrue(sBuilt);
 

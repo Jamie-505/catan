@@ -6,11 +6,7 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.IOException;
 import java.util.*;
-import java.util.function.ToIntBiFunction;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import org.json.JSONObject;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
@@ -18,9 +14,8 @@ import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
 
 @Component
-public class CatanSocketHandler extends TextWebSocketHandler {
+public class CatanSocketHandler extends TextWebSocketHandler implements PropertyChangeListener {
 
-    private Gson gson;
     private SocketUtils utils;
 
     // set to store all live sessions
@@ -38,9 +33,6 @@ public class CatanSocketHandler extends TextWebSocketHandler {
                 }
         );
 
-        GsonBuilder builder = new GsonBuilder();
-        builder.excludeFieldsWithoutExposeAnnotation();
-        this.gson = builder.create();
         this.sessions = Collections.synchronizedSet(new HashSet<WebSocketSession>());
     }
 
@@ -58,54 +50,14 @@ public class CatanSocketHandler extends TextWebSocketHandler {
         System.out.println(session.getId() + " has opened a connection");
         super.afterConnectionEstablished(session);
 
-        // Add session to session list
-        sessions.add(session);
         Player player = new Player(utils.toInt(session.getId()));
 
         //add change listener for status property so every time the status changes a message will be sent
-        player.addPropertyChangeListener(e -> {
-            try {
-                Player p = (Player) e.getNewValue();
-                sendStatusUpdate(p);
-                System.out.printf("Property '%s': '%s' -> '%s'%n",
-                        e.getPropertyName(), e.getOldValue(), p.getStatus());
-
-                switch (e.getPropertyName()) {
-
-                    case "Trade Decrease":
-                        RawMaterialOverview costs = (RawMaterialOverview) e.getOldValue();
-                        sendMessageToAll(CatanMessage.costs(utils.toInt(session.getId()),
-                                costs, false));
-                        break;
-                    case "Trade Increase":
-                        RawMaterialOverview harvest = (RawMaterialOverview) e.getOldValue();
-                        sendMessageToAll(CatanMessage.harvest(utils.toInt(session.getId()),
-                                harvest, false));
-                        break;
-
-                    //if there was a decrease/increase of raw materials send harvest/cost messages
-                    case "RawMaterialIncrease":
-                        RawMaterialOverview harvest2 = (RawMaterialOverview) e.getOldValue();
-                        sendMessageToAll(Integer.toHexString(player.getId()),   //parse id back to hex string (session id)
-                                CatanMessage.harvest(player.getId(), harvest2, false),
-                                CatanMessage.harvest(player.getId(), harvest2, true));
-                        break;
-
-                    case "RawMaterialDecrease":
-                        RawMaterialOverview costs2 = (RawMaterialOverview) e.getOldValue();
-                        sendMessageToAll(Integer.toHexString(player.getId()),   //parse id back to hex string (session id)
-                                CatanMessage.costs(player.getId(), costs2, false),
-                                CatanMessage.costs(player.getId(), costs2, true));
-                        break;
-                }
-
-            } catch (IOException ex) {
-                System.out.printf("An exception occured %s", ex.getMessage());
-            }
-        });
+        player.addPropertyChangeListener(this);
 
         try {
             utils.getGameCtrl().addPlayer(player);
+            sessions.add(session);
 
             // sending session id to the client that just connected
             TextMessage verifyProtocol = CatanMessage.serverProtocol();
@@ -123,7 +75,7 @@ public class CatanSocketHandler extends TextWebSocketHandler {
     //region handleTextMessage
     @Override
     public void handleTextMessage(WebSocketSession session, TextMessage message)
-            throws InterruptedException, IOException {
+            throws InterruptedException, IOException, IllegalArgumentException {
 
         System.out.println("Message from " + session.getId() + ": " + message.getPayload());
 
@@ -145,17 +97,18 @@ public class CatanSocketHandler extends TextWebSocketHandler {
                 case START_GAME:
                     if (utils.handleStartGameMessage(session, message)) {
                         sendMessageToAll(CatanMessage.startGame(utils.getGameCtrl().getBoard()));
-                        utils.startGame();
+                        utils.getGameCtrl().startGame();
                     }
                     break;
 
                 case BUILD:
-                    OK = utils.build(session, message);
+                    OK = utils.build(utils.toInt(session.getId()), message);
                     if (!OK) errorMessage = "Das Gebäude kann nicht gebaut werden.";
                     break;
 
                 case ROLL_DICE:
-                    this.dice(session);
+                    OK = getGameCtrl().dice(utils.toInt(session.getId()));
+                    if (!OK) errorMessage = "Du bist nicht am Zug";
                     break;
 
                 case ROBBER_TO:
@@ -198,8 +151,7 @@ public class CatanSocketHandler extends TextWebSocketHandler {
                     break;
 
                 case END_TURN:
-                    Player next = utils.getGameCtrl().getNext();
-                    utils.nextMove(next.getId(), DICE);
+                    nextMove();
                     break;
             }
 
@@ -212,6 +164,18 @@ public class CatanSocketHandler extends TextWebSocketHandler {
         }
     }
 
+    public void nextMove() throws IOException {
+        Player current = utils.getGameCtrl().getCurrent();
+
+        //current player has won the game
+        if (current.has10VictoryPoints()) {
+            utils.getGameCtrl().endGame();
+            sendMessageToAll(CatanMessage.endGame(current));
+        } else {
+            utils.getGameCtrl().nextMove();
+        }
+    }
+
     //endregion
 
     //region afterConnectionClosed
@@ -220,46 +184,12 @@ public class CatanSocketHandler extends TextWebSocketHandler {
         super.afterConnectionClosed(session, status);
         System.out.println("Session " + session.getId() + " has ended");
 
-        //remove player from GameController
-        Player player = utils.getGameCtrl().getPlayer(session.getId());
-        utils.getGameCtrl().removePlayer(player);
+        if (!utils.getGameCtrl().isGameOver()) {
+            getGameCtrl().getPlayer(session.getId()).setKI(true);
+        }
 
         // remove the session from sessions list
         sessions.remove(session);
-
-        // TODO: Replace player with KI !
-    }
-    //endregion
-
-    //region dice
-    public void dice(WebSocketSession session) throws IOException {
-        int id = utils.toInt(session.getId());
-
-        //check if client is allowed to dice
-        if (!getGameCtrl().getCurrent().equals(getGameCtrl().getPlayer(id)))
-            sendError(session, "Du bist nicht am Zug!");
-
-        int[] dice = Player.throwDice();
-        TextMessage diceMessage = CatanMessage.throwDice(
-                utils.getGameCtrl().getPlayer(session.getId()).getId(), dice);
-
-        sendMessageToAll(diceMessage);
-
-        int sum = dice[0] + dice[1];
-
-        //the robber is activated
-        if (sum == 7) utils.extractCardsDueToRobber();
-
-            //distribute raw materials
-        else {
-            Map<Integer, RawMaterialOverview> distribution =
-                    utils.getGameCtrl().mapOwnerWithHarvest(sum);
-
-            utils.getGameCtrl().distributeRawMaterial(distribution);
-
-            //after raw material distribution player can continue his turn
-            getGameCtrl().setPlayerActive(id, TRADE_OR_BUILD);
-        }
     }
     //endregion
 
@@ -422,18 +352,49 @@ public class CatanSocketHandler extends TextWebSocketHandler {
         return true;
     }
 
+    @Override
+    public void propertyChange(PropertyChangeEvent evt) {
+        try {
+            Player player = (Player) evt.getNewValue();
+            sendStatusUpdate(player);
+            System.out.printf("Property '%s': '%s' -> '%s'%n",
+                    evt.getPropertyName(), evt.getOldValue(), player.getStatus());
 
-    //endregion
+            switch (evt.getPropertyName()) {
 
-    //region sendCostMessages
-    public void sendCostMessages(WebSocketSession session, TextMessage message) {
-        Building building = gson.fromJson(JSONUtils.createJSON(message)
-                .getJSONObject(Constants.BUILD).toString(), Building.class);
+                case "Trade Decrease":
+                    RawMaterialOverview costs = (RawMaterialOverview) evt.getOldValue();
+                    sendMessageToAll(CatanMessage.costs(getGameCtrl().getCurrent().getId(), costs, false));
+                    break;
+                case "Trade Increase":
+                    RawMaterialOverview harvest = (RawMaterialOverview) evt.getOldValue();
+                    sendMessageToAll(CatanMessage.harvest(getGameCtrl().getCurrent().getId(), harvest, false));
+                    break;
 
-        sendMessageToAll(session.getId(),
-                CatanMessage.costs(utils.toInt(session.getId()), building.getCost(), false),
-                CatanMessage.costs(utils.toInt(session.getId()), building.getCost(), true));
+                //if there was a decrease/increase of raw materials send harvest/cost messages
+                case "RawMaterialIncrease":
+                    RawMaterialOverview harvest2 = (RawMaterialOverview) evt.getOldValue();
+                    sendMessageToAll(Integer.toHexString(player.getId()),   //parse id back to hex string (session id)
+                            CatanMessage.harvest(player.getId(), harvest2, false),
+                            CatanMessage.harvest(player.getId(), harvest2, true));
+                    break;
+
+                case "RawMaterialDecrease":
+                    RawMaterialOverview costs2 = (RawMaterialOverview) evt.getOldValue();
+                    sendMessageToAll(Integer.toHexString(player.getId()),   //parse id back to hex string (session id)
+                            CatanMessage.costs(player.getId(), costs2, false),
+                            CatanMessage.costs(player.getId(), costs2, true));
+                    break;
+
+                case DICE:
+                    sendMessageToAll(CatanMessage.throwDice(player.getId(), (int[]) evt.getOldValue()));
+                    break;
+            }
+
+        } catch (IOException ex) {
+            System.out.printf("An exception occured %s", ex.getMessage());
+        }
     }
-    //endregion
 
+    //endregion
 }

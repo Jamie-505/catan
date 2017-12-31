@@ -3,8 +3,6 @@ package de.lmu.settleBattle.catanServer;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
-import java.util.Random;
-
 public enum RawMaterialType {
 
     @Expose
@@ -24,8 +22,8 @@ public enum RawMaterialType {
     WOOL,
 
     @Expose
-    @SerializedName(Constants.WEAT)
-    WEAT,
+    @SerializedName(Constants.WHEAT)
+    WHEAT,
     DESERT,
     WATER;
 
@@ -40,8 +38,8 @@ public enum RawMaterialType {
                 return Constants.WOOD;
             case WOOL:
                 return Constants.WOOL;
-            case WEAT:
-                return Constants.WEAT;
+            case WHEAT:
+                return Constants.WHEAT;
             case WATER:
                 return Constants.WATER;
             default: throw new AssertionError( "Unknown building type" + this);
@@ -51,7 +49,7 @@ public enum RawMaterialType {
 
     public boolean isValidTradingType() {
         return this.equals(RawMaterialType.CLAY) || this.equals(RawMaterialType.ORE) ||
-                this.equals(RawMaterialType.WEAT) || this.equals(RawMaterialType.WOOL) ||
+                this.equals(RawMaterialType.WHEAT) || this.equals(RawMaterialType.WOOL) ||
                 this.equals(RawMaterialType.WOOD);
     }
 }

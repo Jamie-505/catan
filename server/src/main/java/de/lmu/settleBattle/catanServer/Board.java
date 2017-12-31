@@ -226,9 +226,35 @@ public class Board extends JSONStringBuilder {
         return neighbors;
     }
 
-    public Location[] getFreeRoadLoc(int id) throws IllegalAccessException {
-        for (Building s : settlements) {
-            if (s.getOwner() == id) {
+    /**
+     * returns the harvest that is distributed for one building
+     * @param building
+     * @return
+     */
+    public RawMaterialOverview getHarvest(Building building) {
+        RawMaterialOverview overview = new RawMaterialOverview();
+
+        if (building.isRoad()) return overview;
+
+        for (Field field : fields) {
+            for (Location loc : building.getLocations())
+                if (loc.equals(field.getLocation())) {
+                    overview.increase(field.getHarvest(), 1);
+                    break;
+                }
+        }
+
+        return overview;
+    }
+
+    public Location[] getFreeRoadLoc(Player player, boolean initialPhase) throws IllegalAccessException {
+        List<Building> buildings = new ArrayList<Building>();
+
+        if (initialPhase) buildings.add(player.getLastSettlement());
+        else buildings.addAll(player.getSettlementsAndCities());
+
+        for (Building s : buildings) {
+            if (s.getOwner() == player.getId()) {
                 for (int i = 0; i < 3; i++) {
                     Location[] locs = new Location[2];
 
@@ -323,19 +349,16 @@ public class Board extends JSONStringBuilder {
      * <postconditions: none>
      */
 
-    public boolean placeBuilding(int playerID, Location[] loc, BuildingType type, boolean initialPhase) {
+    public boolean placeBuilding(Building bld, boolean initialPhase) {
         boolean cornerAroundIsOccupied = false;
         boolean edgeIsOccupied = false;
         boolean edgeAroundIsOccupied = false;
         Building foundCorner = null;
         Building foundEdge = null;
 
-
         //create a building
-        Building bld = new Building(playerID, type, loc);
-
         for (Building s : getSettlementsAndCities()) {
-            if (s.isBuiltAroundHere(loc, false)) {
+            if (s.isBuiltAroundHere(bld.getLocations(), false)) {
                 cornerAroundIsOccupied = true;
                 foundCorner = s;
                 break;
@@ -343,21 +366,22 @@ public class Board extends JSONStringBuilder {
         }
 
         for (Building r : roads) {
-            if (r.isBuiltAroundHere(loc, true)) {
+            if (r.isBuiltAroundHere(bld.getLocations(), true)) {
                 edgeIsOccupied = true;
                 break;
-            } else if (r.isBuiltAroundHere(loc, false)) {
+            } else if (r.isBuiltAroundHere(bld.getLocations(), false)) {
                 edgeAroundIsOccupied = true;
                 foundEdge = r;
                 break;
             }
         }
 
-        switch (type) {
+        switch (bld.getType()) {
             case SETTLEMENT:
                 //in the initial phase a sLocs can be placed anywhere
                 //afterwards it can only placed on corners that are connected to roads of the player
-                if (!cornerAroundIsOccupied && (initialPhase || edgeAroundIsOccupied && foundEdge.getOwner() == playerID)) {
+                if (!cornerAroundIsOccupied && (initialPhase ||
+                        edgeAroundIsOccupied && foundEdge.getOwner() == bld.getOwner())) {
                     return this.addRoadOrSettlement(bld);
                 }
 
@@ -366,7 +390,7 @@ public class Board extends JSONStringBuilder {
             case CITY:
                 //Upgrading a sLocs happens here
                 if (cornerAroundIsOccupied && !initialPhase &&
-                        foundCorner.getOwner() == playerID && foundCorner.isSettlement()) {
+                        foundCorner.getOwner() == bld.getOwner() && foundCorner.isSettlement()) {
                     return this.addCity(bld, foundCorner);
                 }
                 break;
@@ -375,8 +399,8 @@ public class Board extends JSONStringBuilder {
                 // roads can only be placed on edges that are connected to a sLocs/city of the player or
                 // another road of the player
                 if (!edgeIsOccupied &&
-                        (cornerAroundIsOccupied && foundCorner.getOwner() == playerID ||
-                        edgeAroundIsOccupied && foundEdge.getOwner() == playerID)) {
+                        (cornerAroundIsOccupied && foundCorner.getOwner() == bld.getOwner() ||
+                        edgeAroundIsOccupied && foundEdge.getOwner() == bld.getOwner())) {
                     return this.addRoadOrSettlement(bld);
                 }
 

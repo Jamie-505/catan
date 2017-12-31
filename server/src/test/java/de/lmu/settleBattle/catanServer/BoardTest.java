@@ -51,8 +51,9 @@ public class BoardTest {
             boolean expected = i >= 10 || i == 6 ? false : true;
             int expectedSize = expected ? board.getBuildingsSize() + 1 : board.getBuildingsSize();
 
-            boolean built = board.placeBuilding(buildings.get(i).getOwner(),
-                    buildings.get(i).getLocations(), buildings.get(i).getType(), true);
+            Building bld = new Building(buildings.get(i).getOwner(), buildings.get(i).getType(),
+                    buildings.get(i).getLocations());
+            boolean built = board.placeBuilding(bld, true);
 
             assertTrue(expected == built);
             assertTrue(board.getBuildingsSize() == expectedSize);
@@ -102,8 +103,9 @@ public class BoardTest {
             boolean expected = i >= 8 ? false : true;
             int expectedSize = expected ? board.getBuildingsSize() + 1 : board.getBuildingsSize();
 
-            boolean built = board.placeBuilding(buildings.get(i).getOwner(),
-                    buildings.get(i).getLocations(), buildings.get(i).getType(), false);
+            Building bld = new Building(buildings.get(i).getOwner(), buildings.get(i).getType(),
+                    buildings.get(i).getLocations());
+            boolean built = board.placeBuilding(bld, false);
 
             assertTrue(expected == built);
             assertTrue(board.getBuildingsSize() == expectedSize);

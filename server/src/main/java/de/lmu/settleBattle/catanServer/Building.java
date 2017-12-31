@@ -17,18 +17,26 @@ public class Building extends JSONStringBuilder {
     @SerializedName(Constants.PLACE)
     private Location[] locations;
 
+    @Expose
+    @SerializedName(Constants.VIEW_ID)
+    private String viewID;
+
     private RawMaterialOverview costs;
 
     //region Constructors
-    public Building() {
-    }
+    public Building() { }
 
     public Building(BuildingType type) {
         this.type = type;
         initializeLocations(type);
         this.costs = getCosts(type);
+        this.viewID = null;
     }
 
+    public Building(BuildingType type, int owner) {
+        this(type);
+        this.owner = owner;
+    }
 
     public Building(int owner, BuildingType type, Location[] loc) {
         this(type, owner);
@@ -38,6 +46,11 @@ public class Building extends JSONStringBuilder {
         } else throw new IllegalArgumentException();
     }
 
+    public Building(int owner, String viewID, BuildingType type, Location[] loc) {
+        this(owner, type, loc);
+        this.viewID = viewID;
+    }
+
     public Building(BuildingType type, Location[] loc) {
         this(type);
 
@@ -45,12 +58,6 @@ public class Building extends JSONStringBuilder {
             this.locations = loc;
         } else throw new IllegalArgumentException();
     }
-
-    public Building(BuildingType type, int owner) {
-        this(type);
-        this.owner = owner;
-    }
-
 
     private void initializeLocations(BuildingType type) {
         int count = type.equals(BuildingType.ROAD) ? 2 : 3;
@@ -65,7 +72,6 @@ public class Building extends JSONStringBuilder {
             this.locations = loc;
         } else throw new IllegalArgumentException();
     }
-
 
     public int getOwner() {
         return owner;
@@ -100,7 +106,6 @@ public class Building extends JSONStringBuilder {
         }
         return false;
     }
-
 
     /**
      * returns true if two Location[] Objects are adjacent and exactlyHere == false or
@@ -151,11 +156,11 @@ public class Building extends JSONStringBuilder {
         }
     }
 
-    public boolean isSettlement() { return this.type.equals(BuildingType.SETTLEMENT); }
+    public boolean isSettlement() { return this.type != null && this.type.equals(BuildingType.SETTLEMENT); }
 
-    public boolean isCity() { return this.type.equals(BuildingType.CITY); }
+    public boolean isCity() { return this.type != null && this.type.equals(BuildingType.CITY); }
 
-    public boolean isRoad() { return this.type.equals(BuildingType.ROAD); }
+    public boolean isRoad() { return this.type != null && this.type.equals(BuildingType.ROAD); }
 
     public BuildingType getType() {
         return type;
@@ -182,6 +187,4 @@ public class Building extends JSONStringBuilder {
         }
         return null;
     }
-
-
 }

@@ -142,52 +142,78 @@ public class GameController implements PropertyChangeListener {
     //endregion
 
     //region place buildings handling
-    public boolean placeBuilding(int ownerId, Location[] locs, BuildingType type) {
+
+    /**
+     * checks if the owner has the permission to build a building
+     *
+     * @param building
+     * @return
+     */
+    private boolean hasBuildPermission(Building building) {
         boolean buildPermission = false;
-        boolean built = false;
 
         //during the building phase no cities can be built and no raw materials are reduced
-        if (this.buildingPhaseActive && !type.equals(BuildingType.CITY))
-            buildPermission = true;
-
-            //the player can only built building if he has enough raw materials
-        else if (!this.buildingPhaseActive) {
-            buildPermission = getPlayer(ownerId).canAfford(type);
+        if (this.buildingPhaseActive && !building.isCity()) {
+            //in initial building phase a road can only be placed next to last settlement that was built
+            if (building.isRoad()) {
+                Building settlement = getPlayer(building.getOwner()).getLastSettlement();
+                buildPermission = settlement == null ? false :
+                        settlement.isBuiltAroundHere(building.getLocations(), false);
+            } else buildPermission = true;
         }
 
-        if (buildPermission) {
-            built = board.placeBuilding(ownerId, locs, type, this.buildingPhaseActive);
+        //the player can only built building if he has enough raw materials
+        else if (!this.buildingPhaseActive) {
+            Player player = getPlayer(building.getOwner());
+            buildPermission = player.canAfford(building.getType()) && player.getStock().getCount(building.getType()) > 0;
+        }
 
-            //if the building was successfully built and the player needs to pay for it
-            //--> reduce raw materials
-            if (built) {
-                Player owner = getPlayer(ownerId);
-                Building building = new Building(ownerId, type, locs);
+        return buildPermission;
+    }
 
-                //add building to haven array in player so he can trade with it
-                //havens are only added for settlements (if a city is placed then the haven was already
-                //added when the sLocs was placed)
-                if (board.isConnectedToHaven(building) && type.equals(BuildingType.SETTLEMENT)) {
-                    Haven haven = board.getConnectedHaven(building);
-                    owner.addHaven(haven);
-                }
+    /**
+     * places building if possible and does follow-up work
+     * @param building
+     * @return
+     */
+    public boolean placeBuilding(Building building) {
+        boolean built;
 
-                //increase victory points
-                if (!building.isRoad()) {
-                    // always add 1 victory point because:
-                    // a new settlement brings 1 victory point and
-                    // if a city was built then the owner has already received 1 victory point for the settlement he built before
-                    owner.addVictoryPoints(1);
-                }
+        if (!hasBuildPermission(building)) return false;
 
+        built = board.placeBuilding(building, this.buildingPhaseActive);
 
-                //decrease raw materials
-                if (!buildingPhaseActive && getCurrent().getStatus().equals(BUILD_STREET))
-                    owner.decreaseRawMaterials(Building.getCosts(type));
+        //if the building was successfully built do follow-up work
+        if (built) {
+            Player owner = getPlayer(building.getOwner());
+            owner.getStock().decrease(building.getType());
 
+            owner.addBuilding(building);
 
-                updateStatus(owner.getId());
+            //add building to haven array in player so he can trade with it
+            //havens are only added for settlements (if a city is placed then the haven was already
+            //added when the sLocs was placed)
+            if (board.isConnectedToHaven(building) && building.isSettlement()) {
+                Haven haven = board.getConnectedHaven(building);
+                owner.addHaven(haven);
             }
+
+            //increase victory points
+            if (!building.isRoad()) {
+                // always add 1 victory point because:
+                // a new settlement brings 1 victory point and
+                // if a city was built then the owner has already received 1 victory point for the settlement he built before
+                owner.addVictoryPoints(1);
+            }
+
+            //raw material distribution for second settlement
+            if (buildingPhaseActive && round == 2 && building.isSettlement())
+                distributeRawMaterial(building);
+
+            //decrease raw materials
+            if (!buildingPhaseActive) owner.decreaseRawMaterials(Building.getCosts(building.getType()));
+
+            updateStatus(owner.getId());
         }
         return built;
     }
@@ -302,6 +328,18 @@ public class GameController implements PropertyChangeListener {
         return distribution;
     }
 
+    /**
+     * distributes raw materials for one building
+     *
+     * @param building
+     */
+    public void distributeRawMaterial(Building building) {
+        if (!building.isRoad()) {
+            RawMaterialOverview overview = board.getHarvest(building);
+            getPlayer(building.getOwner()).increaseRawMaterials(overview);
+        }
+    }
+
     public void distributeRawMaterial(Map<Integer, RawMaterialOverview> distribution) {
 
         for (Player p : players) {
@@ -404,14 +442,31 @@ public class GameController implements PropertyChangeListener {
     }
 
     public void addPlayer(Player p) throws IllegalAccessException {
+        if (gameStarted) throw new IllegalAccessException("The game is already started!");
+
         if (players.size() < 4) {
 
             players.add(p);
-
             if (p.isKI()) p.addPropertyChangeListener(this);
 
         } else throw new IllegalAccessException("The player cannot be added. There" +
                 "are already 4 players for this game!");
+    }
+
+    /**
+     * adds new KI to game
+     *
+     * @throws IllegalAccessException
+     */
+    public Player addKI() throws IllegalAccessException {
+        if (gameStarted)
+            throw new IllegalAccessException("The game is already started!");
+
+        Player player = new Player(getValidId(), getValidColor());
+        player.setName("KI(" + player.getColor() + ")");
+        setKI(player);
+        addPlayer(player);
+        return player;
     }
 
     public List<Player> getPlayers() {
@@ -423,8 +478,8 @@ public class GameController implements PropertyChangeListener {
     }
 
     public void setKI(Player player) {
-        player.setKI(true);
         player.addPropertyChangeListener(this);
+        player.setKI(true);
     }
 
     public int getPlayerCount() {
@@ -465,6 +520,28 @@ public class GameController implements PropertyChangeListener {
         }
 
         return false;
+    }
+
+    /**
+     * @return valid ID for new player
+     */
+    private int getValidId() {
+        int id = 1;
+        for (Player player : players)
+            id += player.getId();
+        return id;
+    }
+
+    /**
+     * @return valid color for new player
+     */
+    private Color getValidColor() throws IllegalAccessException {
+        for (Color color : Color.values()) {
+            if (isValidColor(color))
+                return color;
+        }
+
+        throw new IllegalAccessException("All colors are occupied.");
     }
 
     //endregion
@@ -671,7 +748,7 @@ public class GameController implements PropertyChangeListener {
         Player ki = (Player) evt.getNewValue();
         if (!ki.isKI()) return;
 
-        if (!evt.getPropertyName().equals("status"))
+        if (!evt.getPropertyName().equals(PROP_STATUS))
             return;
 
         switch (ki.getStatus()) {
@@ -692,13 +769,14 @@ public class GameController implements PropertyChangeListener {
                 break;
 
             case BUILD_SETTLEMENT:
-                placeBuilding(ki.getId(), board.getRandomFreeSettlementLoc(),
-                        BuildingType.SETTLEMENT);
+                Building settlement = new Building(ki.getId(), BuildingType.SETTLEMENT, board.getRandomFreeSettlementLoc());
+                placeBuilding(settlement);
                 break;
 
             case BUILD_STREET:
                 try {
-                    placeBuilding(ki.getId(), board.getFreeRoadLoc(ki.getId()), BuildingType.ROAD);
+                    Building street = new Building(ki.getId(), BuildingType.ROAD, board.getFreeRoadLoc(ki, buildingPhaseActive));
+                    placeBuilding(street);
                 } catch (IllegalAccessException ex) {
                     ex.printStackTrace();
                 }
@@ -706,10 +784,12 @@ public class GameController implements PropertyChangeListener {
 
             case TRADE_OR_BUILD:
                 if (ki.canAfford(BuildingType.SETTLEMENT)) {
-                    placeBuilding(ki.getId(), board.getRandomFreeSettlementLoc(), BuildingType.SETTLEMENT);
+                    Building s = new Building(ki.getId(), BuildingType.SETTLEMENT, board.getRandomFreeSettlementLoc());
+                    placeBuilding(s);
                 } else if (ki.canAfford(BuildingType.ROAD)) {
                     try {
-                        placeBuilding(ki.getId(), board.getFreeRoadLoc(ki.getId()), BuildingType.ROAD);
+                        Building r = new Building(ki.getId(), BuildingType.ROAD, board.getFreeRoadLoc(ki, buildingPhaseActive));
+                        placeBuilding(r);
                     } catch (IllegalAccessException ex) {
                         ex.printStackTrace();
                     }

@@ -83,11 +83,11 @@ public class GameControllerTest {
         assertTrue(list.get(1).getStatus().equals(Constants.WAIT));
         assertTrue(list.get(2).getStatus().equals(Constants.WAIT));
 
-        getNext();
+        nextMove();
     }
 
     //region nextMove
-    public void getNext() throws Exception {
+    public void nextMove() throws Exception {
         List<Player> list = gameController.getPlayers();
 
         assertTrue(list.get(0).getId() == gameController.getCurrent().getId());
@@ -206,7 +206,8 @@ public class GameControllerTest {
         //player 3 places his first settlement and afterwards should have status BUILD_STREET
         int sCnt = gameController.getBoard().getSettlements().size();
         int rCnt = gameController.getBoard().getRoads().size();
-        gameController.placeBuilding(player3.getId(), gameController.getBoard().getRandomFreeSettlementLoc(), BuildingType.SETTLEMENT);
+        Building s1 = new Building(player3.getId(), BuildingType.SETTLEMENT, gameController.getBoard().getRandomFreeSettlementLoc());
+        gameController.placeBuilding(s1);
 
         assertEquals(sCnt+1, gameController.getBoard().getSettlements().size());
         assertEquals(rCnt, gameController.getBoard().getRoads().size());
@@ -218,7 +219,9 @@ public class GameControllerTest {
         assertEquals(WAIT, player1.getStatus());
 
         //player 3 places his second road
-        gameController.placeBuilding(player3.getId(), gameController.getBoard().getFreeRoadLoc(player3.getId()), BuildingType.ROAD);
+        Building r1 = new Building(player3.getId(), BuildingType.ROAD, gameController.getBoard()
+                .getFreeRoadLoc(player3, gameController.isBuildingPhaseActive()));
+        gameController.placeBuilding(r1);
 
         assertEquals(BUILD_SETTLEMENT, player3.getStatus());
         assertEquals(WAIT, player4.getStatus());
@@ -229,7 +232,8 @@ public class GameControllerTest {
         //player 3 places his second settlement
         sCnt = gameController.getBoard().getSettlements().size();
         rCnt = gameController.getBoard().getRoads().size();
-        gameController.placeBuilding(player3.getId(), gameController.getBoard().getRandomFreeSettlementLoc(), BuildingType.SETTLEMENT);
+        Building s2 = new Building(player3.getId(), BuildingType.SETTLEMENT, gameController.getBoard().getRandomFreeSettlementLoc());
+        gameController.placeBuilding(s2);
 
         assertEquals(sCnt+1, gameController.getBoard().getSettlements().size());
         assertEquals(rCnt, gameController.getBoard().getRoads().size());
@@ -241,7 +245,9 @@ public class GameControllerTest {
         assertEquals(WAIT, player1.getStatus());
 
         //player 3 places his second road
-        gameController.placeBuilding(player3.getId(), gameController.getBoard().getFreeRoadLoc(player3.getId()), BuildingType.ROAD);
+        Building r2 = new Building(player3.getId(), BuildingType.ROAD, gameController.getBoard()
+                .getFreeRoadLoc(player3, gameController.isBuildingPhaseActive()));
+        gameController.placeBuilding(r2);
 
         assertTrue(gameController.getBoard().getSettlements().size() >= 8);
         assertTrue(gameController.getBoard().getRoads().size() >= 8);
@@ -273,6 +279,30 @@ public class GameControllerTest {
         gameController.setPlayerActive(player, ROBBER_TO);
 
         assertFalse(loc.equals(gameController.getBoard().getRobber().getLocation()));
+    }
+    //endregion
+
+    @Test
+    public void rawMaterialDistribution_InitialPhase() throws IllegalAccessException {
+
+        initializeGame();
+
+        for (int i = 0; i < 5; i++) {
+            Player player = gameController.getCurrent();
+
+            Building s = new Building(player.getId(), BuildingType.SETTLEMENT, gameController.getBoard()
+                    .getRandomFreeSettlementLoc());
+            gameController.placeBuilding(s);
+            Building r = new Building(player.getId(), BuildingType.ROAD, gameController.getBoard()
+                    .getFreeRoadLoc(player, gameController.isBuildingPhaseActive()));
+            gameController.placeBuilding(r);
+        }
+
+        for (Player player : gameController.getPlayers()) {
+            if (player.getId() == gameController.getCurrent().getId())
+                assertEquals(0, player.getRawMaterialCount());
+            else assertTrue(player.getRawMaterialCount() >= 1);
+        }
     }
     //endregion
 }

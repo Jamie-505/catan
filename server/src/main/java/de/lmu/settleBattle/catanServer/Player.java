@@ -10,6 +10,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+import static de.lmu.settleBattle.catanServer.Constants.*;
+
 public class Player extends JSONStringBuilder implements Comparable, Cloneable {
 
     //region property change listener
@@ -64,9 +66,13 @@ public class Player extends JSONStringBuilder implements Comparable, Cloneable {
 
     @Expose
     @SerializedName(Constants.DEV_CARDS)
-    protected DevelopmentCardOverview developmentDeck;
+    private DevelopmentCardOverview developmentDeck;
 
-    protected Building[] buildingStock;
+    protected List<Building> settlements;
+    protected List<Building> roads;
+    protected List<Building> cities;
+    protected BuildingStock stock;
+
     protected ArrayList<Haven> havens;
 
     private boolean isKI;
@@ -92,7 +98,14 @@ public class Player extends JSONStringBuilder implements Comparable, Cloneable {
         this.longestRoad = false;
         this.rawMaterialDeck = new RawMaterialOverview(0);
         this.developmentDeck = new DevelopmentCardOverview(0);
-        this.buildingStock = null;
+
+        //initialize building stock
+        this.settlements = new ArrayList<>();
+        this.roads = new ArrayList<>();
+        this.cities = new ArrayList<>();
+
+        stock = new BuildingStock();
+
         this.havens = new ArrayList<>();
         this.isKI = false;
     }
@@ -114,6 +127,11 @@ public class Player extends JSONStringBuilder implements Comparable, Cloneable {
         this(id);
         this.isKI = isKI;
     }
+
+    public Player(int id, Color color) {
+        this(id);
+        this.color = color;
+    }
     //endregion
 
     //region Actions
@@ -131,13 +149,13 @@ public class Player extends JSONStringBuilder implements Comparable, Cloneable {
 
         int[] result = dice.roll();
 
-        changes.firePropertyChange(Constants.DICE, result, this);
+        changes.firePropertyChange(DICE, result, this);
 
         return result;
     }
 
     public void endMove() {
-        changes.firePropertyChange(Constants.END_TURN, "", this);
+        changes.firePropertyChange(END_TURN, "", this);
     }
 
     /**
@@ -169,12 +187,10 @@ public class Player extends JSONStringBuilder implements Comparable, Cloneable {
             throws IllegalArgumentException {
 
         this.rawMaterialDeck.decrease(offer);
-        changes.firePropertyChange("Trade Decrease",
-                offer, this);
+        changes.firePropertyChange(TRD_DECR, offer, this);
 
         this.rawMaterialDeck.increase(request);
-        changes.firePropertyChange("Trade Increase",
-                request, this);
+        changes.firePropertyChange(TRD_INCR, request, this);
     }
     //endregion
 
@@ -250,12 +266,12 @@ public class Player extends JSONStringBuilder implements Comparable, Cloneable {
 
     public void decreaseRawMaterials(RawMaterialOverview overview) throws IllegalArgumentException {
         this.rawMaterialDeck.decrease(overview);
-        changes.firePropertyChange("RawMaterialDecrease", overview, this);
+        changes.firePropertyChange(RMO_DECR, overview, this);
     }
 
     public void increaseRawMaterials(RawMaterialOverview overview) throws IllegalArgumentException {
         this.rawMaterialDeck.increase(overview);
-        changes.firePropertyChange("RawMaterialIncrease", overview, this);
+        changes.firePropertyChange(RMO_INCR, overview, this);
     }
 
     public void removeDevelopmentCard(DevCardType type) throws Exception {
@@ -382,11 +398,13 @@ public class Player extends JSONStringBuilder implements Comparable, Cloneable {
      * <postconditions: none>
      */
 
-    public void setStatus(String status) {
-        String oldStatus = this.status;
-        boolean fire = status.equals(oldStatus) ? false : true;
-        this.status = status;
-        if (fire) changes.firePropertyChange("status", oldStatus, this);
+    public void setStatus(String newStatus) {
+        boolean fire = newStatus.equals(this.status) ? false : true;
+        if (fire) {
+            String oldStatus = this.status;
+            this.status = newStatus;
+            changes.firePropertyChange(PROP_STATUS, oldStatus, this);
+        }
     }
 
     /**
@@ -440,7 +458,9 @@ public class Player extends JSONStringBuilder implements Comparable, Cloneable {
         return isKI;
     }
 
-    public void setKI(boolean isKI) { this.isKI = isKI; }
+    public void setKI(boolean isKI) {
+        this.isKI = isKI;
+    }
 
     /**
      * <method name: isLongestRoad>
@@ -517,7 +537,64 @@ public class Player extends JSONStringBuilder implements Comparable, Cloneable {
 
     @Override
     public String toString() {
-        return "ID: "+ id + "_Name:" + this.getName() + "_Farbe:" + this.getColor() + "_Status:" +this.getStatus();
+        return "ID: " + id + "_Name:" + this.getName() + "_Farbe:" + this.getColor() + "_Status:" + this.getStatus();
+    }
+
+    public List<Building> getBuildings(BuildingType type) {
+        List<Building> buildings = null;
+        switch (type) {
+            case ROAD:
+                buildings = this.roads;
+                break;
+            case SETTLEMENT:
+                buildings = this.settlements;
+                break;
+            case CITY:
+                buildings = this.cities;
+                break;
+        }
+        return buildings;
+    }
+
+    public BuildingStock getStock() {
+        return stock;
+    }
+
+    public void addBuilding(Building bld) {
+        switch (bld.getType()) {
+            case ROAD:
+                roads.add(bld);
+                break;
+            case CITY:
+                cities.add(bld);
+                break;
+            case SETTLEMENT:
+                settlements.add(bld);
+                break;
+            default:
+                throw new IllegalArgumentException("This type does not exist");
+        }
+    }
+
+    public Building getLastSettlement() {
+        if (this.settlements.size() == 0) return null;
+
+        return this.settlements.get(settlements.size()-1);
+    }
+
+    public List<Building> getSettlements() {
+        return settlements;
+    }
+
+    public List<Building> getCities() {
+        return cities;
+    }
+
+    public List<Building> getSettlementsAndCities() {
+        List<Building> buildings = new ArrayList<>();
+        buildings.addAll(settlements);
+        buildings.addAll(cities);
+        return buildings;
     }
 
     public RawMaterialType removeRandomResource() throws Exception {

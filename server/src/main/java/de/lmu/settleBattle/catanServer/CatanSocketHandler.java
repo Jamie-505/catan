@@ -24,6 +24,10 @@ public class CatanSocketHandler extends TextWebSocketHandler implements Property
     public CatanSocketHandler() {
         super();
 
+        initialize();
+    }
+
+    private void initialize() {
         utils = new SocketUtils();
 
         utils.getGameCtrl().getBoard().addPropertyChangeListener(e -> {
@@ -52,11 +56,12 @@ public class CatanSocketHandler extends TextWebSocketHandler implements Property
 
         Player player = new Player(utils.toInt(session.getId()));
 
-        //add change listener for status property so every time the status changes a message will be sent
-        player.addPropertyChangeListener(this);
-
         try {
             utils.getGameCtrl().addPlayer(player);
+
+            //add change listener for status property so every time the status changes a message will be sent
+            player.addPropertyChangeListener(this);
+
             sessions.add(session);
 
             // sending session id to the client that just connected
@@ -66,7 +71,7 @@ public class CatanSocketHandler extends TextWebSocketHandler implements Property
         } catch (IOException e) {
             e.printStackTrace();
         } catch (IllegalAccessException e) {
-            session.sendMessage(new TextMessage("Cannot join this game"));
+            sendError(session, "Cannot join this game");
             e.printStackTrace();
         }
     }
@@ -177,6 +182,22 @@ public class CatanSocketHandler extends TextWebSocketHandler implements Property
                 case END_TURN:
                     nextMove();
                     break;
+
+                case ADD_KI:
+                    try {
+                        Player newPlayer = getGameCtrl().addKI();
+                        newPlayer.addPropertyChangeListener(this);
+                        newPlayer.setStatus(WAIT_FOR_GAME_START);
+                        sendOK(session);
+
+                        if (utils.getGameCtrl().startGame())
+                            sendMessageToAll(CatanMessage.startGame(utils.getGameCtrl().getBoard()));
+
+                    } catch (IllegalAccessException ex) {
+                        OK = false;
+                        errorMessage = "No KI could be added.";
+                    }
+                    break;
             }
 
             if (OK) sendOK(session);
@@ -199,7 +220,6 @@ public class CatanSocketHandler extends TextWebSocketHandler implements Property
             utils.getGameCtrl().nextMove();
         }
     }
-
     //endregion
 
     //region afterConnectionClosed
@@ -208,12 +228,23 @@ public class CatanSocketHandler extends TextWebSocketHandler implements Property
         super.afterConnectionClosed(session, status);
         System.out.println("Session " + session.getId() + " has ended");
 
-        if (!utils.getGameCtrl().isGameOver()) {
-            getGameCtrl().getPlayer(session.getId()).setKI(true);
-        }
-
         // remove the session from sessions list
         sessions.remove(session);
+        sendMessageToAll(CatanMessage.playerLeft(session.getId()));
+
+        if (!utils.getGameCtrl().isGameOver()) {
+
+            //replace player by KI
+            if (sessions.size() > 0) {
+                Player player = getGameCtrl().getPlayer(session.getId());
+                getGameCtrl().setKI(player);
+            }
+
+            //no real player left --> reinitialize game
+            else {
+                initialize();
+            }
+        }
     }
     //endregion
 
@@ -342,6 +373,7 @@ public class CatanSocketHandler extends TextWebSocketHandler implements Property
     //region trading
     public boolean addTradeRequest(TradeRequest tradeRequest) {
 
+
         //at least one raw material must be requested/offered
         if (tradeRequest.getOffer().getTotalCount() < 1 || tradeRequest.getRequest().getTotalCount() < 1)
             return false;
@@ -381,29 +413,30 @@ public class CatanSocketHandler extends TextWebSocketHandler implements Property
         try {
             Player player = (Player) evt.getNewValue();
             sendStatusUpdate(player);
+
             System.out.printf("Property '%s': '%s' -> '%s'%n",
                     evt.getPropertyName(), evt.getOldValue(), player.getStatus());
 
             switch (evt.getPropertyName()) {
 
-                case "Trade Decrease":
+                case TRD_DECR:
                     RawMaterialOverview costs = (RawMaterialOverview) evt.getOldValue();
                     sendMessageToAll(CatanMessage.costs(getGameCtrl().getCurrent().getId(), costs, false));
                     break;
-                case "Trade Increase":
+                case TRD_INCR:
                     RawMaterialOverview harvest = (RawMaterialOverview) evt.getOldValue();
                     sendMessageToAll(CatanMessage.harvest(getGameCtrl().getCurrent().getId(), harvest, false));
                     break;
 
                 //if there was a decrease/increase of raw materials send harvest/cost messages
-                case "RawMaterialIncrease":
+                case RMO_INCR:
                     RawMaterialOverview harvest2 = (RawMaterialOverview) evt.getOldValue();
                     sendMessageToAll(Integer.toHexString(player.getId()),   //parse id back to hex string (session id)
                             CatanMessage.harvest(player.getId(), harvest2, false),
                             CatanMessage.harvest(player.getId(), harvest2, true));
                     break;
 
-                case "RawMaterialDecrease":
+                case RMO_DECR:
                     RawMaterialOverview costs2 = (RawMaterialOverview) evt.getOldValue();
                     sendMessageToAll(Integer.toHexString(player.getId()),   //parse id back to hex string (session id)
                             CatanMessage.costs(player.getId(), costs2, false),

@@ -353,6 +353,12 @@ public class CatanMessage {
 
     //endregion
 
+    public static TextMessage playerLeft(String id) {
+        JSONObject payload = new JSONObject();
+        payload.put(MESSAGE, "Player " + id + " left the game.");
+
+        return new TextMessage(payload.toString());
+    }
 
     public static TextMessage sendBuildMessage(Building building) {
         JSONObject payload = new JSONObject();

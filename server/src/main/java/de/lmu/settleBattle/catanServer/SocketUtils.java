@@ -34,10 +34,13 @@ public class SocketUtils {
     }
 
     //region build
-    public boolean build(int id, TextMessage message) throws IOException {
+    public boolean build(int id, TextMessage message) throws IOException, IllegalArgumentException {
         Building building = gson.fromJson(JSONUtils.createJSON(message)
                 .getJSONObject(Constants.BUILD).toString(), Building.class);
-        return this.gameCtrl.placeBuilding(id, building.getLocations(), building.getType());
+        if (building.getOwner() == id)
+            return this.gameCtrl.placeBuilding(building);
+        else throw new IllegalArgumentException(
+                String.format("Owner %s cannot build building for owner %s", id, building.getOwner()));
     }
     //endregion
 
@@ -56,7 +59,7 @@ public class SocketUtils {
 
         //add roads to board directly
         boolean successful = this.gameCtrl.getBoard().placeBuilding
-                (player.getId(), road1.getLocations(), road1.getType(), false);
+                (road1, false);
 
         if (successful) {
             //the second road
@@ -65,8 +68,7 @@ public class SocketUtils {
 
             Building road2 = new Building(player.getId(), BuildingType.ROAD, locs2);
 
-            successful = this.gameCtrl.getBoard().placeBuilding(player.getId(), road2.getLocations(),
-                    road2.getType(), false);
+            successful = this.gameCtrl.getBoard().placeBuilding(road2,false);
         }
 
         //remove construction card

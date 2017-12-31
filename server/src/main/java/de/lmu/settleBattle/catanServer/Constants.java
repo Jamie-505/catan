@@ -12,8 +12,7 @@ public class Constants {
     public final static String START_GAME = "Spiel starten";
     public final static String WAIT_FOR_GAME_START = "Wartet auf Spielbeginn";
     public final static String BUILD_SETTLEMENT = "Dorf bauen";
-    public final static String BUILD_STREET = "Straße bauen";
-    public final static String BUILD_TOWN = "Stadt bauen";
+    public final static String BUILD_STREET = "Strasse bauen";
     public final static String DICE = "Würfeln";
     public final static String EXTRACT_CARDS_DUE_TO_ROBBER = "Karten wegen Räuber abgeben";
     public final static String MOVE_ROBBER = "Räuber versetzen";
@@ -24,7 +23,7 @@ public class Constants {
     public final static String BUILD = "Bauen";
     public final static String CARD_BUY = "Entwicklungskarte kaufen";
     public final static String CARD_KNIGHT = "Ritter ausspielen";
-    public final static String CARD_RD_CON = "Straßenbaukarte ausspielen";
+    public final static String CARD_RD_CON = "Strassenbaukarte ausspielen";
     public final static String CARD_MONOPOLY = "Monopolkarte ausspielen";
     public final static String CARD_INVENTION = "Erfindungskarte ausspielen";
     public final static String CARD_SOLD = "Entwicklungskarte gekauft";
@@ -39,7 +38,7 @@ public class Constants {
     public final static String GET_ID = "Willkommen";
     public final static String HANDSHAKE = "Hallo";
     public final static String HARVEST = "Ertrag";
-    public final static String LARGEST_ARMY = "Größte Rittermacht";
+    public final static String LARGEST_ARMY = "Grösste Rittermacht";
     public final static String LONGEST_RD = "Längste Handelsstrasse";
     public final static String NEW_BUILDING ="Bauvorgang";
     public final static String ROBBER_AT = "Räuber versetzt";
@@ -63,13 +62,15 @@ public class Constants {
     public final static String FELLOW_PLAYER = "Mitspieler";
     public final static String ARMY = "Rittermacht";
     public final static String DEV_CARDS = "Entwicklungskarten";
+    public final static String ADD_KI = "addKI";
+    public final static String VIEW_ID = "viewID";
 
     //Message Objects
     public final static String CARD = "Karte";
-    public final static String OWNER = "Eigentümer";
+    public final static String OWNER = "Owner";
     public final static String TYPE = "Typ";
     public final static String PLACE = "Ort";
-    public final static String ROAD = "Straße";
+    public final static String ROAD = "Strasse";
     public final static String SETTLEMENT = "Siedlung";
     public final static String CITY = "Stadt";
     public final static String NUMBER = "Zahl";
@@ -81,7 +82,7 @@ public class Constants {
     public final static String KNIGHT = "Ritter";
     public final static String INVENTION = "Erfindung";
     public final static String MONOPOLE = "Monopol";
-    public final static String ROAD_CONSTRUCTION = "Straßenbau";
+    public final static String ROAD_CONSTRUCTION = "Strassenbau";
     public final static String VICTORY_PTS = "Siegpunkte";
     public final static String VICTORY_PT = "Siegpunkt";
     public final static String WHEAT = "Getreide";
@@ -117,8 +118,16 @@ public class Constants {
 
     //Development cards description
     public final static String KNIGHT_DESC = "";
-    public final static String ROAD_CONSTRUCTION_DESC = "Wer diese Karte ausspielt, darf ohne Rohstoff Kosten 2 neue Straßen auf den Spielplan legen. Hierbei  müssen die üblichen Regeln für den Bau von Straßen beachtet werden.";
+    public final static String ROAD_CONSTRUCTION_DESC = "Wer diese Karte ausspielt, darf ohne Rohstoff Kosten 2 neue Strassen auf den Spielplan legen. Hierbei  müssen die üblichen Regeln für den Bau von Strassen beachtet werden.";
     public final static String INVENTION_DESC = "Wer diese Karte ausspielt, darf sich 2 beliebige Rohstoffkarten von den Vorratsstapeln nehmen. Hat der Spieler die Bauphase noch vor sich, darf er diese Rohstoffkarte(n) zum Bauen verwenden";
     public final static String MONOPOLE_DESC = "Wer diese Karte ausspielt, wählt einen Rohstoff  aus. Alle Mitspieler müssen ihm alle Rohstoffkarten geben,  die sie von dieser Sorte auf der Hand halten. Wer keine  solche Rohstoffkarte besitzt, muss auch nichts abgeben.";
     public final static String VICTORY_POINT_DESC = "";
+
+    //PropertyChanges
+    public final static String TRD_DECR = "Trade Decrease";
+    public final static String TRD_INCR = "Trade Increase";
+    public final static String RMO_INCR = "RawMaterial Increase";
+    public final static String RMO_DECR = "RawMaterial Decrease";
+    public final static String PROP_STATUS = "Status Prop";
+
 }

@@ -109,7 +109,7 @@ public class JSONUtilsTest {
   //region buildingMessagesShouldBeRight
   @Test
   public void buildingMessagesShouldBeRight() throws Exception {
-    assertEquals("{\"Eigentümer\":42,\"Typ\":\"Stadt\"," +
+    assertEquals("{\"Owner\":42,\"Typ\":\"Stadt\"," +
             "\"Ort\":[{\"x\":1,\"y\":0},{\"x\":1,\"y\":1},{\"x\":2,\"y\":0}]}",
         city.toJSONString());
 

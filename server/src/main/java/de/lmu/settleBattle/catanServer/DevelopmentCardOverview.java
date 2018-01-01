@@ -134,6 +134,10 @@ public class DevelopmentCardOverview extends JSONStringBuilder {
         return invention+knight+monopole+roadConstruction+victoryPoint;
     }
 
+    public boolean hasRoadConstructionCard() {
+        return this.roadConstruction > 0;
+    }
+
     @Override
     public String toJSONString_Unknown(){
         JSONObject json = new JSONObject();

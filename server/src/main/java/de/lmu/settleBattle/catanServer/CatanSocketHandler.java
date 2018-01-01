@@ -128,6 +128,12 @@ public class CatanSocketHandler extends TextWebSocketHandler implements Property
                     if (!OK) errorMessage = "Der Räuber kann nicht versetzt werden.";
                     break;
 
+                case CARD_RD_CON:
+                    sendMessageToAll(CatanMessage.roadConstructionCard(utils.toInt(session.getId()), message));
+                    OK = utils.applyRoadConstructionCard(session, message);
+                    if (!OK) errorMessage = "Die Straße kann nicht gebaut werden.";
+                    break;
+
                 case TOSS_CARDS:
                     OK = utils.tossRawMaterials(session, message);
                     if (!OK) errorMessage = "Die Rohstoffe konnten nicht reduziert werden.";

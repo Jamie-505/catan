@@ -297,13 +297,22 @@ public class CatanMessage {
     }
 
 
-    public static TextMessage roadConstructionCard(Building bld) {
+    public static TextMessage roadConstructionCard(Building road1, Building road2) throws Exception {
 
-        if (!bld.isRoad()) throw new IllegalArgumentException("Can only build road with this card.");
+        if (!road1.isRoad() || !road2.isRoad() ) throw new IllegalArgumentException("Can only build road with this card.");
+        if (road1.getOwner() != road2.getOwner()) throw new Exception("the two roads must be of the same owner");
 
         JSONObject payload = new JSONObject();
-        payload.put(Constants.PLAYER, bld.getOwner());
-        payload.put(Constants.ROAD, bld.toJSON());
+        payload.put(Constants.PLAYER, road1.getOwner());
+        payload.put(Constants.ROAD, road1.toJSON());
+        payload.put(Constants.ROAD, road2.toJSON());
+
+        return new TextMessage(JSONUtils.setJSONType(Constants.CARD_RD_CON, payload).toString());
+    }
+
+    public static TextMessage roadConstructionCard(int playerId, TextMessage message) {
+        JSONObject payload = JSONUtils.createJSON(message).getJSONObject(CARD_RD_CON);
+        payload.put(PLAYER, playerId);
 
         return new TextMessage(JSONUtils.setJSONType(Constants.CARD_RD_CON, payload).toString());
     }

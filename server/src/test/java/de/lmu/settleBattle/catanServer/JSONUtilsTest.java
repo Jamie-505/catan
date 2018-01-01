@@ -13,6 +13,7 @@ public class JSONUtilsTest {
   private static Player player2;
   private static Building city;
   private static Building road;
+  private static Building road2;
   private static Field field;
   private static Haven haven;
   private static Robber robber;
@@ -44,6 +45,8 @@ public class JSONUtilsTest {
 
     road = new Building(BuildingType.ROAD, 3);
     road.build(new Location[]{l1, l3});
+    road2 = new Building(BuildingType.ROAD, 3);
+    road2.build(new Location[]{l1, l2});
 
     field = new Field(RawMaterialType.WOOL, l1, 3);
     haven = new Haven(new Location[]{l1, l2}, RawMaterialType.CLAY);
@@ -318,7 +321,7 @@ public class JSONUtilsTest {
   //region roadConstructionCardShouldBeCorrects
   @Test
   public void roadConstructionCardShouldBeCorrect() throws Exception {
-    JSONObject roadJSON = JSONUtils.createJSON(CatanMessage.roadConstructionCard(road));
+    JSONObject roadJSON = JSONUtils.createJSON(CatanMessage.roadConstructionCard(road,road2));
     JSONObject road = roadJSON.getJSONObject(Constants.CARD_RD_CON);
 
     assertTrue(road.has(Constants.PLAYER));

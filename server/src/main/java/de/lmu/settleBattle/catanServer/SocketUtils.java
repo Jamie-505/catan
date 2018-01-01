@@ -41,6 +41,48 @@ public class SocketUtils {
     }
     //endregion
 
+    //region applyRoadConstructionCard
+    public boolean applyRoadConstructionCard(WebSocketSession session, TextMessage message) throws Exception {
+
+        //player id
+        Player player = gameCtrl.getPlayer(session.getId());
+        if (!player.hasRoadConstructionCard()) return false;
+
+        //the first road
+        Location[] locs1 = gson.fromJson(JSONUtils.createJSON(message)
+                .getJSONObject(Constants.CARD_RD_CON).getJSONArray("Strasse 1").toString(), Location[].class);
+
+        Building road1 = new Building(player.getId(), BuildingType.ROAD, locs1);
+
+        //add roads to board directly
+        boolean successful = this.gameCtrl.getBoard().placeBuilding
+                (player.getId(), road1.getLocations(), road1.getType(), false);
+
+        if (successful) {
+            //the second road
+            Location[] locs2 = gson.fromJson(JSONUtils.createJSON(message)
+                    .getJSONObject(Constants.CARD_RD_CON).getJSONArray("Strasse 2").toString(), Location[].class);
+
+            Building road2 = new Building(player.getId(), BuildingType.ROAD, locs2);
+
+            successful = this.gameCtrl.getBoard().placeBuilding(player.getId(), road2.getLocations(),
+                    road2.getType(), false);
+        }
+
+        //remove construction card
+        if (successful) {
+            try {
+                this.gameCtrl.getPlayer(player.getId()).removeDevelopmentCard(DevCardType.ROAD_CONSTRUCTION);
+                successful = true;
+            } catch (Exception ex) {
+                ex.printStackTrace();
+                successful = false;
+            }
+        }
+        return successful;
+    }
+    //endregion
+
     //region performHandshake
     public boolean performHandshake(WebSocketSession session) throws InterruptedException, IOException {
         TextMessage idAllocation = CatanMessage.welcomeNewPlayer(toInt(session.getId()));

@@ -260,6 +260,14 @@ public class Player extends JSONStringBuilder implements Comparable, Cloneable {
         changes.firePropertyChange("RawMaterialIncrease", overview, this);
     }
 
+    public void removeDevelopmentCard(DevCardType type) throws Exception {
+        this.developmentDeck.decrease(type, 1);
+    }
+
+    public boolean hasRoadConstructionCard() {
+        return this.developmentDeck.hasRoadConstructionCard();
+    }
+
     /**
      * Player has to extract half of their cards if
      * he has at least 7 raw materials

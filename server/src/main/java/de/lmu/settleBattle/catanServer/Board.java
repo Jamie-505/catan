@@ -149,7 +149,6 @@ public class Board extends JSONStringBuilder {
         fieldLocations[34] = new Location(-3, 0);
         fieldLocations[35] = new Location(-2, -1);
         fieldLocations[36] = new Location(-1, -2);
-        //TODO add locations for water fields
 
         //shuffle the fields and numbers
         Collections.shuffle(Arrays.asList(boardFields));

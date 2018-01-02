@@ -259,9 +259,6 @@ public class Player extends JSONStringBuilder implements Comparable, Cloneable {
         this.rawMaterialDeck.increase(overview);
         changes.firePropertyChange("RawMaterialIncrease", overview, this);
     }
-    public void removeDevelopmentCard(DevCardType type, int i) throws Exception {
-        this.developmentDeck.decrease(type, i);
-    }
 
     /**
      * Player has to extract half of their cards if
@@ -273,8 +270,21 @@ public class Player extends JSONStringBuilder implements Comparable, Cloneable {
         return rawMaterialDeck.getTotalCount() >= 7 ? true : false;
     }
 
-    //endregion
+    public boolean hasRawMaterial(RawMaterialType type){
+        return this.rawMaterialDeck.getTypeCount(type) >= 1;
+    }
 
+    public int getRawMaterialCount(RawMaterialType type){
+        return this.rawMaterialDeck.getTypeCount(type);
+    }
+
+    public boolean hasMonopoleCard() {
+        return this.developmentDeck.hasMonopoleCard();
+    }
+
+    public void removeDevelopmentCard(DevCardType type , int amount) throws Exception {
+        this.developmentDeck.decrease(type,amount);
+    }
 
     public boolean canAffordDevCard() {
         return this.rawMaterialDeck.canAffordDevelopmentCard();

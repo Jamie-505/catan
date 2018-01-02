@@ -25,6 +25,7 @@ public class Constants {
     public final static String CARD_BUY = "Entwicklungskarte kaufen";
     public final static String CARD_KNIGHT = "Ritter ausspielen";
     public final static String CARD_RD_CON = "Straßenbaukarte ausspielen";
+    public final static String CARD_MONOPOLY = "Monopolkarte ausspielen";
     public final static String CARD_INVENTION = "Erfindungskarte ausspielen";
     public final static String CARD_SOLD = "Entwicklungskarte gekauft";
     public final static String CHAT_IN = "Chatnachricht";

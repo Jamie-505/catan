@@ -108,6 +108,10 @@ public class DevelopmentCardOverview extends JSONStringBuilder {
     }
     //endregion
 
+    public boolean hasMonopoleCard() {
+        return this.monopole > 0;
+    }
+
     public DevCardType withdrawRandomCard(){
 
         DevCardType[] cards = DevCardType.values();

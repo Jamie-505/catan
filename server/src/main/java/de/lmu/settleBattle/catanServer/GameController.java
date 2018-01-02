@@ -175,7 +175,7 @@ public class GameController implements PropertyChangeListener {
 
 
                 //decrease raw materials
-                if(!buildingPhaseActive && getCurrent().getStatus().equals(BUILD_STREET))
+                if (!buildingPhaseActive && getCurrent().getStatus().equals(BUILD_STREET))
                     owner.decreaseRawMaterials(Building.getCosts(type));
 
 
@@ -199,7 +199,7 @@ public class GameController implements PropertyChangeListener {
 
             if (player.getStatus().equals(BUILD_STREET)) {
                 player = nextMove();
-                status =  buildingPhaseActive ? BUILD_SETTLEMENT : DICE;
+                status = buildingPhaseActive ? BUILD_SETTLEMENT : DICE;
             }
 
             setPlayerActive(player.getId(), status);
@@ -230,6 +230,27 @@ public class GameController implements PropertyChangeListener {
         this.rawMaterialDeck.increase(RawMaterialType.ORE, 1);
         this.rawMaterialDeck.increase(RawMaterialType.WOOD, 1);
         this.rawMaterialDeck.increase(RawMaterialType.WHEAT, 1);
+    }
+
+    public boolean applyMonopoleCard(Player monoPlayer, RawMaterialType targetType) {
+        if (!monoPlayer.hasMonopoleCard()) return false;
+
+        try {
+            monoPlayer.removeDevelopmentCard(DevCardType.MONOPOLE, 1);
+
+            for (Player player : players) {
+                if (player != monoPlayer && player.hasRawMaterial(targetType)) {
+                    RawMaterialOverview overview =
+                            new RawMaterialOverview(targetType, player.getRawMaterialCount(targetType));
+                    player.decreaseRawMaterials(overview);
+                    monoPlayer.increaseRawMaterials(overview);
+                }
+            }
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            return false;
+        }
+        return true;
     }
 
     public boolean applyInventionCard(Player player, RawMaterialOverview overview) {
@@ -571,8 +592,7 @@ public class GameController implements PropertyChangeListener {
         return buildingPhaseActive;
     }
 
-    public void setBuildingPhaseActive(boolean active)
-    {
+    public void setBuildingPhaseActive(boolean active) {
         this.buildingPhaseActive = active;
     }
 

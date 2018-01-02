@@ -214,6 +214,16 @@ public class SocketUtils {
 
         return gameCtrl.applyInventionCard(player, overview);
     }
+
+    public boolean applyMonopolyCard(WebSocketSession session, TextMessage message) throws Exception {
+        Player monoPlayer = gameCtrl.getPlayer(session.getId());
+
+        JSONObject json = JSONUtils.createJSON(message).getJSONObject(MONOPOLE);
+        JSONObject rawMaterialJSON = json.getJSONObject(Constants.RAW_MATERIAL);
+        RawMaterialType type = gson.fromJson(rawMaterialJSON.toString(), RawMaterialType.class);
+
+        return gameCtrl.applyMonopoleCard(monoPlayer, type);
+    }
     //endregion
 
 }

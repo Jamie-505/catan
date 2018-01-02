@@ -117,6 +117,12 @@ public class CatanSocketHandler extends TextWebSocketHandler implements Property
                     if (!OK) errorMessage = "Du bist nicht am Zug";
                     break;
 
+                case CARD_MONOPOLY:
+                    sendMessageToAll(CatanMessage.monopoleCard(utils.toInt(session.getId()), message));
+                    OK = utils.applyMonopolyCard(session,message);
+                    if(!OK) errorMessage = "The applyMonopolyCard card could not be played";
+                    break;
+
                 case ROBBER_TO:
                     OK = utils.moveRobber(session, message);
                     if (!OK) errorMessage = "Der Räuber kann nicht versetzt werden.";

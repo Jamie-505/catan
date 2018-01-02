@@ -36,7 +36,7 @@ public class Cube {
   }
 
   public Hex toHex() {
-    return new Hex(x, z);
+    return new Hex(x, y);
   }
 
   public Hex cubeToOddRHex() {

@@ -104,7 +104,9 @@ public class MainActivity extends BaseSocketActivity {
 
   private void addViewToLayout(View view, Hex hex, Grid grid) {
     //Add to view
-    RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(grid.width, grid.height);
+    RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(
+        grid.width, grid.height
+    );
     params.addRule(RelativeLayout.RIGHT_OF, R.id.centerLayout);
     params.addRule(RelativeLayout.BELOW, R.id.centerLayout);
     mRelativeLayout.addView(view, params);
@@ -112,7 +114,7 @@ public class MainActivity extends BaseSocketActivity {
     //Set coordinates
     Point p = grid.hexToPixel(hex);
     params.leftMargin = -grid.centerOffsetX + p.x;
-    params.topMargin = -grid.centerOffsetY + p.y;
+    params.topMargin = -grid.centerOffsetY - p.y;
   }
 
   public void displayMessage(String msg){

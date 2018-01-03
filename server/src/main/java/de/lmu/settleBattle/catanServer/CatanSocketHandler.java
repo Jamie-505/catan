@@ -106,6 +106,12 @@ public class CatanSocketHandler extends TextWebSocketHandler implements Property
                     if (!OK) errorMessage = "Das Gebäude kann nicht gebaut werden.";
                     break;
 
+                case CARD_INVENTION:
+                    sendMessageToAll(CatanMessage.inventionCard(utils.toInt(session.getId()), message));
+                    OK = utils.applyInventionCard(session, message);
+                    if (!OK) errorMessage = "Die Karte Erfindung kann nicht ausgespielt werden.";
+                    break;
+
                 case ROLL_DICE:
                     OK = getGameCtrl().dice(utils.toInt(session.getId()));
                     if (!OK) errorMessage = "Du bist nicht am Zug";
@@ -159,7 +165,7 @@ public class CatanSocketHandler extends TextWebSocketHandler implements Property
             else if (!errorMessage.equals(""))
                 sendError(session, errorMessage);
 
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }

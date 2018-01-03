@@ -122,6 +122,10 @@ public class DevelopmentCardOverview extends JSONStringBuilder {
 
     }
 
+    public boolean hasInventionCard() {
+        return this.invention > 0;
+    }
+
     public int getTotalCount() {
         return invention+knight+monopole+roadConstruction+victoryPoint;
     }

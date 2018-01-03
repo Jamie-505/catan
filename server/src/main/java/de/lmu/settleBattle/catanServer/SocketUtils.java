@@ -198,11 +198,21 @@ public class SocketUtils {
      * @return
      */
     public boolean tossRawMaterials(WebSocketSession session, TextMessage message) {
-        JSONObject json = JSONUtils.createJSON(message);
+        JSONObject json = JSONUtils.createJSON(message).getJSONObject(TOSS_CARDS).getJSONObject(TOSS);
         JSONObject rawMaterialJSON = json.getJSONObject(Constants.RAW_MATERIALS);
         RawMaterialOverview overview = gson.fromJson(rawMaterialJSON.toString(), RawMaterialOverview.class);
 
         return gameCtrl.tossRawMaterialCards(toInt(session.getId()), overview);
+    }
+
+    public boolean applyInventionCard(WebSocketSession session, TextMessage message) throws Exception {
+        Player player = gameCtrl.getPlayer(session.getId());
+
+        JSONObject json = JSONUtils.createJSON(message).getJSONObject(INVENTION);
+        JSONObject rawMaterialJSON = json.getJSONObject(Constants.RAW_MATERIALS);
+        RawMaterialOverview overview = gson.fromJson(rawMaterialJSON.toString(), RawMaterialOverview.class);
+
+        return gameCtrl.applyInventionCard(player, overview);
     }
     //endregion
 

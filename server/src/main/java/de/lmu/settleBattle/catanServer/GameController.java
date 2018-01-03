@@ -231,6 +231,24 @@ public class GameController implements PropertyChangeListener {
         this.rawMaterialDeck.increase(RawMaterialType.WOOD, 1);
         this.rawMaterialDeck.increase(RawMaterialType.WHEAT, 1);
     }
+
+    public boolean applyInventionCard(Player player, RawMaterialOverview overview) {
+        if (!player.hasInventionCard() || overview.getTotalCount() != 2)
+            return false;
+
+        boolean ret;
+        try {
+
+            this.rawMaterialDeck.decrease(overview);
+            player.increaseRawMaterials(overview);
+            player.removeDevelopmentCard(DevCardType.INVENTION, 1);
+            ret = true;
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            ret = false;
+        }
+        return ret;
+    }
     //endregion
 
     //region field distribution handling
@@ -476,7 +494,6 @@ public class GameController implements PropertyChangeListener {
 
     /**
      * player tosses cards after a roll of 7 if he has at least 7 raw materials
-     *
      * @param id
      * @param overview
      * @return
@@ -565,6 +582,10 @@ public class GameController implements PropertyChangeListener {
 
     public void endGame() {
         this.isGameOver = true;
+    }
+
+    public RawMaterialOverview getRawMaterialDeck() {
+        return this.rawMaterialDeck;
     }
 
     public boolean isGameOver() {

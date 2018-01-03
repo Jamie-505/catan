@@ -25,6 +25,7 @@ public class Constants {
     public final static String CARD_BUY = "Entwicklungskarte kaufen";
     public final static String CARD_KNIGHT = "Ritter ausspielen";
     public final static String CARD_RD_CON = "Straßenbaukarte ausspielen";
+    public final static String CARD_INVENTION = "Erfindungskarte ausspielen";
     public final static String CARD_SOLD = "Entwicklungskarte gekauft";
     public final static String CHAT_IN = "Chatnachricht";
     public final static String CHAT_OUT = "Chatnachricht senden";
@@ -48,6 +49,7 @@ public class Constants {
     public final static String START_CON = "Spiel gestartet";
     public final static String STATUS_UPD = "Statusupdate";
     public final static String TOSS_CARDS = "Karten abgeben";
+    public final static String TOSS = "Abgeben";
     public final static String TRD_ABORTED = "Handelsangebot abgebrochen";
     public final static String TRD_ACC = "Handelsangebot angenommen";
     public final static String TRD_FIN = "Handel ausgefuehrt";

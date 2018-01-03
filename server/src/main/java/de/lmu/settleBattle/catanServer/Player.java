@@ -232,6 +232,10 @@ public class Player extends JSONStringBuilder implements Comparable, Cloneable {
         return this.rawMaterialDeck.getTotalCount();
     }
 
+    public boolean hasInventionCard() {
+        return this.developmentDeck.hasInventionCard();
+    }
+
     /**
      * <method name: has10VictoryPoints>
      * <description: this method checks if the player has at least 10 points>
@@ -247,13 +251,16 @@ public class Player extends JSONStringBuilder implements Comparable, Cloneable {
     }
 
     public void decreaseRawMaterials(RawMaterialOverview overview) throws IllegalArgumentException {
-        changes.firePropertyChange("RawMaterialDecrease", overview, this);
         this.rawMaterialDeck.decrease(overview);
+        changes.firePropertyChange("RawMaterialDecrease", overview, this);
     }
 
     public void increaseRawMaterials(RawMaterialOverview overview) throws IllegalArgumentException {
-        changes.firePropertyChange("RawMaterialIncrease", overview, this);
         this.rawMaterialDeck.increase(overview);
+        changes.firePropertyChange("RawMaterialIncrease", overview, this);
+    }
+    public void removeDevelopmentCard(DevCardType type, int i) throws Exception {
+        this.developmentDeck.decrease(type, i);
     }
 
     /**
@@ -467,4 +474,5 @@ public class Player extends JSONStringBuilder implements Comparable, Cloneable {
     public void setRawMaterialDeck(RawMaterialOverview rmo) {
         this.rawMaterialDeck = rmo;
     }
+
 }

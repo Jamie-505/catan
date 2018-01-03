@@ -2,7 +2,6 @@ package de.lmu.settleBattle.catanServer;
 
 import org.json.JSONObject;
 import org.springframework.web.socket.TextMessage;
-
 import static de.lmu.settleBattle.catanServer.Constants.*;
 
 public class CatanMessage {
@@ -324,6 +323,12 @@ public class CatanMessage {
         payload.put(Constants.RAW_MATERIALS, overview.toJSON());
 
         return new TextMessage(JSONUtils.setJSONType(Constants.INVENTION, payload).toString());
+    }
+
+    public static TextMessage inventionCard(int playerId, TextMessage message) {
+        JSONObject payload = JSONUtils.createJSON(message).getJSONObject(INVENTION);
+        payload.put(PLAYER, playerId);
+        return new TextMessage(JSONUtils.setJSONType(INVENTION, payload).toString());
     }
 
     //endregion

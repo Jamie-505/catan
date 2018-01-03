@@ -1,12 +1,16 @@
 package de.lmu.settleBattle.catanServer;
 
-import org.springframework.web.socket.TextMessage;
-import org.springframework.web.socket.WebSocketSession;
+import static de.lmu.settleBattle.catanServer.Constants.TRADE_OR_BUILD;
+import static de.lmu.settleBattle.catanServer.Constants.WAIT;
+import static de.lmu.settleBattle.catanServer.Constants.WAIT_FOR_GAME_START;
 
-import java.io.IOException;
-import java.util.*;
-
-import static de.lmu.settleBattle.catanServer.Constants.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Stack;
 
 public class GameController {
     private Board board;
@@ -187,7 +191,7 @@ public class GameController {
         Map<Integer, RawMaterialOverview> distribution = new HashMap<>();
 
         Map<Building, RawMaterialType> buildings =
-                board.getBuildingsOnDistributingFields(number);
+            board.getBuildingsOnDistributingFields(number);
 
         for (Building bld : buildings.keySet()) {
             int amount = bld.isCity() ? 2 : 1;
@@ -198,7 +202,7 @@ public class GameController {
                 distribution.replace(bld.getOwner(), overview);
 
             } else distribution.put(bld.getOwner(),
-                    new RawMaterialOverview(buildings.get(bld), amount));
+                new RawMaterialOverview(buildings.get(bld), amount));
         }
 
         return distribution;
@@ -221,8 +225,8 @@ public class GameController {
         Player fellowPlayer = getPlayer(fellowPlayerId);
 
         if (offerent.canAfford(tradeRequest.getOffer()) &&
-                fellowPlayer.canAfford(tradeRequest.getRequest()) &&
-                tradeRequest.canBeExecutedBy(fellowPlayerId)) {
+            fellowPlayer.canAfford(tradeRequest.getRequest()) &&
+            tradeRequest.canBeExecutedBy(fellowPlayerId)) {
 
             offerent.trade(tradeRequest.getOffer(), tradeRequest.getRequest());
             fellowPlayer.trade(tradeRequest.getRequest(), tradeRequest.getOffer());
@@ -247,14 +251,14 @@ public class GameController {
 
         //client sends raw material overview containing 1 clay/ore/.. ore for request/offer
         if (tradeRequest.getRequest().getTotalCount() != 1 &&
-                tradeRequest.getOffer().getTotalCount() != 1)
+            tradeRequest.getOffer().getTotalCount() != 1)
             return false;
 
         RawMaterialType requestType = tradeRequest.getRequest().getType();
         RawMaterialType offerType = tradeRequest.getOffer().getType();
 
         if (!requestType.isValidTradingType() || !offerType.isValidTradingType()
-                || requestType.equals(offerType)) return false;
+            || requestType.equals(offerType)) return false;
 
         //check if player has 2:1 haven for trading
         Haven haven = player.get2To1Haven(offerType);
@@ -310,7 +314,7 @@ public class GameController {
             players.add(p);
 
         else throw new IllegalAccessException("The player cannot be added. There" +
-                "are already 4 players for this game!");
+            "are already 4 players for this game!");
     }
 
     public List<Player> getPlayers() {

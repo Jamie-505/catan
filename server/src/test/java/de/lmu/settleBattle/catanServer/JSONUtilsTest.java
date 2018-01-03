@@ -368,7 +368,7 @@ public class JSONUtilsTest {
     Building[] settlements = gson.fromJson(settlementsJSON.toString(), Building[].class);
     Building[] cities = gson.fromJson(citiesJSON.toString(), Building[].class);
 
-    assertEquals(37, fields.length);
+    assertEquals(19, fields.length);
     assertEquals(9, havens.length);
     assertEquals(0, roads.length);
     assertEquals(0, settlements.length);

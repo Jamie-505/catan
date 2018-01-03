@@ -91,19 +91,19 @@ public class Board extends JSONStringBuilder {
      */
     private void initializeFields() {
         //create a list of fields
-        ArrayList<Field> listOfFields = new ArrayList<>();
+        Field[] boardFields = new Field[18];
         //adding 3 tiles each
-        for (int i = 1; i <= 3; i++) {
-            listOfFields.add(new Field(RawMaterialType.CLAY));
-            listOfFields.add(new Field(RawMaterialType.ORE));
-            listOfFields.add(new Field(RawMaterialType.WOOD));
-            listOfFields.add(new Field(RawMaterialType.WOOL));
-            listOfFields.add(new Field(RawMaterialType.WEAT));
+        for (int i = 0; i <= 2; i++) {
+            boardFields[i*5] = new Field(RawMaterialType.CLAY);
+            boardFields[i*5 + 1] = new Field(RawMaterialType.ORE);
+            boardFields[i*5 + 2] = new Field(RawMaterialType.WOOD);
+            boardFields[i*5 + 3] = new Field(RawMaterialType.WOOL);
+            boardFields[i*5 + 4] = new Field(RawMaterialType.WEAT);
         }
         //adding 1 tile wood sheep and wheat each
-        listOfFields.add(new Field(RawMaterialType.WOOD));
-        listOfFields.add(new Field(RawMaterialType.WOOL));
-        listOfFields.add(new Field(RawMaterialType.WEAT));
+        boardFields[15] = new Field(RawMaterialType.WOOD);
+        boardFields[16] = new Field(RawMaterialType.WOOL);
+        boardFields[17] = new Field(RawMaterialType.WEAT);
 
 
         // adding the fields in spiral way starting from bottom left corned (0,-2)
@@ -150,21 +150,19 @@ public class Board extends JSONStringBuilder {
         fieldLocations[36] = new Location(-1, -2);
 
         //shuffle the fields and numbers
-        Collections.shuffle(listOfFields);
+        Collections.shuffle(Arrays.asList(boardFields));
         //put back in array
         for (int i = 0; i < 18; i++) {
-            listOfFields.get(i).setNumber(numberOrder[i]);
-            listOfFields.get(i).setLocation(fieldLocations[i]);
-            fields[i] = listOfFields.get(i);
+            Field field = boardFields[i];
+            field.setNumber(numberOrder[i]);
+            field.setLocation(fieldLocations[i]);
+            boardFields[i] = field;
         }
 
+        fields = new Field[19];
+        System.arraycopy(boardFields, 0, fields, 0, boardFields.length);
         // add desert in the middle
         fields[18] = new Field(fieldLocations[18], RawMaterialType.DESERT);
-
-        // add water
-        for (int i = 19; i < 37; i++) {
-            fields[i] = new Field(RawMaterialType.WATER);
-        }
     }
 
     /**

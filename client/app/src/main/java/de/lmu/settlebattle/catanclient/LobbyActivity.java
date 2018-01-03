@@ -31,6 +31,7 @@ public class LobbyActivity extends BaseSocketActivity {
     public void onReceive(Context context, Intent intent) {
       if (intent.getAction().equals(GAME_START)) {
         Intent startGame = new Intent(LobbyActivity.this, MainActivity.class);
+        startGame.putExtra(BOARD, intent.getStringExtra(BOARD));
         startActivity(startGame);
       } else if (intent.getAction().equals(PLAYER_UPDATE)) {
         String allPlayers = storage.getAllPlayers();

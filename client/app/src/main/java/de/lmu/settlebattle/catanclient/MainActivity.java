@@ -29,7 +29,7 @@ import android.widget.Toast;
 import com.google.gson.Gson;
 import de.lmu.settlebattle.catanclient.dice.DiceFragment;
 import de.lmu.settlebattle.catanclient.grid.Cube;
-import de.lmu.settlebattle.catanclient.grid.DemoObjects;
+import de.lmu.settlebattle.catanclient.grid.Board;
 import de.lmu.settlebattle.catanclient.grid.Hex;
 import de.lmu.settlebattle.catanclient.grid.Grid;
 import de.lmu.settlebattle.catanclient.grid.StorageMap;
@@ -66,6 +66,7 @@ public class MainActivity extends BaseSocketActivity {
   private RelativeLayout mRelativeLayout;
   private SeaTradeFragment seaTradeFragment = new SeaTradeFragment();
   private TradeOfferFragment tradeOfferFragment = new TradeOfferFragment();
+  private Board board;
 
   @Override
   public void onBackPressed() {
@@ -76,13 +77,17 @@ public class MainActivity extends BaseSocketActivity {
     }
   }
 
-
   @Override
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_main);
     storage = new Storage(this);
     setIntentFilters();
+
+    Intent startActivity = getIntent();
+    board = gson.fromJson(startActivity.getStringExtra(BOARD), Board.class);
+
+    board = new Board(board.fields);
 
     bauenBtn = (Button) findViewById(R.id.bauen_button);
     diceBtn = (ImageButton) findViewById(R.id.throwDiceBtn);
@@ -99,7 +104,7 @@ public class MainActivity extends BaseSocketActivity {
       radius = extras.getInt("GRID_RADIUS", 3);
     }
 
-    initGridView(radius);
+    initGridView(radius, board.fields);
   }
 
   private void addViewToLayout(View view, Hex hex, Grid grid) {
@@ -133,11 +138,11 @@ public class MainActivity extends BaseSocketActivity {
     ft.commit();
   }
 
-  private void initGridView(int radius) {
+  private void initGridView(int radius, Hex[] fields) {
     int scale = setGridDimensions(radius);
 
     //Init node elements
-    Grid grid = setGridNodes(radius, scale);
+    setGridNodes(radius, scale, fields);
   }
 
   private void OnGridHexClick(Hex hex) {
@@ -253,9 +258,11 @@ public class MainActivity extends BaseSocketActivity {
     return scale;
   }
 
-  private Grid setGridNodes(int radius, int scale) {
+  private Grid setGridNodes(int radius, int scale, Hex[] fields) {
     try {
-      StorageMap storageMap = new StorageMap(radius, DemoObjects.squareMap);
+      Board board = new Board(fields);
+
+      StorageMap storageMap = new StorageMap(radius, board.hexMap);
       final Grid grid = new Grid(radius, scale);
 
       //Grid node listener restricted to the node's circular area.
@@ -295,7 +302,7 @@ public class MainActivity extends BaseSocketActivity {
         Hex hex = cube.toHex();
 
         CircleImageView view = new CircleImageView(this);
-        Integer pic = (Integer) storageMap.getObjectByCoordinate(hex.getQ(), hex.getR());
+        Integer pic = (Integer) storageMap.getObjectByCoordinate(hex.getX(), hex.getY());
         if(pic == null) {
           view.setHex(hex);
           view.setOnTouchListener(gridNodeTouchListener);

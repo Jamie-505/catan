@@ -1,7 +1,7 @@
 package de.lmu.settlebattle.catanclient.utils;
 
 import static de.lmu.settlebattle.catanclient.utils.Constants.OWNER;
-import static de.lmu.settlebattle.catanclient.utils.Constants.PLACE;
+import static de.lmu.settlebattle.catanclient.utils.Constants.LOCATION;
 import static de.lmu.settlebattle.catanclient.utils.Constants.TYPE;
 
 import com.google.gson.annotations.SerializedName;
@@ -14,6 +14,6 @@ class Building {
   @SerializedName(TYPE)
   String type;
 
-  @SerializedName(PLACE)
+  @SerializedName(LOCATION)
   private ArrayList[] locations;
 }

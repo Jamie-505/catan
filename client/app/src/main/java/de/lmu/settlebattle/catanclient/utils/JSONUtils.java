@@ -3,7 +3,7 @@ package de.lmu.settlebattle.catanclient.utils;
 import static de.lmu.settlebattle.catanclient.utils.Constants.*;
 
 import com.google.gson.Gson;
-import de.lmu.settlebattle.catanclient.dice.Dice;
+import de.lmu.settlebattle.catanclient.grid.Board;
 import de.lmu.settlebattle.catanclient.player.Player;
 import de.lmu.settlebattle.catanclient.trade.Trade;
 import de.lmu.settlebattle.catanclient.utils.Message.Error;
@@ -37,7 +37,8 @@ public class JSONUtils {
           Error error = gson.fromJson(jObj.getString(ERROR), Error.class);
           return displayError(error.Message);
         case GAME_START:
-          return new String[] { GAME_START };
+          JSONObject board = new JSONObject(jObj.getString(GAME_START));
+          return new String[] { GAME_START, board.getString(BOARD) };
         case GET_ID:
           Player player = gson.fromJson(jObj.getString(GET_ID), Player.class);
           return new Object[] { TO_STORAGE, player };

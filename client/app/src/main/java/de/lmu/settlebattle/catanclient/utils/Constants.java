@@ -73,10 +73,11 @@ public final class Constants {
 
   // Message Objects
   public final static String ACCEPT = "Annehmen";
-  public final static String CARD = "Karte";
+  public final static String BOARD = "Karte";
   public final static String CITY = "Stadt";
   public final static String CLAY = "Lehm";
   public final static String DICE_THROW = "Wurf";
+  public final static String FIELDS = "Felder";
   public final static String HAVEN = "Hafen";
   public final static String KNIGHT = "Ritter";
   public final static String MONOPOLE = "Monopol";
@@ -85,7 +86,7 @@ public final class Constants {
   public final static String OFFER = "Angebot";
   public final static String ORE = "Erz";
   public final static String OWNER = "Eigentümer";
-  public final static String PLACE = "Ort";
+  public final static String LOCATION = "Ort";
   public final static String PROTOCOL = "Protokoll";
   public final static String REQUEST = "Nachfrage";
   public final static String ROAD = "Straße";

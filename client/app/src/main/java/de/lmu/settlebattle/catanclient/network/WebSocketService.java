@@ -137,7 +137,9 @@ public class WebSocketService extends Service {
         }
         break;
       case GAME_START:
-        broadcast(GAME_START);
+        Intent gameStart = new Intent(GAME_START);
+        gameStart.putExtra(BOARD, mail[1].toString());
+        broadcast(gameStart);
         break;
       case GAME_WAIT:
         player = (Player) mail[1];

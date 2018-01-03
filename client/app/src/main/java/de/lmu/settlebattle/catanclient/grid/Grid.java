@@ -46,8 +46,8 @@ public class Grid {
     int x = 0;
     int y = 0;
 
-    x = (int) (width * (hex.getQ() + 0.5 * hex.getR()));
-    y = (int) (scale * 1.5 * hex.getR());
+    x = (int) (width * (hex.getX() + 0.5 * hex.getY()));
+    y = (int) (scale * 1.5 * hex.getY());
 
     return new Point(x, y);
   }

@@ -1,15 +1,33 @@
 package de.lmu.settlebattle.catanclient.grid;
 
+
+import static de.lmu.settlebattle.catanclient.utils.Constants.LOCATION;
+import static de.lmu.settlebattle.catanclient.utils.Constants.NUMBER;
+import static de.lmu.settlebattle.catanclient.utils.Constants.TYPE;
+
+import com.google.gson.annotations.SerializedName;
+import de.lmu.settlebattle.catanclient.utils.Location;
+
 /**
  * Non-cube hex coordinates (q, r)
  */
 public class Hex {
-  private int q; //column
-  private int r; //row
+
+  @SerializedName(LOCATION)
+  Location loc;
+
+  @SerializedName(TYPE)
+  public String type;
+
+  @SerializedName(NUMBER)
+  public int number;
+
+  public Hex(Location loc) {
+    this.loc = loc;
+  }
 
   public Hex (int q, int r) {
-    this.q = q;
-    this.r = r;
+     this.loc = new Location(q, r);
   }
 
   public Hex (float q, float r) {
@@ -30,39 +48,18 @@ public class Hex {
     else if (y_diff > z_diff)
       ry = -rx-rz;
 
-    this.q = rx;
-    this.r = ry;
-  }
-
-  public Cube toCube() {
-    return new Cube(q, -q-r, r);
-  }
-
-  public Cube oddRHexToCube() {
-    int x = q - (r - (r&1)) / 2;
-    int z = r;
-    int y = -x-z;
-
-    return new Cube(x, -x-z, z);
+    this.loc = new Location(rx, ry);
   }
 
   public String toString() {
-    return q + ":" + r;
+    return loc.x + ":" + loc.y;
   }
 
-  public int getQ() {
-    return q;
+  public int getX() {
+    return loc.x;
   }
 
-  public void setQ(int q) {
-    this.q = q;
-  }
-
-  public int getR() {
-    return r;
-  }
-
-  public void setR(int r) {
-    this.r = r;
+  public int getY() {
+    return loc.y;
   }
 }

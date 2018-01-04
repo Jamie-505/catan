@@ -172,38 +172,38 @@ public class Board extends JSONStringBuilder {
 
 
         //initialize the locations
-        havenLocations[0] = new Location(0, -3);
-        havenLocations[1] = new Location(2, -3);
-        havenLocations[2] = new Location(3, -2);
-        havenLocations[3] = new Location(3, 0);
-        havenLocations[4] = new Location(1, 2);
-        havenLocations[5] = new Location(-1, 3);
-        havenLocations[6] = new Location(-3, 3);
-        havenLocations[7] = new Location(-3, 1);
-        havenLocations[8] = new Location(-2, -1);
+        havenLocations[0] = new Location(1, -3);
+        havenLocations[1] = new Location(3, -3);
+        havenLocations[2] = new Location(3, -1);
+        havenLocations[3] = new Location(2, 1);
+        havenLocations[4] = new Location(0, 3);
+        havenLocations[5] = new Location(-2, 3);
+        havenLocations[6] = new Location(-3, 2);
+        havenLocations[7] = new Location(-3, 0);
+        havenLocations[8] = new Location(-1, -2);
 
         //create arrays for haven location by joining
         //the haven location with its adjacent field location to crete the havens
-        Location[] havenLocation_1 = {havenLocations[0], fieldLocations[0]};
-        Location[] havenLocation_2 = {havenLocations[1], fieldLocations[1]};
+        Location[] havenLocation_1 = {havenLocations[0], fieldLocations[1]};
+        Location[] havenLocation_2 = {havenLocations[1], fieldLocations[2]};
         Location[] havenLocation_3 = {havenLocations[2], fieldLocations[3]};
-        Location[] havenLocation_4 = {havenLocations[3], fieldLocations[4]};
-        Location[] havenLocation_5 = {havenLocations[4], fieldLocations[5]};
+        Location[] havenLocation_4 = {havenLocations[3], fieldLocations[5]};
+        Location[] havenLocation_5 = {havenLocations[4], fieldLocations[6]};
         Location[] havenLocation_6 = {havenLocations[5], fieldLocations[7]};
-        Location[] havenLocation_7 = {havenLocations[6], fieldLocations[8]};
-        Location[] havenLocation_8 = {havenLocations[7], fieldLocations[9]};
+        Location[] havenLocation_7 = {havenLocations[6], fieldLocations[9]};
+        Location[] havenLocation_8 = {havenLocations[7], fieldLocations[10]};
         Location[] havenLocation_9 = {havenLocations[8], fieldLocations[11]};
 
         //create the havens
-        havens[0] = new Haven(havenLocation_1, RawMaterialType.ORE);
-        havens[1] = new Haven(havenLocation_2, RawMaterialType.WOOL);
-        havens[2] = new Haven(havenLocation_3, RawMaterialType.WATER);
-        havens[3] = new Haven(havenLocation_4, RawMaterialType.WATER);
+        havens[0] = new Haven(havenLocation_1, RawMaterialType.WEAT);
+        havens[1] = new Haven(havenLocation_2, RawMaterialType.WATER);
+        havens[2] = new Haven(havenLocation_3, RawMaterialType.WOOD);
+        havens[3] = new Haven(havenLocation_4, RawMaterialType.CLAY);
         havens[4] = new Haven(havenLocation_5, RawMaterialType.WATER);
-        havens[5] = new Haven(havenLocation_6, RawMaterialType.WOOD);
-        havens[6] = new Haven(havenLocation_7, RawMaterialType.WEAT);
+        havens[5] = new Haven(havenLocation_6, RawMaterialType.WATER);
+        havens[6] = new Haven(havenLocation_7, RawMaterialType.WOOL);
         havens[7] = new Haven(havenLocation_8, RawMaterialType.WATER);
-        havens[8] = new Haven(havenLocation_9, RawMaterialType.CLAY);
+        havens[8] = new Haven(havenLocation_9, RawMaterialType.ORE);
 
     }
 

@@ -129,5 +129,5 @@ public class Constants {
     public final static String RMO_INCR = "RawMaterial Increase";
     public final static String RMO_DECR = "RawMaterial Decrease";
     public final static String PROP_STATUS = "Status Prop";
-
+    public final static String VP_INCR = "VictoryPointIncrease";
 }

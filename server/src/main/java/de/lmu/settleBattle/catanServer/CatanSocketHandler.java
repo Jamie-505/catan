@@ -150,6 +150,11 @@ public class CatanSocketHandler extends TextWebSocketHandler implements Property
                     if (!OK) errorMessage = "Die Rohstoffe konnten nicht reduziert werden.";
                     break;
 
+                case CARD_BUY:
+                    OK = utils.buyDevCard(session);
+                    if (!OK) errorMessage = "Es konnte keine Entwicklungskarte gekauft werden.";
+                    break;
+
                 case SEA_TRADE:
                     OK = utils.seatrade(session, message);
                     if (!OK) errorMessage = "Der Seehandel kann nicht durchgeführt werden";
@@ -198,6 +203,11 @@ public class CatanSocketHandler extends TextWebSocketHandler implements Property
                         errorMessage = "No KI could be added.";
                     }
                     break;
+
+                case GAME_OVER:
+                    OK = utils.endGame(session);
+                    if (!OK) errorMessage = "Failed to end the game";
+                    break;
             }
 
             if (OK) sendOK(session);
@@ -213,8 +223,8 @@ public class CatanSocketHandler extends TextWebSocketHandler implements Property
         Player current = utils.getGameCtrl().getCurrent();
 
         //current player has won the game
-        if (current.has10VictoryPoints()) {
-            utils.getGameCtrl().endGame();
+        if (current.hasWon()) {
+            utils.getGameCtrl().endGame(current);
             sendMessageToAll(CatanMessage.endGame(current));
         } else {
             utils.getGameCtrl().nextMove();
@@ -447,11 +457,21 @@ public class CatanSocketHandler extends TextWebSocketHandler implements Property
                     sendMessageToAll(CatanMessage.throwDice(player.getId(), (int[]) evt.getOldValue()));
                     break;
             }
+            } catch(IOException ex){
+                System.out.printf("An exception occured %s", ex.getMessage());
+            }
 
-        } catch (IOException ex) {
-            System.out.printf("An exception occured %s", ex.getMessage());
-        }
     }
 
-    //endregion
+        public void endGame (WebSocketSession session){
+            Player winner = utils.getGameCtrl().getPlayer(session.getId());
+            if (winner.hasWon() && winner.getId() == this.utils.getGameCtrl().getPlayerWithHighestPoints().getId()) {
+                sendMessageToAll(CatanMessage.endGame(winner));
+                this.utils.endGame(session);
+            }
+        }
+
+
+        //endregion
+
 }

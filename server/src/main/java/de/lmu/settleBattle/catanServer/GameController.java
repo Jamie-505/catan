@@ -198,13 +198,13 @@ public class GameController implements PropertyChangeListener {
                 owner.addHaven(haven);
             }
 
-            //increase victory points
-            if (!building.isRoad()) {
-                // always add 1 victory point because:
-                // a new settlement brings 1 victory point and
-                // if a city was built then the owner has already received 1 victory point for the settlement he built before
-                owner.addVictoryPoints(1);
-            }
+                //increase victory points
+                if (!building.isRoad()) {
+                    // always add 1 victory point because:
+                    // a new settlement brings 1 victory point and
+                    // if a city was built then the owner has already received 1 victory point for the settlement he built before
+                    owner.increaseVictoryPoints(1);
+                }
 
             //raw material distribution for second settlement
             if (buildingPhaseActive && round == 2 && building.isSettlement())
@@ -243,21 +243,29 @@ public class GameController implements PropertyChangeListener {
     //region development card handling
 
     /**
-     * <method name: buyDevelopmentCard>
+     * <method name: addDevelopmentCard>
      * <description: this method performs the actions required to buy development card>
      * <preconditions: player has the required cards to buy and his turn is up>
      * <postconditions: player gets a development card in exchange for his material cards>
      */
 
-    public void tradeDevelopmentCard(Player player) {
+    public boolean buyDevelopmentCard(Player player) {
+        boolean ret = false;
+
         if (player.canAffordDevCard()) {
+            RawMaterialOverview price = new RawMaterialOverview(0,1,0,1,1);
             try {
-                player.buyDevelopmentCard(developmentCardDeck.withdrawRandomCard());
-                sellDevelopmentCard();
+                player.decreaseRawMaterials(price);
+                player.addDevelopmentCard(developmentCardDeck.withdrawRandomCard(), 1);
+                this.rawMaterialDeck.increase(price);
+                ret = true;
             } catch (Exception e) {
                 e.printStackTrace();
+                ret = false;
             }
         }
+
+        return ret;
     }
 
     public void sellDevelopmentCard() {
@@ -526,7 +534,7 @@ public class GameController implements PropertyChangeListener {
      * @return valid ID for new player
      */
     private int getValidId() {
-        int id = 1;
+        int id = 1000;
         for (Player player : players)
             id += player.getId();
         return id;
@@ -685,8 +693,23 @@ public class GameController implements PropertyChangeListener {
         return board;
     }
 
-    public void endGame() {
+    public boolean endGame(Player winner) {
+        if(!winner.hasWon() ||  winner.getId() != getPlayerWithHighestPoints().getId()){
+            return false;
+        }
         this.isGameOver = true;
+        return true;
+    }
+
+    public Player getPlayerWithHighestPoints(){
+        Player topPlayer = players.get(0);
+        for (Player player : players){
+            if(player.getVictoryPointsCount() > topPlayer.getVictoryPointsCount()){
+                topPlayer = player;
+            }
+        }
+        return topPlayer;
+
     }
 
     public RawMaterialOverview getRawMaterialDeck() {
@@ -794,7 +817,7 @@ public class GameController implements PropertyChangeListener {
                         ex.printStackTrace();
                     }
                 } else {
-                    tradeDevelopmentCard(ki);
+                    buyDevelopmentCard(ki);
                 }
 
                 nextMove();

@@ -104,6 +104,19 @@ public class JSONUtilsTest {
     assertEquals(Constants.START_GAME, player.get(Constants.PLAYER_STATE));
     assertEquals("Weis", player.get(Constants.PLAYER_COLOR)); assertEquals("Lucy", player.get(Constants.PLAYER_NAME));
     assertEquals(0, player.get(Constants.PLAYER_ID));
+
+  }
+
+  @Test
+  public void playerJSON() throws Exception {
+    //check player to JSON
+    player1.increaseVictoryPoints(4);
+    player1.addDevelopmentCard(DevCardType.VICTORY_POINT, 3);
+    JSONObject playerHidden = player1.toJSON_Unknown();
+    assertEquals(4, playerHidden.get(Constants.VICTORY_PTS));
+
+    JSONObject playerPublic = player1.toJSON();
+    assertEquals(7, playerPublic.get(Constants.VICTORY_PTS));
   }
 
   //region buildingMessagesShouldBeRight

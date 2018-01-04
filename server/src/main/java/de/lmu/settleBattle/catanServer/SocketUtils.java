@@ -148,6 +148,11 @@ public class SocketUtils {
     }
     //endregion
 
+    public boolean buyDevCard(WebSocketSession session) {
+        Player player = gameCtrl.getPlayer(session.getId());
+        return gameCtrl.buyDevelopmentCard(player);
+    }
+
     //region trading
     public boolean seatrade(WebSocketSession session, TextMessage message) {
         TradeRequest tradeRequest = CatanMessage.seatradeToTradeRequest(SEA_TRADE, message);
@@ -251,6 +256,11 @@ public class SocketUtils {
         RawMaterialOverview overview = gson.fromJson(rawMaterialJSON.toString(), RawMaterialOverview.class);
 
         return gameCtrl.tossRawMaterialCards(toInt(session.getId()), overview);
+    }
+
+    public boolean endGame(WebSocketSession session) {
+
+        return gameCtrl.endGame(gameCtrl.getPlayer(session.getId()));
     }
 
     public boolean applyInventionCard(WebSocketSession session, TextMessage message) throws Exception {

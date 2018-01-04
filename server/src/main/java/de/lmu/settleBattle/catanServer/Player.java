@@ -12,6 +12,8 @@ import java.util.Random;
 
 import static de.lmu.settleBattle.catanServer.Constants.*;
 
+import static de.lmu.settleBattle.catanServer.Constants.*;
+
 public class Player extends JSONStringBuilder implements Comparable, Cloneable {
 
     //region property change listener
@@ -44,9 +46,8 @@ public class Player extends JSONStringBuilder implements Comparable, Cloneable {
 
     @Expose
     @SerializedName(Constants.VICTORY_PTS)
-    private int victoryPoints;
-
-    protected int victoryPointsDevCards;
+    private int victoryPtsTotal;
+    private int victoryPtsHidden;
 
     @Expose
     @SerializedName(Constants.ARMY)
@@ -91,8 +92,8 @@ public class Player extends JSONStringBuilder implements Comparable, Cloneable {
         this.color = null;
         this.name = null;
         this.status = "";
-        this.victoryPoints = 0;
-        this.victoryPointsDevCards = 0;
+        this.victoryPtsTotal = 0;
+        this.victoryPtsHidden = 0;
         this.armyCount = 0;
         this.greatestArmy = false;
         this.longestRoad = false;
@@ -159,21 +160,17 @@ public class Player extends JSONStringBuilder implements Comparable, Cloneable {
     }
 
     /**
-     * <method name: buyDevelopmentCard>
+     * <method name: addDevelopmentCard>
      * <description: this method performs the actions required to buy development card>
      * <preconditions: player has the required cards to buy and his turn is up>
      * <postconditions: player gets a development card in exchange for his material cards>
      */
-    public void buyDevelopmentCard(DevCardType card) throws Exception {
-        try {
-            this.rawMaterialDeck.decrease(RawMaterialType.ORE, 1);
-            this.rawMaterialDeck.decrease(RawMaterialType.WOOL, 1);
-            this.rawMaterialDeck.decrease(RawMaterialType.WHEAT, 1);
-            this.developmentDeck.increase(card, 1);
-        } catch (Exception e) {
-            throw e;
+    public void addDevelopmentCard(DevCardType card, int amount) throws Exception {
+        this.developmentDeck.increase(card, amount);
+        if(card == DevCardType.VICTORY_POINT){
+            this.victoryPtsHidden += amount;
+            increaseVictoryPoints(amount);
         }
-
     }
 
     //region trade
@@ -251,17 +248,13 @@ public class Player extends JSONStringBuilder implements Comparable, Cloneable {
     }
 
     /**
-     * <method name: has10VictoryPoints>
+     * <method name: hasWon>
      * <description: this method checks if the player has at least 10 points>
      * <preconditions: none>
      * <postconditions: none>
      */
-    public boolean has10VictoryPoints() {
-        return (this.victoryPoints + this.victoryPointsDevCards) >= 10;
-    }
-
-    public void addVictoryPoints(int vicPtsGain) {
-        this.victoryPoints += vicPtsGain;
+    public boolean hasWon() {
+        return this.victoryPtsTotal >= 10;
     }
 
     public void decreaseRawMaterials(RawMaterialOverview overview) throws IllegalArgumentException {
@@ -307,13 +300,14 @@ public class Player extends JSONStringBuilder implements Comparable, Cloneable {
     }
 
     public void decreaseVictoryPoints(int i) throws Exception {
-        if(this.victoryPoints <= 0) throw new Exception();
-        this.victoryPoints = victoryPoints - i;
+        if(this.victoryPtsTotal <= 0) throw new Exception();
+        this.victoryPtsTotal -= - i;
     }
 
-    public void increaseVictoryPoints(int i) {
-        this.victoryPoints = victoryPoints + i;
-
+    public void increaseVictoryPoints(int amount){
+        int oldVpAmount = this.victoryPtsTotal;
+        this.victoryPtsTotal = victoryPtsTotal + amount;
+        changes.firePropertyChange(VP_INCR, oldVpAmount, this);
     }
 
     /**
@@ -506,15 +500,22 @@ public class Player extends JSONStringBuilder implements Comparable, Cloneable {
     }
     //endregion
 
+    public int getVictoryPointsCount() {
+        return victoryPtsTotal;
+    }
+
     @Override
     public String toJSONString_Unknown() {
         JSONObject hiddenJSON = this.toJSON();
 
-        hiddenJSON.remove(Constants.DEV_CARDS);
-        hiddenJSON.put(Constants.DEV_CARDS, this.developmentDeck.toJSON_Unknown());
+        hiddenJSON.remove(DEV_CARDS);
+        hiddenJSON.put(DEV_CARDS, this.developmentDeck.toJSON_Unknown());
 
-        hiddenJSON.remove(Constants.RAW_MATERIALS);
-        hiddenJSON.put(Constants.RAW_MATERIALS, this.rawMaterialDeck.toJSON_Unknown());
+        hiddenJSON.remove(RAW_MATERIALS);
+        hiddenJSON.put(RAW_MATERIALS, this.rawMaterialDeck.toJSON_Unknown());
+
+        hiddenJSON.remove(VICTORY_PTS);
+        hiddenJSON.put(VICTORY_PTS, this.victoryPtsTotal-this.victoryPtsHidden);
 
         return hiddenJSON.toString();
     }

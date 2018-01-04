@@ -28,7 +28,7 @@ public class CircleImageView extends AppCompatImageView {
     private static final int COLORDRAWABLE_DIMENSION = 2;
 
     private static final int DEFAULT_BORDER_WIDTH = 1;
-    private static final int SELECTED_BORDER_WIDTH = 8;
+    private static final int SELECTED_BORDER_WIDTH = 1;
     private static final int DEFAULT_BORDER_COLOR = Color.TRANSPARENT;
     private static final int SELECTED_BORDER_COLOR = Color.TRANSPARENT;
 

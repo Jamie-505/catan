@@ -1,6 +1,21 @@
 package de.lmu.settlebattle.catanclient;
 
-import static de.lmu.settlebattle.catanclient.utils.Constants.*;
+import static de.lmu.settlebattle.catanclient.utils.Constants.BOARD;
+import static de.lmu.settlebattle.catanclient.utils.Constants.BUILD;
+import static de.lmu.settlebattle.catanclient.utils.Constants.DICE_RESULT;
+import static de.lmu.settlebattle.catanclient.utils.Constants.DICE_THROW;
+import static de.lmu.settlebattle.catanclient.utils.Constants.DISPLAY_ERROR;
+import static de.lmu.settlebattle.catanclient.utils.Constants.ERROR_MSG;
+import static de.lmu.settlebattle.catanclient.utils.Constants.NEW_CONSTRUCT;
+import static de.lmu.settlebattle.catanclient.utils.Constants.OK;
+import static de.lmu.settlebattle.catanclient.utils.Constants.PLAYER_UPDATE;
+import static de.lmu.settlebattle.catanclient.utils.Constants.PLAYER_WAIT;
+import static de.lmu.settlebattle.catanclient.utils.Constants.ROLL_DICE;
+import static de.lmu.settlebattle.catanclient.utils.Constants.TRADE;
+import static de.lmu.settlebattle.catanclient.utils.Constants.TRD_ABORTED;
+import static de.lmu.settlebattle.catanclient.utils.Constants.TRD_FIN;
+import static de.lmu.settlebattle.catanclient.utils.Constants.TRD_OFFER;
+import static de.lmu.settlebattle.catanclient.utils.JSONUtils.createJSONString;
 
 import android.app.Fragment;
 import android.app.FragmentManager;
@@ -9,70 +24,60 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.app.Activity;
-import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Matrix;
 import android.graphics.Point;
-import android.graphics.drawable.Drawable;
-import android.graphics.drawable.LayerDrawable;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
 import android.support.v4.content.LocalBroadcastManager;
-import android.util.Log;
-import android.os.Handler;
-import android.support.constraint.ConstraintLayout;
-import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.AppCompatImageView;
 import android.support.v7.widget.Toolbar;
-import android.text.Html;
-import android.text.method.LinkMovementMethod;
 import android.util.Log;
 import android.view.Display;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.ImageButton;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import com.google.gson.Gson;
+import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 import de.lmu.settlebattle.catanclient.dice.DiceFragment;
-import de.lmu.settlebattle.catanclient.grid.Cube;
 import de.lmu.settlebattle.catanclient.grid.Board;
-import de.lmu.settlebattle.catanclient.grid.Hex;
+import de.lmu.settlebattle.catanclient.grid.Construction;
+import de.lmu.settlebattle.catanclient.grid.Cube;
 import de.lmu.settlebattle.catanclient.grid.Grid;
+import de.lmu.settlebattle.catanclient.grid.Hex;
 import de.lmu.settlebattle.catanclient.grid.StorageMap;
+import de.lmu.settlebattle.catanclient.grid.building.BuildingView;
+import de.lmu.settlebattle.catanclient.grid.building.BuildingViewN;
+import de.lmu.settlebattle.catanclient.grid.building.BuildingViewNW;
+import de.lmu.settlebattle.catanclient.grid.street.StreetView;
+import de.lmu.settlebattle.catanclient.grid.street.StreetView.Orientation;
+import de.lmu.settlebattle.catanclient.grid.street.StreetViewNE;
+import de.lmu.settlebattle.catanclient.grid.street.StreetViewNW;
+import de.lmu.settlebattle.catanclient.grid.street.StreetViewW;
+import de.lmu.settlebattle.catanclient.grid.ConstructionsLayer;
 import de.lmu.settlebattle.catanclient.player.Player;
 import de.lmu.settlebattle.catanclient.player.Storage;
 import de.lmu.settlebattle.catanclient.trade.DomTradeFragment;
 import de.lmu.settlebattle.catanclient.trade.SeaTradeFragment;
 import de.lmu.settlebattle.catanclient.trade.Trade;
 import de.lmu.settlebattle.catanclient.trade.TradeOfferFragment;
-import de.lmu.settlebattle.catanclient.utils.JSONUtils;
-
-import com.otaliastudios.zoom.ZoomImageView;
-import com.otaliastudios.zoom.ZoomLayout;
-import com.otaliastudios.zoom.ZoomLogger;
-import com.sothree.slidinguppanel.SlidingUpPanelLayout;
-import java.util.Arrays;
-import java.util.List;
 
 public class MainActivity extends BaseSocketActivity {
 
   // LogCat tag
   private static final String TAG = MainActivity.class.getSimpleName();
 
-  public Storage storage ;
+  public Storage storage;
+  private Player self;
+
   private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
     @Override
     public void onReceive(Context context, Intent intent) {
@@ -89,7 +94,9 @@ public class MainActivity extends BaseSocketActivity {
   private FragmentManager fragmentManager = getFragmentManager();
   private Gson gson = new Gson();
   private ImageButton diceBtn;
-  private RelativeLayout mRelativeLayout;
+  private RelativeLayout gridLayout;
+  private ConstructionsLayer settlementLayer;
+  private ConstructionsLayer streetLayer;
   private SeaTradeFragment seaTradeFragment = new SeaTradeFragment();
   private TradeOfferFragment tradeOfferFragment = new TradeOfferFragment();
   private Board board;
@@ -114,6 +121,7 @@ public class MainActivity extends BaseSocketActivity {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_main);
     storage = new Storage(this);
+    self = storage.getPlayer();
     setIntentFilters();
 
     Intent startActivity = getIntent();
@@ -125,7 +133,9 @@ public class MainActivity extends BaseSocketActivity {
     diceBtn = (ImageButton) findViewById(R.id.throwDiceBtn);
     domTradeBtn = (Button) findViewById(R.id.domTradeBtn);
     seaTradeBtn = (Button) findViewById(R.id.handeln_button);
-    mRelativeLayout = (RelativeLayout) findViewById(R.id.gridLayout);
+    gridLayout = (RelativeLayout) findViewById(R.id.gridLayout);
+    streetLayer = (ConstructionsLayer) findViewById(R.id.layerStreets);
+    settlementLayer = (ConstructionsLayer) findViewById(R.id.layerSettlements);
 
     setClickListener();
 
@@ -137,6 +147,8 @@ public class MainActivity extends BaseSocketActivity {
     }
 
     initGridView(radius, board.fields);
+    streetLayer.setWithholdTouchEventsFromChildren(true);
+    settlementLayer.setWithholdTouchEventsFromChildren(true);
 
     setSupportActionBar((Toolbar) findViewById(R.id.main_toolbar));
     // Liste & Baukostenkarte
@@ -166,8 +178,8 @@ public class MainActivity extends BaseSocketActivity {
         public void onItemClick(AdapterView<?> parent, View view,
                                 int position, long id) {
           // TODO Auto-generated method stub
-          String Slecteditem= itemname[+position];
-          Toast.makeText(getApplicationContext(), Slecteditem, Toast.LENGTH_SHORT).show();
+          String selectedItem= itemname[+position];
+          Toast.makeText(getApplicationContext(), selectedItem, Toast.LENGTH_SHORT).show();
 
         }
       });
@@ -333,12 +345,137 @@ public class MainActivity extends BaseSocketActivity {
     );
     params.addRule(RelativeLayout.RIGHT_OF, R.id.centerLayout);
     params.addRule(RelativeLayout.BELOW, R.id.centerLayout);
-    mRelativeLayout.addView(view, params);
+    gridLayout.addView(view, params);
 
     //Set coordinates
     Point p = grid.hexToPixel(hex);
     params.leftMargin = -grid.centerOffsetX + p.x;
     params.topMargin = -grid.centerOffsetY - p.y;
+  }
+
+  private void addBuildingTopLeft(Hex hex, Grid grid) {
+    BuildingViewNW building = new BuildingViewNW(this, hex);
+
+    int width = 30, height = 30;
+    //Add to view
+    RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(
+        width, height
+    );
+    params.addRule(RelativeLayout.RIGHT_OF, R.id.centerSettlements);
+    params.addRule(RelativeLayout.BELOW, R.id.centerSettlements);
+    settlementLayer.addView(building, params);
+
+    building.setOnClickListener((View v) -> {
+      BuildingView b = (BuildingView) v;
+      Construction c = new Construction(self.id, b.type, b.location, b.getTag().toString());
+      mService.sendMessage(createJSONString(BUILD, c));
+    });
+
+    //Set coordinates
+    Point p = grid.hexToPixel(hex);
+    params.leftMargin = -grid.centerOffsetX + p.x - width/2;
+    params.topMargin = -grid.centerOffsetY - p.y + 20;
+  }
+
+  private void addBuildingTop(Hex hex, Grid grid) {
+
+    BuildingViewN building = new BuildingViewN(this, hex);
+
+    int width = 30, height = 30;
+    //Add to view
+    RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(
+        width, height
+    );
+    params.addRule(RelativeLayout.RIGHT_OF, R.id.centerSettlements);
+    params.addRule(RelativeLayout.BELOW, R.id.centerSettlements);
+    settlementLayer.addView(building, params);
+
+    building.setOnClickListener((View v) -> {
+      BuildingView b = (BuildingView) v;
+      Construction c = new Construction(self.id, b.type, b.location, b.getTag().toString());
+      mService.sendMessage(createJSONString(BUILD, c));
+    });
+
+    //Set coordinates
+    Point p = grid.hexToPixel(hex);
+    params.leftMargin = -grid.centerOffsetX + p.x - width/2 + grid.width/2;
+    params.topMargin = -grid.centerOffsetY - p.y - height/2;
+  }
+
+  private void addStreetLeft(Hex hex, Grid grid) {
+
+    StreetViewW street = new StreetViewW(this, hex);
+
+    int width = 18, height = grid.scale;
+    // Add to view
+    RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(
+        width, height
+    );
+    params.addRule(RelativeLayout.RIGHT_OF, R.id.centerStreets);
+    params.addRule(RelativeLayout.BELOW, R.id.centerStreets);
+    streetLayer.addView(street, params);
+
+    street.setOnClickListener((View v) -> {
+      StreetView s = (StreetView) v;
+      Construction c = new Construction(self.id, s.type, s.location, s.getTag().toString());
+      mService.sendMessage(createJSONString(BUILD, c));
+    });
+
+    // Set coordinates
+    Point p = grid.hexToPixel(hex);
+    params.leftMargin = -grid.centerOffsetX + p.x - width/2;
+    params.topMargin = -grid.centerOffsetY - p.y + grid.height/4;
+  }
+
+  private void addStreetTopLeft(Hex hex, Grid grid) {
+
+    StreetViewNW street = new StreetViewNW(this, hex);
+
+    int width = grid.width/2, height = 50;
+    // Add to view
+    RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(
+        width, height
+    );
+
+    params.addRule(RelativeLayout.RIGHT_OF, R.id.centerStreets);
+    params.addRule(RelativeLayout.BELOW, R.id.centerStreets);
+    streetLayer.addView(street, params);
+
+    street.setOnClickListener((View v) -> {
+      StreetView s = (StreetView) v;
+      Construction c = new Construction(self.id, s.type, s.location, s.getTag().toString());
+      mService.sendMessage(createJSONString(BUILD, c));
+    });
+
+    // Set coordinates
+    Point p = grid.hexToPixel(hex);
+    params.leftMargin = -grid.centerOffsetX + p.x + 72 - grid.width/2;
+    params.topMargin = -grid.centerOffsetY - p.y - 5;
+  }
+
+  private void addStreetTopRight(Hex hex, Grid grid) {
+
+    StreetViewNE street = new StreetViewNE(this, hex);
+    int width = grid.width/2, height = 50;
+    // Add to view
+    RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(
+        width, height
+    );
+
+    params.addRule(RelativeLayout.RIGHT_OF, R.id.centerStreets);
+    params.addRule(RelativeLayout.BELOW, R.id.centerStreets);
+    streetLayer.addView(street, params);
+
+    street.setOnClickListener((View v) -> {
+      StreetView s = (StreetView) v;
+      Construction c = new Construction(self.id, s.type, s.location, s.getTag().toString());
+      mService.sendMessage(createJSONString(BUILD, c));
+    });
+
+    // Set coordinates
+    Point p = grid.hexToPixel(hex);
+    params.leftMargin = -grid.centerOffsetX + p.x + 72;
+    params.topMargin = -grid.centerOffsetY - p.y - 5;
   }
 
   public void displayMessage(String msg){
@@ -381,6 +518,10 @@ public class MainActivity extends BaseSocketActivity {
         case DISPLAY_ERROR:
           displayMessage(intent.getStringExtra(ERROR_MSG));
           break;
+        case NEW_CONSTRUCT:
+          String conStr = intent.getStringExtra(NEW_CONSTRUCT);
+          Construction construction = gson.fromJson(conStr, Construction.class);
+          showConstruction(construction);
         case OK:
           hideFragment(seaTradeFragment);
           break;
@@ -425,11 +566,15 @@ public class MainActivity extends BaseSocketActivity {
   }
 
   private void setClickListener() {
+    bauenBtn.setOnClickListener((View v) -> {
+      Toast.makeText(MainActivity.this, "Du kannst jetzt bauen", Toast.LENGTH_LONG).show();
+      streetLayer.setWithholdTouchEventsFromChildren(false);
+      settlementLayer.setWithholdTouchEventsFromChildren(false);
+    });
     diceBtn.setOnClickListener((View v) -> {
-      String diceMsg = JSONUtils.createJSONString(ROLL_DICE, new Object());
+      String diceMsg = createJSONString(ROLL_DICE, new Object());
       mService.sendMessage(diceMsg);
     });
-
     domTradeBtn.setOnClickListener((View v) -> showFragment(domTradeFragment));
     seaTradeBtn.setOnClickListener((View v) -> showFragment(seaTradeFragment));
   }
@@ -438,6 +583,7 @@ public class MainActivity extends BaseSocketActivity {
     IntentFilter filter = new IntentFilter();
     filter.addAction(DICE_RESULT);
     filter.addAction(DISPLAY_ERROR);
+    filter.addAction(NEW_CONSTRUCT);
     filter.addAction(OK);
     filter.addAction(PLAYER_UPDATE);
     filter.addAction(PLAYER_WAIT);
@@ -451,7 +597,7 @@ public class MainActivity extends BaseSocketActivity {
 
   private int setGridDimensions(int radius) {
     // Gets the layout params that will allow to resize the layout
-    ViewGroup.LayoutParams params = mRelativeLayout.getLayoutParams();
+    ViewGroup.LayoutParams params = gridLayout.getLayoutParams();
 
     //Get display metrics
     Display display = getWindowManager().getDefaultDisplay();
@@ -539,6 +685,36 @@ public class MainActivity extends BaseSocketActivity {
           }
         }
         addViewToLayout(view, hex, grid);
+        // we dont need buildings in the ocean
+        if (hex.getX() != -3 && hex.getY() != 3) {
+          if (hex.getX() + hex.getY() == -3) {
+            addStreetTopRight(hex, grid);
+            addBuildingTop(hex, grid);
+          } else if (hex.getX() == 3 && hex.getY() == -3) {
+            addStreetTopLeft(hex, grid);
+            addBuildingTopLeft(hex, grid);
+            addBuildingTop(hex, grid);
+          } else if (hex.getX() + hex.getY() == 3) {
+            addBuildingTopLeft(hex, grid);
+            addStreetLeft(hex, grid);
+          } else if (hex.getY() == -3) {
+            addStreetTopLeft(hex, grid);
+            addStreetTopRight(hex, grid);
+            addBuildingTopLeft(hex, grid);
+            addBuildingTop(hex, grid);
+          } else if (hex.getX() == 3) {
+            addStreetLeft(hex, grid);
+            addStreetTopLeft(hex, grid);
+            addBuildingTopLeft(hex, grid);
+            addBuildingTop(hex, grid);
+          } else {
+            addStreetLeft(hex, grid);
+            addStreetTopLeft(hex, grid);
+            addStreetTopRight(hex, grid);
+            addBuildingTopLeft(hex, grid);
+            addBuildingTop(hex, grid);
+          }
+        }
       }
 
       return grid;
@@ -548,6 +724,27 @@ public class MainActivity extends BaseSocketActivity {
     }
 
     return null;
+  }
+
+  private void showConstruction(Construction construction) {
+    String viewId = construction.viewId;
+    if (viewId == null) {
+      viewId = BuildingView.createTag(construction.locations);
+    }
+    switch (construction.type) {
+      case SETTLEMENT:
+        BuildingView v = settlementLayer.findViewWithTag(viewId);
+        v.setImageResource(R.drawable.settlement);
+        break;
+      case STREET:
+        StreetView s = streetLayer.findViewWithTag(viewId);
+        if (s.getOrientation() == Orientation.VERTICAL) {
+          s.setImageResource(R.drawable.red_street);
+        } else {
+          s.setImageResource(R.drawable.red_street_1);
+        }
+        break;
+    }
   }
 
   private void showFragment(MainActivityFragment f) {

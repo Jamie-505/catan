@@ -65,8 +65,8 @@ public class Grid {
     nodes = new Cube[getNumberOfNodesInGrid(radius)];
     int i = 0;
 
+    for (int y = radius; y >= -radius; y--) {
     for (int x = -radius; x <= radius; x++) {
-      for (int y = radius; y >= -radius; y--) {
         int z = -x-y;
         if (Math.abs(x) <= radius && Math.abs(y) <= radius && Math.abs(z) <= radius) {
           nodes[i++] = new Cube(x, y, z);

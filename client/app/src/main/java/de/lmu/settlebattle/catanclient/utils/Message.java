@@ -1,10 +1,8 @@
 package de.lmu.settlebattle.catanclient.utils;
 
-import static de.lmu.settlebattle.catanclient.utils.Constants.*;
+import static de.lmu.settlebattle.catanclient.utils.Constants.MESSAGE;
 
 import com.google.gson.annotations.SerializedName;
-import java.util.ArrayList;
-import java.util.Map;
 
 public class Message {
 

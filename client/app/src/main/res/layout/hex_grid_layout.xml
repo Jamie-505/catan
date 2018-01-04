@@ -4,7 +4,6 @@
   android:layout_width="wrap_content"
   android:layout_height="wrap_content">
 
-
   <View
     android:layout_width="0dp"
     android:layout_height="0dp"
@@ -12,5 +11,49 @@
     android:layout_centerHorizontal="true"
     android:layout_centerVertical="true"/>
 
+  <de.lmu.settlebattle.catanclient.grid.ConstructionsLayer
+    android:id="@+id/layerStreets"
+    android:elevation="5dp"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:clickable="false"
+    android:visibility="visible">
+
+    <View
+      android:layout_width="0dp"
+      android:layout_height="0dp"
+      android:id="@+id/centerStreets"
+      android:layout_centerHorizontal="true"
+      android:layout_centerVertical="true"/>
+
+  </de.lmu.settlebattle.catanclient.grid.ConstructionsLayer>
+
+  <de.lmu.settlebattle.catanclient.grid.ConstructionsLayer
+    android:id="@+id/layerSettlements"
+    android:elevation="8dp"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:visibility="visible">
+
+    <View
+      android:layout_width="0dp"
+      android:layout_height="0dp"
+      android:id="@+id/centerSettlements"
+      android:layout_centerHorizontal="true"
+      android:layout_centerVertical="true"/>
+
+  </de.lmu.settlebattle.catanclient.grid.ConstructionsLayer>
+
+  <!-- TODO: set visibility according to player state -->
+  <!-- not sure if we want this overlay over the map -->
+  <!--<View-->
+    <!--android:id="@+id/disableBuildings"-->
+    <!--android:layout_width="match_parent"-->
+    <!--android:layout_height="match_parent"-->
+    <!--android:clickable="true"-->
+    <!--android:focusable="true"-->
+    <!--android:elevation="28dp"-->
+    <!--android:visibility="gone"-->
+    <!--android:background="#3e000000"/>-->
 
 </RelativeLayout>

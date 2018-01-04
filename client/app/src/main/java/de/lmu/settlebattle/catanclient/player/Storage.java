@@ -8,7 +8,6 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import com.google.gson.Gson;
-import de.lmu.settlebattle.catanclient.player.Player;
 import java.util.ArrayList;
 
 public class Storage {

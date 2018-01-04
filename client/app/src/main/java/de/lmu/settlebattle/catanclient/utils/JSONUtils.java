@@ -3,7 +3,6 @@ package de.lmu.settlebattle.catanclient.utils;
 import static de.lmu.settlebattle.catanclient.utils.Constants.*;
 
 import com.google.gson.Gson;
-import de.lmu.settlebattle.catanclient.grid.Board;
 import de.lmu.settlebattle.catanclient.player.Player;
 import de.lmu.settlebattle.catanclient.trade.Trade;
 import de.lmu.settlebattle.catanclient.utils.Message.Error;
@@ -44,6 +43,9 @@ public class JSONUtils {
           return new Object[] { TO_STORAGE, player };
         case HANDSHAKE:
           return completeHandshake(jObj.getJSONObject(HANDSHAKE));
+        case NEW_CONSTRUCT:
+          String constuct = jObj.getString(NEW_CONSTRUCT);
+          return new String[] {NEW_CONSTRUCT, constuct };
         case TRD_OFFER:
           Trade trade = gson.fromJson(jObj.getString(TRD_OFFER), Trade.class);
           return new Object[] { TRD_OFFER, trade };

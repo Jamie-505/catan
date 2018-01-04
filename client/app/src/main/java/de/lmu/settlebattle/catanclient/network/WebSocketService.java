@@ -152,6 +152,10 @@ public class WebSocketService extends Service {
         }
         broadcast(PLAYER_WAIT);
         break;
+      case NEW_CONSTRUCT:
+        Intent newConstruct = new Intent(NEW_CONSTRUCT);
+        newConstruct.putExtra(NEW_CONSTRUCT, mail[1].toString());
+        broadcast(newConstruct);
       case OK:
         broadcast(OK);
         break;

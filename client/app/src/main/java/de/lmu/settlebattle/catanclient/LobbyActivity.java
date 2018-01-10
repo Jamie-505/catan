@@ -61,6 +61,11 @@ public class LobbyActivity extends BaseSocketActivity {
           mService.sendMessage(createJSONString(GAME_READY, null));
           startGameBtn.setText(R.string.wait_for_other_players);
         });
+    Button addKiBtn = (Button) findViewById(R.id.kiBtn);
+    addKiBtn.setOnClickListener((View v) -> {
+      mService.sendMessage(createJSONString(ADD_KI, null));
+    });
+
   }
 
   private void setIntentFilter() {

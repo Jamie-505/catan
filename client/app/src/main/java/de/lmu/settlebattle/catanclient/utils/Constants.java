@@ -5,6 +5,7 @@ import de.lmu.settlebattle.catanclient.AppConfig;
 public final class Constants {
 
   // Message Type Constants
+  public static final String ADD_KI = "addKI";
   public static final String BUILD = "Bauen";
   public static final String CARD_BUY = "Entwicklungskarte kaufen";
   public static final String CARD_KNIGHT = "Ritter ausspielen";

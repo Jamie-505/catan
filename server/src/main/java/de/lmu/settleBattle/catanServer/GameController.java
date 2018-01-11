@@ -129,6 +129,8 @@ public class GameController implements PropertyChangeListener {
     }
 
     public void setPlayerActive(Player player, String status) {
+        System.out.printf("Set player %s to status %s", player.getId(), status);
+
         //due to property change listeners first all stati need to be set to WAIT
         //and afterwards active player status must be set
         for (Player p : players) {
@@ -157,7 +159,7 @@ public class GameController implements PropertyChangeListener {
             //in initial building phase a road can only be placed next to last settlement that was built
             if (building.isRoad()) {
                 Building settlement = getPlayer(building.getOwner()).getLastSettlement();
-                buildPermission = settlement == null ? false :
+                buildPermission = settlement != null &&
                         settlement.isBuiltAroundHere(building.getLocations(), false);
             } else buildPermission = true;
         }
@@ -225,7 +227,10 @@ public class GameController implements PropertyChangeListener {
      * @param id
      */
     private void updateStatus(int id) {
-        if (getCurrent().getId() != id) return;
+        if (getCurrent().getId() != id) {
+            System.out.printf("Die IDs %s und %s stimmen nicht überein", getCurrent().getId(), id);
+            return;
+        }
 
         if (buildingPhaseActive) {
             String status = Constants.BUILD_STREET;

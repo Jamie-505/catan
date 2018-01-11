@@ -258,13 +258,13 @@ public class Player extends JSONStringBuilder implements Comparable, Cloneable {
     }
 
     public void decreaseRawMaterials(RawMaterialOverview overview) throws IllegalArgumentException {
-        this.rawMaterialDeck.decrease(overview);
         changes.firePropertyChange(RMO_DECR, overview, this);
+        this.rawMaterialDeck.decrease(overview);
     }
 
     public void increaseRawMaterials(RawMaterialOverview overview) throws IllegalArgumentException {
-        this.rawMaterialDeck.increase(overview);
         changes.firePropertyChange(RMO_INCR, overview, this);
+        this.rawMaterialDeck.increase(overview);
     }
 
     public void removeDevelopmentCard(DevCardType type) throws Exception {
@@ -317,7 +317,7 @@ public class Player extends JSONStringBuilder implements Comparable, Cloneable {
      * @return
      */
     public boolean hasToExtractCards() {
-        return rawMaterialDeck.getTotalCount() >= 7 ? true : false;
+        return rawMaterialDeck.getTotalCount() >= 7;
     }
 
     public boolean hasRawMaterial(RawMaterialType type){
@@ -393,7 +393,7 @@ public class Player extends JSONStringBuilder implements Comparable, Cloneable {
      */
 
     public void setStatus(String newStatus) {
-        boolean fire = newStatus.equals(this.status) ? false : true;
+        boolean fire = !newStatus.equals(this.status);
         if (fire) {
             String oldStatus = this.status;
             this.status = newStatus;
@@ -442,7 +442,7 @@ public class Player extends JSONStringBuilder implements Comparable, Cloneable {
      */
 
     public void setColor(Color color) {
-        boolean fire = color.equals(this.color) ? false : true;
+        boolean fire = !color.equals(this.color);
         this.color = color;
         if (fire)
             changes.firePropertyChange("color", "null", this);

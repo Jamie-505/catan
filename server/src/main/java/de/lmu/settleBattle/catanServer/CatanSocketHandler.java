@@ -111,6 +111,17 @@ public class CatanSocketHandler extends TextWebSocketHandler implements Property
                     if (!OK) errorMessage = "Das Gebäude kann nicht gebaut werden.";
                     break;
 
+                case ROLL_DICE:
+                    OK = getGameCtrl().dice(utils.toInt(session.getId()));
+                    if (!OK) errorMessage = "Du bist nicht am Zug";
+                    break;
+
+                case CARD_MONOPOLY:
+                    sendMessageToAll(CatanMessage.monopoleCard(utils.toInt(session.getId()), message));
+                    OK = utils.applyMonopolyCard(session,message);
+                    if(!OK) errorMessage = "Die Monopolkarte konnte nicht ausgespielt werden.";
+                    break;
+
                 case CARD_INVENTION:
                     sendMessageToAll(CatanMessage.inventionCard(utils.toInt(session.getId()), message));
                     OK = utils.applyInventionCard(session, message);
@@ -123,26 +134,15 @@ public class CatanSocketHandler extends TextWebSocketHandler implements Property
                     if (!OK) errorMessage = "Die Ritterkarte konnte nicht ausgespielt werden.";
                     break;
 
-                case ROLL_DICE:
-                    OK = getGameCtrl().dice(utils.toInt(session.getId()));
-                    if (!OK) errorMessage = "Du bist nicht am Zug";
-                    break;
-
-                case CARD_MONOPOLY:
-                    sendMessageToAll(CatanMessage.monopoleCard(utils.toInt(session.getId()), message));
-                    OK = utils.applyMonopolyCard(session,message);
-                    if(!OK) errorMessage = "The applyMonopolyCard card could not be played";
+                case CARD_RD_CON:
+                    sendMessageToAll(CatanMessage.roadConstructionCard(utils.toInt(session.getId()), message));
+                    OK = utils.applyRoadConstructionCard(session, message);
+                    if (!OK) errorMessage = "Die Straßenkontruktionskarte konnte nicht ausgespielt werden.";
                     break;
 
                 case ROBBER_TO:
                     OK = utils.moveRobber(session, message);
                     if (!OK) errorMessage = "Der Räuber kann nicht versetzt werden.";
-                    break;
-
-                case CARD_RD_CON:
-                    sendMessageToAll(CatanMessage.roadConstructionCard(utils.toInt(session.getId()), message));
-                    OK = utils.applyRoadConstructionCard(session, message);
-                    if (!OK) errorMessage = "Die Straße kann nicht gebaut werden.";
                     break;
 
                 case TOSS_CARDS:
@@ -200,7 +200,7 @@ public class CatanSocketHandler extends TextWebSocketHandler implements Property
 
                     } catch (IllegalAccessException ex) {
                         OK = false;
-                        errorMessage = "No KI could be added.";
+                        errorMessage = "Es konnte keine KI hinzugefügt werden.";
                     }
                     break;
 
@@ -312,13 +312,11 @@ public class CatanSocketHandler extends TextWebSocketHandler implements Property
         for (WebSocketSession s : sessions) {
 
             try {
-                System.out.println("Sending Message To: " + s.getId() + ", "
-                        + message);
+                System.out.printf("Send Message to %s: %s", s.getId(), message);
 
                 s.sendMessage(message);
             } catch (IOException e) {
-                System.out.println("error in sending. " + s.getId() + ", "
-                        + e.getMessage());
+                System.out.printf("Send error to: %s %s ", s.getId(), e.getMessage());
                 e.printStackTrace();
             }
         }
@@ -338,13 +336,11 @@ public class CatanSocketHandler extends TextWebSocketHandler implements Property
             try {
                 TextMessage sentMessage = s.getId().equals(sessionId) ? privateMessage : publicMessage;
 
-                System.out.println("Sending Message To: " + s.getId() + ", "
-                        + sentMessage);
+                System.out.printf("Send Message to %s: %s", s.getId(), sentMessage);
                 s.sendMessage(sentMessage);
 
             } catch (IOException e) {
-                System.out.println("error in sending. " + s.getId() + ", "
-                        + e.getMessage());
+                System.out.printf("Send error to: %s %s ", s.getId(), e.getMessage());
                 e.printStackTrace();
             }
         }
@@ -395,18 +391,18 @@ public class CatanSocketHandler extends TextWebSocketHandler implements Property
         tradeRequest.addPropertyChangeListener(evt -> {
             TradeRequest trChanged = (TradeRequest) evt.getNewValue();
             switch (evt.getPropertyName()) {
-                case "TR Accept":
+                case TDR_REQ_ACC:
                     Integer id = (Integer) evt.getOldValue();
                     if (id != null) {
                         sendMessageToAll(CatanMessage.tradeAccept(trChanged, id));
                     }
                     break;
 
-                case "TR Cancel":
+                case TDR_REQ_CANCEL:
                     sendMessageToAll(CatanMessage.trade(trChanged, TRD_ABORTED));
                     break;
 
-                case "TR Execute":
+                case TDR_REQ_EXE:
                     sendMessageToAll(CatanMessage.trade(trChanged, TRD_FIN));
                     break;
             }

@@ -8,6 +8,8 @@ import java.beans.PropertyChangeSupport;
 import java.util.HashMap;
 import java.util.Map;
 
+import static de.lmu.settleBattle.catanServer.Constants.*;
+
 public class TradeRequest extends JSONStringBuilder {
     private static int idCounter = 0;
 
@@ -25,19 +27,19 @@ public class TradeRequest extends JSONStringBuilder {
 
     //region members and constructors
     @Expose
-    @SerializedName(Constants.TRADE_ID)
+    @SerializedName(TRADE_ID)
     private int id;
 
     @Expose
-    @SerializedName(Constants.PLAYER)
+    @SerializedName(PLAYER)
     private int playerId;
 
     @Expose
-    @SerializedName(Constants.OFFER)
+    @SerializedName(OFFER)
     private RawMaterialOverview offer;
 
     @Expose
-    @SerializedName(Constants.REQUEST)
+    @SerializedName(REQUEST)
     private RawMaterialOverview request;
 
     private boolean cancelled;
@@ -45,7 +47,7 @@ public class TradeRequest extends JSONStringBuilder {
     private boolean executed;
 
     @Expose
-    @SerializedName(Constants.FELLOW_PLAYER)
+    @SerializedName(FELLOW_PLAYER)
     private Integer executedWith;
 
     private Map<Integer, Boolean> answers;
@@ -86,7 +88,7 @@ public class TradeRequest extends JSONStringBuilder {
 
         if (fire) {
             this.answers.put(fellowPlayerId, accept);
-            changes.firePropertyChange("TR Accept", fellowPlayerId, this);
+            changes.firePropertyChange(TDR_REQ_ACC, fellowPlayerId, this);
         }
 
         return true;
@@ -105,7 +107,7 @@ public class TradeRequest extends JSONStringBuilder {
         this.cancelled = true;
 
         if (fire)
-            changes.firePropertyChange("TR Cancel", false, this);
+            changes.firePropertyChange(TDR_REQ_CANCEL, false, this);
     }
     public boolean isCancelled() { return this.cancelled; }
 
@@ -123,7 +125,7 @@ public class TradeRequest extends JSONStringBuilder {
         this.executedWith = fellowPlayerId;
         this.executed = true;
 
-        changes.firePropertyChange("TR Execute", false, this);
+        changes.firePropertyChange(TDR_REQ_EXE, false, this);
     }
     public boolean isExecuted() { return this.executed; }
     public Integer getExecutedWith() { return this.executedWith; }

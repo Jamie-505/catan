@@ -48,6 +48,7 @@ public class GameController implements PropertyChangeListener {
     }
 
 
+    //region starting and initializing the game
     public boolean startGame() {
         if (readyToStartGame()) {
             defineTurnOrder();
@@ -69,6 +70,7 @@ public class GameController implements PropertyChangeListener {
         round = 1;
 
     }
+    //endregion
 
     //region turn order handling
     public Player getCurrent() {
@@ -115,14 +117,6 @@ public class GameController implements PropertyChangeListener {
         return player;
     }
 
-    /**
-     * sets new status for active player and
-     * sets status of all others to "Warten"
-     *
-     * @param id
-     * @param status
-     * @return list of players where status changed
-     */
 
     public void setPlayerActive(int id, String status) {
         setPlayerActive(getPlayer(id), status);
@@ -200,17 +194,19 @@ public class GameController implements PropertyChangeListener {
                 owner.addHaven(haven);
             }
 
-                //increase victory points
-                if (!building.isRoad()) {
+            //increase victory points
+            if (!building.isRoad()) {
                     // always add 1 victory point because:
                     // a new settlement brings 1 victory point and
                     // if a city was built then the owner has already received 1 victory point for the settlement he built before
                     owner.increaseVictoryPoints(1);
-                }
+            }
 
             //raw material distribution for second settlement
-            if (buildingPhaseActive && round == 2 && building.isSettlement())
+            if (buildingPhaseActive && (round == 2 || round == 3) && building.isSettlement()){
                 distributeRawMaterial(building);
+            }
+
 
             //decrease raw materials
             if (!buildingPhaseActive) owner.decreaseRawMaterials(Building.getCosts(building.getType()));
@@ -273,11 +269,6 @@ public class GameController implements PropertyChangeListener {
         return ret;
     }
 
-    public void sellDevelopmentCard() {
-        this.rawMaterialDeck.increase(RawMaterialType.ORE, 1);
-        this.rawMaterialDeck.increase(RawMaterialType.WOOD, 1);
-        this.rawMaterialDeck.increase(RawMaterialType.WHEAT, 1);
-    }
 
     public boolean applyMonopoleCard(Player monoPlayer, RawMaterialType targetType) {
         if (!monoPlayer.hasMonopoleCard()) return false;
@@ -697,6 +688,8 @@ public class GameController implements PropertyChangeListener {
     public Board getBoard() {
         return board;
     }
+
+    public int getRound() { return this.round; }
 
     public boolean endGame(Player winner) {
         if(!winner.hasWon() ||  winner.getId() != getPlayerWithHighestPoints().getId()){

@@ -209,7 +209,7 @@ public class GameControllerTest {
         Building s1 = new Building(player3.getId(), BuildingType.SETTLEMENT, gameController.getBoard().getRandomFreeSettlementLoc());
         gameController.placeBuilding(s1);
 
-        assertEquals(sCnt+1, gameController.getBoard().getSettlements().size());
+        assertEquals(sCnt + 1, gameController.getBoard().getSettlements().size());
         assertEquals(rCnt, gameController.getBoard().getRoads().size());
         assertEquals(0, gameController.getBoard().getCities().size());
 
@@ -235,7 +235,7 @@ public class GameControllerTest {
         Building s2 = new Building(player3.getId(), BuildingType.SETTLEMENT, gameController.getBoard().getRandomFreeSettlementLoc());
         gameController.placeBuilding(s2);
 
-        assertEquals(sCnt+1, gameController.getBoard().getSettlements().size());
+        assertEquals(sCnt + 1, gameController.getBoard().getSettlements().size());
         assertEquals(rCnt, gameController.getBoard().getRoads().size());
         assertEquals(0, gameController.getBoard().getCities().size());
 
@@ -267,7 +267,7 @@ public class GameControllerTest {
     @Test
     public void KI_statusupdates() {
         gameController.setKI(player3);
-        player3.setRawMaterialDeck(new RawMaterialOverview(1,4,5,3,0));
+        player3.setRawMaterialDeck(new RawMaterialOverview(1, 4, 5, 3, 0));
         player3.setStatus(EXTRACT_CARDS_DUE_TO_ROBBER);
 
         assertEquals(7, player3.getRawMaterialCount());
@@ -287,21 +287,20 @@ public class GameControllerTest {
 
         initializeGame();
 
-        for (int i = 0; i < 5; i++) {
-            Player player = gameController.getCurrent();
+        Player player = gameController.getCurrent();
 
+        for (int i = 0; i < 6; i++) {
             Building s = new Building(player.getId(), BuildingType.SETTLEMENT, gameController.getBoard()
                     .getRandomFreeSettlementLoc());
-            gameController.placeBuilding(s);
+            assertTrue(gameController.placeBuilding(s));
             Building r = new Building(player.getId(), BuildingType.ROAD, gameController.getBoard()
                     .getFreeRoadLoc(player, gameController.isBuildingPhaseActive()));
-            gameController.placeBuilding(r);
-        }
+            assertTrue(gameController.placeBuilding(r));
 
-        for (Player player : gameController.getPlayers()) {
-            if (player.getId() == gameController.getCurrent().getId())
-                assertEquals(0, player.getRawMaterialCount());
+            if (i < 3) assertEquals(0, player.getRawMaterialCount());
             else assertTrue(player.getRawMaterialCount() >= 1);
+
+            player = gameController.getCurrent();
         }
     }
     //endregion

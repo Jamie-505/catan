@@ -619,4 +619,7 @@ public class Player extends JSONStringBuilder implements Comparable, Cloneable {
         this.rawMaterialDeck = rmo;
     }
 
+    public RawMaterialOverview getResources() {
+        return this.rawMaterialDeck;
+    }
 }

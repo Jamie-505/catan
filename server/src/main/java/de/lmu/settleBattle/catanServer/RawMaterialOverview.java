@@ -171,6 +171,27 @@ public class RawMaterialOverview extends JSONStringBuilder {
     }
     //endregion
 
+    //region withdraw random card
+
+
+    /**
+     * used in the main deck to withdraw random card
+     * @return random card
+     * @throws IllegalArgumentException
+     */
+
+    public RawMaterialType withdrawRandomCard() throws IllegalArgumentException {
+
+        List<RawMaterialType> cards = this.getTypes();
+        Random random = new Random();
+        RawMaterialType card = cards.get(random.nextInt(cards.size()));
+
+        decrease(card, 1);
+
+        return card;
+    }
+
+    //endregion
     //region canAfford
     /**
      * decides whether there is enough raw material to afford a building
@@ -364,17 +385,6 @@ public class RawMaterialOverview extends JSONStringBuilder {
         if (clayCount > 0) types.add(RawMaterialType.CLAY);
 
         return types;
-    }
-
-    public RawMaterialType withdrawRandomCard() throws IllegalArgumentException {
-
-        List<RawMaterialType> cards = this.getTypes();
-        Random random = new Random();
-        RawMaterialType card = cards.get(random.nextInt(cards.size()));
-
-        decrease(card, 1);
-
-        return card;
     }
 }
 

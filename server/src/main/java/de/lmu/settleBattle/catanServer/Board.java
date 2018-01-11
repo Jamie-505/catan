@@ -234,10 +234,10 @@ public class Board extends JSONStringBuilder {
     public RawMaterialOverview getHarvest(Building building) {
         RawMaterialOverview overview = new RawMaterialOverview();
 
-        if (building.isRoad()) return overview;
+        if (building.isRoad() || building.getLocations().length <= 2) return overview;
 
-        for (Field field : fields) {
-            for (Location loc : building.getLocations())
+        for (Location loc : building.getLocations()) {
+            for (Field field : fields)
                 if (loc.equals(field.getLocation())) {
                     overview.increase(field.getHarvest(), 1);
                     break;

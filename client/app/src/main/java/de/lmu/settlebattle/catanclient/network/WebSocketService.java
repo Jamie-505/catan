@@ -29,6 +29,7 @@ public class WebSocketService extends Service {
   private final String TAG = WebSocketService.class.getSimpleName();
 
   private boolean socketConnected = false;
+  public static boolean mainActivityActive = false;
 
   private final IBinder binder = new WebSocketsBinder();
   private Gson gson = new Gson();
@@ -153,6 +154,14 @@ public class WebSocketService extends Service {
         broadcast(PLAYER_WAIT);
         break;
       case NEW_CONSTRUCT:
+        while(!mainActivityActive) {
+          try {
+            Thread.sleep(20);
+          } catch (InterruptedException e) {
+            Log.e(TAG, "NEW CONSTRUCT WAIT FAILED");
+            e.printStackTrace();
+          }
+        }
         Intent newConstruct = new Intent(NEW_CONSTRUCT);
         newConstruct.putExtra(NEW_CONSTRUCT, mail[1].toString());
         broadcast(newConstruct);
@@ -222,7 +231,7 @@ public class WebSocketService extends Service {
       }
       @Override
       public void onClose(int code, String reason, boolean remote) {
-        Log.d(TAG, "Websocket onDisconnect()");
+        Log.d(TAG, "Websocket onDisconnect()| code: " + code + " |reason: " + reason + " | remote: " + remote);
       }
       @Override
       public void onError(Exception error) {

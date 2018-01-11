@@ -31,7 +31,6 @@ import android.graphics.Point;
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
 import android.support.v4.content.LocalBroadcastManager;
-import android.support.v7.widget.AppCompatImageView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Display;
@@ -63,6 +62,7 @@ import de.lmu.settlebattle.catanclient.grid.street.StreetViewNE;
 import de.lmu.settlebattle.catanclient.grid.street.StreetViewNW;
 import de.lmu.settlebattle.catanclient.grid.street.StreetViewW;
 import de.lmu.settlebattle.catanclient.grid.ConstructionsLayer;
+import de.lmu.settlebattle.catanclient.network.WebSocketService;
 import de.lmu.settlebattle.catanclient.player.Player;
 import de.lmu.settlebattle.catanclient.player.Storage;
 import de.lmu.settlebattle.catanclient.trade.DomTradeFragment;
@@ -90,7 +90,6 @@ public class MainActivity extends BaseSocketActivity {
   private Button domTradeBtn;
   private Button seaTradeBtn;
   private DomTradeFragment domTradeFragment = new DomTradeFragment();
-  private DiceFragment diceFragment = new DiceFragment();
   private FragmentManager fragmentManager = getFragmentManager();
   private Gson gson = new Gson();
   private ImageButton diceBtn;
@@ -158,7 +157,6 @@ public class MainActivity extends BaseSocketActivity {
         "Siedlung bauen",
         "Stadt bauen",
         "Entwicklungskarte"
-
     };
 
     Integer[] imgid={
@@ -329,6 +327,19 @@ public class MainActivity extends BaseSocketActivity {
 
 
   }
+
+  @Override
+  public void onResume() {
+    WebSocketService.mainActivityActive = true;
+    super.onResume();
+  }
+
+  @Override
+  public void onStop() {
+    WebSocketService.mainActivityActive = false;
+    super.onStop();
+  }
+
    /*
   final Button baubtn = (Button) findViewById(R.id.bauen_button);
  baubtn.setOnClickListener(new View.OnClickListener() {
@@ -512,6 +523,7 @@ public class MainActivity extends BaseSocketActivity {
         case DICE_RESULT:
           Bundle diceBundle = new Bundle();
           diceBundle.putString(DICE_THROW, intent.getStringExtra(DICE_THROW));
+          MainActivityFragment diceFragment = new DiceFragment();
           diceFragment.setArguments(diceBundle);
           showFragment(diceFragment);
           break;

@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="67dp"
+    android:height="67dp">
+    <!-- Background Tiles-->
+    <item
+        android:id="@+id/tile_wood">
+        <bitmap android:src="@drawable/woods_field"
+            android:gravity="top|left"
+            android:alpha="1"/>
+    </item>
+    <item
+        android:id="@+id/tile_clay">
+        <bitmap android:src="@drawable/clay_field"
+            android:gravity="top|left"
+            android:alpha="0" />
+    </item>
+    <item
+        android:id="@+id/tile_wheat">
+        <bitmap android:src="@drawable/wheat_field"
+            android:gravity="top|left"
+            android:alpha="0"
+            />
+    </item>
+    <item
+        android:id="@+id/tile_iron">
+        <bitmap android:src="@drawable/ore_field"
+            android:gravity="top|left"
+            android:alpha="0"/>
+    </item>
+    <item
+        android:id="@+id/tile_desert">
+        <bitmap android:src="@drawable/desert_field"
+            android:gravity="top|left"
+            android:alpha="0"/>
+
+    </item>
+
+    <item
+        android:id="@+id/tile_sheep">
+        <bitmap android:src="@drawable/sheep_field"
+            android:gravity="top|left"
+            android:alpha="0"/>
+    </item>
+    <!-- Numbers -->
+    <item
+        android:id="@+id/no_1">
+        <bitmap android:src="@drawable/no_1"
+            android:gravity="center|center"
+            android:alpha="0"/>
+    </item>
+
+    <item
+        android:id="@+id/no_2">
+        <bitmap android:src="@drawable/no_2"
+            android:gravity="center|center"
+            android:alpha="0"/>
+    </item>
+
+    <item
+        android:id="@+id/no_3">
+        <bitmap android:src="@drawable/no_3"
+            android:gravity="center|center"
+            android:alpha="0"/>
+    </item>
+
+    <item
+        android:id="@+id/no_4">
+        <bitmap android:src="@drawable/no_4"
+            android:gravity="center|center"
+            android:alpha="0"/>
+    </item>
+
+    <item
+        android:id="@+id/no_5">
+        <bitmap android:src="@drawable/no_5"
+            android:gravity="center|center"
+            android:alpha="0"/>
+    </item>
+
+    <item
+        android:id="@+id/no_6">
+        <bitmap android:src="@drawable/no_6"
+            android:gravity="center|center"
+            android:alpha="0"/>
+    </item>
+
+    <item
+        android:id="@+id/no_1">
+        <bitmap android:src="@drawable/no_1"
+            android:gravity="center|center"
+            android:alpha="0"/>
+    </item>
+
+
+    <item
+        android:id="@+id/no_8">
+        <bitmap android:src="@drawable/no_8"
+            android:gravity="center|center"
+            android:alpha="0"/>
+    </item>
+
+    <item
+        android:id="@+id/no_9">
+        <bitmap android:src="@drawable/no_9"
+            android:gravity="center|center"
+            android:alpha="0"/>
+    </item>
+
+    <item
+        android:id="@+id/no_10">
+        <bitmap android:src="@drawable/no_10"
+            android:gravity="center|center"
+            android:alpha="0"/>
+    </item>
+
+    <item
+        android:id="@+id/no_11">
+        <bitmap android:src="@drawable/no_11"
+            android:gravity="center|center"
+            android:alpha="0"/>
+    </item>
+
+    <item
+        android:id="@+id/no_12">
+        <bitmap android:src="@drawable/no_12"
+            android:gravity="center|center"
+            android:alpha="0"/>
+    </item>
+
+
+    <!-- Robber -->
+
+    <item
+        android:id="@+id/robber">
+        <bitmap android:src="@drawable/robber"
+            android:gravity="center|center"
+            android:alpha="0"/>
+    </item>
+
+
+
+</layer-list>
+
+
+
+
+
+
+
+
+
+    <!-- Settlements -->
+    <!-- Numbers -->
+    <!-- other Elements -->
+    <!-- Räuber -->
+

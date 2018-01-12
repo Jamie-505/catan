@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.v7.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/cardView"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_gravity="center"
+    app:cardUseCompatPadding="true">
+
+    <FrameLayout
+        android:id="@+id/cardContain"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/white">
+
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="top|left"
+            android:orientation="horizontal"
+            android:padding="8dp">
+
+            <ImageView
+                android:id="@+id/bar_orange"
+                android:layout_width="24dp"
+                android:layout_height="88dp"
+                android:src="@drawable/rec_orange"
+                android:scaleType="fitStart" />
+            <ImageView
+                android:id="@+id/bar_white"
+                android:layout_width="24dp"
+                android:layout_height="88dp"
+                android:src="@drawable/rec_white"
+                android:scaleType="fitStart"
+                android:visibility="gone"/>
+            <ImageView
+                android:id="@+id/bar_red"
+                android:layout_width="24dp"
+                android:layout_height="88dp"
+                android:src="@drawable/rec_red"
+                android:scaleType="fitStart"
+                android:visibility="gone"/>
+            <ImageView
+                android:id="@+id/bar_blue"
+                android:layout_width="24dp"
+                android:layout_height="88dp"
+                android:src="@drawable/rec_blue"
+                android:scaleType="fitStart"
+                android:visibility="gone"/>
+
+            <TextView
+                android:id="@+id/titleTextView"
+                style="@style/TextAppearance.AppCompat.Title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/title_gray"
+                android:paddingLeft="8dp"/>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginLeft="40dp"
+            android:layout_marginTop="48dp">
+            <ImageView
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:src="@drawable/resourcenkarte"
+                android:layout_marginRight="0dp"/>
+
+            <TextView
+                android:id="@+id/rsckarten"
+                style="@style/TextAppearance.AppCompat.Medium.Inverse"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingLeft="8dp"
+                android:paddingRight="8dp"
+                android:text="3" />
+            <ImageView
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:src="@drawable/entwicklungkarten"
+                android:layout_marginRight="0dp"/>
+            <TextView
+                android:id="@+id/entwicklungskarten"
+                style="@style/TextAppearance.AppCompat.Medium.Inverse"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingLeft="8dp"
+                android:paddingRight="8dp"
+                android:text="2" />
+            <ImageView
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:src="@drawable/medal" />
+            <TextView
+                android:id="@+id/siegpunkte"
+                style="@style/TextAppearance.AppCompat.Medium.Inverse"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingLeft="8dp"
+                android:paddingRight="8dp"
+                android:text="4" />
+        </LinearLayout>
+            <!--<Button
+                style="@style/Base.Widget.AppCompat.Button"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="24dp"
+                android:text="Button" />-->
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_gravity="top|end"
+            android:layout_marginEnd="8dp"
+            android:layout_marginRight="8dp"
+            android:layout_marginTop="8dp">
+            <ImageView
+                android:id="@+id/rittericon"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:src="@drawable/rittermacht"
+                android:layout_marginRight="4dp"
+                android:visibility="invisible"/>
+            <ImageView
+                android:id="@+id/strasseicon"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:src="@drawable/handelsmacht"
+                android:visibility="invisible"/>
+        </LinearLayout>
+
+
+    </FrameLayout>
+
+</android.support.v7.widget.CardView>

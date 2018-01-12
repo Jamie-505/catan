@@ -28,6 +28,20 @@
       app:layout_constraintStart_toStartOf="parent"
       app:layout_constraintTop_toTopOf="parent">
 
+      <android.support.v4.view.ViewPager
+        android:id="@+id/viewPager"
+        android:layout_width="match_parent"
+        android:layout_height="150dp"
+        android:layout_gravity="bottom"
+        android:elevation="30dp"
+        android:clipToPadding="false"
+        android:overScrollMode="never"
+        android:paddingBottom="4dp"
+        android:paddingEnd="@dimen/card_padding"
+        android:paddingLeft="@dimen/card_padding"
+        android:paddingRight="@dimen/card_padding"
+        android:paddingStart="@dimen/card_padding" />
+
       <android.support.constraint.ConstraintLayout
         android:id="@+id/inactiveOverlay"
         android:layout_width="0dp"
@@ -37,6 +51,7 @@
         android:clickable="true"
         android:focusable="true"
         android:visibility="gone"
+        android:elevation="8dp"
         app:layout_constraintBottom_toTopOf="@id/seatrade_btn"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -206,7 +221,7 @@
             android:id="@+id/wheat"
             android:layout_width="28dp"
             android:layout_height="28dp"
-            android:src="@drawable/ic_001_wheat"
+            android:src="@drawable/ic_wheat"
             app:layout_constraintEnd_toStartOf="@+id/wheattxt"
             app:layout_constraintHorizontal_bias="0.5"
             app:layout_constraintStart_toStartOf="parent" />
@@ -227,7 +242,7 @@
             android:id="@+id/wood"
             android:layout_width="28dp"
             android:layout_height="28dp"
-            android:src="@drawable/ic_002_nature"
+            android:src="@drawable/ic_wood"
             app:layout_constraintEnd_toStartOf="@+id/woodtxt"
             app:layout_constraintHorizontal_bias="0.5"
             app:layout_constraintStart_toEndOf="@+id/wheattxt"
@@ -249,7 +264,7 @@
             android:id="@+id/iron"
             android:layout_width="28dp"
             android:layout_height="28dp"
-            android:src="@drawable/ic_005_stone"
+            android:src="@drawable/ic_ore"
             app:layout_constraintEnd_toStartOf="@+id/irontxt"
             app:layout_constraintHorizontal_bias="0.5"
             app:layout_constraintStart_toEndOf="@+id/woodtxt" />
@@ -270,7 +285,7 @@
             android:id="@+id/sheep"
             android:layout_width="28dp"
             android:layout_height="28dp"
-            android:src="@drawable/ic_004_animal"
+            android:src="@drawable/ic_sheep"
             app:layout_constraintEnd_toStartOf="@+id/sheeptxt"
             app:layout_constraintHorizontal_bias="0.5"
             app:layout_constraintStart_toEndOf="@+id/irontxt" />
@@ -291,7 +306,7 @@
             android:id="@+id/brick"
             android:layout_width="28dp"
             android:layout_height="28dp"
-            android:src="@drawable/ic_003_wall"
+            android:src="@drawable/ic_clay"
             app:layout_constraintEnd_toStartOf="@+id/bricktxt"
             app:layout_constraintHorizontal_bias="0.5"
             app:layout_constraintStart_toEndOf="@+id/sheeptxt" />

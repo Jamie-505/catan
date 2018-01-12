@@ -22,13 +22,13 @@ import de.lmu.settlebattle.catanclient.grid.Hex;
 
 public class CircleImageView extends AppCompatImageView {
 
-    private static final ScaleType SCALE_TYPE = ScaleType.CENTER_CROP;
+    private static final ScaleType SCALE_TYPE = ScaleType.CENTER; //WICHTIG DAS CENTER
 
     private static final Bitmap.Config BITMAP_CONFIG = Bitmap.Config.ARGB_8888;
-    private static final int COLORDRAWABLE_DIMENSION = 2;
+    private static final int COLORDRAWABLE_DIMENSION = 1;
 
-    private static final int DEFAULT_BORDER_WIDTH = 1;
-    private static final int SELECTED_BORDER_WIDTH = 1;
+    private static final int DEFAULT_BORDER_WIDTH = 0;
+    private static final int SELECTED_BORDER_WIDTH = 0;
     private static final int DEFAULT_BORDER_COLOR = Color.TRANSPARENT;
     private static final int SELECTED_BORDER_COLOR = Color.TRANSPARENT;
 

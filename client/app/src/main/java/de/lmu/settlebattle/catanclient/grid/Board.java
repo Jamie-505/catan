@@ -19,12 +19,12 @@ public class Board {
 
   public Board(Hex[] fields) {
     this.fields = fields;
-    typeImgMap.put(WHEAT, R.drawable.wheat_highlighted);
-    typeImgMap.put(ORE, R.drawable.iron_highlighted);
-    typeImgMap.put(WOOL, R.drawable.sheep_highlighted);
-    typeImgMap.put(WOOD, R.drawable.woods_highlighted);
-    typeImgMap.put(CLAY, R.drawable.clay_highlighted);
-    typeImgMap.put("DESERT", R.drawable.desert_highlighted);
+    typeImgMap.put(WHEAT, R.drawable.wheat_field);
+    typeImgMap.put(ORE, R.drawable.ore_field);
+    typeImgMap.put(WOOL, R.drawable.sheep_field);
+    typeImgMap.put(WOOD, R.drawable.woods_field);
+    typeImgMap.put(CLAY, R.drawable.clay_field);
+    typeImgMap.put("DESERT", R.drawable.desert_field);
     setImages(fields);
   }
 
@@ -45,21 +45,13 @@ public class Board {
   }
 
   public Object[][] hexMap = new Integer[][] {
-      // TODO: put in havens
-//      {0, R.drawable.water, 0, R.drawable.water},
-//      {R.drawable.water, R.drawable.desert_highlighted, R.drawable.desert_highlighted, R.drawable.wheat_highlighted, 0},
-//      {0, R.drawable.desert_highlighted, R.drawable.desert_highlighted, R.drawable.desert_highlighted, R.drawable.desert_highlighted, R.drawable.water},
-//      {R.drawable.water, R.drawable.desert_highlighted, R.drawable.desert_highlighted, R.drawable.desert_highlighted, R.drawable.desert_highlighted, R.drawable.desert_highlighted, 0},
-//      {0, R.drawable.desert_highlighted, R.drawable.desert_highlighted, R.drawable.desert_highlighted, R.drawable.desert_highlighted, R.drawable.water},
-//      {R.drawable.water, R.drawable.desert_highlighted, R.drawable.desert_highlighted, R.drawable.desert_highlighted, 0},
-//      {0, R.drawable.water, 0, R.drawable.water},
-      {R.drawable.water, R.drawable.water, R.drawable.water, R.drawable.water},
-      {R.drawable.water, R.drawable.desert_highlighted, R.drawable.desert_highlighted, R.drawable.desert_highlighted, R.drawable.water},
-      {R.drawable.water, R.drawable.desert_highlighted, R.drawable.desert_highlighted, R.drawable.desert_highlighted, R.drawable.desert_highlighted, R.drawable.water},
-      {R.drawable.water, R.drawable.desert_highlighted, R.drawable.desert_highlighted, R.drawable.desert_highlighted, R.drawable.desert_highlighted, R.drawable.desert_highlighted, R.drawable.water},
-      {R.drawable.water, R.drawable.desert_highlighted, R.drawable.desert_highlighted, R.drawable.desert_highlighted, R.drawable.desert_highlighted, R.drawable.water},
-      {R.drawable.water, R.drawable.desert_highlighted, R.drawable.desert_highlighted, R.drawable.desert_highlighted, R.drawable.water},
-      {R.drawable.water, R.drawable.water, R.drawable.water, R.drawable.water},
+      {R.drawable.hafen_0_m3, R.drawable.hafen_1_m3, R.drawable.hafen_2_m3, R.drawable.hafen_3_m3},
+      {R.drawable.hafen_m1_m2,R.drawable.clay_field, R.drawable.clay_field, R.drawable.ore_field, R.drawable.hafen_3_m2},
+      {R.drawable.hafen_m2_m1, R.drawable.tile_layers, R.drawable.tile_layers, R.drawable.tile_layers, R.drawable.sheep_field, R.drawable.hafen_3_m1},
+      {R.drawable.hafen_m3_0, R.drawable.tile_layers, R.drawable.tile_layers, R.drawable.desert_field, R.drawable.wheat_field, R.drawable.ore_field, R.drawable.hafen_3_0},
+      {R.drawable.hafen_m3_1, R.drawable.ore_field, R.drawable.sheep_field, R.drawable.ore_field, R.drawable.woods_field, R.drawable.hafen_2_1},
+      {R.drawable.hafen_m3_2, R.drawable.clay_field, R.drawable.woods_field, R.drawable.wheat_field, R.drawable.hafen_1_2},
+      {R.drawable.hafen_m3_3, R.drawable.hafen_m2_3, R.drawable.hafen_m1_3, R.drawable.hafen_0_3}
   };
 
   @SerializedName(FIELDS)

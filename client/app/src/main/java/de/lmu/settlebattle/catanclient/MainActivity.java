@@ -28,19 +28,22 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
-import android.graphics.Matrix;
+import android.graphics.Color;
+import android.graphics.Paint;
 import android.graphics.Point;
+import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
 import android.support.v4.content.LocalBroadcastManager;
+import android.support.v4.view.ViewPager;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Display;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ListView;
@@ -52,6 +55,7 @@ import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 import de.lmu.settlebattle.catanclient.dice.DiceFragment;
 import de.lmu.settlebattle.catanclient.grid.Board;
 import de.lmu.settlebattle.catanclient.grid.Construction;
+import de.lmu.settlebattle.catanclient.grid.ConstructionsLayer;
 import de.lmu.settlebattle.catanclient.grid.Cube;
 import de.lmu.settlebattle.catanclient.grid.Grid;
 import de.lmu.settlebattle.catanclient.grid.Hex;
@@ -64,10 +68,12 @@ import de.lmu.settlebattle.catanclient.grid.street.StreetView.Orientation;
 import de.lmu.settlebattle.catanclient.grid.street.StreetViewNE;
 import de.lmu.settlebattle.catanclient.grid.street.StreetViewNW;
 import de.lmu.settlebattle.catanclient.grid.street.StreetViewW;
-import de.lmu.settlebattle.catanclient.grid.ConstructionsLayer;
 import de.lmu.settlebattle.catanclient.network.WebSocketService;
 import de.lmu.settlebattle.catanclient.player.Player;
 import de.lmu.settlebattle.catanclient.player.Storage;
+import de.lmu.settlebattle.catanclient.playerCards.CardItem;
+import de.lmu.settlebattle.catanclient.playerCards.CardPagerAdapter;
+import de.lmu.settlebattle.catanclient.playerCards.ShadowTransformer;
 import de.lmu.settlebattle.catanclient.trade.DomTradeFragment;
 import de.lmu.settlebattle.catanclient.trade.SeaTradeFragment;
 import de.lmu.settlebattle.catanclient.trade.Trade;
@@ -89,20 +95,26 @@ public class MainActivity extends BaseSocketActivity {
   };
 
   // Visual Elements
+  private Board board;
   private Button bauenBtn;
   private Button domTradeBtn;
   private Button endTurnBtn;
   private Button seaTradeBtn;
+  private ConstructionsLayer settlementLayer;
+  private ConstructionsLayer streetLayer;
   private DomTradeFragment domTradeFragment = new DomTradeFragment();
   private FragmentManager fragmentManager = getFragmentManager();
   private Gson gson = new Gson();
   private ImageButton diceBtn;
   private RelativeLayout gridLayout;
-  private ConstructionsLayer settlementLayer;
-  private ConstructionsLayer streetLayer;
   private SeaTradeFragment seaTradeFragment = new SeaTradeFragment();
+  private SlidingUpPanelLayout mLayout;
   private TradeOfferFragment tradeOfferFragment = new TradeOfferFragment();
-  private Board board;
+
+  // Card Viewer
+  private ViewPager mViewPager;
+  private CardPagerAdapter mCardAdapter;
+  private ShadowTransformer mCardShadowTransformer;
 
   @Override
   public void onBackPressed() {
@@ -116,9 +128,6 @@ public class MainActivity extends BaseSocketActivity {
     super.onBackPressed();
   }
 
-  // Main Panel zum Sliden
-  private SlidingUpPanelLayout mLayout;
-  //Beginn on Create
   @Override
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
@@ -150,6 +159,27 @@ public class MainActivity extends BaseSocketActivity {
       radius = extras.getInt("GRID_RADIUS", 3);
     }
 
+    /*
+    UserCard View initialisieren
+     */
+    mViewPager = (ViewPager) findViewById(R.id.viewPager);
+
+    mCardAdapter = new CardPagerAdapter();
+    mCardAdapter.addCardItem(new CardItem(false, "Blau", "Liza", 4, 2,
+        3, false, false));
+    mCardAdapter.addCardItem(new CardItem(true, "Blau", "James", 4, 2,
+        3, true, true));
+
+    //Aktiviere Views statt Fragments
+    mViewPager.setAdapter(mCardAdapter);
+    mViewPager.setPageTransformer(false, mCardShadowTransformer);
+
+    mCardShadowTransformer = new ShadowTransformer(mViewPager, mCardAdapter);
+
+    mViewPager.setAdapter(mCardAdapter);
+    mViewPager.setPageTransformer(false, mCardShadowTransformer);
+    mViewPager.setOffscreenPageLimit(3);
+
     initGridView(radius, board.fields);
     streetLayer.setWithholdTouchEventsFromChildren(true);
     settlementLayer.setWithholdTouchEventsFromChildren(true);
@@ -171,62 +201,25 @@ public class MainActivity extends BaseSocketActivity {
         R.drawable.cost_devcard
     };
 
-      CustomListAdapter adapter=new CustomListAdapter(this, itemname, imgid);
-      list=(ListView)findViewById(R.id.list);
-      list.setAdapter(adapter);
+    CustomListAdapter adapter = new CustomListAdapter(this, itemname, imgid);
+    list = (ListView)findViewById(R.id.list);
+    list.setAdapter(adapter);
 
-      list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-
-        @Override
-        public void onItemClick(AdapterView<?> parent, View view,
-                                int position, long id) {
-          // TODO Auto-generated method stub
-          String selectedItem= itemname[+position];
-          Toast.makeText(getApplicationContext(), selectedItem, Toast.LENGTH_SHORT).show();
-
-        }
-      });
-    /*
-
-    ListView lv = (ListView) findViewById(R.id.list);
-    lv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-      @Override
-      public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        Toast.makeText(MainActivity.this, "onItemClick", Toast.LENGTH_SHORT).show();
-      }
+    list.setOnItemClickListener((parent, view, position, id) -> {
+      String selectedItem= itemname[+position];
+      Toast.makeText(getApplicationContext(), selectedItem, Toast.LENGTH_SHORT).show();
     });
-
-    List<String> your_array_list = Arrays.asList(
-        "Straße bauen",
-        "Siedlung bauen",
-        "Stadt bauen",
-        "Entwicklungskarte"
-    );
-
-    // This is the array adapter, it takes the context of the activity as a
-    // first parameter, the type of list view as a second parameter and your
-    // array as a third parameter.
-    /* old list view
-    ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(
-        this,
-        android.R.layout.simple_list_item_1,
-        your_array_list );
-
-    lv.setAdapter(arrayAdapter);
-
-    */
 
     mLayout = (SlidingUpPanelLayout) findViewById(R.id.sliding_layout);
     mLayout.addPanelSlideListener(new SlidingUpPanelLayout.PanelSlideListener() {
       @Override
       public void onPanelSlide(View panel, float slideOffset) {
         Log.i(TAG, "onPanelSlide, offset " + slideOffset);
-
       }
 
-
       @Override
-      public void onPanelStateChanged(View panel, SlidingUpPanelLayout.PanelState previousState, SlidingUpPanelLayout.PanelState newState) {
+      public void onPanelStateChanged(View panel, SlidingUpPanelLayout.PanelState previousState,
+          SlidingUpPanelLayout.PanelState newState) {
         TextView wood = (TextView) findViewById(R.id.woodtxt);
         wood.setText("4");
         TextView brick = (TextView) findViewById(R.id.bricktxt);
@@ -254,83 +247,12 @@ public class MainActivity extends BaseSocketActivity {
           t.setVisibility(View.VISIBLE);
           y.setVisibility(View.INVISIBLE);
           Log.i(TAG, "Kurzer Text sollte sichbar sein ");*/
-
-
-
       }
     });
-    mLayout.setFadeOnClickListener(new View.OnClickListener() {
-      @Override
-      public void onClick(View view) {
-        mLayout.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
-
-      }
-    });
-
+    mLayout.setFadeOnClickListener(
+        view -> mLayout.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED));
     mLayout.setAnchorPoint(0.6f);
     mLayout.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
-
-/*
-    final private Runnable runnable = new Runnable() {
-      public void run() {
-        LayerDrawable myDrawable = (LayerDrawable) getResources().getDrawable(R.drawable.all_layers);
-        Drawable layer =  myDrawable.findDrawableByLayerId(R.id.interesting_layer);
-        if (layer.isVisible()==true)
-        {
-          layer.setVisible(false, false);
-        }
-        else
-        {
-          layer.setVisible(true, false);
-        }
-        TextView txt = (TextView) findViewById(R.id.txtTest);
-        if (txt.getVisibility()==0)
-        {
-          txt.setVisibility(4);
-        }
-        else
-        {
-          txt.setVisibility(0);
-        }
-        Handler handler;
-        handler.postDelayed(this, 5000);
-      }
-    };*/
-
-  /*
-  private void showTile (position,type,[building, corner, color]) {
-
-    LayerDrawable layers = (LayerDrawable) findViewById(R.id.layer_list);
-
-    layers.findDrawableByLayerId(R.id.compoundBackgroundItem).setAlpha(
-            0);
-
-    layers.findDrawableByLayerId(R.id.moreIndicatorItem).setAlpha(0);
-
-    layers.findDrawableByLayerId(R.id.bluetoothItem).setAlpha(0);
-
-    layers.findDrawableByLayerId(R.id.handsetItem).setAlpha(0);
-
-    layers.findDrawableByLayerId(R.id.speakerphoneOnItem).setAlpha(255);
-
-    layers.findDrawableByLayerId(R.id.speakerphoneOffItem).setAlpha(0);
-}
-
-   */
-/*
-    Button f = (Button) findViewById(R.id.follow);
-    f.setText(Html.fromHtml(getString(R.string.follow)));
-    f.setMovementMethod(LinkMovementMethod.getInstance());
-    f.setOnClickListener(new View.OnClickListener() {
-      @Override
-      public void onClick(View v) {
-        Intent i = new Intent(Intent.ACTION_VIEW);
-        i.setData(Uri.parse("http://www.twitter.com/umanoapp"));
-        startActivity(i);
-      }
-    });*/
-
-
   }
 
   @Override
@@ -344,15 +266,6 @@ public class MainActivity extends BaseSocketActivity {
     WebSocketService.mainActivityActive = false;
     super.onStop();
   }
-
-   /*
-  final Button baubtn = (Button) findViewById(R.id.bauen_button);
- baubtn.setOnClickListener(new View.OnClickListener() {
-    public void onClick(View v) {
-      // Code here executes on main thread after user presses button
-    }
-  mLayout.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
-*/
 
   private void addViewToLayout(View view, Hex hex, Grid grid) {
     //Add to view
@@ -586,20 +499,6 @@ public class MainActivity extends BaseSocketActivity {
     }
   }
 
-  public Bitmap rotateBitmap(Bitmap original, float degrees) {
-    int width = original.getWidth();
-    int height = original.getHeight();
-
-    Matrix matrix = new Matrix();
-    matrix.preRotate(degrees);
-
-    Bitmap rotatedBitmap = Bitmap.createBitmap(original, 0, 0, width, height, matrix, true);
-    Canvas canvas = new Canvas(rotatedBitmap);
-    canvas.drawBitmap(original, 5.0f, 0.0f, null);
-
-    return rotatedBitmap;
-  }
-
   private void setClickListener() {
     bauenBtn.setOnClickListener((View v) -> {
       Toast.makeText(MainActivity.this, "Du kannst jetzt bauen", Toast.LENGTH_LONG).show();
@@ -610,6 +509,7 @@ public class MainActivity extends BaseSocketActivity {
       String diceMsg = createJSONString(ROLL_DICE, new Object());
       mService.sendMessage(diceMsg);
     });
+
     domTradeBtn.setOnClickListener((View v) -> showFragment(domTradeFragment));
     endTurnBtn.setOnClickListener((View v) -> endTurn());
     seaTradeBtn.setOnClickListener((View v) -> showFragment(seaTradeFragment));
@@ -709,7 +609,7 @@ public class MainActivity extends BaseSocketActivity {
           view.setHex(hex);
           view.setOnTouchListener(gridNodeTouchListener);
 //                    view.setBackgroundResource(R.drawable.ring);
-          view.setImageResource(R.drawable.wheat_highlighted);
+          view.setImageResource(R.drawable.wheat_field);
         } else {
           view = new CircleImageView(this);
           //view.setBackgroundResource(R.drawable.hexagon);
@@ -718,7 +618,7 @@ public class MainActivity extends BaseSocketActivity {
           if(pic != 0) {
             view.setImageResource(pic);
           } else {
-            view.setImageResource((R.drawable.harbor));
+            view.setImageResource((R.drawable.hafen_0_3));
           }
         }
         addViewToLayout(view, hex, grid);
@@ -811,4 +711,25 @@ public class MainActivity extends BaseSocketActivity {
   private void showView(View v) {
     v.setVisibility(View.VISIBLE);
   }
+
+  /*
+  Zahlen auf Bitmap schreiben
+  */
+  public BitmapDrawable writeOnDrawable(int drawableId, String text){
+
+    Bitmap bm = BitmapFactory.decodeResource(getResources(), drawableId)
+        .copy(Bitmap.Config.ARGB_8888, true);
+
+    Paint paint = new Paint();
+    paint.setStyle(Paint.Style.FILL);
+    paint.setColor(Color.BLACK);
+    paint.setTextSize(20);
+
+    Canvas canvas = new Canvas(bm);
+    canvas.drawText(text, 0, bm.getHeight()/2, paint);
+
+    return new BitmapDrawable(bm);
+  }
+
 }
+

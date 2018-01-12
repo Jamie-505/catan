@@ -20,7 +20,7 @@ import android.view.ViewConfiguration;
 public class PanZoomView extends View {
 
     static protected final boolean ScaleAtFocusPoint = false;
-    static protected final int DefaultDrawableId = R.drawable.desert_default;
+    static protected final int DefaultDrawableId = R.drawable.desert_field;
 
     protected Drawable mSampleImage;
     protected Context mContext;

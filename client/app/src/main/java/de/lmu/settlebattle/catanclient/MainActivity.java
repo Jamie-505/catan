@@ -3,6 +3,7 @@ package de.lmu.settlebattle.catanclient;
 import static de.lmu.settlebattle.catanclient.utils.Constants.BOARD;
 import static de.lmu.settlebattle.catanclient.utils.Constants.BUILD;
 import static de.lmu.settlebattle.catanclient.utils.Constants.BUILD_TRADE;
+import static de.lmu.settlebattle.catanclient.utils.Constants.CLAY;
 import static de.lmu.settlebattle.catanclient.utils.Constants.DICE_RESULT;
 import static de.lmu.settlebattle.catanclient.utils.Constants.DICE_THROW;
 import static de.lmu.settlebattle.catanclient.utils.Constants.DISPLAY_ERROR;
@@ -10,6 +11,7 @@ import static de.lmu.settlebattle.catanclient.utils.Constants.END_TURN;
 import static de.lmu.settlebattle.catanclient.utils.Constants.ERROR_MSG;
 import static de.lmu.settlebattle.catanclient.utils.Constants.NEW_CONSTRUCT;
 import static de.lmu.settlebattle.catanclient.utils.Constants.OK;
+import static de.lmu.settlebattle.catanclient.utils.Constants.ORE;
 import static de.lmu.settlebattle.catanclient.utils.Constants.PLAYER;
 import static de.lmu.settlebattle.catanclient.utils.Constants.PLAYER_UPDATE;
 import static de.lmu.settlebattle.catanclient.utils.Constants.PLAYER_WAIT;
@@ -18,6 +20,9 @@ import static de.lmu.settlebattle.catanclient.utils.Constants.TRADE;
 import static de.lmu.settlebattle.catanclient.utils.Constants.TRD_ABORTED;
 import static de.lmu.settlebattle.catanclient.utils.Constants.TRD_FIN;
 import static de.lmu.settlebattle.catanclient.utils.Constants.TRD_OFFER;
+import static de.lmu.settlebattle.catanclient.utils.Constants.WHEAT;
+import static de.lmu.settlebattle.catanclient.utils.Constants.WOOD;
+import static de.lmu.settlebattle.catanclient.utils.Constants.WOOL;
 import static de.lmu.settlebattle.catanclient.utils.JSONUtils.createJSONString;
 
 import android.app.Fragment;
@@ -34,6 +39,8 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Point;
 import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
+import android.graphics.drawable.LayerDrawable;
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
 import android.support.v4.content.LocalBroadcastManager;
@@ -41,6 +48,7 @@ import android.support.v4.view.ViewPager;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Display;
+import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
@@ -602,23 +610,26 @@ public class MainActivity extends BaseSocketActivity {
 
       for(Cube cube : grid.nodes) {
         Hex hex = cube.toHex();
-
         CircleImageView view = new CircleImageView(this);
-        Integer pic = (Integer) storageMap.getObjectByCoordinate(hex.getX(), hex.getY());
-        if(pic == null) {
+        view.setHex(hex);
+        if (storageMap.getObjectByCoordinate(hex.getX(), hex.getY()) instanceof Hex) {
+          Hex pic = (Hex) storageMap.getObjectByCoordinate(hex.getX(), hex.getY());
+          view = new CircleImageView(this, pic.type, pic.number);
           view.setHex(hex);
-          view.setOnTouchListener(gridNodeTouchListener);
-//                    view.setBackgroundResource(R.drawable.ring);
-          view.setImageResource(R.drawable.wheat_field);
         } else {
-          view = new CircleImageView(this);
-          //view.setBackgroundResource(R.drawable.hexagon);
-          view.setOnTouchListener(gridNodeTouchListener);
-          view.setHex(hex);
-          if(pic != 0) {
-            view.setImageResource(pic);
+          Integer pic = (Integer) storageMap.getObjectByCoordinate(hex.getX(), hex.getY());
+          if(pic == null) {
+            view.setOnTouchListener(gridNodeTouchListener);
+            view.setImageResource(R.drawable.wheat_field);
           } else {
-            view.setImageResource((R.drawable.hafen_0_3));
+            view = new CircleImageView(this);
+            //view.setBackgroundResource(R.drawable.hexagon);
+            view.setOnTouchListener(gridNodeTouchListener);
+            if(pic != 0) {
+              view.setImageResource(pic);
+            } else {
+              view.setImageResource(R.drawable.hafen_0_3);
+            }
           }
         }
         addViewToLayout(view, hex, grid);

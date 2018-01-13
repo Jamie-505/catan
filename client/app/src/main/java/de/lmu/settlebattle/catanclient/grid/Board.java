@@ -15,16 +15,8 @@ import java.util.HashMap;
 
 public class Board {
 
-  private HashMap<String, Integer> typeImgMap = new HashMap<String, Integer>();
-
   public Board(Hex[] fields) {
     this.fields = fields;
-    typeImgMap.put(WHEAT, R.drawable.wheat_field);
-    typeImgMap.put(ORE, R.drawable.ore_field);
-    typeImgMap.put(WOOL, R.drawable.sheep_field);
-    typeImgMap.put(WOOD, R.drawable.woods_field);
-    typeImgMap.put(CLAY, R.drawable.clay_field);
-    typeImgMap.put("DESERT", R.drawable.desert_field);
     setImages(fields);
   }
 
@@ -34,9 +26,9 @@ public class Board {
         int y = field.loc.y;
         int x = field.loc.x;
         if (y >= 0) {
-          hexMap[y + 3][x + 3] = typeImgMap.get(field.type);
+          hexMap[y + 3][x + 3] = field;
         } else {
-          hexMap[y + 3][x + y + 3] = typeImgMap.get(field.type);
+          hexMap[y + 3][x + y + 3] = field;
         }
       } catch (NullPointerException e) {
         Log.i(BOARD, "Water fields have no location");
@@ -44,17 +36,16 @@ public class Board {
     }
   }
 
-  public Object[][] hexMap = new Integer[][] {
+  public Object[][] hexMap = new Object[][] {
       {R.drawable.hafen_0_m3, R.drawable.hafen_1_m3, R.drawable.hafen_2_m3, R.drawable.hafen_3_m3},
-      {R.drawable.hafen_m1_m2,R.drawable.clay_field, R.drawable.clay_field, R.drawable.ore_field, R.drawable.hafen_3_m2},
-      {R.drawable.hafen_m2_m1, R.drawable.tile_layers, R.drawable.tile_layers, R.drawable.tile_layers, R.drawable.sheep_field, R.drawable.hafen_3_m1},
-      {R.drawable.hafen_m3_0, R.drawable.tile_layers, R.drawable.tile_layers, R.drawable.desert_field, R.drawable.wheat_field, R.drawable.ore_field, R.drawable.hafen_3_0},
-      {R.drawable.hafen_m3_1, R.drawable.ore_field, R.drawable.sheep_field, R.drawable.ore_field, R.drawable.woods_field, R.drawable.hafen_2_1},
-      {R.drawable.hafen_m3_2, R.drawable.clay_field, R.drawable.woods_field, R.drawable.wheat_field, R.drawable.hafen_1_2},
+      {R.drawable.hafen_m1_m2,0, 0, 0, R.drawable.hafen_3_m2},
+      {R.drawable.hafen_m2_m1, 0, 0, 0, 0, R.drawable.hafen_3_m1},
+      {R.drawable.hafen_m3_0, 0, 0, 0, 0, 0, R.drawable.hafen_3_0},
+      {R.drawable.hafen_m3_1, 0, 0, 0, 0, R.drawable.hafen_2_1},
+      {R.drawable.hafen_m3_2, 0, 0, 0, R.drawable.hafen_1_2},
       {R.drawable.hafen_m3_3, R.drawable.hafen_m2_3, R.drawable.hafen_m1_3, R.drawable.hafen_0_3}
   };
 
   @SerializedName(FIELDS)
   public Hex[] fields;
-
 }

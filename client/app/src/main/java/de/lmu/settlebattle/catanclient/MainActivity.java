@@ -2,12 +2,15 @@ package de.lmu.settlebattle.catanclient;
 
 import static de.lmu.settlebattle.catanclient.utils.Constants.BOARD;
 import static de.lmu.settlebattle.catanclient.utils.Constants.BUILD;
+import static de.lmu.settlebattle.catanclient.utils.Constants.BUILD_TRADE;
 import static de.lmu.settlebattle.catanclient.utils.Constants.DICE_RESULT;
 import static de.lmu.settlebattle.catanclient.utils.Constants.DICE_THROW;
 import static de.lmu.settlebattle.catanclient.utils.Constants.DISPLAY_ERROR;
+import static de.lmu.settlebattle.catanclient.utils.Constants.END_TURN;
 import static de.lmu.settlebattle.catanclient.utils.Constants.ERROR_MSG;
 import static de.lmu.settlebattle.catanclient.utils.Constants.NEW_CONSTRUCT;
 import static de.lmu.settlebattle.catanclient.utils.Constants.OK;
+import static de.lmu.settlebattle.catanclient.utils.Constants.PLAYER;
 import static de.lmu.settlebattle.catanclient.utils.Constants.PLAYER_UPDATE;
 import static de.lmu.settlebattle.catanclient.utils.Constants.PLAYER_WAIT;
 import static de.lmu.settlebattle.catanclient.utils.Constants.ROLL_DICE;
@@ -88,6 +91,7 @@ public class MainActivity extends BaseSocketActivity {
   // Visual Elements
   private Button bauenBtn;
   private Button domTradeBtn;
+  private Button endTurnBtn;
   private Button seaTradeBtn;
   private DomTradeFragment domTradeFragment = new DomTradeFragment();
   private FragmentManager fragmentManager = getFragmentManager();
@@ -130,8 +134,9 @@ public class MainActivity extends BaseSocketActivity {
 
     bauenBtn = (Button) findViewById(R.id.bauen_button);
     diceBtn = (ImageButton) findViewById(R.id.throwDiceBtn);
-    domTradeBtn = (Button) findViewById(R.id.domTradeBtn);
-    seaTradeBtn = (Button) findViewById(R.id.handeln_button);
+    domTradeBtn = (Button) findViewById(R.id.dom_trade_btn);
+    endTurnBtn = (Button) findViewById(R.id.end_turn_btn);
+    seaTradeBtn = (Button) findViewById(R.id.seatrade_btn);
     gridLayout = (RelativeLayout) findViewById(R.id.gridLayout);
     streetLayer = (ConstructionsLayer) findViewById(R.id.layerStreets);
     settlementLayer = (ConstructionsLayer) findViewById(R.id.layerSettlements);
@@ -495,7 +500,15 @@ public class MainActivity extends BaseSocketActivity {
     snackbar.show();
   }
 
+  private void endTurn() {
+    hideActiveElements();
+    mService.sendMessage(createJSONString(END_TURN, null));
+  }
+
   private void hideActiveElements() {
+    seaTradeBtn.setVisibility(View.INVISIBLE);
+    domTradeBtn.setVisibility(View.INVISIBLE);
+    endTurnBtn.setVisibility(View.INVISIBLE);
     diceBtn.setVisibility(View.INVISIBLE);
   }
 
@@ -520,6 +533,16 @@ public class MainActivity extends BaseSocketActivity {
     String action = intent.getAction();
     if (action != null) {
       switch (action) {
+        case BUILD_TRADE:
+          Player p = gson.fromJson(intent.getStringExtra(PLAYER), Player.class);
+          if (p.id == self.id) {
+            diceBtn.setVisibility(View.INVISIBLE);
+            bauenBtn.setVisibility(View.VISIBLE);
+            domTradeBtn.setVisibility(View.VISIBLE);
+            seaTradeBtn.setVisibility(View.VISIBLE);
+            endTurnBtn.setVisibility(View.VISIBLE);
+          }
+          break;
         case DICE_RESULT:
           Bundle diceBundle = new Bundle();
           diceBundle.putString(DICE_THROW, intent.getStringExtra(DICE_THROW));
@@ -588,11 +611,13 @@ public class MainActivity extends BaseSocketActivity {
       mService.sendMessage(diceMsg);
     });
     domTradeBtn.setOnClickListener((View v) -> showFragment(domTradeFragment));
+    endTurnBtn.setOnClickListener((View v) -> endTurn());
     seaTradeBtn.setOnClickListener((View v) -> showFragment(seaTradeFragment));
   }
 
   private void setIntentFilters() {
     IntentFilter filter = new IntentFilter();
+    filter.addAction(BUILD_TRADE);
     filter.addAction(DICE_RESULT);
     filter.addAction(DISPLAY_ERROR);
     filter.addAction(NEW_CONSTRUCT);

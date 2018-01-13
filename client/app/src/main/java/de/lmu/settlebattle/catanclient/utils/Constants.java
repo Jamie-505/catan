@@ -105,7 +105,7 @@ public final class Constants {
 
   // Player Constants
   public final static String ARMY = "Rittermacht";
-  public final static String BUILD_TRADE = "Handeln oder Bauen";
+  public final static String BUILD_TRADE = "Handeln oder bauen";
   public final static String DEV_CARDS = "Entwicklungskarten";
   public final static String RAW_MATERIALS = "Rohstoffe";
   public final static String PLAYER_ID = "id";

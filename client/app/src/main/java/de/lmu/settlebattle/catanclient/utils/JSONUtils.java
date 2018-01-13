@@ -77,8 +77,6 @@ public class JSONUtils {
     switch (status) {
       case GAME_START:
         return new String[] { GAME_START };
-      case ROLL_DICE:
-        return new Object[] { ROLL_DICE, player };
       default:
         return new Object[] { player.status, player };
     }

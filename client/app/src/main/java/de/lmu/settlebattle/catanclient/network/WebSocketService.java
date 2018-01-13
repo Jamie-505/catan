@@ -115,7 +115,9 @@ public class WebSocketService extends Service {
           storage.storeOpponent(player);
           // updates lobby with latest data
         }
-        broadcast(PLAYER_UPDATE);
+        Intent buildTrade = new Intent(BUILD_TRADE);
+        buildTrade.putExtra(PLAYER, gson.toJson(player));
+        broadcast(buildTrade);
         break;
       case DICE_RESULT:
         Intent diceResult = new Intent(DICE_RESULT);

@@ -80,5 +80,6 @@
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="bauen_und_baukosten">Bauen und Baukosten</string>
   <string name="add_ki">Füge KI hinzu</string>
+  <string name="end_turn">Zug beenden</string>
 
 </resources>

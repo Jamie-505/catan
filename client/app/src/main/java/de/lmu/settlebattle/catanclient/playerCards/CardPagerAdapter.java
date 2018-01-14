@@ -1,6 +1,13 @@
 package de.lmu.settlebattle.catanclient.playerCards;
 
+import static de.lmu.settlebattle.catanclient.utils.Constants.BLUE;
+import static de.lmu.settlebattle.catanclient.utils.Constants.ORANGE;
+import static de.lmu.settlebattle.catanclient.utils.Constants.RED;
+import static de.lmu.settlebattle.catanclient.utils.Constants.WHEAT;
+import static de.lmu.settlebattle.catanclient.utils.Constants.WHITE;
+
 import android.graphics.Color;
+import android.graphics.drawable.Drawable;
 import android.support.v4.view.PagerAdapter;
 import android.support.v7.widget.CardView;
 import android.view.LayoutInflater;
@@ -74,15 +81,32 @@ public class CardPagerAdapter extends PagerAdapter implements CardAdapter {
     // hier passiert die magie
     private void bind(CardItem item, View view) {
 
+        ImageView colorBar = (ImageView) view.findViewById(R.id.color_bar);
+        Drawable color = null;
+        switch (item.getColor()) {
+          case BLUE:
+            color = view.getContext().getResources().getDrawable(R.drawable.rec_blue);
+            break;
+          case ORANGE:
+            color = view.getContext().getResources().getDrawable(R.drawable.rec_orange);
+            break;
+          case RED:
+            color = view.getContext().getResources().getDrawable(R.drawable.rec_red);
+            break;
+          case WHITE:
+            color = view.getContext().getResources().getDrawable(R.drawable.rec_white);
+            break;
+        }
+        colorBar.setImageDrawable(color);
         // TextViews ersetzen
-        TextView titleTextView = (TextView) view.findViewById(R.id.titleTextView); // Name
+        TextView titleTextView = (TextView) view.findViewById(R.id.pName); // Name
         TextView siegpunkteView = (TextView) view.findViewById(R.id.siegpunkte);
-        TextView rsckartenView = (TextView) view.findViewById(R.id.rsckarten);
+        TextView rscKartenView = (TextView) view.findViewById(R.id.rsckarten);
         TextView ekView = (TextView) view.findViewById(R.id.entwicklungskarten);
 
         titleTextView.setText(item.getName());
         siegpunkteView.setText((Integer.toString(item.getSP())));
-        rsckartenView.setText((Integer.toString(item.getRK())));
+        rscKartenView.setText((Integer.toString(item.getRK())));
         ekView.setText((Integer.toString((item.getEK()))));
 
         // Siegermacht und Handelsmacht aktivieren
@@ -91,35 +115,25 @@ public class CardPagerAdapter extends PagerAdapter implements CardAdapter {
 
         if (item.getRM()) {
           ritterView.setVisibility(View.VISIBLE);
-
-        }
-        else {
+        } else {
           ritterView.setVisibility(View.INVISIBLE);
         }
 
       if (item.getHS()) {
         strassenView.setVisibility(View.VISIBLE);
-
-      }
-      else {
+      } else {
         strassenView.setVisibility(View.INVISIBLE);
       }
-
-
 
       // Spieler am Zug aktivieren
         FrameLayout karte = (FrameLayout) view.findViewById(R.id.cardContain);
 
         if (item.getZug()) {
-        karte.setBackgroundColor(Color.parseColor("#FFFFFF"));}
+        karte.setBackgroundColor(Color.WHITE);}
         else {
             karte.setBackgroundColor(Color.parseColor("#CCCCCC"));
         }
         // Farbe zuweisen
-
-
-
-
     }
 
 }

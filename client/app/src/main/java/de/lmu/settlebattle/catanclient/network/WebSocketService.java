@@ -178,6 +178,15 @@ public class WebSocketService extends Service {
           broadcast(PLAYER_WAIT);
         }
         break;
+      case STATUS_UPD:
+        player = (Player) mail[1];
+        if (player.id == storage.getSessionId()) {
+          storage.storePlayer(player);
+        } else {
+          storage.storeOpponent(player);
+        }
+        broadcast(STATUS_UPD);
+        break;
       case TO_SERVER:
         broadcast(PROTOCOL_SUPPORTED);
         webSocketClient.send(mail[1].toString());
@@ -211,6 +220,7 @@ public class WebSocketService extends Service {
         break;
     }
   }
+
   private void startSocket() {
     URI uri;
     try{
@@ -253,7 +263,6 @@ public class WebSocketService extends Service {
     }
   }
 
-
   /**
    * broadcasts errors to any Activity so they can be displayed
    * @param errorMessage
@@ -274,7 +283,6 @@ public class WebSocketService extends Service {
     Log.d(TAG, "Send to server -> " + jsonMsg);
     webSocketClient.send(jsonMsg);
   }
-
 
   public final class WebSocketsBinder extends Binder {
     public WebSocketService getService() {

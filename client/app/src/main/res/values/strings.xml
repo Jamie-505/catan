@@ -65,12 +65,6 @@
     <string name="action_show">Show Panel</string>
     <string name="action_anchor_enable">Enable Anchor Point</string>
     <string name="action_anchor_disable">Disable Anchor Point</string>
-    <string name="iron_count">3</string>
-    <string name="brick_count">2</string>
-    <string name="sheep_count">3</string>
-    <string name="wheat_count">3</string>
-    <string name="wood_count">3</string>
-    <string name="cards_count">3</string>
 
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>

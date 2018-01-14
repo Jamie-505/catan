@@ -1,6 +1,7 @@
 package de.lmu.settlebattle.catanclient.player;
 
 import static de.lmu.settlebattle.catanclient.utils.Constants.ARMY;
+import static de.lmu.settlebattle.catanclient.utils.Constants.BIGGEST_ARMY;
 import static de.lmu.settlebattle.catanclient.utils.Constants.DEV_CARDS;
 import static de.lmu.settlebattle.catanclient.utils.Constants.LONGEST_RD;
 import static de.lmu.settlebattle.catanclient.utils.Constants.PLAYER_COLOR;
@@ -10,7 +11,6 @@ import static de.lmu.settlebattle.catanclient.utils.Constants.RAW_MATERIALS;
 import static de.lmu.settlebattle.catanclient.utils.Constants.VICTORY_PTS;
 
 import com.google.gson.annotations.SerializedName;
-import de.lmu.settlebattle.catanclient.trade.RawMaterialOverview;
 import java.util.Map;
 
 public class Player {
@@ -28,6 +28,9 @@ public class Player {
   @SerializedName(ARMY)
   public int army;
 
+  @SerializedName(BIGGEST_ARMY)
+  public boolean biggestArmy;
+
   @SerializedName(LONGEST_RD)
   public boolean longestRd;
 
@@ -38,5 +41,5 @@ public class Player {
   public RawMaterialOverview rawMaterials;
 
   @SerializedName(DEV_CARDS)
-  public Map<String, Integer> devCards;
+  public DevCardOverview devCards;
 }

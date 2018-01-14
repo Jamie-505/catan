@@ -64,7 +64,7 @@ public class Storage {
     return gson.fromJson(opponentString, Player.class);
   }
 
-  public String getAllPlayers() {
+  public String getAllPlayersAsJson() {
     // +1 because own player is also added not just opponents
     Player[] allPlayers = new Player[opponentIds.size()+1];
     allPlayers[0] = gson.fromJson(sharedPrefs.getString(KEY_PLAYER, null), Player.class);
@@ -74,6 +74,18 @@ public class Storage {
       allPlayers[index] = getOpponent(id);
     }
     return gson.toJson(allPlayers);
+  }
+
+  public Player[] getAllPlayers() {
+    // +1 because own player is also added not just opponents
+    Player[] allPlayers = new Player[opponentIds.size()+1];
+    allPlayers[0] = gson.fromJson(sharedPrefs.getString(KEY_PLAYER, null), Player.class);
+    int index = 0;
+    for (Integer id : opponentIds) {
+      index++;
+      allPlayers[index] = getOpponent(id);
+    }
+    return allPlayers;
   }
 
   public void clear() {

@@ -148,7 +148,7 @@ public class TradeOfferFragment extends MainActivityFragment {
   }
 
   private void updateTradeStatus(int id, boolean accepted) {
-    String allPlayers = mainActivity.storage.getAllPlayers();
+    String allPlayers = mainActivity.storage.getAllPlayersAsJson();
     setPlayers(allPlayers);
 
     for (int i = 0; i < players.length; i++) {

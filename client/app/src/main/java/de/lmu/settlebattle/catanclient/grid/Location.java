@@ -1,4 +1,4 @@
-package de.lmu.settlebattle.catanclient.utils;
+package de.lmu.settlebattle.catanclient.grid;
 
 import com.google.gson.annotations.SerializedName;
 import java.util.Comparator;

@@ -13,6 +13,7 @@ import android.widget.Spinner;
 import de.lmu.settlebattle.catanclient.MainActivity;
 import de.lmu.settlebattle.catanclient.MainActivityFragment;
 import de.lmu.settlebattle.catanclient.R;
+import de.lmu.settlebattle.catanclient.player.RawMaterialOverview;
 
 
 public class SeaTradeFragment extends MainActivityFragment {

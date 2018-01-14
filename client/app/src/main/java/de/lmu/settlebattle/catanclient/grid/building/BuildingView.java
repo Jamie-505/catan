@@ -3,11 +3,9 @@ package de.lmu.settlebattle.catanclient.grid.building;
 import android.content.Context;
 import android.graphics.Color;
 import android.support.v7.widget.AppCompatImageView;
-import android.view.View;
 import de.lmu.settlebattle.catanclient.grid.Construction.ConstructionType;
 import de.lmu.settlebattle.catanclient.grid.Hex;
-import de.lmu.settlebattle.catanclient.utils.Location;
-import java.lang.reflect.Array;
+import de.lmu.settlebattle.catanclient.grid.Location;
 import java.util.Arrays;
 
 public abstract class BuildingView extends AppCompatImageView{

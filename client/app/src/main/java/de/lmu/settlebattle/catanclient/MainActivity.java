@@ -3,7 +3,6 @@ package de.lmu.settlebattle.catanclient;
 import static de.lmu.settlebattle.catanclient.utils.Constants.BOARD;
 import static de.lmu.settlebattle.catanclient.utils.Constants.BUILD;
 import static de.lmu.settlebattle.catanclient.utils.Constants.BUILD_TRADE;
-import static de.lmu.settlebattle.catanclient.utils.Constants.CLAY;
 import static de.lmu.settlebattle.catanclient.utils.Constants.DICE_RESULT;
 import static de.lmu.settlebattle.catanclient.utils.Constants.DICE_THROW;
 import static de.lmu.settlebattle.catanclient.utils.Constants.DISPLAY_ERROR;
@@ -11,18 +10,15 @@ import static de.lmu.settlebattle.catanclient.utils.Constants.END_TURN;
 import static de.lmu.settlebattle.catanclient.utils.Constants.ERROR_MSG;
 import static de.lmu.settlebattle.catanclient.utils.Constants.NEW_CONSTRUCT;
 import static de.lmu.settlebattle.catanclient.utils.Constants.OK;
-import static de.lmu.settlebattle.catanclient.utils.Constants.ORE;
 import static de.lmu.settlebattle.catanclient.utils.Constants.PLAYER;
-import static de.lmu.settlebattle.catanclient.utils.Constants.PLAYER_UPDATE;
 import static de.lmu.settlebattle.catanclient.utils.Constants.PLAYER_WAIT;
 import static de.lmu.settlebattle.catanclient.utils.Constants.ROLL_DICE;
+import static de.lmu.settlebattle.catanclient.utils.Constants.STATUS_UPD;
+import static de.lmu.settlebattle.catanclient.utils.Constants.STATUS_WAIT;
 import static de.lmu.settlebattle.catanclient.utils.Constants.TRADE;
 import static de.lmu.settlebattle.catanclient.utils.Constants.TRD_ABORTED;
 import static de.lmu.settlebattle.catanclient.utils.Constants.TRD_FIN;
 import static de.lmu.settlebattle.catanclient.utils.Constants.TRD_OFFER;
-import static de.lmu.settlebattle.catanclient.utils.Constants.WHEAT;
-import static de.lmu.settlebattle.catanclient.utils.Constants.WOOD;
-import static de.lmu.settlebattle.catanclient.utils.Constants.WOOL;
 import static de.lmu.settlebattle.catanclient.utils.JSONUtils.createJSONString;
 
 import android.app.Fragment;
@@ -32,28 +28,22 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.Canvas;
 import android.graphics.Color;
-import android.graphics.Paint;
 import android.graphics.Point;
-import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.Drawable;
-import android.graphics.drawable.LayerDrawable;
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.ViewPager;
+import android.support.v7.widget.CardView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Display;
-import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageButton;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -78,6 +68,7 @@ import de.lmu.settlebattle.catanclient.grid.street.StreetViewNW;
 import de.lmu.settlebattle.catanclient.grid.street.StreetViewW;
 import de.lmu.settlebattle.catanclient.network.WebSocketService;
 import de.lmu.settlebattle.catanclient.player.Player;
+import de.lmu.settlebattle.catanclient.player.RawMaterialOverview;
 import de.lmu.settlebattle.catanclient.player.Storage;
 import de.lmu.settlebattle.catanclient.playerCards.CardItem;
 import de.lmu.settlebattle.catanclient.playerCards.CardPagerAdapter;
@@ -94,6 +85,7 @@ public class MainActivity extends BaseSocketActivity {
 
   public Storage storage;
   private Player self;
+  private Player[] allPlayers;
 
   private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
     @Override
@@ -108,6 +100,12 @@ public class MainActivity extends BaseSocketActivity {
   private Button domTradeBtn;
   private Button endTurnBtn;
   private Button seaTradeBtn;
+  private TextView selfClayCnt;
+  private TextView selfDevCardCnt;
+  private TextView selfOreCnt;
+  private TextView selfWheatCnt;
+  private TextView selfWoodCnt;
+  private TextView selfWoolCnt;
   private ConstructionsLayer settlementLayer;
   private ConstructionsLayer streetLayer;
   private DomTradeFragment domTradeFragment = new DomTradeFragment();
@@ -116,7 +114,7 @@ public class MainActivity extends BaseSocketActivity {
   private ImageButton diceBtn;
   private RelativeLayout gridLayout;
   private SeaTradeFragment seaTradeFragment = new SeaTradeFragment();
-  private SlidingUpPanelLayout mLayout;
+  private SlidingUpPanelLayout slidingPanel;
   private TradeOfferFragment tradeOfferFragment = new TradeOfferFragment();
 
   // Card Viewer
@@ -129,9 +127,9 @@ public class MainActivity extends BaseSocketActivity {
     if (fragmentManager.getBackStackEntryCount() > 0) {
       fragmentManager.popBackStack();
     }
-    if (mLayout != null &&
-        (mLayout.getPanelState() == SlidingUpPanelLayout.PanelState.EXPANDED || mLayout.getPanelState() == SlidingUpPanelLayout.PanelState.ANCHORED)) {
-      mLayout.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
+    if (slidingPanel != null &&
+        (slidingPanel.getPanelState() == SlidingUpPanelLayout.PanelState.EXPANDED || slidingPanel.getPanelState() == SlidingUpPanelLayout.PanelState.ANCHORED)) {
+      slidingPanel.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
     }
     super.onBackPressed();
   }
@@ -142,13 +140,19 @@ public class MainActivity extends BaseSocketActivity {
     setContentView(R.layout.activity_main);
     storage = new Storage(this);
     self = storage.getPlayer();
+    allPlayers = storage.getAllPlayers();
     setIntentFilters();
 
     Intent startActivity = getIntent();
     board = gson.fromJson(startActivity.getStringExtra(BOARD), Board.class);
-
     board = new Board(board.fields);
 
+    selfWoodCnt = (TextView) findViewById(R.id.slidePnlWoodCnt);
+    selfClayCnt = (TextView) findViewById(R.id.slidePnlClayCnt);
+    selfOreCnt = (TextView) findViewById(R.id.slidePnlOreCnt);
+    selfWoolCnt = (TextView) findViewById(R.id.slidePnlWoolCnt);
+    selfWheatCnt = (TextView) findViewById(R.id.slidePnlWheatCnt);
+    selfDevCardCnt = (TextView) findViewById(R.id.slidePnlDevCardCnt);
     bauenBtn = (Button) findViewById(R.id.bauen_button);
     diceBtn = (ImageButton) findViewById(R.id.throwDiceBtn);
     domTradeBtn = (Button) findViewById(R.id.dom_trade_btn);
@@ -167,26 +171,7 @@ public class MainActivity extends BaseSocketActivity {
       radius = extras.getInt("GRID_RADIUS", 3);
     }
 
-    /*
-    UserCard View initialisieren
-     */
-    mViewPager = (ViewPager) findViewById(R.id.viewPager);
-
-    mCardAdapter = new CardPagerAdapter();
-    mCardAdapter.addCardItem(new CardItem(false, "Blau", "Liza", 4, 2,
-        3, false, false));
-    mCardAdapter.addCardItem(new CardItem(true, "Blau", "James", 4, 2,
-        3, true, true));
-
-    //Aktiviere Views statt Fragments
-    mViewPager.setAdapter(mCardAdapter);
-    mViewPager.setPageTransformer(false, mCardShadowTransformer);
-
-    mCardShadowTransformer = new ShadowTransformer(mViewPager, mCardAdapter);
-
-    mViewPager.setAdapter(mCardAdapter);
-    mViewPager.setPageTransformer(false, mCardShadowTransformer);
-    mViewPager.setOffscreenPageLimit(3);
+    initializePlayerCards(allPlayers);
 
     initGridView(radius, board.fields);
     streetLayer.setWithholdTouchEventsFromChildren(true);
@@ -218,8 +203,12 @@ public class MainActivity extends BaseSocketActivity {
       Toast.makeText(getApplicationContext(), selectedItem, Toast.LENGTH_SHORT).show();
     });
 
-    mLayout = (SlidingUpPanelLayout) findViewById(R.id.sliding_layout);
-    mLayout.addPanelSlideListener(new SlidingUpPanelLayout.PanelSlideListener() {
+    slidingPanel = (SlidingUpPanelLayout) findViewById(R.id.sliding_layout);
+    LinearLayout dragPanel = findViewById(R.id.dragView);
+    int colorId = getResources().getIdentifier(self.color.toLowerCase()
+        , "color", getPackageName());
+    dragPanel.setBackgroundColor(getResources().getColor(colorId));
+    slidingPanel.addPanelSlideListener(new SlidingUpPanelLayout.PanelSlideListener() {
       @Override
       public void onPanelSlide(View panel, float slideOffset) {
         Log.i(TAG, "onPanelSlide, offset " + slideOffset);
@@ -228,24 +217,10 @@ public class MainActivity extends BaseSocketActivity {
       @Override
       public void onPanelStateChanged(View panel, SlidingUpPanelLayout.PanelState previousState,
           SlidingUpPanelLayout.PanelState newState) {
-        TextView wood = (TextView) findViewById(R.id.woodtxt);
-        wood.setText("4");
-        TextView brick = (TextView) findViewById(R.id.bricktxt);
-        // Platz um die Anzahl der Ressourcen zu Parsen brick.setText(Html.fromHtml(getString(R.string.brick_count)));
-        TextView iron = (TextView) findViewById(R.id.irontxt);
-        //i.setText(Html.fromHtml(getString(R.string.iron_count)));
-        TextView sheep = (TextView) findViewById(R.id.sheeptxt);
-        //sheep.setText(Html.fromHtml(getString(R.string.sheep_count)));
-        TextView card = (TextView) findViewById(R.id.cardtxt);
-        //card.setText(Html.fromHtml(getString(R.string.cards_count)));
-        TextView wheat = (TextView) findViewById(R.id.wheattxt);
-        //wheat.setText(Html.fromHtml(getString(R.string.wheat_count)));
 
          /*
-        TextView y = (TextView) findViewById(R.id.rsclong);
-        t.setText(Html.fromHtml(getString(R.string.rsc_big)));
 
-        if(mLayout.getPanelState() == SlidingUpPanelLayout.PanelState.ANCHORED||mLayout.getPanelState() == SlidingUpPanelLayout.PanelState.EXPANDED)
+        if(slidingPanel.getPanelState() == SlidingUpPanelLayout.PanelState.ANCHORED||slidingPanel.getPanelState() == SlidingUpPanelLayout.PanelState.EXPANDED)
         {
           t.setVisibility(View.INVISIBLE);
           y.setVisibility(View.VISIBLE);
@@ -257,10 +232,10 @@ public class MainActivity extends BaseSocketActivity {
           Log.i(TAG, "Kurzer Text sollte sichbar sein ");*/
       }
     });
-    mLayout.setFadeOnClickListener(
-        view -> mLayout.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED));
-    mLayout.setAnchorPoint(0.6f);
-    mLayout.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
+    slidingPanel.setFadeOnClickListener(
+        view -> slidingPanel.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED));
+    slidingPanel.setAnchorPoint(0.6f);
+    slidingPanel.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
   }
 
   @Override
@@ -446,6 +421,27 @@ public class MainActivity extends BaseSocketActivity {
     setGridNodes(radius, scale, fields);
   }
 
+  private void initializePlayerCards(Player[] players) {
+    mCardAdapter = new CardPagerAdapter();
+    mViewPager = (ViewPager) findViewById(R.id.viewPager);
+
+    for (Player p : players) {
+      CardItem card = new CardItem(false, p.color, p.name, p.victoryPts, p.devCards.getTotalAmnt(),
+          p.rawMaterials.getTotalAmnt(), p.biggestArmy, p.longestRd);
+      mCardAdapter.addCardItem(card);
+    }
+
+    //Aktiviere Views statt Fragments
+    mViewPager.setAdapter(mCardAdapter);
+    mViewPager.setPageTransformer(false, mCardShadowTransformer);
+
+    mCardShadowTransformer = new ShadowTransformer(mViewPager, mCardAdapter);
+
+    mViewPager.setAdapter(mCardAdapter);
+    mViewPager.setPageTransformer(false, mCardShadowTransformer);
+    mViewPager.setOffscreenPageLimit(3);
+  }
+
   private void OnGridHexClick(Hex hex) {
     Toast.makeText(MainActivity.this, "Es wurde: " + hex + "gedrückt.", Toast.LENGTH_SHORT).show();
   }
@@ -481,14 +477,13 @@ public class MainActivity extends BaseSocketActivity {
         case OK:
           hideFragment(seaTradeFragment);
           break;
-        case PLAYER_UPDATE:
-          Log.d(TAG, storage.getAllPlayers());
-          // TODO update the player views
-          break;
         case PLAYER_WAIT:
           hideActiveElements();
         case ROLL_DICE:
           showView(diceBtn);
+          break;
+        case STATUS_UPD:
+          updatePlayerViews();
           break;
         case TRD_FIN:
           onBackPressed();
@@ -530,9 +525,9 @@ public class MainActivity extends BaseSocketActivity {
     filter.addAction(DISPLAY_ERROR);
     filter.addAction(NEW_CONSTRUCT);
     filter.addAction(OK);
-    filter.addAction(PLAYER_UPDATE);
     filter.addAction(PLAYER_WAIT);
     filter.addAction(ROLL_DICE);
+    filter.addAction(STATUS_UPD);
     filter.addAction(TRD_ABORTED);
     filter.addAction(TRD_FIN);
     filter.addAction(TRD_OFFER);
@@ -584,7 +579,6 @@ public class MainActivity extends BaseSocketActivity {
             case MotionEvent.ACTION_DOWN:
               float xPoint = event.getX();
               float yPoint = event.getY();
-              //Hex hex = grid.pixelToHex(event.getX(), event.getY()); //This can work on the RelativeLayout grid area
               boolean isPointOutOfCircle = (grid.centerOffsetX -xPoint)*(grid.centerOffsetX -xPoint) + (grid.centerOffsetY -yPoint)*(grid.centerOffsetY -yPoint) > grid.width * grid.width / 4;
 
               if (isPointOutOfCircle) return false;
@@ -616,15 +610,13 @@ public class MainActivity extends BaseSocketActivity {
           Hex pic = (Hex) storageMap.getObjectByCoordinate(hex.getX(), hex.getY());
           view = new CircleImageView(this, pic.type, pic.number);
           view.setHex(hex);
+          view.setOnTouchListener(gridNodeTouchListener);
         } else {
           Integer pic = (Integer) storageMap.getObjectByCoordinate(hex.getX(), hex.getY());
           if(pic == null) {
-            view.setOnTouchListener(gridNodeTouchListener);
             view.setImageResource(R.drawable.wheat_field);
           } else {
             view = new CircleImageView(this);
-            //view.setBackgroundResource(R.drawable.hexagon);
-            view.setOnTouchListener(gridNodeTouchListener);
             if(pic != 0) {
               view.setImageResource(pic);
             } else {
@@ -723,24 +715,50 @@ public class MainActivity extends BaseSocketActivity {
     v.setVisibility(View.VISIBLE);
   }
 
-  /*
-  Zahlen auf Bitmap schreiben
-  */
-  public BitmapDrawable writeOnDrawable(int drawableId, String text){
-
-    Bitmap bm = BitmapFactory.decodeResource(getResources(), drawableId)
-        .copy(Bitmap.Config.ARGB_8888, true);
-
-    Paint paint = new Paint();
-    paint.setStyle(Paint.Style.FILL);
-    paint.setColor(Color.BLACK);
-    paint.setTextSize(20);
-
-    Canvas canvas = new Canvas(bm);
-    canvas.drawText(text, 0, bm.getHeight()/2, paint);
-
-    return new BitmapDrawable(bm);
+  private void updatePlayerCards() {
+    for (int i = 0; i < allPlayers.length; i++) {
+      Player p = allPlayers[i];
+      CardView cardView = mCardAdapter.getCardViewAt(i);
+      TextView devCards = cardView.findViewById(R.id.entwicklungskarten);
+      devCards.setText(String.valueOf(p.devCards.getTotalAmnt()));
+      TextView resCards = cardView.findViewById(R.id.rsckarten);
+      resCards.setText(String.valueOf(p.rawMaterials.getTotalAmnt()));
+      TextView vpPoints = cardView.findViewById(R.id.siegpunkte);
+      vpPoints.setText(String.valueOf(p.victoryPts));
+      if (!p.status.equals(STATUS_WAIT)) {
+        cardView.findViewById(R.id.cardContain).setBackgroundColor(Color.WHITE);
+      } else {
+        cardView.findViewById(R.id.cardContain)
+            .setBackgroundColor(Color.parseColor("#CCCCCC"));
+      }
+      if (p.biggestArmy) {
+        cardView.findViewById(R.id.rittericon).setVisibility(View.VISIBLE);
+      } else {
+        cardView.findViewById(R.id.rittericon).setVisibility(View.INVISIBLE);
+      }
+      if (p.longestRd) {
+        cardView.findViewById(R.id.strasseicon).setVisibility(View.VISIBLE);
+      } else {
+        cardView.findViewById(R.id.strasseicon).setVisibility(View.INVISIBLE);
+      }
+    }
   }
 
+  private void updatePlayerViews() {
+    self = storage.getPlayer();
+    allPlayers = storage.getAllPlayers();
+    updatePlayerCards();
+    updateSlidePanel();
+  }
+
+  private void updateSlidePanel() {
+    RawMaterialOverview res = self.rawMaterials;
+    selfClayCnt.setText(String.valueOf(res.getClayCount()));
+    selfOreCnt.setText(String.valueOf(res.getOreCount()));
+    selfWheatCnt.setText(String.valueOf(res.getWheatCount()));
+    selfWoodCnt.setText(String.valueOf(res.getWoodCount()));
+    selfWoolCnt.setText(String.valueOf(res.getWoolCount()));
+    selfDevCardCnt.setText(String.valueOf(self.devCards.getTotalAmnt()));
+  }
 }
 

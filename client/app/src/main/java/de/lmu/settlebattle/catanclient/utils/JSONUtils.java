@@ -46,6 +46,12 @@ public class JSONUtils {
         case NEW_CONSTRUCT:
           String constuct = jObj.getString(NEW_CONSTRUCT);
           return new String[] {NEW_CONSTRUCT, constuct };
+        case SERVER_RES:
+          return new String[] { OK };
+        case STATUS_UPD:
+          JSONObject status = jObj.getJSONObject(STATUS_UPD);
+          player = gson.fromJson(status.getString(PLAYER), Player.class);
+          return handleStatusUpdate(player);
         case TRD_OFFER:
           Trade trade = gson.fromJson(jObj.getString(TRD_OFFER), Trade.class);
           return new Object[] { TRD_OFFER, trade };
@@ -54,12 +60,6 @@ public class JSONUtils {
         case TRD_FIN:
           trade = gson.fromJson(jObj.getString(msgType), Trade.class);
           return new Object[] { msgType, trade };
-        case SERVER_RES:
-          return new String[] { OK };
-        case STATUS_UPD:
-          JSONObject status = jObj.getJSONObject(STATUS_UPD);
-          player = gson.fromJson(status.getString(PLAYER), Player.class);
-          return handleStatusUpdate(player);
         case HARVEST:
         case COSTS:
           return new String[] {"TODO"};
@@ -73,12 +73,15 @@ public class JSONUtils {
   }
 
   private static Object[] handleStatusUpdate(Player player) {
-    String status = player.status;
-    switch (status) {
+    switch (player.status) {
+      case BUILD_TRADE:
+      case GAME_READY:
       case GAME_START:
-        return new String[] { GAME_START };
-      default:
+      case GAME_WAIT:
+      case ROLL_DICE:
         return new Object[] { player.status, player };
+      default:
+        return new Object[] { STATUS_UPD, player };
     }
   }
 

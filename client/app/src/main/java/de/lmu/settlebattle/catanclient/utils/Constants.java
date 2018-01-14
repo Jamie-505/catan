@@ -1,7 +1,5 @@
 package de.lmu.settlebattle.catanclient.utils;
 
-import de.lmu.settlebattle.catanclient.AppConfig;
-
 public final class Constants {
 
   // Message Type Constants
@@ -105,15 +103,22 @@ public final class Constants {
 
   // Player Constants
   public final static String ARMY = "Rittermacht";
+  public final static String BIGGEST_ARMY = "Grösste Rittermacht";
+  public final static String BLUE = "Blau";
   public final static String BUILD_TRADE = "Handeln oder bauen";
   public final static String DEV_CARDS = "Entwicklungskarten";
-  public final static String RAW_MATERIALS = "Rohstoffe";
-  public final static String PLAYER_ID = "id";
+  public final static String ORANGE = "Orange";
   public final static String PLAYER_COLOR = "Farbe";
-  public final static String PLAYER_STATE = "Status";
-  public final static String PLAYER_NAME = "Name";
-  public final static String PLAYER_ID_WON_GAME = "Spieler %1$s hat das Spiel gewonnen.";
   public final static String PLAYER_DATA_INVALID = "Die gewählten Daten sind bereits vergeben.";
+  public final static String PLAYER_ID = "id";
+  public final static String PLAYER_ID_WON_GAME = "Spieler %1$s hat das Spiel gewonnen.";
+  public final static String PLAYER_NAME = "Name";
+  public final static String PLAYER_STATE = "Status";
+  public final static String RAW_MATERIALS = "Rohstoffe";
+  public final static String RD_CONSTR = "Strassenbau";
+  public final static String RED = "Rot";
+  public final static String STATUS_WAIT = "Warten";
+  public final static String WHITE = "Weis";
 
   // Service
   public static final String ALL_PLAYERS = "allPlayers";
@@ -130,8 +135,6 @@ public final class Constants {
   public static final String VERSION_SERVER = "CatanBackendServer 0.1 (sepgroup03)";
   public static final String VERSION_CLIENT = "AndroidClient 0.1 (sepgroup03)";
 
-
-  public static final boolean IMMERSIVE_MODE_ENABLED = AppConfig.IMMERSIVE_MODE;
   /**
    * Für die Log Datei
    */

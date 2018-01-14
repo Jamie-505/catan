@@ -40,7 +40,7 @@
         android:paddingEnd="@dimen/card_padding"
         android:paddingLeft="@dimen/card_padding"
         android:paddingRight="@dimen/card_padding"
-        android:paddingStart="@dimen/card_padding" />
+        android:paddingStart="@dimen/card_padding"/>
 
       <android.support.constraint.ConstraintLayout
         android:id="@+id/inactiveOverlay"
@@ -70,9 +70,9 @@
           app:layout_constraintRight_toRightOf="parent"
           app:layout_constraintStart_toStartOf="parent"
           app:layout_constraintTop_toTopOf="parent"
-          app:layout_constraintVertical_bias="0.29" />
-
+          app:layout_constraintVertical_bias="0.29"/>
       </android.support.constraint.ConstraintLayout>
+
       <android.support.v7.widget.Toolbar
         xmlns:sothree="http://schemas.android.com/apk/res-auto"
         xmlns:android="http://schemas.android.com/apk/res/android"
@@ -106,8 +106,7 @@
           app:layout_constraintBottom_toBottomOf="parent"
           app:layout_constraintEnd_toEndOf="parent"
           app:layout_constraintStart_toStartOf="parent"
-          app:layout_constraintTop_toTopOf="parent" />
-
+          app:layout_constraintTop_toTopOf="parent"/>
       </com.otaliastudios.zoom.ZoomLayout>
 
       <ImageButton
@@ -118,9 +117,9 @@
         android:layout_marginStart="8dp"
         android:scaleType="fitCenter"
         android:visibility="invisible"
-        app:layout_constraintBottom_toTopOf="@+id/bauen_button"
+        app:layout_constraintBottom_toTopOf="@id/bauen_button"
         app:layout_constraintStart_toStartOf="parent"
-        app:srcCompat="@drawable/throw_dice" />
+        app:srcCompat="@drawable/throw_dice"/>
 
       <Button
         android:id="@+id/bauen_button"
@@ -130,10 +129,10 @@
         android:layout_marginBottom="8dp"
         android:layout_marginStart="8dp"
         android:text="Bauen"
-        app:layout_constraintBottom_toTopOf="@+id/infobar"
+        app:layout_constraintBottom_toTopOf="@id/infobar"
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
-        sothree:layout_constraintEnd_toStartOf="@+id/seatrade_btn" />
+        sothree:layout_constraintEnd_toStartOf="@id/seatrade_btn"/>
 
       <Button
         android:id="@+id/dom_trade_btn"
@@ -144,8 +143,8 @@
         android:layout_marginEnd="8dp"
         android:visibility="invisible"
         android:text="Handeln"
-        app:layout_constraintBottom_toTopOf="@+id/seatrade_btn"
-        app:layout_constraintEnd_toEndOf="parent" />
+        app:layout_constraintBottom_toTopOf="@id/seatrade_btn"
+        app:layout_constraintEnd_toEndOf="parent"/>
 
       <Button
         android:id="@+id/seatrade_btn"
@@ -157,10 +156,10 @@
         android:layout_marginEnd="8dp"
         android:text="Seehandel"
         android:visibility="invisible"
-        app:layout_constraintBottom_toTopOf="@+id/infobar"
+        app:layout_constraintBottom_toTopOf="@id/infobar"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
-        app:layout_constraintStart_toEndOf="@+id/bauen_button" />
+        app:layout_constraintStart_toEndOf="@id/bauen_button"/>
 
       <Button
         android:id="@+id/end_turn_btn"
@@ -174,7 +173,7 @@
         android:visibility="invisible"
         app:layout_constraintStart_toEndOf="@id/throwDiceBtn"
         sothree:layout_constraintBottom_toTopOf="@id/seatrade_btn"
-        sothree:layout_constraintEnd_toStartOf="@id/dom_trade_btn" />
+        sothree:layout_constraintEnd_toStartOf="@id/dom_trade_btn"/>
 
       <LinearLayout
         android:id="@+id/infobar"
@@ -186,29 +185,23 @@
         android:layout_gravity="bottom"
         android:orientation="horizontal"
         android:visibility="visible"
-        app:layout_constraintBottom_toBottomOf="@+id/boardview"
-        app:layout_constraintEnd_toEndOf="@+id/boardview"
-        app:layout_constraintStart_toStartOf="@+id/boardview">
-
-
-      </LinearLayout>
+        app:layout_constraintBottom_toBottomOf="@id/boardview"
+        app:layout_constraintEnd_toEndOf="@id/boardview"
+        app:layout_constraintStart_toStartOf="@id/boardview"/>
     </android.support.constraint.ConstraintLayout>
-
 
     <!-- Sliding Layout -->
     <LinearLayout
+      android:id="@+id/dragView"
       android:layout_width="match_parent"
       android:layout_height="match_parent"
-      android:background="#ffffff"
       android:orientation="vertical"
       android:clickable="true"
-      android:focusable="false"
-      android:id="@+id/dragView">
+      android:focusable="true">
 
       <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="68dp">
-
 
         <android.support.constraint.ConstraintLayout
           xmlns:android="http://schemas.android.com/apk/res/android"
@@ -222,20 +215,20 @@
             android:layout_width="28dp"
             android:layout_height="28dp"
             android:src="@drawable/ic_wheat"
-            app:layout_constraintEnd_toStartOf="@+id/wheattxt"
+            app:layout_constraintEnd_toStartOf="@id/slidePnlWheatCnt"
             app:layout_constraintHorizontal_bias="0.5"
-            app:layout_constraintStart_toStartOf="parent" />
+            app:layout_constraintStart_toStartOf="parent"/>
 
           <TextView
-            android:id="@+id/wheattxt"
+            android:id="@+id/slidePnlWheatCnt"
             android:layout_width="28dp"
             android:layout_height="match_parent"
-            android:text="@string/wheat_count"
+            android:text="0"
             android:textColor="@color/title_gray"
             android:textSize="28sp"
-            app:layout_constraintEnd_toStartOf="@+id/wood"
+            app:layout_constraintEnd_toStartOf="@id/wood"
             app:layout_constraintHorizontal_bias="0.5"
-            app:layout_constraintStart_toEndOf="@+id/wheat"
+            app:layout_constraintStart_toEndOf="@id/wheat"
             android:paddingRight="8dp"/>
 
           <ImageView
@@ -243,21 +236,20 @@
             android:layout_width="28dp"
             android:layout_height="28dp"
             android:src="@drawable/ic_wood"
-            app:layout_constraintEnd_toStartOf="@+id/woodtxt"
+            app:layout_constraintEnd_toStartOf="@id/slidePnlWoodCnt"
             app:layout_constraintHorizontal_bias="0.5"
-            app:layout_constraintStart_toEndOf="@+id/wheattxt"
-            />
+            app:layout_constraintStart_toEndOf="@id/slidePnlWheatCnt"/>
 
           <TextView
-            android:id="@+id/woodtxt"
+            android:id="@+id/slidePnlWoodCnt"
             android:layout_width="28dp"
             android:layout_height="match_parent"
-            android:text="@string/wheat_count"
+            android:text="0"
             android:textColor="@color/title_gray"
             android:textSize="28sp"
-            app:layout_constraintEnd_toStartOf="@+id/iron"
+            app:layout_constraintEnd_toStartOf="@id/iron"
             app:layout_constraintHorizontal_bias="0.5"
-            app:layout_constraintStart_toEndOf="@+id/wood"
+            app:layout_constraintStart_toEndOf="@id/wood"
             android:paddingRight="8dp"/>
 
           <ImageView
@@ -265,20 +257,20 @@
             android:layout_width="28dp"
             android:layout_height="28dp"
             android:src="@drawable/ic_ore"
-            app:layout_constraintEnd_toStartOf="@+id/irontxt"
+            app:layout_constraintEnd_toStartOf="@id/slidePnlOreCnt"
             app:layout_constraintHorizontal_bias="0.5"
-            app:layout_constraintStart_toEndOf="@+id/woodtxt" />
+            app:layout_constraintStart_toEndOf="@id/slidePnlWoodCnt"/>
 
           <TextView
-            android:id="@+id/irontxt"
+            android:id="@+id/slidePnlOreCnt"
             android:layout_width="28dp"
             android:layout_height="match_parent"
-            android:text="@string/wheat_count"
+            android:text="0"
             android:textColor="@color/title_gray"
             android:textSize="28sp"
-            app:layout_constraintEnd_toStartOf="@+id/sheep"
+            app:layout_constraintEnd_toStartOf="@id/sheep"
             app:layout_constraintHorizontal_bias="0.5"
-            app:layout_constraintStart_toEndOf="@+id/iron"
+            app:layout_constraintStart_toEndOf="@id/iron"
             android:paddingRight="8dp"/>
 
           <ImageView
@@ -286,20 +278,20 @@
             android:layout_width="28dp"
             android:layout_height="28dp"
             android:src="@drawable/ic_sheep"
-            app:layout_constraintEnd_toStartOf="@+id/sheeptxt"
+            app:layout_constraintEnd_toStartOf="@id/slidePnlWoolCnt"
             app:layout_constraintHorizontal_bias="0.5"
-            app:layout_constraintStart_toEndOf="@+id/irontxt" />
+            app:layout_constraintStart_toEndOf="@id/slidePnlOreCnt"/>
 
           <TextView
-            android:id="@+id/sheeptxt"
+            android:id="@+id/slidePnlWoolCnt"
             android:layout_width="28dp"
             android:layout_height="match_parent"
-            android:text="@string/wheat_count"
+            android:text="0"
             android:textColor="@color/title_gray"
             android:textSize="28sp"
-            app:layout_constraintEnd_toStartOf="@+id/brick"
+            app:layout_constraintEnd_toStartOf="@id/brick"
             app:layout_constraintHorizontal_bias="0.5"
-            app:layout_constraintStart_toEndOf="@+id/sheep"
+            app:layout_constraintStart_toEndOf="@id/sheep"
             android:paddingRight="8dp"/>
 
           <ImageView
@@ -307,74 +299,67 @@
             android:layout_width="28dp"
             android:layout_height="28dp"
             android:src="@drawable/ic_clay"
-            app:layout_constraintEnd_toStartOf="@+id/bricktxt"
+            app:layout_constraintEnd_toStartOf="@id/slidePnlClayCnt"
             app:layout_constraintHorizontal_bias="0.5"
-            app:layout_constraintStart_toEndOf="@+id/sheeptxt" />
+            app:layout_constraintStart_toEndOf="@id/slidePnlWoolCnt"/>
 
           <TextView
-            android:id="@+id/bricktxt"
+            android:id="@+id/slidePnlClayCnt"
             android:layout_width="28dp"
             android:layout_height="match_parent"
-            android:text="@string/wheat_count"
+            android:text="0"
             android:textColor="@color/title_gray"
             android:textSize="28sp"
-            app:layout_constraintEnd_toStartOf="@+id/card"
+            app:layout_constraintEnd_toStartOf="@id/card"
             app:layout_constraintHorizontal_bias="0.5"
-            app:layout_constraintStart_toEndOf="@+id/brick"
-            />
+            app:layout_constraintStart_toEndOf="@id/brick"/>
 
           <ImageView
             android:id="@+id/card"
             android:layout_width="28dp"
             android:layout_height="28dp"
-            android:src="@drawable/ic_hand"
-            app:layout_constraintEnd_toStartOf="@+id/cardtxt"
+            android:src="@drawable/entwicklungkarten"
+            app:layout_constraintEnd_toStartOf="@id/slidePnlDevCardCnt"
             app:layout_constraintHorizontal_bias="0.5"
-            app:layout_constraintStart_toEndOf="@+id/bricktxt"
-            android:contentDescription="TODO" />
+            app:layout_constraintStart_toEndOf="@id/slidePnlClayCnt"/>
 
           <TextView
-            android:id="@+id/cardtxt"
+            android:id="@+id/slidePnlDevCardCnt"
             android:layout_width="28dp"
             android:layout_height="match_parent"
-            android:text="@string/wheat_count"
+            android:text="0"
             android:textColor="@color/title_gray"
             android:textSize="28sp"
             app:layout_constraintEnd_toStartOf="parent"
             app:layout_constraintHorizontal_bias="0.5"
-            app:layout_constraintStart_toEndOf="@+id/card"
-            />
-
-
+            app:layout_constraintStart_toEndOf="@id/card"/>
         </android.support.constraint.ConstraintLayout>
-
-
       </LinearLayout>
-
 
       <View
         android:layout_width="match_parent"
         android:layout_height="2dp"
         android:background="?android:attr/listDivider"/>
+
       <TextView
         android:id="@+id/bauen"
-        android:layout_width="wrap_content"
+        android:background="#ffffff"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="@string/bauen_und_baukosten"
         android:textAppearance="@style/Base.TextAppearance.AppCompat.Headline"
         android:textColor="@color/title_gray"
-        android:textAlignment="center"
-        android:padding="10dp"
-        android:gravity="center"
-        />
+        android:padding="10dp"/>
+
       <ListView
         android:id="@+id/list"
+        android:background="#ffffff"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="1">
-      </ListView>
+        android:layout_weight="1"/>
     </LinearLayout>
   </com.sothree.slidinguppanel.SlidingUpPanelLayout>
+
   <FrameLayout
     android:id="@+id/fragmentContainer"
     android:elevation="40dp"
@@ -389,5 +374,5 @@
     app:layout_constraintEnd_toEndOf="parent"
     app:layout_constraintHorizontal_bias="0.5"
     app:layout_constraintStart_toStartOf="parent"
-    app:layout_constraintTop_toTopOf="parent" />
+    app:layout_constraintTop_toTopOf="parent"/>
 </android.support.constraint.ConstraintLayout>

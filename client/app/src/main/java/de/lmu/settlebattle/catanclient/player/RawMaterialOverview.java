@@ -1,4 +1,4 @@
-package de.lmu.settlebattle.catanclient.trade;
+package de.lmu.settlebattle.catanclient.player;
 
 import static de.lmu.settlebattle.catanclient.utils.Constants.*;
 import com.google.gson.annotations.SerializedName;
@@ -19,6 +19,9 @@ public class RawMaterialOverview {
 
   @SerializedName(ORE)
   private int oreCount;
+
+  @SerializedName(UNKNOWN)
+  private int unknown;
 
   //region Constructors
   public RawMaterialOverview() {
@@ -68,7 +71,35 @@ public class RawMaterialOverview {
     }
   }
 
+  public int getClayCount() {
+    return clayCount;
+  }
+
+  public int getOreCount() {
+    return oreCount;
+  }
+
+  public int getWheatCount() {
+    return wheatCount;
+  }
+
+  public int getWoodCount() {
+    return woodCount;
+  }
+
+  public int getWoolCount() {
+    return woolCount;
+  }
+
   public int[] getQnts() {
-    return new int[] { this.clayCount, this.oreCount, this.wheatCount, this.woodCount, this.woolCount };
+    return new int[] { clayCount, oreCount, wheatCount, woodCount, woolCount, unknown };
+  }
+
+  public int getTotalAmnt() {
+    int size = 0;
+    for (int q : getQnts()) {
+      size += q;
+    }
+    return size;
   }
 }

@@ -7,7 +7,6 @@ import static de.lmu.settlebattle.catanclient.utils.Constants.VIEW_ID;
 
 import com.google.gson.annotations.SerializedName;
 import de.lmu.settlebattle.catanclient.utils.Constants;
-import de.lmu.settlebattle.catanclient.utils.Location;
 
 public class Construction {
 

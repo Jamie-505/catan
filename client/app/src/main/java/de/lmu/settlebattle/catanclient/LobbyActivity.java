@@ -34,10 +34,10 @@ public class LobbyActivity extends BaseSocketActivity {
         startGame.putExtra(BOARD, intent.getStringExtra(BOARD));
         startActivity(startGame);
       } else if (intent.getAction().equals(PLAYER_UPDATE)) {
-        String allPlayers = storage.getAllPlayers();
+        String allPlayers = storage.getAllPlayersAsJson();
         updatePlayers(allPlayers);
       } else if (intent.getAction().equals(PLAYER_WAIT)) {
-        String allPlayers = storage.getAllPlayers();
+        String allPlayers = storage.getAllPlayersAsJson();
         updatePlayers(allPlayers);
       }
     }

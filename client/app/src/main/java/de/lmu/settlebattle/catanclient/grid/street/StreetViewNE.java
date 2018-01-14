@@ -2,7 +2,7 @@ package de.lmu.settlebattle.catanclient.grid.street;
 
 import android.content.Context;
 import de.lmu.settlebattle.catanclient.grid.Hex;
-import de.lmu.settlebattle.catanclient.utils.Location;
+import de.lmu.settlebattle.catanclient.grid.Location;
 
 public class StreetViewNE extends StreetView {
 

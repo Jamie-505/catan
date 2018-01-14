@@ -8,6 +8,7 @@ import static de.lmu.settlebattle.catanclient.utils.Constants.REQUEST;
 import static de.lmu.settlebattle.catanclient.utils.Constants.TRD_ID;
 
 import com.google.gson.annotations.SerializedName;
+import de.lmu.settlebattle.catanclient.player.RawMaterialOverview;
 
 public class Trade {
 

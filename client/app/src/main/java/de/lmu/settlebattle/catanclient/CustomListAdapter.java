@@ -1,8 +1,5 @@
 package de.lmu.settlebattle.catanclient;
 
-/**
- * Created by danijel on 27.12.17.
- */
 import android.app.Activity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -19,8 +16,6 @@ public class CustomListAdapter extends ArrayAdapter<String> {
 
   public CustomListAdapter(Activity context, String[] itemname, Integer[] imgid) {
     super(context, R.layout.mylist, itemname);
-    // TODO Auto-generated constructor stub
-
     this.context=context;
     this.itemname=itemname;
     this.imgid=imgid;
@@ -38,6 +33,5 @@ public class CustomListAdapter extends ArrayAdapter<String> {
     imageView.setImageResource(imgid[position]);
     extratxt.setText("Kurze beschreibung für "+itemname[position]);
     return rowView;
-
-  };
+  }
 }

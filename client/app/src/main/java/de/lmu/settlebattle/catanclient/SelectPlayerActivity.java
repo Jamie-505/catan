@@ -33,7 +33,7 @@ public class SelectPlayerActivity extends BaseSocketActivity {
       } else if (intent.getAction().equals(NEXT_ACTIVITY)) {
         Intent enterLobby = new Intent(SelectPlayerActivity.this,
             LobbyActivity.class);
-        String allPlayers = storage.getAllPlayers();
+        String allPlayers = storage.getAllPlayersAsJson();
         enterLobby.putExtra(ALL_PLAYERS, allPlayers);
         startActivity(enterLobby);
       }

@@ -6,7 +6,6 @@ import static de.lmu.settlebattle.catanclient.utils.Constants.NUMBER;
 import static de.lmu.settlebattle.catanclient.utils.Constants.TYPE;
 
 import com.google.gson.annotations.SerializedName;
-import de.lmu.settlebattle.catanclient.utils.Location;
 
 /**
  * Non-cube hex coordinates (q, r)

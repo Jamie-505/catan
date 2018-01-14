@@ -1,11 +1,8 @@
 package de.lmu.settlebattle.catanclient.grid.building;
 
 import android.content.Context;
-import android.util.Log;
-import android.view.View;
-import de.lmu.settlebattle.catanclient.R;
 import de.lmu.settlebattle.catanclient.grid.Hex;
-import de.lmu.settlebattle.catanclient.utils.Location;
+import de.lmu.settlebattle.catanclient.grid.Location;
 
 public class BuildingViewN extends BuildingView {
 

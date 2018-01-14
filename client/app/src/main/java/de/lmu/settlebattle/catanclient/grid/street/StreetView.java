@@ -5,10 +5,9 @@ import static de.lmu.settlebattle.catanclient.grid.building.BuildingView.createT
 import android.content.Context;
 import android.graphics.Color;
 import android.support.v7.widget.AppCompatImageView;
-import android.view.View;
 import de.lmu.settlebattle.catanclient.grid.Construction.ConstructionType;
 import de.lmu.settlebattle.catanclient.grid.Hex;
-import de.lmu.settlebattle.catanclient.utils.Location;
+import de.lmu.settlebattle.catanclient.grid.Location;
 
 public abstract class StreetView extends AppCompatImageView {
 

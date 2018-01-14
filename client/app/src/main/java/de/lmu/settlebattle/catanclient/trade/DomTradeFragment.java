@@ -31,6 +31,7 @@ import de.lmu.settlebattle.catanclient.MainActivity;
 import de.lmu.settlebattle.catanclient.MainActivityFragment;
 import de.lmu.settlebattle.catanclient.R;
 import de.lmu.settlebattle.catanclient.player.Player;
+import de.lmu.settlebattle.catanclient.player.RawMaterialOverview;
 import de.lmu.settlebattle.catanclient.utils.JSONUtils;
 import java.lang.reflect.Type;
 import java.util.HashMap;
@@ -174,7 +175,7 @@ public class DomTradeFragment extends MainActivityFragment {
   }
 
   private void updateTradeStatus(int id, boolean accepted) {
-    String allPlayers = mainActivity.storage.getAllPlayers();
+    String allPlayers = mainActivity.storage.getAllPlayersAsJson();
     setPlayers(allPlayers);
 
     for (int i = 0; i < players.length; i++) {

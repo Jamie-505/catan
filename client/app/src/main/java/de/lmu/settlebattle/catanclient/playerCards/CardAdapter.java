@@ -1,6 +1,5 @@
 package de.lmu.settlebattle.catanclient.playerCards;
 
-
 import android.support.v7.widget.CardView;
 
 public interface CardAdapter {

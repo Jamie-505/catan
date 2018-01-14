@@ -25,6 +25,14 @@ public class Storage {
     this.sharedPrefs = context.getSharedPreferences(KEY_SHARED_PREF, Context.MODE_PRIVATE);
   }
 
+  public boolean isItMe(Player p) {
+    return p.id == getSessionId();
+  }
+
+  public boolean isItMe(int id) {
+    return id == getSessionId();
+  }
+
   public void storeSessionId(int sessionId) {
     Editor editor = sharedPrefs.edit();
     editor.putInt(KEY_SESSION_ID, sessionId);

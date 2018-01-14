@@ -2,7 +2,12 @@ package de.lmu.settlebattle.catanclient;
 
 import static de.lmu.settlebattle.catanclient.utils.Constants.BOARD;
 import static de.lmu.settlebattle.catanclient.utils.Constants.BUILD;
+import static de.lmu.settlebattle.catanclient.utils.Constants.BUILD_CITY;
+import static de.lmu.settlebattle.catanclient.utils.Constants.BUILD_SETTLEMENT;
+import static de.lmu.settlebattle.catanclient.utils.Constants.BUILD_VILLAGE;
+import static de.lmu.settlebattle.catanclient.utils.Constants.BUILD_STREET;
 import static de.lmu.settlebattle.catanclient.utils.Constants.BUILD_TRADE;
+import static de.lmu.settlebattle.catanclient.utils.Constants.CARD_BUY;
 import static de.lmu.settlebattle.catanclient.utils.Constants.DICE_RESULT;
 import static de.lmu.settlebattle.catanclient.utils.Constants.DICE_THROW;
 import static de.lmu.settlebattle.catanclient.utils.Constants.DISPLAY_ERROR;
@@ -37,7 +42,6 @@ import android.support.design.widget.Snackbar;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.ViewPager;
 import android.support.v7.widget.CardView;
-import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Display;
 import android.view.Gravity;
@@ -89,6 +93,7 @@ public class MainActivity extends BaseSocketActivity {
   // LogCat tag
   private static final String TAG = MainActivity.class.getSimpleName();
 
+  private boolean isItTimeToBuild;
   public Storage storage;
   private Player self;
   private Player[] allPlayers;
@@ -101,8 +106,6 @@ public class MainActivity extends BaseSocketActivity {
   };
 
   // Visual Elements
-  private Board board;
-  private Button bauenBtn;
   private Button domTradeBtn;
   private Button endTurnBtn;
   private Button seaTradeBtn;
@@ -133,13 +136,12 @@ public class MainActivity extends BaseSocketActivity {
     if (fragmentManager.getBackStackEntryCount() > 0) {
       fragmentManager.popBackStack();
     }
-    if (mLayout != null &&
-        (mLayout.getPanelState() == SlidingUpPanelLayout.PanelState.EXPANDED || mLayout.getPanelState() == SlidingUpPanelLayout.PanelState.ANCHORED)) {
-      mLayout.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
+    if (slidingPanel != null &&
+        slidingPanel.getPanelState() != SlidingUpPanelLayout.PanelState.COLLAPSED) {
+      slidingPanel.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
     }
     super.onBackPressed();
   }
-  private SlidingUpPanelLayout mLayout;
   @Override
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
@@ -150,23 +152,24 @@ public class MainActivity extends BaseSocketActivity {
     setIntentFilters();
 
     Intent startActivity = getIntent();
-    board = gson.fromJson(startActivity.getStringExtra(BOARD), Board.class);
+    // I know weird but I need to get the fields from the message somehow to init the board
+    Board board = gson.fromJson(startActivity.getStringExtra(BOARD), Board.class);
     board = new Board(board.fields);
 
-    selfWoodCnt = (TextView) findViewById(R.id.slidePnlWoodCnt);
-    selfClayCnt = (TextView) findViewById(R.id.slidePnlClayCnt);
-    selfOreCnt = (TextView) findViewById(R.id.slidePnlOreCnt);
-    selfWoolCnt = (TextView) findViewById(R.id.slidePnlWoolCnt);
-    selfWheatCnt = (TextView) findViewById(R.id.slidePnlWheatCnt);
-    selfDevCardCnt = (TextView) findViewById(R.id.slidePnlDevCardCnt);
-    bauenBtn = (Button) findViewById(R.id.bauen_button);
-    diceBtn = (ImageButton) findViewById(R.id.throwDiceBtn);
-    domTradeBtn = (Button) findViewById(R.id.dom_trade_btn);
-    endTurnBtn = (Button) findViewById(R.id.end_turn_btn);
-    seaTradeBtn = (Button) findViewById(R.id.seatrade_btn);
-    gridLayout = (RelativeLayout) findViewById(R.id.gridLayout);
-    streetLayer = (ConstructionsLayer) findViewById(R.id.layerStreets);
-    settlementLayer = (ConstructionsLayer) findViewById(R.id.layerSettlements);
+    diceBtn = findViewById(R.id.throwDiceBtn);
+    domTradeBtn = findViewById(R.id.dom_trade_btn);
+    endTurnBtn = findViewById(R.id.end_turn_btn);
+    gridLayout = findViewById(R.id.gridLayout);
+    seaTradeBtn = findViewById(R.id.seatrade_btn);
+    selfClayCnt = findViewById(R.id.slidePnlClayCnt);
+    selfDevCardCnt = findViewById(R.id.slidePnlDevCardCnt);
+    selfOreCnt = findViewById(R.id.slidePnlOreCnt);
+    selfWheatCnt = findViewById(R.id.slidePnlWheatCnt);
+    selfWoodCnt = findViewById(R.id.slidePnlWoodCnt);
+    selfWoolCnt = findViewById(R.id.slidePnlWoolCnt);
+    settlementLayer = findViewById(R.id.layerSettlements);
+    slidingPanel = findViewById(R.id.sliding_layout);
+    streetLayer = findViewById(R.id.layerStreets);
 
     setClickListener();
 
@@ -179,20 +182,19 @@ public class MainActivity extends BaseSocketActivity {
 
     initializePlayerCards(allPlayers);
 
-
-
     initGridView(radius, board.fields);
     streetLayer.setWithholdTouchEventsFromChildren(true);
     settlementLayer.setWithholdTouchEventsFromChildren(true);
 
-    setSupportActionBar((Toolbar) findViewById(R.id.main_toolbar));
+    setSupportActionBar(findViewById(R.id.main_toolbar));
+
     // Liste & Baukostenkarte
     ListView list;
-    String[] itemname ={
-        "Straße bauen",
-        "Siedlung bauen",
-        "Stadt bauen",
-        "Entwicklungskarte"
+    String[] actionEntries ={
+        BUILD_STREET,
+        BUILD_SETTLEMENT,
+        BUILD_CITY,
+        CARD_BUY,
     };
 
     Integer[] imgid={
@@ -202,19 +204,30 @@ public class MainActivity extends BaseSocketActivity {
         R.drawable.cost_devcard
     };
 
-    CustomListAdapter adapter = new CustomListAdapter(this, itemname, imgid);
-    list = (ListView)findViewById(R.id.list);
+    CustomListAdapter adapter = new CustomListAdapter(this, actionEntries, imgid);
+    list = findViewById(R.id.list);
     list.setAdapter(adapter);
 
     list.setOnItemClickListener((parent, view, position, id) -> {
-      String selectedItem= itemname[+position];
-      Toast.makeText(getApplicationContext(), selectedItem, Toast.LENGTH_SHORT).show();
+      if (isItTimeToBuild) {
+        String selectedItem= actionEntries[+position];
+        switch (selectedItem) {
+          case BUILD_STREET:
+            streetLayer.setWithholdTouchEventsFromChildren(false);
+            break;
+          case BUILD_SETTLEMENT:
+          case BUILD_CITY:
+            settlementLayer.setWithholdTouchEventsFromChildren(false);
+            break;
+        }
+        slidingPanel.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
+        Toast.makeText(getApplicationContext(), selectedItem, Toast.LENGTH_SHORT).show();
+      }
     });
 
-    slidingPanel = (SlidingUpPanelLayout) findViewById(R.id.sliding_layout);
     LinearLayout dragPanel = findViewById(R.id.dragView);
-    int colorId = getResources().getIdentifier(self.color.toLowerCase()
-        , "color", getPackageName());
+    int colorId = getResources().getIdentifier(self.color.toLowerCase(),
+        "color", getPackageName());
     dragPanel.setBackgroundColor(getResources().getColor(colorId));
     slidingPanel.addPanelSlideListener(new SlidingUpPanelLayout.PanelSlideListener() {
       @Override
@@ -398,6 +411,56 @@ public class MainActivity extends BaseSocketActivity {
     params.topMargin = -grid.centerOffsetY - p.y - 5;
   }
 
+  private LayerDrawable createColoredBuilding(String farbe, ConstructionType type) {
+    Drawable[] layers = new Drawable[2];
+    int colorId = getResources().getIdentifier(farbe.toLowerCase() , "color", getPackageName());
+    int color = getColor(colorId);
+    int colorDarkId = getResources().getIdentifier(farbe.toLowerCase() + "_dark" , "color", getPackageName());
+    int colorDark = getColor(colorDarkId);
+    VectorMasterDrawable container = new VectorMasterDrawable(this, R.drawable.ic_bulding_container);
+    PathModel pathModel = container.getPathModelByName("background");
+    pathModel.setFillColor(color);
+    pathModel.setStrokeColor(colorDark);
+    layers[0] = container;
+    switch (type) {
+      case CITY:
+        layers[1] = this.getResources().getDrawable(R.drawable.ic_city);
+        break;
+      case SETTLEMENT:
+        layers[1] = this.getResources().getDrawable(R.drawable.ic_settlement);
+        break;
+    }
+    LayerDrawable building = new LayerDrawable(layers);
+    building.setLayerGravity(0, Gravity.CENTER);
+    building.setLayerGravity(1, Gravity.CENTER);
+    return building;
+  }
+
+  private Drawable createColoredStreet(String farbe, Orientation orientation) {
+    int colorId = getResources().getIdentifier(farbe.toLowerCase() , "color", getPackageName());
+    int color = getColor(colorId);
+    int colorDarkId = getResources().getIdentifier(farbe.toLowerCase() + "_dark" , "color", getPackageName());
+    int colorDark = getColor(colorDarkId);
+    VectorMasterDrawable street;
+    switch (orientation) {
+      case TILTED:
+        street = new VectorMasterDrawable(this, R.drawable.ic_street_tilted);
+        break;
+      default:
+        street = new VectorMasterDrawable(this, R.drawable.ic_street_straight);
+        break;
+    }
+    PathModel pathModel = street.getPathModelByName("color");
+    pathModel.setFillColor(color);
+    pathModel.setStrokeColor(colorDark);
+    return street;
+  }
+
+  private void deactivateBuildLayers() {
+    settlementLayer.setWithholdTouchEventsFromChildren(true);
+    streetLayer.setWithholdTouchEventsFromChildren(true);
+  }
+
   public void displayMessage(String msg){
     View layout = findViewById(R.id.contain);
     Snackbar snackbar = Snackbar.make(layout, msg, Snackbar.LENGTH_LONG);
@@ -458,11 +521,19 @@ public class MainActivity extends BaseSocketActivity {
     String action = intent.getAction();
     if (action != null) {
       switch (action) {
+        case BUILD_VILLAGE:
+          Toast.makeText(MainActivity.this, "Du kannst jetzt eine Siedlung bauen", Toast.LENGTH_LONG).show();
+          settlementLayer.setWithholdTouchEventsFromChildren(false);
+          break;
+        case BUILD_STREET:
+          Toast.makeText(MainActivity.this, "Du kannst jetzt eine Straße bauen", Toast.LENGTH_LONG).show();
+          streetLayer.setWithholdTouchEventsFromChildren(false);
+          break;
         case BUILD_TRADE:
           Player p = gson.fromJson(intent.getStringExtra(PLAYER), Player.class);
-          if (p.id == self.id) {
+          if (storage.isItMe(p.id)) {
+            isItTimeToBuild = true;
             diceBtn.setVisibility(View.INVISIBLE);
-            bauenBtn.setVisibility(View.VISIBLE);
             domTradeBtn.setVisibility(View.VISIBLE);
             seaTradeBtn.setVisibility(View.VISIBLE);
             endTurnBtn.setVisibility(View.VISIBLE);
@@ -479,6 +550,8 @@ public class MainActivity extends BaseSocketActivity {
           displayMessage(intent.getStringExtra(ERROR_MSG));
           break;
         case NEW_CONSTRUCT:
+          settlementLayer.setWithholdTouchEventsFromChildren(true);
+          streetLayer.setWithholdTouchEventsFromChildren(true);
           String conStr = intent.getStringExtra(NEW_CONSTRUCT);
           Construction construction = gson.fromJson(conStr, Construction.class);
           showConstruction(construction);
@@ -511,23 +584,23 @@ public class MainActivity extends BaseSocketActivity {
   }
 
   private void setClickListener() {
-    bauenBtn.setOnClickListener((View v) -> {
-      Toast.makeText(MainActivity.this, "Du kannst jetzt bauen", Toast.LENGTH_LONG).show();
-      streetLayer.setWithholdTouchEventsFromChildren(false);
-      settlementLayer.setWithholdTouchEventsFromChildren(false);
-    });
     diceBtn.setOnClickListener((View v) -> {
       String diceMsg = createJSONString(ROLL_DICE, new Object());
       mService.sendMessage(diceMsg);
     });
-
     domTradeBtn.setOnClickListener((View v) -> showFragment(domTradeFragment));
-    endTurnBtn.setOnClickListener((View v) -> endTurn());
+    endTurnBtn.setOnClickListener((View v) -> {
+      deactivateBuildLayers();
+      isItTimeToBuild = false;
+      endTurn();
+    });
     seaTradeBtn.setOnClickListener((View v) -> showFragment(seaTradeFragment));
   }
 
   private void setIntentFilters() {
     IntentFilter filter = new IntentFilter();
+    filter.addAction(BUILD_VILLAGE);
+    filter.addAction(BUILD_STREET);
     filter.addAction(BUILD_TRADE);
     filter.addAction(DICE_RESULT);
     filter.addAction(DISPLAY_ERROR);
@@ -539,8 +612,7 @@ public class MainActivity extends BaseSocketActivity {
     filter.addAction(TRD_ABORTED);
     filter.addAction(TRD_FIN);
     filter.addAction(TRD_OFFER);
-    LocalBroadcastManager.getInstance(this)
-        .registerReceiver(broadcastReceiver, filter);
+    LocalBroadcastManager.getInstance(this).registerReceiver(broadcastReceiver, filter);
   }
 
   private int setGridDimensions(int radius) {
@@ -675,9 +747,11 @@ public class MainActivity extends BaseSocketActivity {
   }
 
   private void showConstruction(Construction construction) {
-    Player p = storage.getOpponent(construction.owner);
-    if (p == null) {
+    Player p;
+    if (storage.isItMe(construction.owner)) {
       p = self;
+    } else {
+      p = storage.getOpponent(construction.owner);
     }
     String viewId = construction.viewId;
     if (viewId == null) {
@@ -698,55 +772,12 @@ public class MainActivity extends BaseSocketActivity {
     }
   }
 
-  private LayerDrawable createColoredBuilding(String farbe, ConstructionType type) {
-    Drawable[] layers = new Drawable[2];
-    int colorId = getResources().getIdentifier(farbe.toLowerCase() , "color", getPackageName());
-    int color = getColor(colorId);
-    int colorDarkId = getResources().getIdentifier(farbe.toLowerCase() + "_dark" , "color", getPackageName());
-    int colorDark = getColor(colorDarkId);
-    VectorMasterDrawable container = new VectorMasterDrawable(this, R.drawable.ic_bulding_container);
-    PathModel pathModel = container.getPathModelByName("background");
-    pathModel.setFillColor(color);
-    pathModel.setStrokeColor(colorDark);
-    layers[0] = container;
-    switch (type) {
-      case CITY:
-        layers[1] = this.getResources().getDrawable(R.drawable.ic_city);
-        break;
-      case SETTLEMENT:
-        layers[1] = this.getResources().getDrawable(R.drawable.ic_settlement);
-        break;
-    }
-    LayerDrawable building = new LayerDrawable(layers);
-    building.setLayerGravity(0, Gravity.CENTER);
-    building.setLayerGravity(1, Gravity.CENTER);
-    return building;
-  }
-
-  private Drawable createColoredStreet(String farbe, Orientation orientation) {
-    int colorId = getResources().getIdentifier(farbe.toLowerCase() , "color", getPackageName());
-    int color = getColor(colorId);
-    int colorDarkId = getResources().getIdentifier(farbe.toLowerCase() + "_dark" , "color", getPackageName());
-    int colorDark = getColor(colorDarkId);
-    VectorMasterDrawable street;
-    switch (orientation) {
-      case TILTED:
-        street = new VectorMasterDrawable(this, R.drawable.ic_street_tilted);
-        break;
-      default:
-        street = new VectorMasterDrawable(this, R.drawable.ic_street_straight);
-        break;
-    }
-    PathModel pathModel = street.getPathModelByName("color");
-    pathModel.setFillColor(color);
-    pathModel.setStrokeColor(colorDark);
-    return street;
-  }
   private void showFragment(MainActivityFragment f) {
     FragmentTransaction ft = fragmentManager.beginTransaction();
     ft.addToBackStack(f.tag());
     if (fragmentManager.findFragmentByTag(f.tag()) == null) {
       ft.add(R.id.fragmentContainer, f, f.tag());
+      ft.show(f);
     } else {
       ft.show(f);
     }

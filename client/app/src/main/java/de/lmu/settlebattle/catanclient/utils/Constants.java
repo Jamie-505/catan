@@ -105,11 +105,14 @@ public final class Constants {
   public final static String ARMY = "Rittermacht";
   public final static String BIGGEST_ARMY = "Grösste Rittermacht";
   public final static String BLUE = "Blau";
+  public final static String BUILD_CITY = "Stadt bauen";
+  public final static String BUILD_SETTLEMENT = "Siedlung bauen";
+  public final static String BUILD_STREET = "Strasse bauen";
   public final static String BUILD_TRADE = "Handeln oder bauen";
+  public final static String BUILD_VILLAGE = "Dorf bauen";
   public final static String DEV_CARDS = "Entwicklungskarten";
   public final static String ORANGE = "Orange";
   public final static String PLAYER_COLOR = "Farbe";
-  public final static String PLAYER_DATA_INVALID = "Die gewählten Daten sind bereits vergeben.";
   public final static String PLAYER_ID = "id";
   public final static String PLAYER_ID_WON_GAME = "Spieler %1$s hat das Spiel gewonnen.";
   public final static String PLAYER_NAME = "Name";
@@ -140,14 +143,5 @@ public final class Constants {
 
   public static final String BLAU = "blau";
   public static final String WEIS = "weis";
-  /**
-   * Für die Log Datei
-   */
 
-  public static final String LOG_NAME = "Die Siedler";
-  /**
-   * Um nach Fehlern für die Log Datei in der UI zu suchen
-   */
-
-  public static final String LOG_UI = "Die Siedler UI";
 }

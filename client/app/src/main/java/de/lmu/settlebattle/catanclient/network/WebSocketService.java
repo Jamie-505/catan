@@ -104,11 +104,37 @@ public class WebSocketService extends Service {
 
   private void messageReceived(String message) {
     Object[] mail = JSONUtils.parse(message);
-    Player player;
-    switch (mail[0].toString()) {
-      case BUILD_TRADE:
+    Player player = new Player();
+    boolean itsMe = false;
+    try {
+      if (mail[1] instanceof Player) {
         player = (Player) mail[1];
-        if (player.id == storage.getSessionId()) {
+        itsMe = storage.isItMe(player);
+      }
+    } catch (ArrayIndexOutOfBoundsException e) {
+      Log.i(TAG, "Mail was empty :P");
+    }
+    switch (mail[0].toString()) {
+      case BUILD_VILLAGE:
+        if (itsMe) {
+          while(!mainActivityActive) {
+            try {
+              Thread.sleep(20);
+            } catch (InterruptedException e) {
+              Log.e(TAG, "NEW CONSTRUCT WAIT FAILED");
+              e.printStackTrace();
+            }
+          }
+          broadcast(BUILD_VILLAGE);
+        }
+        break;
+      case BUILD_STREET:
+        if (itsMe) {
+          broadcast(BUILD_STREET);
+        }
+        break;
+      case BUILD_TRADE:
+        if (itsMe) {
           // should cause select player activity so switch to lobby
           storage.storePlayer(player);
         } else {
@@ -128,8 +154,7 @@ public class WebSocketService extends Service {
         displayError(mail[1].toString());
         break;
       case GAME_READY:
-        player = (Player) mail[1];
-        if (player.id == storage.getSessionId()) {
+        if (itsMe) {
           // should cause select player activity so switch to lobby
           storage.storePlayer(player);
           broadcast(NEXT_ACTIVITY);
@@ -145,8 +170,7 @@ public class WebSocketService extends Service {
         broadcast(gameStart);
         break;
       case GAME_WAIT:
-        player = (Player) mail[1];
-        if (player.id == storage.getSessionId()) {
+        if (itsMe) {
           // should cause select player activity so switch to lobby
           storage.storePlayer(player);
         } else {
@@ -171,16 +195,14 @@ public class WebSocketService extends Service {
         broadcast(OK);
         break;
       case ROLL_DICE:
-        player = (Player) mail[1];
-        if (player.id == storage.getSessionId()) {
+        if (itsMe) {
           broadcast(ROLL_DICE);
         } else {
           broadcast(PLAYER_WAIT);
         }
         break;
       case STATUS_UPD:
-        player = (Player) mail[1];
-        if (player.id == storage.getSessionId()) {
+        if (itsMe) {
           storage.storePlayer(player);
         } else {
           storage.storeOpponent(player);
@@ -208,15 +230,13 @@ public class WebSocketService extends Service {
       case TRD_OFFER:
         trade = (Trade) mail[1];
         Intent tradeIntent;
-        if (storage.getSessionId() == trade.player) {
+        if (storage.isItMe(trade.player)) {
           tradeIntent = new Intent(TRD_SENT);
         } else {
           tradeIntent = new Intent(TRD_OFFER);
         }
         tradeIntent.putExtra(TRADE, gson.toJson(trade));
         broadcast(tradeIntent);
-        break;
-      default:
         break;
     }
   }

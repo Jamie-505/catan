@@ -74,6 +74,8 @@ public class JSONUtils {
 
   private static Object[] handleStatusUpdate(Player player) {
     switch (player.status) {
+      case BUILD_VILLAGE:
+      case BUILD_STREET:
       case BUILD_TRADE:
       case GAME_READY:
       case GAME_START:

@@ -18,8 +18,12 @@
   <color name="lblFromName">#777777</color>
   <color name="status">#80CCCCCC</color>
   <color name="backgroundwater">#64B3F5</color>
-  <color name="orange">#ffab40</color>
+  <color name="orange">#FFB74D</color>
+  <color name="orange_dark">#ef6c00</color>
   <color name="rot">#e57373</color>
+  <color name="rot_dark">#c62828</color>
   <color name="blau">#4dd0e1</color>
+  <color name="blau_dark">#00838f</color>
   <color name="weis">#fafafa</color>
+  <color name="weis_dark">#757575</color>
 </resources>

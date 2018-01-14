@@ -135,6 +135,11 @@ public final class Constants {
   public static final String VERSION_SERVER = "CatanBackendServer 0.1 (sepgroup03)";
   public static final String VERSION_CLIENT = "AndroidClient 0.1 (sepgroup03)";
 
+
+  // FARBEN
+
+  public static final String BLAU = "blau";
+  public static final String WEIS = "weis";
   /**
    * Für die Log Datei
    */

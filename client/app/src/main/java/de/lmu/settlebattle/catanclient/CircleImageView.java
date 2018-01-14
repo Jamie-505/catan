@@ -194,10 +194,10 @@ public class CircleImageView extends AppCompatImageView {
         layers[1] = this.getResources().getDrawable(R.drawable.no_3);
         break;
       case 4:
-        layers[1] = this.getResources().getDrawable(R.drawable.no_2);
+        layers[1] = this.getResources().getDrawable(R.drawable.no_4);
         break;
       case 5:
-        layers[1] = this.getResources().getDrawable(R.drawable.no_2);
+        layers[1] = this.getResources().getDrawable(R.drawable.no_5);
         break;
       case 6:
         layers[1] = this.getResources().getDrawable(R.drawable.no_6);

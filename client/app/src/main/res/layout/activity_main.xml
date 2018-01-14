@@ -87,7 +87,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         app:hasClickableChildren="true"
-        app:maxZoom="3"
+        app:maxZoom="5"
         app:maxZoomType="zoom"
         app:minZoom="0.7"
         app:minZoomType="zoom"
@@ -101,8 +101,8 @@
 
         <include
           layout="@layout/hex_grid_layout"
-          android:layout_width="wrap_content"
-          android:layout_height="wrap_content"
+          android:layout_width="match_parent"
+          android:layout_height="match_parent"
           app:layout_constraintBottom_toBottomOf="parent"
           app:layout_constraintEnd_toEndOf="parent"
           app:layout_constraintStart_toStartOf="parent"

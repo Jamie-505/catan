@@ -30,6 +30,8 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.Color;
 import android.graphics.Point;
+import android.graphics.drawable.Drawable;
+import android.graphics.drawable.LayerDrawable;
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
 import android.support.v4.content.LocalBroadcastManager;
@@ -38,6 +40,7 @@ import android.support.v7.widget.CardView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Display;
+import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
@@ -49,10 +52,13 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 import com.google.gson.Gson;
+import com.sdsmdg.harjot.vectormaster.VectorMasterDrawable;
+import com.sdsmdg.harjot.vectormaster.models.PathModel;
 import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 import de.lmu.settlebattle.catanclient.dice.DiceFragment;
 import de.lmu.settlebattle.catanclient.grid.Board;
 import de.lmu.settlebattle.catanclient.grid.Construction;
+import de.lmu.settlebattle.catanclient.grid.Construction.ConstructionType;
 import de.lmu.settlebattle.catanclient.grid.ConstructionsLayer;
 import de.lmu.settlebattle.catanclient.grid.Cube;
 import de.lmu.settlebattle.catanclient.grid.Grid;
@@ -100,12 +106,6 @@ public class MainActivity extends BaseSocketActivity {
   private Button domTradeBtn;
   private Button endTurnBtn;
   private Button seaTradeBtn;
-  private TextView selfClayCnt;
-  private TextView selfDevCardCnt;
-  private TextView selfOreCnt;
-  private TextView selfWheatCnt;
-  private TextView selfWoodCnt;
-  private TextView selfWoolCnt;
   private ConstructionsLayer settlementLayer;
   private ConstructionsLayer streetLayer;
   private DomTradeFragment domTradeFragment = new DomTradeFragment();
@@ -115,6 +115,12 @@ public class MainActivity extends BaseSocketActivity {
   private RelativeLayout gridLayout;
   private SeaTradeFragment seaTradeFragment = new SeaTradeFragment();
   private SlidingUpPanelLayout slidingPanel;
+  private TextView selfClayCnt;
+  private TextView selfDevCardCnt;
+  private TextView selfOreCnt;
+  private TextView selfWheatCnt;
+  private TextView selfWoodCnt;
+  private TextView selfWoolCnt;
   private TradeOfferFragment tradeOfferFragment = new TradeOfferFragment();
 
   // Card Viewer
@@ -127,13 +133,13 @@ public class MainActivity extends BaseSocketActivity {
     if (fragmentManager.getBackStackEntryCount() > 0) {
       fragmentManager.popBackStack();
     }
-    if (slidingPanel != null &&
-        (slidingPanel.getPanelState() == SlidingUpPanelLayout.PanelState.EXPANDED || slidingPanel.getPanelState() == SlidingUpPanelLayout.PanelState.ANCHORED)) {
-      slidingPanel.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
+    if (mLayout != null &&
+        (mLayout.getPanelState() == SlidingUpPanelLayout.PanelState.EXPANDED || mLayout.getPanelState() == SlidingUpPanelLayout.PanelState.ANCHORED)) {
+      mLayout.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
     }
     super.onBackPressed();
   }
-
+  private SlidingUpPanelLayout mLayout;
   @Override
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
@@ -172,6 +178,8 @@ public class MainActivity extends BaseSocketActivity {
     }
 
     initializePlayerCards(allPlayers);
+
+
 
     initGridView(radius, board.fields);
     streetLayer.setWithholdTouchEventsFromChildren(true);
@@ -268,7 +276,7 @@ public class MainActivity extends BaseSocketActivity {
   private void addBuildingTopLeft(Hex hex, Grid grid) {
     BuildingViewNW building = new BuildingViewNW(this, hex);
 
-    int width = 30, height = 30;
+    int width = 48, height = 48;
     //Add to view
     RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(
         width, height
@@ -293,7 +301,7 @@ public class MainActivity extends BaseSocketActivity {
 
     BuildingViewN building = new BuildingViewN(this, hex);
 
-    int width = 30, height = 30;
+    int width = 48, height = 48;
     //Add to view
     RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(
         width, height
@@ -667,26 +675,73 @@ public class MainActivity extends BaseSocketActivity {
   }
 
   private void showConstruction(Construction construction) {
+    Player p = storage.getOpponent(construction.owner);
+    if (p == null) {
+      p = self;
+    }
     String viewId = construction.viewId;
     if (viewId == null) {
       viewId = BuildingView.createTag(construction.locations);
     }
     switch (construction.type) {
       case SETTLEMENT:
+      case CITY:
         BuildingView v = settlementLayer.findViewWithTag(viewId);
-        v.setImageResource(R.drawable.settlement);
+        Drawable settleImg = createColoredBuilding(p.color, construction.type); //
+        v.setImageDrawable(settleImg);
         break;
       case STREET:
         StreetView s = streetLayer.findViewWithTag(viewId);
-        if (s.getOrientation() == Orientation.VERTICAL) {
-          s.setImageResource(R.drawable.red_street);
-        } else {
-          s.setImageResource(R.drawable.red_street_1);
-        }
+        Drawable streetImg = createColoredStreet(p.color, s.getOrientation());
+        s.setImageDrawable(streetImg);
         break;
     }
   }
 
+  private LayerDrawable createColoredBuilding(String farbe, ConstructionType type) {
+    Drawable[] layers = new Drawable[2];
+    int colorId = getResources().getIdentifier(farbe.toLowerCase() , "color", getPackageName());
+    int color = getColor(colorId);
+    int colorDarkId = getResources().getIdentifier(farbe.toLowerCase() + "_dark" , "color", getPackageName());
+    int colorDark = getColor(colorDarkId);
+    VectorMasterDrawable container = new VectorMasterDrawable(this, R.drawable.ic_bulding_container);
+    PathModel pathModel = container.getPathModelByName("background");
+    pathModel.setFillColor(color);
+    pathModel.setStrokeColor(colorDark);
+    layers[0] = container;
+    switch (type) {
+      case CITY:
+        layers[1] = this.getResources().getDrawable(R.drawable.ic_city);
+        break;
+      case SETTLEMENT:
+        layers[1] = this.getResources().getDrawable(R.drawable.ic_settlement);
+        break;
+    }
+    LayerDrawable building = new LayerDrawable(layers);
+    building.setLayerGravity(0, Gravity.CENTER);
+    building.setLayerGravity(1, Gravity.CENTER);
+    return building;
+  }
+
+  private Drawable createColoredStreet(String farbe, Orientation orientation) {
+    int colorId = getResources().getIdentifier(farbe.toLowerCase() , "color", getPackageName());
+    int color = getColor(colorId);
+    int colorDarkId = getResources().getIdentifier(farbe.toLowerCase() + "_dark" , "color", getPackageName());
+    int colorDark = getColor(colorDarkId);
+    VectorMasterDrawable street;
+    switch (orientation) {
+      case TILTED:
+        street = new VectorMasterDrawable(this, R.drawable.ic_street_tilted);
+        break;
+      default:
+        street = new VectorMasterDrawable(this, R.drawable.ic_street_straight);
+        break;
+    }
+    PathModel pathModel = street.getPathModelByName("color");
+    pathModel.setFillColor(color);
+    pathModel.setStrokeColor(colorDark);
+    return street;
+  }
   private void showFragment(MainActivityFragment f) {
     FragmentTransaction ft = fragmentManager.beginTransaction();
     ft.addToBackStack(f.tag());

@@ -11,6 +11,10 @@ import de.lmu.settlebattle.catanclient.grid.Location;
 
 public abstract class StreetView extends AppCompatImageView {
 
+  public enum Orientation {
+    VERTICAL, TILTED
+  }
+
   public Location[] location = new Location[2];
   public ConstructionType type;
   private Orientation orientation;
@@ -30,9 +34,5 @@ public abstract class StreetView extends AppCompatImageView {
 
   public Orientation getOrientation() {
     return orientation;
-  }
-
-  public enum Orientation {
-    VERTICAL, TILTED
   }
 }

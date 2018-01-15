@@ -219,6 +219,9 @@ public class MainActivity extends BaseSocketActivity {
           case BUILD_CITY:
             settlementLayer.setWithholdTouchEventsFromChildren(false);
             break;
+          case CARD_BUY:
+            mService.sendMessage(createJSONString(CARD_BUY, null));
+            break;
         }
         slidingPanel.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
         displayMessage(selectedItem);

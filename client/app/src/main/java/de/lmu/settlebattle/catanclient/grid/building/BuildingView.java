@@ -32,4 +32,8 @@ public abstract class BuildingView extends AppCompatImageView{
   }
 
   protected abstract void setLocation(Hex hex);
+
+  public void setType(ConstructionType type) {
+    this.type = type;
+  }
 }

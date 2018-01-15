@@ -772,10 +772,17 @@ public class MainActivity extends BaseSocketActivity {
     }
     switch (construction.type) {
       case SETTLEMENT:
-      case CITY:
         BuildingView v = settlementLayer.findViewWithTag(viewId);
         Drawable settleImg = createColoredBuilding(p.color, construction.type); //
         v.setImageDrawable(settleImg);
+        v.setType(ConstructionType.CITY);
+        break;
+      case CITY:
+        BuildingView bV = settlementLayer.findViewWithTag(viewId);
+        Drawable cityImg = createColoredBuilding(p.color, construction.type); //
+        bV.setImageDrawable(cityImg);
+        bV.setType(ConstructionType.NONE);
+        bV.setClickable(false);
         break;
       case STREET:
         StreetView s = streetLayer.findViewWithTag(viewId);

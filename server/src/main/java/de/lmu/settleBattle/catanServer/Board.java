@@ -86,6 +86,7 @@ public class Board extends JSONStringBuilder {
 //        }
 //        return locations;
 //    }
+
     /**
      * this method initialize the field
      */
@@ -94,11 +95,11 @@ public class Board extends JSONStringBuilder {
         Field[] boardFields = new Field[18];
         //adding 3 tiles each
         for (int i = 0; i <= 2; i++) {
-            boardFields[i*5] = new Field(RawMaterialType.CLAY);
-            boardFields[i*5 + 1] = new Field(RawMaterialType.ORE);
-            boardFields[i*5 + 2] = new Field(RawMaterialType.WOOD);
-            boardFields[i*5 + 3] = new Field(RawMaterialType.WOOL);
-            boardFields[i*5 + 4] = new Field(RawMaterialType.WHEAT);
+            boardFields[i * 5] = new Field(RawMaterialType.CLAY);
+            boardFields[i * 5 + 1] = new Field(RawMaterialType.ORE);
+            boardFields[i * 5 + 2] = new Field(RawMaterialType.WOOD);
+            boardFields[i * 5 + 3] = new Field(RawMaterialType.WOOL);
+            boardFields[i * 5 + 4] = new Field(RawMaterialType.WHEAT);
         }
         //adding 1 tile wood sheep and wheat each
         boardFields[15] = new Field(RawMaterialType.WOOD);
@@ -228,6 +229,7 @@ public class Board extends JSONStringBuilder {
 
     /**
      * returns the harvest that is distributed for one building
+     *
      * @param building
      * @return
      */
@@ -305,8 +307,7 @@ public class Board extends JSONStringBuilder {
             exactlyHere = true;
             buildings = getRoads();
             if (!isValidEdge(locs)) return false;
-        }
-        else if (!isValidCorner(locs)) return false;
+        } else if (!isValidCorner(locs)) return false;
 
         for (Building bld : buildings) {
             if (bld.isBuiltAroundHere(locs, exactlyHere))
@@ -343,68 +344,131 @@ public class Board extends JSONStringBuilder {
     }
 
     /**
-     * <method name: none>
-     * <description: none>
-     * <preconditions: none>
-     * <postconditions: none>
+     * places building on board
+     *
+     * @param bld          building to place
+     * @param initialPhase initial phase is active
+     * @return true if building was built, otherwise false
      */
+    public boolean placeBuilding(Building bld, boolean initialPhase) throws IllegalAccessException {
+        boolean built = false;
 
-    public boolean placeBuilding(Building bld, boolean initialPhase) {
+        switch (bld.getType()) {
+            case SETTLEMENT:
+                built = placeSettlement(bld, initialPhase);
+                break;
+
+            case CITY:
+                built = placeCity(bld, initialPhase);
+                break;
+
+            case ROAD:
+                built = placeRoad(bld);
+                break;
+        }
+        return built;
+    }
+
+    private boolean placeSettlement(Building bld, boolean initialPhaseActive)
+            throws IllegalAccessException {
+        if (!bld.isSettlement()) return false;
+
         boolean cornerAroundIsOccupied = false;
-        boolean edgeIsOccupied = false;
-        boolean edgeAroundIsOccupied = false;
-        Building foundCorner = null;
-        Building foundEdge = null;
+        boolean edgeAroundIsOccupiedByMe = false;
 
         //create a building
         for (Building s : getSettlementsAndCities()) {
             if (s.isBuiltAroundHere(bld.getLocations(), false)) {
                 cornerAroundIsOccupied = true;
+                break;
+            }
+        }
+
+        //if initial phase is active no edges need to be checked
+        //if corner is already occupied, location is not buildable --> don't have to iterate over roads
+        if (!initialPhaseActive && !cornerAroundIsOccupied) {
+            for (Building r : roads) {
+                if (r.isBuiltAroundHere(bld.getLocations(), false)) {
+                    if (r.getOwner() == bld.getOwner()) {
+                        edgeAroundIsOccupiedByMe = true;
+                        break;
+                    }
+                }
+            }
+        }
+
+        if (cornerAroundIsOccupied)
+            //building cannot be placed because of distance rule or corner is already occupied
+            throw new IllegalAccessException("Location bereits besetzt oder Abstandsregel nicht eingehalten");
+
+
+        //in the initial phase a sLocs can be placed anywhere
+        //afterwards it can only placed on corners that are connected to roads of the player
+        if (initialPhaseActive || edgeAroundIsOccupiedByMe) {
+            return this.addRoadOrSettlement(bld);
+        }
+
+        return false;
+    }
+
+
+    private boolean placeRoad(Building bld) {
+
+        boolean cornerAroundIsOccupiedByMe = false;
+        boolean edgeIsOccupied = false;
+        boolean edgeAroundIsOccupiedByMe = false;
+
+        //check if a building of owner is placed around
+        for (Building s : getSettlementsAndCities()) {
+            if (s.isBuiltAroundHere(bld.getLocations(), false) &&
+                    s.getOwner() == bld.getOwner()) {
+                cornerAroundIsOccupiedByMe = true;
+                break;
+            }
+        }
+
+        //check if road is connected to road or edge is already occupied
+        for (Building r : roads) {
+            if (r.isBuiltAroundHere(bld.getLocations(), true)) {
+                edgeIsOccupied = true;
+                break;
+            } else if (r.isBuiltAroundHere(bld.getLocations(), false) &&
+                    r.getOwner() == bld.getOwner()) {
+                edgeAroundIsOccupiedByMe = true;
+            }
+        }
+
+        // roads can only be placed on edges that are connected to a sLocs/city of the player
+        // or another road of the player
+        if (!edgeIsOccupied &&
+                (cornerAroundIsOccupiedByMe || edgeAroundIsOccupiedByMe)) {
+            return this.addRoadOrSettlement(bld);
+        }
+
+        return false;
+    }
+
+    private boolean placeCity(Building bld, boolean initialPhaseActive)
+            throws IllegalAccessException {
+        if (initialPhaseActive)
+            throw new IllegalAccessException("Stadt kann nicht in initialer Bauphase gebaut werden");
+
+        boolean cornerIsOccupied = false;
+        Building foundCorner = null;
+
+        //check if settlement of player is already there
+        for (Building s : getSettlements()) {
+            if (s.getOwner() == bld.getOwner() &&
+                    s.isBuiltAroundHere(bld.getLocations(), true)) {
+                cornerIsOccupied = true;
                 foundCorner = s;
                 break;
             }
         }
 
-        for (Building r : roads) {
-            if (r.isBuiltAroundHere(bld.getLocations(), true)) {
-                edgeIsOccupied = true;
-                break;
-            } else if (r.isBuiltAroundHere(bld.getLocations(), false)) {
-                edgeAroundIsOccupied = true;
-                foundEdge = r;
-                break;
-            }
-        }
-
-        switch (bld.getType()) {
-            case SETTLEMENT:
-                //in the initial phase a sLocs can be placed anywhere
-                //afterwards it can only placed on corners that are connected to roads of the player
-                if (!cornerAroundIsOccupied && (initialPhase ||
-                        edgeAroundIsOccupied && foundEdge.getOwner() == bld.getOwner())) {
-                    return this.addRoadOrSettlement(bld);
-                }
-
-                break;
-
-            case CITY:
-                //Upgrading a sLocs happens here
-                if (cornerAroundIsOccupied && !initialPhase &&
-                        foundCorner.getOwner() == bld.getOwner() && foundCorner.isSettlement()) {
-                    return this.addCity(bld, foundCorner);
-                }
-                break;
-
-            case ROAD:
-                // roads can only be placed on edges that are connected to a sLocs/city of the player or
-                // another road of the player
-                if (!edgeIsOccupied &&
-                        (cornerAroundIsOccupied && foundCorner.getOwner() == bld.getOwner() ||
-                        edgeAroundIsOccupied && foundEdge.getOwner() == bld.getOwner())) {
-                    return this.addRoadOrSettlement(bld);
-                }
-
-                break;
+        //Upgrading a sLocs happens here
+        if (cornerIsOccupied) {
+            return this.addCity(bld, foundCorner);
         }
 
         return false;
@@ -422,6 +486,8 @@ public class Board extends JSONStringBuilder {
 
             ret = true;
         }
+
+        if (ret) changes.firePropertyChange("new city", "", city);
 
         return ret;
     }
@@ -444,7 +510,7 @@ public class Board extends JSONStringBuilder {
         }
 
 
-        if (ret) changes.firePropertyChange("buildings", "", bld);
+        if (ret) changes.firePropertyChange("new building", "", bld);
 
         return ret;
     }

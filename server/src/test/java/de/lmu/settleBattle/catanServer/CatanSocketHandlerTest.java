@@ -13,14 +13,15 @@ import java.util.List;
 
 import static de.lmu.settleBattle.catanServer.Constants.*;
 import static junit.framework.TestCase.assertEquals;
+import static junit.framework.TestCase.assertFalse;
 import static junit.framework.TestCase.assertTrue;
 
 public class CatanSocketHandlerTest {
-    CatanSocketHandler handler;
-    List<TestWebSocketSession> sessions;
-    TestWebSocketSession session1;
-    TestWebSocketSession session2;
-    TestWebSocketSession session3;
+    private CatanSocketHandler handler;
+    private List<TestWebSocketSession> sessions;
+    private TestWebSocketSession session1;
+    private TestWebSocketSession session2;
+    private TestWebSocketSession session3;
 
     @Before
     public void setUp() throws Exception {
@@ -143,18 +144,19 @@ public class CatanSocketHandlerTest {
         assertTrue(p1.getStatus().equals(START_GAME));
         assertTrue(p1.getColor().equals(Color.RED));
 
+        boolean assigned;
         //assign same data to cause error message
-        handler.getUtils().assignPlayerData(session2, setPlayerData("Eminem", Color.RED));
+        try {
+            handler.getUtils().assignPlayerData(session2, setPlayerData("Eminem", Color.RED));
+            assigned = true;
+        } catch (IllegalAccessException ex) {
+            assigned = false;
+        }
 
+        assertFalse(assigned);
         Player p2 = handler.getGameCtrl().getPlayer(session2.getId());
         assertTrue(p2.getColor() == null);
         assertTrue(p2.getName() == null);
-        JSONObject error2 = JSONUtils.createJSON(session2.getLast());
-        JSONObject error1 = JSONUtils.createJSON(session2.get(session2.getLastIndex() - 1));
-        assertTrue(error2.has(ERROR));
-        assertTrue(error1.has(ERROR));
-        assertTrue(error1.getJSONObject(ERROR).get(MESSAGE).equals(NAME_ALREADY_ASSIGNED));
-        assertTrue(error2.getJSONObject(ERROR).get(MESSAGE).equals(COLOR_ALREADY_ASSIGNED));
 
         handler.getUtils().assignPlayerData(session2, setPlayerData("Batman", Color.BLUE));
 
@@ -222,7 +224,7 @@ public class CatanSocketHandlerTest {
 
     //region buildBuildingWithInvalidLocation
     private void buildBuildingWithInvalidLocation(BuildingType type, Location[] locs)
-            throws IOException {
+            throws IOException, IllegalAccessException {
         TestWebSocketSession session = getCurrentSession();
         String id = session.getId();
 
@@ -234,7 +236,14 @@ public class CatanSocketHandlerTest {
         Board board = handler.getGameCtrl().getBoard();
         int builtBuildingCnt = board.getBuildingsSize();
 
-        boolean sBuilt = handler.getUtils().build(SocketUtils.toInt(session.getId()), CatanMessage.sendBuildMessage(building));
+        boolean sBuilt;
+        try {
+            sBuilt = handler.getUtils().build(SocketUtils.toInt(session.getId()), CatanMessage.sendBuildMessage(building));
+        }
+        catch (IllegalAccessException ex) {
+            sBuilt = false;
+        }
+
         assertTrue(board.getBuildingsSize() == builtBuildingCnt);
         assertTrue(!sBuilt);
 
@@ -247,11 +256,10 @@ public class CatanSocketHandlerTest {
 
     //region buildBuildingWithValidLocation
     private void buildBuildingWithValidLocation(BuildingType type, Location[] locs)
-            throws IOException {
+            throws IOException, IllegalAccessException {
         TestWebSocketSession session = getCurrentSession();
 
-        Building building = new Building(
-                handler.getUtils().toInt(session.getId()), type, locs);
+        Building building = new Building(SocketUtils.toInt(session.getId()), type, locs);
 
         int fromIndex = session.getLastIndex();
         //check if sLocs was built
@@ -285,7 +293,6 @@ public class CatanSocketHandlerTest {
 
         int activeStatusCount = 0;
         int waitCount = 0;
-        int otherCnt = 0;
 
         //if there were no player messages, nothing is to be validated
         if (changedPlayers.size() == 0) return;

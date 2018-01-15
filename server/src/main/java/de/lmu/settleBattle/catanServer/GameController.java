@@ -172,7 +172,7 @@ public class GameController implements PropertyChangeListener {
      * @param building
      * @return
      */
-    public boolean placeBuilding(Building building) {
+    public boolean placeBuilding(Building building) throws IllegalAccessException {
         boolean built;
 
         if (!hasBuildPermission(building)) return false;
@@ -182,8 +182,6 @@ public class GameController implements PropertyChangeListener {
         //if the building was successfully built do follow-up work
         if (built) {
             Player owner = getPlayer(building.getOwner());
-            owner.getStock().decrease(building.getType());
-
             owner.addBuilding(building);
 
             //add building to haven array in player so he can trade with it
@@ -791,7 +789,11 @@ public class GameController implements PropertyChangeListener {
 
             case BUILD_SETTLEMENT:
                 Building settlement = new Building(ki.getId(), BuildingType.SETTLEMENT, board.getRandomFreeSettlementLoc());
-                placeBuilding(settlement);
+                try {
+                    placeBuilding(settlement);
+                }catch (IllegalAccessException ex) {
+                    ex.printStackTrace();
+                }
                 break;
 
             case BUILD_STREET:
@@ -805,8 +807,12 @@ public class GameController implements PropertyChangeListener {
 
             case TRADE_OR_BUILD:
                 if (ki.canAfford(BuildingType.SETTLEMENT)) {
-                    Building s = new Building(ki.getId(), BuildingType.SETTLEMENT, board.getRandomFreeSettlementLoc());
-                    placeBuilding(s);
+                    try {
+                        Building s = new Building(ki.getId(), BuildingType.SETTLEMENT, board.getRandomFreeSettlementLoc());
+                        placeBuilding(s);
+                    } catch (IllegalAccessException ex) {
+                        ex.printStackTrace();
+                    }
                 } else if (ki.canAfford(BuildingType.ROAD)) {
                     try {
                         Building r = new Building(ki.getId(), BuildingType.ROAD, board.getFreeRoadLoc(ki, buildingPhaseActive));

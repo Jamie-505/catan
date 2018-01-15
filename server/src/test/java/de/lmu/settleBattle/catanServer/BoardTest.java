@@ -11,8 +11,8 @@ import static org.junit.Assert.*;
 
 public class BoardTest {
 
-    Board board;
-    List<Building> buildings;
+    private Board board;
+    private List<Building> buildings;
 
     //region setUp
     @Before
@@ -27,8 +27,8 @@ public class BoardTest {
         buildings.add(new Building(1, SETTLEMENT, new Location[]{new Location(1, -1), new Location(2, -1), new Location(2, -2)}));
         buildings.add(new Building(1, ROAD, new Location[]{new Location(1, -1), new Location(2, -2)}));
 
-        buildings.add(new Building(1, ROAD, new Location[] {new Location(2,-2), new Location(3,-2)}));
-        buildings.add(new Building(1, SETTLEMENT, new Location[] {new Location(2,-2), new Location(3,-2), new Location(3,-3)}));
+        buildings.add(new Building(1, ROAD, new Location[]{new Location(2, -2), new Location(3, -2)}));
+        buildings.add(new Building(1, SETTLEMENT, new Location[]{new Location(2, -2), new Location(3, -2), new Location(3, -3)}));
 
         buildings.add(new Building(2, SETTLEMENT, new Location[]{new Location(1, 0), new Location(1, 1), new Location(2, 0)}));
         buildings.add(new Building(2, ROAD, new Location[]{new Location(-2, 1), new Location(-1, 0)}));
@@ -38,22 +38,29 @@ public class BoardTest {
         buildings.add(new Building(0, SETTLEMENT, new Location[]{new Location(-2, 1), new Location(-2, 2), new Location(-1, 1)}));
         buildings.add(new Building(0, ROAD, new Location[]{new Location(1, -1), new Location(2, -2)}));
 
-        buildings.add(new Building(2, ROAD, new Location[]{new Location(3,0), new Location(2,1)}));
-        buildings.add(new Building(2, ROAD, new Location[]{new Location(1,2), new Location(2,1)}));
-        buildings.add(new Building(2, ROAD, new Location[]{new Location(-3,2), new Location(-3,3)}));
+        buildings.add(new Building(2, ROAD, new Location[]{new Location(3, 0), new Location(2, 1)}));
+        buildings.add(new Building(2, ROAD, new Location[]{new Location(1, 2), new Location(2, 1)}));
+        buildings.add(new Building(2, ROAD, new Location[]{new Location(-3, 2), new Location(-3, 3)}));
     }
     //endregion
 
     //region build_initialPhase
     @Test
-    public void build_initialPhase() {
+    public void build_initialPhase() throws IllegalAccessException {
         for (int i = 0; i < buildings.size(); i++) {
-            boolean expected = i >= 10 || i == 6 ? false : true;
+            boolean expected = i < 10 && i != 6;
             int expectedSize = expected ? board.getBuildingsSize() + 1 : board.getBuildingsSize();
 
             Building bld = new Building(buildings.get(i).getOwner(), buildings.get(i).getType(),
                     buildings.get(i).getLocations());
-            boolean built = board.placeBuilding(bld, true);
+
+            boolean built;
+            try {
+                built = board.placeBuilding(bld, true);
+            } catch (IllegalAccessException ex) {
+                built = false;
+            }
+
 
             assertTrue(expected == built);
             assertTrue(board.getBuildingsSize() == expectedSize);
@@ -78,34 +85,40 @@ public class BoardTest {
 
 
         Building road = buildings.get(1);
-        assertFalse(road.isBuiltAroundHere(new Location[] {new Location(-2,2), new Location(-1,1)}, true));
-        assertTrue(road.isBuiltAroundHere(new Location[] {new Location(-2,1), new Location(-1,1)}, true));
+        assertFalse(road.isBuiltAroundHere(new Location[]{new Location(-2, 2), new Location(-1, 1)}, true));
+        assertTrue(road.isBuiltAroundHere(new Location[]{new Location(-2, 1), new Location(-1, 1)}, true));
 
         //adjacent edges
-        assertTrue(road.isBuiltAroundHere(new Location[] {new Location(-1,1), new Location(-2,2)}, false));
-        assertTrue(road.isBuiltAroundHere(new Location[] {new Location(-2,1), new Location(-1,0)}, false));
-        assertTrue(road.isBuiltAroundHere(new Location[] {new Location(-1,0), new Location(-1,1)}, false));
-        assertTrue(road.isBuiltAroundHere(new Location[] {new Location(-2,1), new Location(-2,2)}, false));
+        assertTrue(road.isBuiltAroundHere(new Location[]{new Location(-1, 1), new Location(-2, 2)}, false));
+        assertTrue(road.isBuiltAroundHere(new Location[]{new Location(-2, 1), new Location(-1, 0)}, false));
+        assertTrue(road.isBuiltAroundHere(new Location[]{new Location(-1, 0), new Location(-1, 1)}, false));
+        assertTrue(road.isBuiltAroundHere(new Location[]{new Location(-2, 1), new Location(-2, 2)}, false));
 
         //non-adjacent edges
-        assertFalse(road.isBuiltAroundHere(new Location[] {new Location(0,0), new Location(0,1)}, false));
-        assertFalse(road.isBuiltAroundHere(new Location[] {new Location(2,-2), new Location(2,-1)}, false));
+        assertFalse(road.isBuiltAroundHere(new Location[]{new Location(0, 0), new Location(0, 1)}, false));
+        assertFalse(road.isBuiltAroundHere(new Location[]{new Location(2, -2), new Location(2, -1)}, false));
     }
 
     @Test
-    public void build_gameStarted() {
-        board.addRoad(new Building(2, ROAD, new Location[] {new Location(-2,2), new Location(-1,1)} ));
-        board.addRoad(new Building(0, ROAD, new Location[] {new Location(-1,1), new Location(0,0)} ));
-        board.addRoad(new Building(1, ROAD, new Location[] {new Location(2,-1), new Location(2,-2)} ));
-        board.addRoad(new Building(1, ROAD, new Location[] {new Location(-2,1), new Location(-1,0)} ));
+    public void build_gameStarted() throws IllegalAccessException {
+        board.addRoad(new Building(2, ROAD, new Location[]{new Location(-2, 2), new Location(-1, 1)}));
+        board.addRoad(new Building(0, ROAD, new Location[]{new Location(-1, 1), new Location(0, 0)}));
+        board.addRoad(new Building(1, ROAD, new Location[]{new Location(2, -1), new Location(2, -2)}));
+        board.addRoad(new Building(1, ROAD, new Location[]{new Location(-2, 1), new Location(-1, 0)}));
 
         for (int i = 0; i < buildings.size(); i++) {
-            boolean expected = i >= 8 ? false : true;
+            boolean expected = i < 8;
             int expectedSize = expected ? board.getBuildingsSize() + 1 : board.getBuildingsSize();
 
             Building bld = new Building(buildings.get(i).getOwner(), buildings.get(i).getType(),
                     buildings.get(i).getLocations());
-            boolean built = board.placeBuilding(bld, false);
+
+            boolean built;
+            try {
+                built = board.placeBuilding(bld, false);
+            } catch (IllegalAccessException ex) {
+                built = false;
+            }
 
             assertTrue(expected == built);
             assertTrue(board.getBuildingsSize() == expectedSize);
@@ -114,13 +127,13 @@ public class BoardTest {
 
     @Test
     public void robberTest() {
-        Location desert = new Location(0,0);
+        Location desert = new Location(0, 0);
         assertFalse(board.getRobber().isValidNewLocation(desert));
 
-        Location water = new Location(0,-3);
+        Location water = new Location(0, -3);
         assertFalse(board.getRobber().isValidNewLocation(water));
 
-        Location land = new Location(-2,0);
+        Location land = new Location(-2, 0);
         assertTrue(board.getRobber().isValidNewLocation(land));
     }
 }

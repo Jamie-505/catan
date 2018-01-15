@@ -569,15 +569,30 @@ public class Player extends JSONStringBuilder implements Comparable, Cloneable {
         switch (bld.getType()) {
             case ROAD:
                 roads.add(bld);
+                stock.decrease(BuildingType.ROAD);
                 break;
+
             case CITY:
-                cities.add(bld);
+                Building foundS = null;
+                for (Building s : settlements) {
+                    if (s.isBuiltAroundHere(bld.getLocations(), true)) {
+                        foundS = s;
+                        break;
+                    }
+                }
+
+                if (foundS != null) {
+                    settlements.remove(foundS);
+                    cities.add(bld);
+                    stock.decrease(BuildingType.CITY);
+                    stock.increaseSettlement();
+                }
                 break;
+
             case SETTLEMENT:
                 settlements.add(bld);
+                stock.decrease(BuildingType.SETTLEMENT);
                 break;
-            default:
-                throw new IllegalArgumentException("This type does not exist");
         }
     }
 

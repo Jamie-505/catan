@@ -34,12 +34,12 @@ public class SocketUtils {
     }
 
     //region build
-    public boolean build(int id, TextMessage message) throws IOException, IllegalArgumentException {
+    public boolean build(int id, TextMessage message) throws IllegalAccessException {
         Building building = gson.fromJson(JSONUtils.createJSON(message)
                 .getJSONObject(Constants.BUILD).toString(), Building.class);
         if (building.getOwner() == id)
             return this.gameCtrl.placeBuilding(building);
-        else throw new IllegalArgumentException(
+        else throw new IllegalAccessException(
                 String.format("Owner %s cannot build building for owner %s", id, building.getOwner()));
     }
     //endregion
@@ -99,7 +99,7 @@ public class SocketUtils {
 
     //region assignPlayerData
     public void assignPlayerData(WebSocketSession session, TextMessage message)
-            throws InterruptedException, IOException {
+            throws InterruptedException, IOException, IllegalAccessException {
         JSONObject json = JSONUtils.createJSON(message);
         Player gPlayer = gson.fromJson(json.get(PLAYER).toString(), Player.class);
         Color color = gPlayer.getColor();
@@ -114,15 +114,12 @@ public class SocketUtils {
             player.setColor(color);
 
         } else {
-            if (!validName) {
-                System.out.printf("Send Message to %s: %s", gPlayer.getId(), Constants.NAME_ALREADY_ASSIGNED);
-                session.sendMessage(CatanMessage.error(Constants.NAME_ALREADY_ASSIGNED));
-            }
+            if (!validName)
+                throw new IllegalAccessException(CatanMessage.error(Constants.NAME_ALREADY_ASSIGNED).toString());
 
-            if (!validColor) {
-                System.out.printf("Send Message to %s: %s", gPlayer.getId(), Constants.COLOR_ALREADY_ASSIGNED);
-                session.sendMessage(CatanMessage.error(Constants.COLOR_ALREADY_ASSIGNED));
-            }
+            if (!validColor)
+                throw new IllegalAccessException(CatanMessage.error(Constants.COLOR_ALREADY_ASSIGNED).toString());
+
         }
     }
     //endregion

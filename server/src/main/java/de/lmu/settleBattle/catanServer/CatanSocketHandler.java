@@ -31,9 +31,9 @@ public class CatanSocketHandler extends TextWebSocketHandler implements Property
         utils = new SocketUtils();
 
         utils.getGameCtrl().getBoard().addPropertyChangeListener(e -> {
-                    sendMessageToAll(CatanMessage.newBuilding((Building) e.getNewValue()));
                     System.out.printf("A new building has been built: %s %n",
                             ((Building) e.getNewValue()).toJSONString());
+                    sendMessageToAll(CatanMessage.newBuilding((Building) e.getNewValue()));
                 }
         );
 
@@ -54,7 +54,7 @@ public class CatanSocketHandler extends TextWebSocketHandler implements Property
         System.out.println(session.getId() + " has opened a connection");
         super.afterConnectionEstablished(session);
 
-        Player player = new Player(utils.toInt(session.getId()));
+        Player player = new Player(SocketUtils.toInt(session.getId()));
 
         try {
             utils.getGameCtrl().addPlayer(player);
@@ -66,10 +66,7 @@ public class CatanSocketHandler extends TextWebSocketHandler implements Property
 
             // sending session id to the client that just connected
             TextMessage verifyProtocol = CatanMessage.serverProtocol();
-            System.out.printf("Send Message to %s: %s", player.getId(), verifyProtocol.toString());
-            session.sendMessage(verifyProtocol);
-        } catch (IOException e) {
-            e.printStackTrace();
+            sendSynchronizedMessage(session, verifyProtocol);
         } catch (IllegalAccessException e) {
             sendError(session, "Cannot join this game");
             e.printStackTrace();
@@ -80,7 +77,7 @@ public class CatanSocketHandler extends TextWebSocketHandler implements Property
     //region handleTextMessage
     @Override
     public void handleTextMessage(WebSocketSession session, TextMessage message)
-            throws InterruptedException, IOException, IllegalArgumentException {
+            throws InterruptedException, IOException {
 
         System.out.println("Message from " + session.getId() + ": " + message.getPayload());
 
@@ -96,7 +93,14 @@ public class CatanSocketHandler extends TextWebSocketHandler implements Property
                     break;
 
                 case PLAYER:
-                    utils.assignPlayerData(session, message);
+                    try {
+                        utils.assignPlayerData(session, message);
+                    }
+                    catch (IllegalAccessException ex) {
+                        ex.printStackTrace();
+                        errorMessage = ex.getMessage();
+                        OK = false;
+                    }
                     break;
 
                 case START_GAME:
@@ -107,37 +111,42 @@ public class CatanSocketHandler extends TextWebSocketHandler implements Property
                     break;
 
                 case BUILD:
-                    OK = utils.build(utils.toInt(session.getId()), message);
-                    if (!OK) errorMessage = "Das Gebäude kann nicht gebaut werden.";
+                    try {
+                        OK = utils.build(SocketUtils.toInt(session.getId()), message);
+                        if (!OK) errorMessage = "Das Gebäude kann nicht gebaut werden.";
+                    } catch (IllegalAccessException ex) {
+                        errorMessage = ex.getMessage();
+                        OK = false;
+                    }
                     break;
 
                 case ROLL_DICE:
-                    OK = getGameCtrl().dice(utils.toInt(session.getId()));
+                    OK = getGameCtrl().dice(SocketUtils.toInt(session.getId()));
                     if (!OK) errorMessage = "Du bist nicht am Zug";
                     break;
 
                 case CARD_MONOPOLY:
-                    sendMessageToAll(CatanMessage.monopoleCard(utils.toInt(session.getId()), message));
-                    OK = utils.applyMonopolyCard(session,message);
-                    if(!OK) errorMessage = "Die Monopolkarte konnte nicht ausgespielt werden.";
+                    sendMessageToAll(CatanMessage.monopoleCard(SocketUtils.toInt(session.getId()), message));
+                    OK = utils.applyMonopolyCard(session, message);
+                    if (!OK) errorMessage = "Die Monopolkarte konnte nicht ausgespielt werden.";
                     break;
 
                 case CARD_INVENTION:
-                    sendMessageToAll(CatanMessage.inventionCard(utils.toInt(session.getId()), message));
+                    sendMessageToAll(CatanMessage.inventionCard(SocketUtils.toInt(session.getId()), message));
                     OK = utils.applyInventionCard(session, message);
                     if (!OK) errorMessage = "Die Karte Erfindung kann nicht ausgespielt werden.";
                     break;
 
                 case CARD_KNIGHT:
-                    sendMessageToAll(CatanMessage.knightCard(utils.toInt(session.getId()), message));
+                    sendMessageToAll(CatanMessage.knightCard(SocketUtils.toInt(session.getId()), message));
                     OK = utils.applyKnightCard(session, message);
                     if (!OK) errorMessage = "Die Ritterkarte konnte nicht ausgespielt werden.";
                     break;
 
                 case CARD_RD_CON:
-                    sendMessageToAll(CatanMessage.roadConstructionCard(utils.toInt(session.getId()), message));
+                    sendMessageToAll(CatanMessage.roadConstructionCard(SocketUtils.toInt(session.getId()), message));
                     OK = utils.applyRoadConstructionCard(session, message);
-                    if (!OK) errorMessage = "Die Straßenkontruktionskarte konnte nicht ausgespielt werden.";
+                    if (!OK) errorMessage = "Die Straßenkonstruktionskarte konnte nicht ausgespielt werden.";
                     break;
 
                 case ROBBER_TO:
@@ -163,25 +172,25 @@ public class CatanSocketHandler extends TextWebSocketHandler implements Property
                 case TRD_REQ:
                     TradeRequest tradeRequest = utils.tradeOffer(session, message);
                     OK = addTradeRequest(tradeRequest);
-                    if (!OK) sendError(session, "Das Handelsangebot ist ungültig.");
+                    if (!OK) errorMessage = "Das Handelsangebot ist ungültig.";
                     break;
 
                 case TRD_RES:
                     OK = utils.tradeAccepted(session, message);
-                    if (!OK) sendError(session,
+                    if (!OK) errorMessage =
                             "Der Spieler kann das Handelsangebot nicht annehmen, da er entweder " +
-                                    "die geforderten Rohstoffe nicht besitzt oder die Handels-ID ungültig ist.");
+                                    "die geforderten Rohstoffe nicht besitzt oder die Handels-ID ungültig ist.";
                     break;
 
                 case TRD_SEL:
                     OK = utils.tradeConduction(session, message);
                     if (!OK)
-                        sendError(session, "Der Handel konnte nicht durchgeführt werden. Haben beide Parteien genügend Rohstoffe?");
+                        errorMessage = "Der Handel konnte nicht durchgeführt werden. Haben beide Parteien genügend Rohstoffe?";
                     break;
 
                 case TRD_REJ:
                     OK = utils.tradeCancelled(message);
-                    if (!OK) sendError(session, "Die Handels-ID exitsiert nicht.");
+                    if (!OK) errorMessage = "Die Handels-ID exitsiert nicht.";
                     break;
 
                 case END_TURN:
@@ -198,15 +207,10 @@ public class CatanSocketHandler extends TextWebSocketHandler implements Property
                         if (utils.getGameCtrl().startGame())
                             sendMessageToAll(CatanMessage.startGame(utils.getGameCtrl().getBoard()));
 
-                    } catch (IllegalAccessException ex) {
+                    } catch (Exception ex) {
                         OK = false;
                         errorMessage = "Es konnte keine KI hinzugefügt werden.";
                     }
-                    break;
-
-                case GAME_OVER:
-                    OK = utils.endGame(session);
-                    if (!OK) errorMessage = "Failed to end the game";
                     break;
             }
 
@@ -219,7 +223,7 @@ public class CatanSocketHandler extends TextWebSocketHandler implements Property
         }
     }
 
-    public void nextMove() throws IOException {
+    private void nextMove() throws IOException {
         Player current = utils.getGameCtrl().getCurrent();
 
         //current player has won the game
@@ -276,12 +280,11 @@ public class CatanSocketHandler extends TextWebSocketHandler implements Property
             for (WebSocketSession session : sessions) {
                 TextMessage message;
 
-                if (utils.toInt(session.getId()) == player.getId()) {
+                if (SocketUtils.toInt(session.getId()) == player.getId()) {
                     message = CatanMessage.statusUpdate(player);
                 } else message = CatanMessage.statusUpdatePublic(player);
 
-                System.out.printf("Send Message to %s: %s", utils.toInt(session.getId()), message.toString());
-                session.sendMessage(message);
+                sendSynchronizedMessage(session, message);
             }
         }
     }
@@ -289,12 +292,11 @@ public class CatanSocketHandler extends TextWebSocketHandler implements Property
     private void sendStatusUpdate(Player player) throws IOException {
         for (WebSocketSession session : sessions) {
             TextMessage message;
-            if (utils.toInt(session.getId()) == player.getId()) {
+            if (SocketUtils.toInt(session.getId()) == player.getId()) {
                 message = CatanMessage.statusUpdate(player);
             } else message = CatanMessage.statusUpdatePublic(player);
 
-            System.out.printf("Send Message to %s: %s", utils.toInt(session.getId()), message.toString());
-            session.sendMessage(message);
+            sendSynchronizedMessage(session, message);
         }
     }
     //endregion
@@ -310,69 +312,62 @@ public class CatanSocketHandler extends TextWebSocketHandler implements Property
 
         // Looping through all the sessions and sending the message individually
         for (WebSocketSession s : sessions) {
-
-            try {
-                System.out.printf("Send Message to %s: %s", s.getId(), message);
-
-                s.sendMessage(message);
-            } catch (IOException e) {
-                System.out.printf("Send error to: %s %s ", s.getId(), e.getMessage());
-                e.printStackTrace();
-            }
+            sendSynchronizedMessage(s, message);
         }
     }
 
     /**
      * sends normal message to current player and hidden message to everyone else
      *
-     * @param sessionId
-     * @param privateMessage
-     * @param publicMessage
+     * @param sessionId      id of session
+     * @param privateMessage message sent to himself
+     * @param publicMessage  message sent to everybody else
      */
     public void sendMessageToAll(String sessionId, TextMessage privateMessage, TextMessage publicMessage) {
         // Looping through all the sessions and sending the message individually
         for (WebSocketSession s : sessions) {
-
-            try {
-                TextMessage sentMessage = s.getId().equals(sessionId) ? privateMessage : publicMessage;
-
-                System.out.printf("Send Message to %s: %s", s.getId(), sentMessage);
-                s.sendMessage(sentMessage);
-
-            } catch (IOException e) {
-                System.out.printf("Send error to: %s %s ", s.getId(), e.getMessage());
-                e.printStackTrace();
-            }
+            TextMessage message = s.getId().equals(sessionId) ? privateMessage : publicMessage;
+            sendSynchronizedMessage(s, message);
         }
     }
     //endregion
 
     private void sendFellowPlayers(WebSocketSession session) throws IOException {
         for (Player player : utils.getGameCtrl().getPlayers())
-            if (player.getId() != utils.toInt(session.getId()))
-                session.sendMessage(CatanMessage.statusUpdate(player));
+            if (player.getId() != SocketUtils.toInt(session.getId()))
+                sendSynchronizedMessage(session, CatanMessage.statusUpdate(player));
     }
 
     //region sendOK
     private void sendOK(WebSocketSession session) {
-        try {
-            TextMessage message = CatanMessage.OK();
-            session.sendMessage(message);
-            System.out.printf("Send Message to %s: %s", utils.toInt(session.getId()), message.toString());
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        TextMessage message = CatanMessage.OK();
+        sendSynchronizedMessage(session, message);
     }
     //endregion
 
+    /**
+     * send message synchronized
+     *
+     * @param session web socket session
+     * @param message message to be sent
+     */
+    private void sendSynchronizedMessage(WebSocketSession session, TextMessage message) {
+
+        try {
+            synchronized (session) {
+                System.out.printf("Send Message to %s: %s", SocketUtils.toInt(session.getId()), message.getPayload());
+                session.sendMessage(message);
+            }
+
+        } catch (IOException ex) {
+            System.out.printf("Send error to: %s %s ", session.getId(), ex.getMessage());
+            ex.printStackTrace();
+        }
+    }
+
     //region sendError
     private void sendError(WebSocketSession session, String errorDescription) {
-        try {
-            session.sendMessage(CatanMessage.error(errorDescription));
-            System.out.printf("Send Message to %s: %s", utils.toInt(session.getId()), errorDescription);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        sendSynchronizedMessage(session, CatanMessage.error(errorDescription));
     }
     //endregion
 
@@ -457,21 +452,21 @@ public class CatanSocketHandler extends TextWebSocketHandler implements Property
                     //TODO
                     break;
             }
-            } catch(IOException ex){
-                System.out.printf("An exception occured %s", ex.getMessage());
-            }
+        } catch (IOException ex) {
+            System.out.printf("An exception occured %s", ex.getMessage());
+        }
 
     }
 
-        public void endGame (WebSocketSession session){
-            Player winner = utils.getGameCtrl().getPlayer(session.getId());
-            if (winner.hasWon() && winner.getId() == this.utils.getGameCtrl().getPlayerWithHighestPoints().getId()) {
-                sendMessageToAll(CatanMessage.endGame(winner));
-                this.utils.endGame(session);
-            }
+    public void endGame(WebSocketSession session) {
+        Player winner = utils.getGameCtrl().getPlayer(session.getId());
+        if (winner.hasWon() && winner.getId() == this.utils.getGameCtrl().getPlayerWithHighestPoints().getId()) {
+            sendMessageToAll(CatanMessage.endGame(winner));
+            this.utils.endGame(session);
         }
+    }
 
 
-        //endregion
+    //endregion
 
 }

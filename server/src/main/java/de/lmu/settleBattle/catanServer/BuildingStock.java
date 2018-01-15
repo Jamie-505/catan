@@ -27,6 +27,10 @@ public class BuildingStock {
         return count;
     }
 
+    public void increaseSettlement() {
+        this.settlementCount += 1;
+    }
+
     public boolean decrease(BuildingType type) {
         if (getCount(type) < 1)
             return false;

@@ -258,13 +258,17 @@ public class Player extends JSONStringBuilder implements Comparable, Cloneable {
     }
 
     public void decreaseRawMaterials(RawMaterialOverview overview) throws IllegalArgumentException {
-        changes.firePropertyChange(RMO_DECR, overview, this);
+        if (overview.getTotalCount() == 0) return;
+
         this.rawMaterialDeck.decrease(overview);
+        changes.firePropertyChange(RMO_DECR, overview, this);
     }
 
     public void increaseRawMaterials(RawMaterialOverview overview) throws IllegalArgumentException {
-        changes.firePropertyChange(RMO_INCR, overview, this);
+        if (overview.getTotalCount() == 0) return;
+
         this.rawMaterialDeck.increase(overview);
+        changes.firePropertyChange(RMO_INCR, overview, this);
     }
 
     public void removeDevelopmentCard(DevCardType type) throws Exception {

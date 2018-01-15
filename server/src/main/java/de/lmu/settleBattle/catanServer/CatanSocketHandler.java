@@ -452,6 +452,10 @@ public class CatanSocketHandler extends TextWebSocketHandler implements Property
                 case DICE:
                     sendMessageToAll(CatanMessage.throwDice(player.getId(), (int[]) evt.getOldValue()));
                     break;
+
+                case END_TURN:
+                    //TODO
+                    break;
             }
             } catch(IOException ex){
                 System.out.printf("An exception occured %s", ex.getMessage());

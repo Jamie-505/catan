@@ -221,7 +221,9 @@ public class MainActivity extends BaseSocketActivity {
             break;
         }
         slidingPanel.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
-        Toast.makeText(getApplicationContext(), selectedItem, Toast.LENGTH_SHORT).show();
+        displayMessage(selectedItem);
+      } else {
+        displayMessage("Du kannst gerade nicht bauen, evtl musst du erst Würfeln oder auf deinen Zug warten");
       }
     });
 
@@ -494,7 +496,7 @@ public class MainActivity extends BaseSocketActivity {
 
   private void initializePlayerCards(Player[] players) {
     mCardAdapter = new CardPagerAdapter();
-    mViewPager = (ViewPager) findViewById(R.id.viewPager);
+    mViewPager = findViewById(R.id.viewPager);
 
     for (Player p : players) {
       CardItem card = new CardItem(false, p.color, p.name, p.victoryPts, p.devCards.getTotalAmnt(),
@@ -514,7 +516,7 @@ public class MainActivity extends BaseSocketActivity {
   }
 
   private void OnGridHexClick(Hex hex) {
-    Toast.makeText(MainActivity.this, "Es wurde: " + hex + "gedrückt.", Toast.LENGTH_SHORT).show();
+    displayMessage("Es wurde: " + hex + "gedrückt");
   }
 
   private void reactToIntent(Intent intent) {
@@ -522,14 +524,21 @@ public class MainActivity extends BaseSocketActivity {
     if (action != null) {
       switch (action) {
         case BUILD_VILLAGE:
-          Toast.makeText(MainActivity.this, "Du kannst jetzt eine Siedlung bauen", Toast.LENGTH_LONG).show();
+          mViewPager.setCurrentItem(0, true);
+          mCardAdapter.getCardViewAt(0).findViewById(R.id.cardContain).setBackgroundColor(Color.WHITE);
+          displayMessage("Du kannst jetzt eine Siedlung bauen");
+          streetLayer.setWithholdTouchEventsFromChildren(true);
           settlementLayer.setWithholdTouchEventsFromChildren(false);
           break;
         case BUILD_STREET:
-          Toast.makeText(MainActivity.this, "Du kannst jetzt eine Straße bauen", Toast.LENGTH_LONG).show();
+          mViewPager.setCurrentItem(0, true);
+          mCardAdapter.getCardViewAt(0).findViewById(R.id.cardContain).setBackgroundColor(Color.WHITE);
+          displayMessage("Du kannst jetzt eine Staße bauen");
+          settlementLayer.setWithholdTouchEventsFromChildren(true);
           streetLayer.setWithholdTouchEventsFromChildren(false);
           break;
         case BUILD_TRADE:
+          updatePlayerViews();
           Player p = gson.fromJson(intent.getStringExtra(PLAYER), Player.class);
           if (storage.isItMe(p.id)) {
             isItTimeToBuild = true;
@@ -555,13 +564,17 @@ public class MainActivity extends BaseSocketActivity {
           String conStr = intent.getStringExtra(NEW_CONSTRUCT);
           Construction construction = gson.fromJson(conStr, Construction.class);
           showConstruction(construction);
+          break;
         case OK:
           hideFragment(seaTradeFragment);
           break;
         case PLAYER_WAIT:
           hideActiveElements();
+          break;
         case ROLL_DICE:
           showView(diceBtn);
+          mViewPager.setCurrentItem(0, true);
+          mCardAdapter.getCardViewAt(0).findViewById(R.id.cardContain).setBackgroundColor(Color.WHITE);
           break;
         case STATUS_UPD:
           updatePlayerViews();
@@ -812,6 +825,7 @@ public class MainActivity extends BaseSocketActivity {
       TextView vpPoints = cardView.findViewById(R.id.siegpunkte);
       vpPoints.setText(String.valueOf(p.victoryPts));
       if (!p.status.equals(STATUS_WAIT)) {
+        mViewPager.setCurrentItem(i, true);
         cardView.findViewById(R.id.cardContain).setBackgroundColor(Color.WHITE);
       } else {
         cardView.findViewById(R.id.cardContain)

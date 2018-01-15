@@ -112,14 +112,15 @@ public class WebSocketService extends Service {
         itsMe = storage.isItMe(player);
       }
     } catch (ArrayIndexOutOfBoundsException e) {
-      Log.i(TAG, "Mail was empty :P");
+      // nothing to do here
+      // just means that no further info was send in the mail
     }
     switch (mail[0].toString()) {
       case BUILD_VILLAGE:
         if (itsMe) {
           while(!mainActivityActive) {
             try {
-              Thread.sleep(20);
+              Thread.sleep(200);
             } catch (InterruptedException e) {
               Log.e(TAG, "NEW CONSTRUCT WAIT FAILED");
               e.printStackTrace();
@@ -182,7 +183,7 @@ public class WebSocketService extends Service {
       case NEW_CONSTRUCT:
         while(!mainActivityActive) {
           try {
-            Thread.sleep(20);
+            Thread.sleep(200);
           } catch (InterruptedException e) {
             Log.e(TAG, "NEW CONSTRUCT WAIT FAILED");
             e.printStackTrace();

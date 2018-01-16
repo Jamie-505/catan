@@ -169,6 +169,8 @@ public class Player extends JSONStringBuilder implements Comparable, Cloneable {
             this.victoryPtsHidden += amount;
             increaseVictoryPoints(amount, false);
         }
+
+        changes.firePropertyChange(DEV_CARD_BUY, "null", this);
     }
 
     //region trade

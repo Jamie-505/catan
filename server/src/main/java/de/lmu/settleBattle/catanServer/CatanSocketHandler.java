@@ -446,6 +446,7 @@ public class CatanSocketHandler extends TextWebSocketHandler implements Property
                     break;
 
                 case VP_INCR:
+                case DEV_CARD_BUY:
                     sendStatusUpdate = true;
                     break;
 

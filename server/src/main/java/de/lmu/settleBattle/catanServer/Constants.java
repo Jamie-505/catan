@@ -134,4 +134,5 @@ public class Constants {
     public final static String SU_TO_ALL = "SU_TO_ALL";
     public final static String SU_ONLY_TO_ME = "SU_ONLY_TO_ME";
     public final static String VP_INCR = "Victory Pts Increased";
+    public final static String DEV_CARD_BUY = "DevCard Bought";
 }

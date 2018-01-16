@@ -125,16 +125,13 @@ public class SocketUtils {
     //endregion
 
     //region handleStartGameMessage
-    public boolean handleStartGameMessage(WebSocketSession session, TextMessage message) throws IOException {
-        boolean ready = false;
+    public void handleStartGameMessage(WebSocketSession session, TextMessage message) {
         JSONObject json = (JSONUtils.createJSON(message)).
                 getJSONObject(Constants.START_GAME);
 
         if (json.length() == 0) {
             setStatus(session.getId(), Constants.WAIT_FOR_GAME_START);
-            ready = gameCtrl.readyToStartGame();
         }
-        return ready;
     }
     //endregion
 

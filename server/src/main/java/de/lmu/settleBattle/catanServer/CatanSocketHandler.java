@@ -31,9 +31,11 @@ public class CatanSocketHandler extends TextWebSocketHandler implements Property
         utils = new SocketUtils();
 
         utils.getGameCtrl().getBoard().addPropertyChangeListener(e -> {
-                    System.out.printf("A new building has been built: %s %n",
-                            ((Building) e.getNewValue()).toJSONString());
-                    sendMessageToAll(CatanMessage.newBuilding((Building) e.getNewValue()));
+                    if (e.getPropertyName().equals("new building")) {
+                        System.out.printf("A new building has been built: %s %n",
+                                ((Building) e.getNewValue()).toJSONString());
+                        sendMessageToAll(CatanMessage.newBuilding((Building) e.getNewValue()));
+                    }
                 }
         );
 
@@ -76,8 +78,7 @@ public class CatanSocketHandler extends TextWebSocketHandler implements Property
 
     //region handleTextMessage
     @Override
-    public void handleTextMessage(WebSocketSession session, TextMessage message)
-            throws InterruptedException, IOException {
+    public void handleTextMessage(WebSocketSession session, TextMessage message) {
 
         System.out.println("Message from " + session.getId() + ": " + message.getPayload());
 
@@ -95,8 +96,7 @@ public class CatanSocketHandler extends TextWebSocketHandler implements Property
                 case PLAYER:
                     try {
                         utils.assignPlayerData(session, message);
-                    }
-                    catch (IllegalAccessException ex) {
+                    } catch (IllegalAccessException ex) {
                         ex.printStackTrace();
                         errorMessage = ex.getMessage();
                         OK = false;
@@ -104,9 +104,10 @@ public class CatanSocketHandler extends TextWebSocketHandler implements Property
                     break;
 
                 case START_GAME:
-                    if (utils.handleStartGameMessage(session, message)) {
+                    utils.handleStartGameMessage(session, message);
+                    if (utils.getGameCtrl().readyToStartGame()) {
                         sendMessageToAll(CatanMessage.startGame(utils.getGameCtrl().getBoard()));
-                        utils.getGameCtrl().startGame();
+                        getGameCtrl().startGame();
                     }
                     break;
 
@@ -204,8 +205,10 @@ public class CatanSocketHandler extends TextWebSocketHandler implements Property
                         newPlayer.setStatus(WAIT_FOR_GAME_START);
                         sendOK(session);
 
-                        if (utils.getGameCtrl().startGame())
+                        if (utils.getGameCtrl().readyToStartGame()) {
                             sendMessageToAll(CatanMessage.startGame(utils.getGameCtrl().getBoard()));
+                            getGameCtrl().startGame();
+                        }
 
                     } catch (Exception ex) {
                         OK = false;
@@ -273,20 +276,9 @@ public class CatanSocketHandler extends TextWebSocketHandler implements Property
     //endregion
 
     //region sendStatusUpdate
-    private void sendStatusUpdate() throws IOException {
-
-        //for every player send status update to everybody
-        for (Player player : utils.getGameCtrl().getPlayers()) {
-            for (WebSocketSession session : sessions) {
-                TextMessage message;
-
-                if (SocketUtils.toInt(session.getId()) == player.getId()) {
-                    message = CatanMessage.statusUpdate(player);
-                } else message = CatanMessage.statusUpdatePublic(player);
-
-                sendSynchronizedMessage(session, message);
-            }
-        }
+    private void sendStatusUpdateToMe(Player player) {
+        sendSynchronizedMessage(getSession(Integer.toHexString(player.getId())),
+                CatanMessage.statusUpdate(player));
     }
 
     private void sendStatusUpdate(Player player) throws IOException {
@@ -413,13 +405,17 @@ public class CatanSocketHandler extends TextWebSocketHandler implements Property
     public void propertyChange(PropertyChangeEvent evt) {
         try {
             Player player = (Player) evt.getNewValue();
-            sendStatusUpdate(player);
+            boolean sendStatusUpdate = true;
 
             System.out.printf("Property '%s': '%s' -> '%s'%n",
                     evt.getPropertyName(), evt.getOldValue(), player.getStatus());
 
             switch (evt.getPropertyName()) {
 
+                case SU_ONLY_TO_ME:
+                    sendStatusUpdateToMe(player);
+                    sendStatusUpdate = false;
+                    break;
                 case TRD_DECR:
                     RawMaterialOverview costs = (RawMaterialOverview) evt.getOldValue();
                     sendMessageToAll(CatanMessage.costs(getGameCtrl().getCurrent().getId(), costs, false));
@@ -446,12 +442,19 @@ public class CatanSocketHandler extends TextWebSocketHandler implements Property
 
                 case DICE:
                     sendMessageToAll(CatanMessage.throwDice(player.getId(), (int[]) evt.getOldValue()));
+                    sendStatusUpdate = false;
+                    break;
+
+                case VP_INCR:
+                    sendStatusUpdate = true;
                     break;
 
                 case END_TURN:
                     //TODO
                     break;
             }
+
+            if (sendStatusUpdate) sendStatusUpdate(player);
         } catch (IOException ex) {
             System.out.printf("An exception occured %s", ex.getMessage());
         }

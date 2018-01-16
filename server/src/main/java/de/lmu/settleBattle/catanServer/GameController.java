@@ -14,12 +14,6 @@ import java.util.Stack;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
-import org.springframework.web.socket.TextMessage;
-import org.springframework.web.socket.WebSocketSession;
-
-import java.io.IOException;
-import java.util.*;
-
 import static de.lmu.settleBattle.catanServer.Constants.*;
 
 public class GameController implements PropertyChangeListener {
@@ -197,7 +191,7 @@ public class GameController implements PropertyChangeListener {
                     // always add 1 victory point because:
                     // a new settlement brings 1 victory point and
                     // if a city was built then the owner has already received 1 victory point for the settlement he built before
-                    owner.increaseVictoryPoints(1);
+                    owner.increaseVictoryPoints(1, true);
             }
 
             //raw material distribution for second settlement
@@ -718,7 +712,7 @@ public class GameController implements PropertyChangeListener {
         if (player.getArmyCount() < 3) return true;
 
         if (this.greatestArmyPlayer == null) {
-            player.increaseVictoryPoints(2);
+            player.increaseVictoryPoints(2, true);
             player.setGreatestArmy(true);
             this.greatestArmyPlayer = player;
             done = true;
@@ -729,7 +723,7 @@ public class GameController implements PropertyChangeListener {
                 try {
                     greatestArmyPlayer.decreaseVictoryPoints(2);
                     greatestArmyPlayer.setGreatestArmy(false);
-                    player.increaseVictoryPoints(2);
+                    player.increaseVictoryPoints(2, true);
                     player.setGreatestArmy(true);
                     this.greatestArmyPlayer = player;
                     done = true;
@@ -767,7 +761,7 @@ public class GameController implements PropertyChangeListener {
         Player ki = (Player) evt.getNewValue();
         if (!ki.isKI()) return;
 
-        if (!evt.getPropertyName().equals(PROP_STATUS))
+        if (!evt.getPropertyName().equals(SU_TO_ALL))
             return;
 
         switch (ki.getStatus()) {

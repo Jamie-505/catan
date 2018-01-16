@@ -171,17 +171,21 @@ public class CatanSocketHandlerTest {
     @Test
     public void handleStartGameMessage() throws Exception {
         initializeAssignments();
-        boolean started = handler.getUtils().handleStartGameMessage(session1, startGameMessage());
+        handler.getUtils().handleStartGameMessage(session1, startGameMessage());
+        boolean started = handler.getGameCtrl().readyToStartGame();
         assertTrue(!started);
         Player p1 = CatanMessage.statusUpdateToPlayer(session1.getLast());
         assertTrue(p1.getStatus().equals(WAIT_FOR_GAME_START));
 
-        started = handler.getUtils().handleStartGameMessage(session2, startGameMessage());
+        handler.getUtils().handleStartGameMessage(session2, startGameMessage());
+        started = handler.getGameCtrl().readyToStartGame();
         assertTrue(!started);
         Player p2 = CatanMessage.statusUpdateToPlayer(session2.getLast());
         assertTrue(p2.getStatus().equals(WAIT_FOR_GAME_START));
 
-        started = handler.getUtils().handleStartGameMessage(session3, startGameMessage());
+
+        handler.getUtils().handleStartGameMessage(session3, startGameMessage());
+        started = handler.getGameCtrl().readyToStartGame();
         assertTrue(started);
         Player p3 = CatanMessage.statusUpdateToPlayer(session3.getLast());
         assertTrue(p3.getStatus().equals(WAIT_FOR_GAME_START));

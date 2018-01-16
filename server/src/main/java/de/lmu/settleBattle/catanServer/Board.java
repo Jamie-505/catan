@@ -487,7 +487,7 @@ public class Board extends JSONStringBuilder {
             ret = true;
         }
 
-        if (ret) changes.firePropertyChange("new city", "", city);
+        if (ret) changes.firePropertyChange("new building", "", city);
 
         return ret;
     }

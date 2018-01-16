@@ -12,8 +12,6 @@ import java.util.Random;
 
 import static de.lmu.settleBattle.catanServer.Constants.*;
 
-import static de.lmu.settleBattle.catanServer.Constants.*;
-
 public class Player extends JSONStringBuilder implements Comparable, Cloneable {
 
     //region property change listener
@@ -169,7 +167,7 @@ public class Player extends JSONStringBuilder implements Comparable, Cloneable {
         this.developmentDeck.increase(card, amount);
         if(card == DevCardType.VICTORY_POINT){
             this.victoryPtsHidden += amount;
-            increaseVictoryPoints(amount);
+            increaseVictoryPoints(amount, false);
         }
     }
 
@@ -308,10 +306,12 @@ public class Player extends JSONStringBuilder implements Comparable, Cloneable {
         this.victoryPtsTotal -= - i;
     }
 
-    public void increaseVictoryPoints(int amount){
+    public void increaseVictoryPoints(int amount, boolean showAll){
         int oldVpAmount = this.victoryPtsTotal;
         this.victoryPtsTotal = victoryPtsTotal + amount;
-        changes.firePropertyChange(VP_INCR, oldVpAmount, this);
+
+        if (showAll) changes.firePropertyChange(VP_INCR, oldVpAmount, this);
+        else changes.firePropertyChange(SU_ONLY_TO_ME, oldVpAmount, this);
     }
 
     /**
@@ -401,7 +401,7 @@ public class Player extends JSONStringBuilder implements Comparable, Cloneable {
         if (fire) {
             String oldStatus = this.status;
             this.status = newStatus;
-            changes.firePropertyChange(PROP_STATUS, oldStatus, this);
+            changes.firePropertyChange(SU_TO_ALL, oldStatus, this);
         }
     }
 
@@ -449,7 +449,7 @@ public class Player extends JSONStringBuilder implements Comparable, Cloneable {
         boolean fire = !color.equals(this.color);
         this.color = color;
         if (fire)
-            changes.firePropertyChange("color", "null", this);
+            changes.firePropertyChange(SU_TO_ALL, "null", this);
     }
 
     public boolean isKI() {

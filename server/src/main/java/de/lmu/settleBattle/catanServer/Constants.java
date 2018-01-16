@@ -128,9 +128,10 @@ public class Constants {
     public final static String TRD_INCR = "Trade Increase";
     public final static String RMO_INCR = "RawMaterial Increase";
     public final static String RMO_DECR = "RawMaterial Decrease";
-    public final static String PROP_STATUS = "Status Prop";
     public final static String TDR_REQ_ACC = "TR Accept";
     public final static String TDR_REQ_CANCEL = "TR Cancel";
     public final static String TDR_REQ_EXE = "TR Execute";
-    public final static String VP_INCR = "VictoryPointIncrease";
+    public final static String SU_TO_ALL = "SU_TO_ALL";
+    public final static String SU_ONLY_TO_ME = "SU_ONLY_TO_ME";
+    public final static String VP_INCR = "Victory Pts Increased";
 }

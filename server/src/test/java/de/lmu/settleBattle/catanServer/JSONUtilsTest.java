@@ -110,7 +110,7 @@ public class JSONUtilsTest {
   @Test
   public void playerJSON() throws Exception {
     //check player to JSON
-    player1.increaseVictoryPoints(4);
+    player1.increaseVictoryPoints(4, true);
     player1.addDevelopmentCard(DevCardType.VICTORY_POINT, 3);
     JSONObject playerHidden = player1.toJSON_Unknown();
     assertEquals(4, playerHidden.get(Constants.VICTORY_PTS));

@@ -22,10 +22,8 @@ public class JSONUtils {
    * @param msg JSON string to be interpreted
    */
   public static Object[] parse(final String msg) {
-
     try {
       JSONObject jObj = new JSONObject(msg);
-
       String msgType = jObj.keys().next();
 
       switch (msgType) {
@@ -60,6 +58,8 @@ public class JSONUtils {
         case TRD_FIN:
           trade = gson.fromJson(jObj.getString(msgType), Trade.class);
           return new Object[] { msgType, trade };
+        case ROBBER_AT:
+          return new String[] { msgType, jObj.getString(msgType) };
         case HARVEST:
         case COSTS:
           return new String[] {"TODO"};
@@ -80,6 +80,7 @@ public class JSONUtils {
       case GAME_READY:
       case GAME_START:
       case GAME_WAIT:
+      case ROBBER_TO:
       case ROLL_DICE:
         return new Object[] { player.status, player };
       default:

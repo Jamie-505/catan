@@ -1,9 +1,39 @@
 package de.lmu.settlebattle.catanclient.network;
 
-import static de.lmu.settlebattle.catanclient.utils.Constants.*;
-
-import com.google.gson.Gson;
-import de.lmu.settlebattle.catanclient.player.Player;
+import static de.lmu.settlebattle.catanclient.utils.Constants.ACTION_CONNECTION_ESTABLISHED;
+import static de.lmu.settlebattle.catanclient.utils.Constants.ACTION_NETWORK_STATE_CHANGED;
+import static de.lmu.settlebattle.catanclient.utils.Constants.BOARD;
+import static de.lmu.settlebattle.catanclient.utils.Constants.BUILD_STREET;
+import static de.lmu.settlebattle.catanclient.utils.Constants.BUILD_TRADE;
+import static de.lmu.settlebattle.catanclient.utils.Constants.BUILD_VILLAGE;
+import static de.lmu.settlebattle.catanclient.utils.Constants.DICE_RESULT;
+import static de.lmu.settlebattle.catanclient.utils.Constants.DICE_THROW;
+import static de.lmu.settlebattle.catanclient.utils.Constants.DISPLAY_ERROR;
+import static de.lmu.settlebattle.catanclient.utils.Constants.ERROR;
+import static de.lmu.settlebattle.catanclient.utils.Constants.ERROR_MSG;
+import static de.lmu.settlebattle.catanclient.utils.Constants.GAME_READY;
+import static de.lmu.settlebattle.catanclient.utils.Constants.GAME_START;
+import static de.lmu.settlebattle.catanclient.utils.Constants.GAME_WAIT;
+import static de.lmu.settlebattle.catanclient.utils.Constants.NEW_CONSTRUCT;
+import static de.lmu.settlebattle.catanclient.utils.Constants.NEXT_ACTIVITY;
+import static de.lmu.settlebattle.catanclient.utils.Constants.OK;
+import static de.lmu.settlebattle.catanclient.utils.Constants.PLAYER;
+import static de.lmu.settlebattle.catanclient.utils.Constants.PLAYER_UPDATE;
+import static de.lmu.settlebattle.catanclient.utils.Constants.PLAYER_WAIT;
+import static de.lmu.settlebattle.catanclient.utils.Constants.PROTOCOL_SUPPORTED;
+import static de.lmu.settlebattle.catanclient.utils.Constants.ROBBER;
+import static de.lmu.settlebattle.catanclient.utils.Constants.ROBBER_AT;
+import static de.lmu.settlebattle.catanclient.utils.Constants.ROBBER_TO;
+import static de.lmu.settlebattle.catanclient.utils.Constants.ROLL_DICE;
+import static de.lmu.settlebattle.catanclient.utils.Constants.STATUS_UPD;
+import static de.lmu.settlebattle.catanclient.utils.Constants.TO_SERVER;
+import static de.lmu.settlebattle.catanclient.utils.Constants.TO_STORAGE;
+import static de.lmu.settlebattle.catanclient.utils.Constants.TRADE;
+import static de.lmu.settlebattle.catanclient.utils.Constants.TRD_ABORTED;
+import static de.lmu.settlebattle.catanclient.utils.Constants.TRD_ACC;
+import static de.lmu.settlebattle.catanclient.utils.Constants.TRD_FIN;
+import static de.lmu.settlebattle.catanclient.utils.Constants.TRD_OFFER;
+import static de.lmu.settlebattle.catanclient.utils.Constants.TRD_SENT;
 
 import android.app.Service;
 import android.content.BroadcastReceiver;
@@ -14,9 +44,12 @@ import android.os.Binder;
 import android.os.IBinder;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
+import com.google.gson.Gson;
+import de.lmu.settlebattle.catanclient.player.Player;
+import de.lmu.settlebattle.catanclient.player.Storage;
+import de.lmu.settlebattle.catanclient.robber.Robber;
 import de.lmu.settlebattle.catanclient.trade.Trade;
 import de.lmu.settlebattle.catanclient.utils.JSONUtils;
-import de.lmu.settlebattle.catanclient.player.Storage;
 import java.net.URI;
 import java.net.URISyntaxException;
 import org.java_websocket.client.WebSocketClient;
@@ -120,7 +153,7 @@ public class WebSocketService extends Service {
         if (itsMe) {
           while(!mainActivityActive) {
             try {
-              Thread.sleep(200);
+              Thread.sleep(50);
             } catch (InterruptedException e) {
               Log.e(TAG, "NEW CONSTRUCT WAIT FAILED");
               e.printStackTrace();
@@ -183,7 +216,7 @@ public class WebSocketService extends Service {
       case NEW_CONSTRUCT:
         while(!mainActivityActive) {
           try {
-            Thread.sleep(200);
+            Thread.sleep(50);
           } catch (InterruptedException e) {
             Log.e(TAG, "NEW CONSTRUCT WAIT FAILED");
             e.printStackTrace();
@@ -192,6 +225,7 @@ public class WebSocketService extends Service {
         Intent newConstruct = new Intent(NEW_CONSTRUCT);
         newConstruct.putExtra(NEW_CONSTRUCT, mail[1].toString());
         broadcast(newConstruct);
+        break;
       case OK:
         broadcast(OK);
         break;
@@ -238,6 +272,22 @@ public class WebSocketService extends Service {
         }
         tradeIntent.putExtra(TRADE, gson.toJson(trade));
         broadcast(tradeIntent);
+        break;
+      case ROBBER_AT:
+        String robberStr = mail[1].toString();
+        Robber robber = gson.fromJson(robberStr, Robber.class);
+        if (storage.isItMe(robber.player)) {
+          broadcast(ROBBER_AT);
+        } else {
+          Intent robberIntent = new Intent(ROBBER);
+          robberIntent.putExtra(ROBBER, robberStr);
+          broadcast(robberIntent);
+        }
+        break;
+      case ROBBER_TO:
+        if (itsMe) {
+          broadcast(ROBBER_TO);
+        }
         break;
     }
   }

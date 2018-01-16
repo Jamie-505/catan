@@ -71,5 +71,6 @@
     <string name="bauen_und_baukosten">Bauen und Baukosten</string>
   <string name="add_ki">Füge KI hinzu</string>
   <string name="end_turn">Zug beenden</string>
+  <string name="select_robber_target">Wähle aus wen du bestehlen willst</string>
 
 </resources>

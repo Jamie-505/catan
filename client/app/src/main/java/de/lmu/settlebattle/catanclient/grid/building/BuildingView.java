@@ -31,6 +31,10 @@ public abstract class BuildingView extends AppCompatImageView{
     return tag;
   }
 
+  public static String createTag(Location l) {
+    return String.valueOf(l.getX()) + String.valueOf(l.getY());
+  }
+
   protected abstract void setLocation(Hex hex);
 
   public void setType(ConstructionType type) {

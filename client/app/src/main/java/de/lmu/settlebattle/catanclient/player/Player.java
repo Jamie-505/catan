@@ -11,7 +11,6 @@ import static de.lmu.settlebattle.catanclient.utils.Constants.RAW_MATERIALS;
 import static de.lmu.settlebattle.catanclient.utils.Constants.VICTORY_PTS;
 
 import com.google.gson.annotations.SerializedName;
-import java.util.Map;
 
 public class Player {
   public int id;

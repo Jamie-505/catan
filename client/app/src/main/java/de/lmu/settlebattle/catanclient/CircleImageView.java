@@ -27,6 +27,8 @@ import android.util.AttributeSet;
 
 import android.view.Gravity;
 import de.lmu.settlebattle.catanclient.grid.Hex;
+import de.lmu.settlebattle.catanclient.grid.building.BuildingView;
+import java.util.ArrayList;
 
 public class CircleImageView extends AppCompatImageView {
 
@@ -64,6 +66,8 @@ public class CircleImageView extends AppCompatImageView {
   private boolean mSetupPending;
 
   private Hex mHex; //Hold the node coordinates on the grid
+  private Drawable[] layers = new Drawable[3];
+  private ArrayList<Integer> owners = new ArrayList<>();
 
   public CircleImageView(Context context) {
     super(context);
@@ -141,12 +145,23 @@ public class CircleImageView extends AppCompatImageView {
     setup();
   }
 
+  public void addOwner(int id) {
+    if (!owners.contains(id)){
+      owners.add(id);
+    }
+  }
+
+  public ArrayList<Integer> getOwners() {
+    return owners;
+  }
+
   public Hex getHex() {
     return mHex;
   }
 
   public void setHex(Hex hex) {
     mHex = hex;
+    this.setTag(BuildingView.createTag(mHex.getLocation()));
   }
 
   public int getBorderColor() {
@@ -164,7 +179,6 @@ public class CircleImageView extends AppCompatImageView {
   }
 
   private void setLayers(String type, int number) {
-    Drawable[] layers = new Drawable[2];
     switch (type) {
       case CLAY:
         layers[0] = this.getResources().getDrawable(R.drawable.clay_field);
@@ -183,7 +197,7 @@ public class CircleImageView extends AppCompatImageView {
         break;
       default:
         layers[0] = this.getResources().getDrawable(R.drawable.desert_field);
-        layers[1] = this.getResources().getDrawable(R.drawable.robber);
+        layers[1] = this.getResources().getDrawable(R.drawable.desert_field);
         break;
     }
     switch (number) {
@@ -219,9 +233,28 @@ public class CircleImageView extends AppCompatImageView {
         layers[1] = this.getResources().getDrawable(R.drawable.no_12);
         break;
     }
-    LayerDrawable tile = new LayerDrawable(layers);
-    tile.setLayerGravity(1, Gravity.CENTER);
-    this.setImageDrawable(tile);
+    layers[2] = this.getResources().getDrawable(R.drawable.robber).mutate();
+    // set robber visible on desert in beginning
+    if (!type.equals("DESERT")) {
+      layers[2].setAlpha(0);
+    }
+    LayerDrawable layerImg = new LayerDrawable(layers);
+    layerImg.setLayerGravity(1, Gravity.CENTER);
+    layerImg.setLayerGravity(2, Gravity.CENTER);
+    this.setImageDrawable(layerImg);
+  }
+
+  public void showRobber(boolean show) {
+    if (show) {
+      layers[2] = getResources().getDrawable(R.drawable.robber).mutate();
+    } else {
+      layers[2] = getResources().getDrawable(R.drawable.robber).mutate();
+      layers[2].setAlpha(0);
+    }
+    LayerDrawable layerImg = new LayerDrawable(layers);
+    layerImg.setLayerGravity(1, Gravity.CENTER);
+    layerImg.setLayerGravity(2, Gravity.CENTER);
+    this.setImageDrawable(layerImg);
   }
 
   public void setSelected(boolean selected) {

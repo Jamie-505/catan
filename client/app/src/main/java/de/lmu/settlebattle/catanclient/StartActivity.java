@@ -70,8 +70,7 @@ public class StartActivity extends Activity {
       Log.i(TAG, "No ActionBar to hide...");
     }
 
-
-    btnConnect = (Button) findViewById(R.id.connectButton);
+    btnConnect = findViewById(R.id.connectButton);
 
     btnConnect.setOnClickListener((View v) -> {
       if (!connected) {
@@ -95,6 +94,12 @@ public class StartActivity extends Activity {
       }
 
     });
+  }
+
+  @Override
+  protected void onStop() {
+    unbindService(mConnection);
+    super.onStop();
   }
 }
 

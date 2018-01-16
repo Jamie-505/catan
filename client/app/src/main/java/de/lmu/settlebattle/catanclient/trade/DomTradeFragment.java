@@ -175,45 +175,53 @@ public class DomTradeFragment extends MainActivityFragment {
   }
 
   private void updateTradeStatus(int id, boolean accepted) {
-    String allPlayers = mainActivity.storage.getAllPlayersAsJson();
-    setPlayers(allPlayers);
+    try {
+      String allPlayers = mainActivity.storage.getAllPlayersAsJson();
+      setPlayers(allPlayers);
 
-    for (int i = 0; i < players.length; i++) {
-      if (players[i] != null) {
-        int resIdCon = getResources().getIdentifier(
-            "p" + i, "id", mainActivity.getPackageName()
-        );
-        int resIdNam = getResources().getIdentifier(
-            "p"+i+"Name", "id", mainActivity.getPackageName()
-        );
-        int resIdSta = getResources().getIdentifier(
-            "p"+i+"Status", "id", mainActivity.getPackageName()
-        );
-        LinearLayout playerView = (LinearLayout) fragmentView.findViewById(resIdCon);
-        playerView.setVisibility(View.VISIBLE);
-        TextView playerName = (TextView) fragmentView.findViewById(resIdNam);
-        playerName.setText(players[i].name);
-        ImageButton playerStatus = (ImageButton) fragmentView.findViewById(resIdSta);
-        int colorId = getResources().getIdentifier(
-            players[i].color.toLowerCase(), "color", mainActivity.getPackageName()
-        );
-        playerStatus.setBackgroundColor(getResources().getColor(colorId));
-        if (players[i].id == id) {
-          if (accepted) {
-            playerStatus.setImageDrawable(getResources().getDrawable(R.drawable.ic_success));
-            playerStatus.setOnClickListener((View v) -> {
-              Trade finalTrade = new Trade(null, null);
-              finalTrade.id = trade.id;
-              finalTrade.opponent = id;
-              String answer = JSONUtils.createJSONString(TRD_SEL, finalTrade);
-              mainActivity.mService.sendMessage(answer);
-            });
-            playerStatus.setClickable(true);
-          } else {
-            playerStatus.setImageDrawable(getResources().getDrawable(R.drawable.ic_decline));
-            playerStatus.setClickable(false);
+      for (int i = 0; i < players.length; i++) {
+        if (players[i] != null) {
+          int resIdCon = getResources().getIdentifier(
+              "p" + i, "id", mainActivity.getPackageName()
+          );
+          int resIdNam = getResources().getIdentifier(
+              "p" + i + "Name", "id", mainActivity.getPackageName()
+          );
+          int resIdSta = getResources().getIdentifier(
+              "p" + i + "Status", "id", mainActivity.getPackageName()
+          );
+          LinearLayout playerView = fragmentView.findViewById(resIdCon);
+          playerView.setVisibility(View.VISIBLE);
+          TextView playerName = fragmentView.findViewById(resIdNam);
+          playerName.setText(players[i].name);
+          ImageButton playerStatus = fragmentView.findViewById(resIdSta);
+          int colorId = getResources().getIdentifier(
+              players[i].color.toLowerCase(), "color", mainActivity.getPackageName()
+          );
+          playerStatus.setBackgroundColor(getResources().getColor(colorId));
+          if (players[i].id == id) {
+            if (accepted) {
+              playerStatus.setImageDrawable(getResources().getDrawable(R.drawable.ic_success));
+              playerStatus.setOnClickListener((View v) -> {
+                Trade finalTrade = new Trade(null, null);
+                finalTrade.id = trade.id;
+                finalTrade.opponent = id;
+                String answer = JSONUtils.createJSONString(TRD_SEL, finalTrade);
+                mainActivity.mService.sendMessage(answer);
+              });
+              playerStatus.setClickable(true);
+            } else {
+              playerStatus.setImageDrawable(getResources().getDrawable(R.drawable.ic_decline));
+              playerStatus.setClickable(false);
+            }
           }
         }
+      }
+    } catch (Exception e) {
+      if (isAdded()) {
+        mainActivity = (MainActivity) getActivity();
+        mainActivity.onBackPressed();
+        mainActivity.displayMessage("Hoppla, da ist wohl was schief gelaufen");
       }
     }
   }

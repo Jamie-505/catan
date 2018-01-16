@@ -80,9 +80,9 @@ public class LobbyActivity extends BaseSocketActivity {
   private void updatePlayers(String allPlayers) {
     setPlayers(allPlayers);
     // player card
-    TextView playerName = (TextView) findViewById(R.id.playerName);
+    TextView playerName = findViewById(R.id.playerName);
     playerName.setText(players[0].name);
-    ImageButton playerColor = (ImageButton) findViewById(R.id.playerStatus);
+    ImageButton playerColor = findViewById(R.id.playerStatus);
     int colorId = getResources().getIdentifier(players[0].color.toLowerCase()
         , "color", getPackageName());
     playerColor.setBackgroundColor(getResources().getColor(colorId));
@@ -95,9 +95,8 @@ public class LobbyActivity extends BaseSocketActivity {
     for (int i = 1; i < players.length; i++) {
       try {
         if (players[i] != null) {
-          ConstraintLayout opponentCard =
-              (ConstraintLayout) findViewById(getResources().getIdentifier(
-              "player" + (i + 1), "id", getPackageName()));
+          ConstraintLayout opponentCard = findViewById(getResources()
+                  .getIdentifier("player" + (i + 1), "id", getPackageName()));
           opponentCard.setVisibility(View.VISIBLE);
 
           TextView opponentName = (TextView) findViewById(getResources().getIdentifier(

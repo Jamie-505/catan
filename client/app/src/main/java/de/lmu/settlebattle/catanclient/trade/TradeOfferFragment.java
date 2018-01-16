@@ -42,6 +42,7 @@ public class TradeOfferFragment extends MainActivityFragment {
             break;
           case TRD_ABORTED:
             mainActivity.onBackPressed();
+            break;
         }
       }
     }
@@ -68,9 +69,9 @@ public class TradeOfferFragment extends MainActivityFragment {
     if (getArguments() != null) {
       trade = gson.fromJson(getArguments().getString(TRADE), Trade.class);
       trader = mainActivity.storage.getOpponent(trade.player);
-      TextView playerName = (TextView) view.findViewById(R.id.playerName);
+      TextView playerName = view.findViewById(R.id.playerName);
       playerName.setText(trader.name);
-      ImageButton playerIcon = (ImageButton) view.findViewById(R.id.playerIcon);
+      ImageButton playerIcon = view.findViewById(R.id.playerIcon);
       int colorId = getResources().getIdentifier(trader.color.toLowerCase(),
           "color", mainActivity.getPackageName());
       playerIcon.setBackgroundColor(getResources().getColor(colorId));
@@ -79,18 +80,18 @@ public class TradeOfferFragment extends MainActivityFragment {
       // fill fields with correct amounts
       for (String resource : fields) {
         int resIdOffer = getResources().getIdentifier("offer" + resource + "Cnt","id", mainActivity.getPackageName());
-        TextView offerAmount = (TextView) view.findViewById(resIdOffer);
+        TextView offerAmount = view.findViewById(resIdOffer);
         offerAmount.setText(String.valueOf(trade.offer.getQnts()[i]));
         int resIdReq = getResources().getIdentifier("req" + resource + "Cnt","id", mainActivity.getPackageName());
-        TextView reqAmount = (TextView) view.findViewById(resIdReq);
+        TextView reqAmount = view.findViewById(resIdReq);
         reqAmount.setText(String.valueOf(trade.request.getQnts()[i++]));
       }
     }
 
-    accBtn = (Button) view.findViewById(R.id.accBtn);
-    cancelBtn = (Button) view.findViewById(R.id.cancelBtn);
-    decBtn = (Button) view.findViewById(R.id.decBtn);
-    tradeStatus = (CardView) view.findViewById(R.id.tradeStatus);
+    accBtn = view.findViewById(R.id.accBtn);
+    cancelBtn = view.findViewById(R.id.cancelBtn);
+    decBtn = view.findViewById(R.id.decBtn);
+    tradeStatus = view.findViewById(R.id.tradeStatus);
 
     setOnClickListener();
 
@@ -148,37 +149,45 @@ public class TradeOfferFragment extends MainActivityFragment {
   }
 
   private void updateTradeStatus(int id, boolean accepted) {
-    String allPlayers = mainActivity.storage.getAllPlayersAsJson();
-    setPlayers(allPlayers);
+    try {
+      String allPlayers = mainActivity.storage.getAllPlayersAsJson();
+      setPlayers(allPlayers);
 
-    for (int i = 0; i < players.length; i++) {
-      if (players[i] != null && players[i].id != trader.id) {
-        // trader is not shown therefor no update for him
-        int resIdCon = getResources().getIdentifier(
-            "p" + i, "id", mainActivity.getPackageName()
-        );
-        int resIdNam = getResources().getIdentifier(
-            "p"+i+"Name", "id", mainActivity.getPackageName()
-        );
-        int resIdSta = getResources().getIdentifier(
-            "p"+i+"Status", "id", mainActivity.getPackageName()
-        );
-        LinearLayout playerView = (LinearLayout) view.findViewById(resIdCon);
-        playerView.setVisibility(View.VISIBLE);
-        TextView playerName = (TextView) view.findViewById(resIdNam);
-        playerName.setText(players[i].name);
-        ImageButton playerStatus = (ImageButton) view.findViewById(resIdSta);
-        int colorId = getResources().getIdentifier(
-            players[i].color.toLowerCase(), "color", mainActivity.getPackageName()
-        );
-        playerStatus.setBackgroundColor(getResources().getColor(colorId));
-        if (players[i].id == id) {
-          if (accepted) {
-            playerStatus.setImageDrawable(getResources().getDrawable(R.drawable.ic_success));
-          } else {
-            playerStatus.setImageDrawable(getResources().getDrawable(R.drawable.ic_decline));
+      for (int i = 0; i < players.length; i++) {
+        if (players[i] != null && players[i].id != trader.id) {
+          // trader is not shown therefor no update for him
+          int resIdCon = getResources().getIdentifier(
+              "p" + i, "id", getActivity().getPackageName()
+          );
+          int resIdNam = getResources().getIdentifier(
+              "p"+i+"Name", "id", getActivity().getPackageName()
+          );
+          int resIdSta = getResources().getIdentifier(
+              "p"+i+"Status", "id", getActivity().getPackageName()
+          );
+          LinearLayout playerView = (LinearLayout) view.findViewById(resIdCon);
+          playerView.setVisibility(View.VISIBLE);
+          TextView playerName = (TextView) view.findViewById(resIdNam);
+          playerName.setText(players[i].name);
+          ImageButton playerStatus = (ImageButton) view.findViewById(resIdSta);
+          int colorId = getResources().getIdentifier(
+              players[i].color.toLowerCase(), "color", getActivity().getPackageName()
+          );
+          playerStatus.setBackgroundColor(getResources().getColor(colorId));
+          if (players[i].id == id) {
+            if (accepted) {
+              playerStatus.setImageDrawable(getResources().getDrawable(R.drawable.ic_success));
+            } else {
+              playerStatus.setImageDrawable(getResources().getDrawable(R.drawable.ic_decline));
+            }
           }
         }
+      }
+    } catch (Exception e) {
+      if (isAdded()) {
+        mainActivity = (MainActivity) getActivity();
+        mainActivity.onBackPressed();
+        mainActivity.displayMessage("Hoppla, da ist wohl was schief gelaufen");
       }
     }
   }

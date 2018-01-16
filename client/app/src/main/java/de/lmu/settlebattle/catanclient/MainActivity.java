@@ -1,5 +1,6 @@
 package de.lmu.settlebattle.catanclient;
 
+import static de.lmu.settlebattle.catanclient.grid.building.BuildingView.createTag;
 import static de.lmu.settlebattle.catanclient.utils.Constants.BOARD;
 import static de.lmu.settlebattle.catanclient.utils.Constants.BUILD;
 import static de.lmu.settlebattle.catanclient.utils.Constants.BUILD_CITY;
@@ -15,11 +16,16 @@ import static de.lmu.settlebattle.catanclient.utils.Constants.END_TURN;
 import static de.lmu.settlebattle.catanclient.utils.Constants.ERROR_MSG;
 import static de.lmu.settlebattle.catanclient.utils.Constants.NEW_CONSTRUCT;
 import static de.lmu.settlebattle.catanclient.utils.Constants.OK;
+import static de.lmu.settlebattle.catanclient.utils.Constants.OWNER;
 import static de.lmu.settlebattle.catanclient.utils.Constants.PLAYER;
 import static de.lmu.settlebattle.catanclient.utils.Constants.PLAYER_WAIT;
+import static de.lmu.settlebattle.catanclient.utils.Constants.ROBBER;
+import static de.lmu.settlebattle.catanclient.utils.Constants.ROBBER_AT;
+import static de.lmu.settlebattle.catanclient.utils.Constants.ROBBER_TO;
 import static de.lmu.settlebattle.catanclient.utils.Constants.ROLL_DICE;
 import static de.lmu.settlebattle.catanclient.utils.Constants.STATUS_UPD;
 import static de.lmu.settlebattle.catanclient.utils.Constants.STATUS_WAIT;
+import static de.lmu.settlebattle.catanclient.utils.Constants.TOSS_CARDS;
 import static de.lmu.settlebattle.catanclient.utils.Constants.TRADE;
 import static de.lmu.settlebattle.catanclient.utils.Constants.TRD_ABORTED;
 import static de.lmu.settlebattle.catanclient.utils.Constants.TRD_FIN;
@@ -54,7 +60,6 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 import com.google.gson.Gson;
 import com.sdsmdg.harjot.vectormaster.VectorMasterDrawable;
 import com.sdsmdg.harjot.vectormaster.models.PathModel;
@@ -67,6 +72,8 @@ import de.lmu.settlebattle.catanclient.grid.ConstructionsLayer;
 import de.lmu.settlebattle.catanclient.grid.Cube;
 import de.lmu.settlebattle.catanclient.grid.Grid;
 import de.lmu.settlebattle.catanclient.grid.Hex;
+import de.lmu.settlebattle.catanclient.grid.Location;
+import de.lmu.settlebattle.catanclient.robber.Robber;
 import de.lmu.settlebattle.catanclient.grid.StorageMap;
 import de.lmu.settlebattle.catanclient.grid.building.BuildingView;
 import de.lmu.settlebattle.catanclient.grid.building.BuildingViewN;
@@ -83,10 +90,13 @@ import de.lmu.settlebattle.catanclient.player.Storage;
 import de.lmu.settlebattle.catanclient.playerCards.CardItem;
 import de.lmu.settlebattle.catanclient.playerCards.CardPagerAdapter;
 import de.lmu.settlebattle.catanclient.playerCards.ShadowTransformer;
+import de.lmu.settlebattle.catanclient.robber.RobberFragment;
 import de.lmu.settlebattle.catanclient.trade.DomTradeFragment;
 import de.lmu.settlebattle.catanclient.trade.SeaTradeFragment;
 import de.lmu.settlebattle.catanclient.trade.Trade;
 import de.lmu.settlebattle.catanclient.trade.TradeOfferFragment;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class MainActivity extends BaseSocketActivity {
 
@@ -94,6 +104,7 @@ public class MainActivity extends BaseSocketActivity {
   private static final String TAG = MainActivity.class.getSimpleName();
 
   private boolean isItTimeToBuild;
+  private boolean enableRobber;
   public Storage storage;
   private Player self;
   private Player[] allPlayers;
@@ -115,7 +126,7 @@ public class MainActivity extends BaseSocketActivity {
   private FragmentManager fragmentManager = getFragmentManager();
   private Gson gson = new Gson();
   private ImageButton diceBtn;
-  private RelativeLayout gridLayout;
+  private CircleImageView currentRobberTile;
   private SeaTradeFragment seaTradeFragment = new SeaTradeFragment();
   private SlidingUpPanelLayout slidingPanel;
   private TextView selfClayCnt;
@@ -125,6 +136,7 @@ public class MainActivity extends BaseSocketActivity {
   private TextView selfWoodCnt;
   private TextView selfWoolCnt;
   private TradeOfferFragment tradeOfferFragment = new TradeOfferFragment();
+  private RelativeLayout gridLayout;
 
   // Card Viewer
   private ViewPager mViewPager;
@@ -183,8 +195,8 @@ public class MainActivity extends BaseSocketActivity {
     initializePlayerCards(allPlayers);
 
     initGridView(radius, board.fields);
-    streetLayer.setWithholdTouchEventsFromChildren(true);
-    settlementLayer.setWithholdTouchEventsFromChildren(true);
+    currentRobberTile = findViewByLoc(new Location(0, 0));
+    disableClickLayers();
 
     setSupportActionBar(findViewById(R.id.main_toolbar));
 
@@ -213,13 +225,16 @@ public class MainActivity extends BaseSocketActivity {
         String selectedItem= actionEntries[+position];
         switch (selectedItem) {
           case BUILD_STREET:
-            streetLayer.setWithholdTouchEventsFromChildren(false);
+            disableClickLayers();
+            enableConstructionLayer(streetLayer);
             break;
           case BUILD_SETTLEMENT:
           case BUILD_CITY:
-            settlementLayer.setWithholdTouchEventsFromChildren(false);
+            disableClickLayers();
+            enableConstructionLayer(settlementLayer);
             break;
           case CARD_BUY:
+            disableClickLayers();
             mService.sendMessage(createJSONString(CARD_BUY, null));
             break;
         }
@@ -461,7 +476,7 @@ public class MainActivity extends BaseSocketActivity {
     return street;
   }
 
-  private void deactivateBuildLayers() {
+  private void disableClickLayers() {
     settlementLayer.setWithholdTouchEventsFromChildren(true);
     streetLayer.setWithholdTouchEventsFromChildren(true);
   }
@@ -472,9 +487,23 @@ public class MainActivity extends BaseSocketActivity {
     snackbar.show();
   }
 
+  private void enableConstructionLayer(ConstructionsLayer layer) {
+    if (layer == settlementLayer) {
+      streetLayer.setWithholdTouchEventsFromChildren(true);
+      settlementLayer.setWithholdTouchEventsFromChildren(false);
+    } else if (layer == streetLayer) {
+      settlementLayer.setWithholdTouchEventsFromChildren(true);
+      streetLayer.setWithholdTouchEventsFromChildren(false);
+    }
+  }
+
   private void endTurn() {
     hideActiveElements();
     mService.sendMessage(createJSONString(END_TURN, null));
+  }
+
+  private CircleImageView findViewByLoc(Location l) {
+   return gridLayout.findViewWithTag(createTag(l));
   }
 
   private void hideActiveElements() {
@@ -485,9 +514,11 @@ public class MainActivity extends BaseSocketActivity {
   }
 
   private void hideFragment(Fragment fragment) {
-    FragmentTransaction ft = fragmentManager.beginTransaction();
-    ft.hide(fragment);
-    ft.commit();
+    if (fragment != null) {
+      FragmentTransaction ft = fragmentManager.beginTransaction();
+      ft.hide(fragment);
+      ft.commit();
+    }
   }
 
   private void initGridView(int radius, Hex[] fields) {
@@ -518,8 +549,32 @@ public class MainActivity extends BaseSocketActivity {
     mViewPager.setOffscreenPageLimit(3);
   }
 
-  private void OnGridHexClick(Hex hex) {
-    displayMessage("Es wurde: " + hex + "gedrückt");
+  private void moveRobber(Location newRobberLoc) {
+    if (currentRobberTile.getHex().getLocation() == newRobberLoc) {
+      displayMessage("Der Räuber braucht ein neues Zuhause!");
+    } else {
+      currentRobberTile.showRobber(false);
+      currentRobberTile = findViewByLoc(newRobberLoc);
+      currentRobberTile.showRobber(true);
+    }
+  }
+
+  private void OnGridHexClick(CircleImageView cV) {
+    if (enableRobber) {
+      moveRobber(cV.getHex().getLocation());
+      if (cV.getOwners().size() > 1) {
+        Bundle robberBundle = new Bundle();
+        robberBundle.putIntegerArrayList(OWNER, cV.getOwners());
+        RobberFragment robberFragment = new RobberFragment();
+        robberFragment.setArguments(robberBundle);
+        enableRobber = false;
+        showFragment(robberFragment);
+      } else if (cV.getOwners().size() == 1) {
+        sendRobberMsg(cV.getOwners().get(0));
+      } else {
+        sendRobberMsg(null);
+      }
+    }
   }
 
   private void reactToIntent(Intent intent) {
@@ -530,21 +585,22 @@ public class MainActivity extends BaseSocketActivity {
           mViewPager.setCurrentItem(0, true);
           mCardAdapter.getCardViewAt(0).findViewById(R.id.cardContain).setBackgroundColor(Color.WHITE);
           displayMessage("Du kannst jetzt eine Siedlung bauen");
-          streetLayer.setWithholdTouchEventsFromChildren(true);
-          settlementLayer.setWithholdTouchEventsFromChildren(false);
+          enableConstructionLayer(settlementLayer);
           break;
         case BUILD_STREET:
           mViewPager.setCurrentItem(0, true);
           mCardAdapter.getCardViewAt(0).findViewById(R.id.cardContain).setBackgroundColor(Color.WHITE);
           displayMessage("Du kannst jetzt eine Staße bauen");
-          settlementLayer.setWithholdTouchEventsFromChildren(true);
-          streetLayer.setWithholdTouchEventsFromChildren(false);
+          enableConstructionLayer(streetLayer);
           break;
         case BUILD_TRADE:
           updatePlayerViews();
           Player p = gson.fromJson(intent.getStringExtra(PLAYER), Player.class);
           if (storage.isItMe(p.id)) {
+            // needed because of double status updates from the server
+            enableRobber = false;
             isItTimeToBuild = true;
+            displayMessage("Du kannst jetzt bauen und handeln!");
             diceBtn.setVisibility(View.INVISIBLE);
             domTradeBtn.setVisibility(View.VISIBLE);
             seaTradeBtn.setVisibility(View.VISIBLE);
@@ -554,7 +610,7 @@ public class MainActivity extends BaseSocketActivity {
         case DICE_RESULT:
           Bundle diceBundle = new Bundle();
           diceBundle.putString(DICE_THROW, intent.getStringExtra(DICE_THROW));
-          MainActivityFragment diceFragment = new DiceFragment();
+          DiceFragment diceFragment = new DiceFragment();
           diceFragment.setArguments(diceBundle);
           showFragment(diceFragment);
           break;
@@ -562,8 +618,7 @@ public class MainActivity extends BaseSocketActivity {
           displayMessage(intent.getStringExtra(ERROR_MSG));
           break;
         case NEW_CONSTRUCT:
-          settlementLayer.setWithholdTouchEventsFromChildren(true);
-          streetLayer.setWithholdTouchEventsFromChildren(true);
+          disableClickLayers();
           String conStr = intent.getStringExtra(NEW_CONSTRUCT);
           Construction construction = gson.fromJson(conStr, Construction.class);
           showConstruction(construction);
@@ -573,6 +628,16 @@ public class MainActivity extends BaseSocketActivity {
           break;
         case PLAYER_WAIT:
           hideActiveElements();
+          break;
+        case ROBBER:
+          Robber robber = gson.fromJson(intent.getStringExtra(ROBBER), Robber.class);
+          moveRobber(robber.location);
+          break;
+        case ROBBER_AT:
+          break;
+        case ROBBER_TO:
+          enableRobber = true;
+          displayMessage("Setze den Räuber an eine neue Stelle");
           break;
         case ROLL_DICE:
           showView(diceBtn);
@@ -599,14 +664,20 @@ public class MainActivity extends BaseSocketActivity {
     }
   }
 
+  public void sendRobberMsg(Integer id) {
+    Robber r = new Robber(currentRobberTile.getHex().getLocation(), id);
+    mService.sendMessage(createJSONString(ROBBER_TO, r));
+  }
+
   private void setClickListener() {
     diceBtn.setOnClickListener((View v) -> {
+      diceBtn.setVisibility(View.INVISIBLE);
       String diceMsg = createJSONString(ROLL_DICE, new Object());
       mService.sendMessage(diceMsg);
     });
     domTradeBtn.setOnClickListener((View v) -> showFragment(domTradeFragment));
     endTurnBtn.setOnClickListener((View v) -> {
-      deactivateBuildLayers();
+      disableClickLayers();
       isItTimeToBuild = false;
       endTurn();
     });
@@ -623,6 +694,9 @@ public class MainActivity extends BaseSocketActivity {
     filter.addAction(NEW_CONSTRUCT);
     filter.addAction(OK);
     filter.addAction(PLAYER_WAIT);
+    filter.addAction(ROBBER);
+    filter.addAction(ROBBER_AT);
+    filter.addAction(ROBBER_TO);
     filter.addAction(ROLL_DICE);
     filter.addAction(STATUS_UPD);
     filter.addAction(TRD_ABORTED);
@@ -667,35 +741,32 @@ public class MainActivity extends BaseSocketActivity {
       final Grid grid = new Grid(radius, scale);
 
       //Grid node listener restricted to the node's circular area.
-      View.OnTouchListener gridNodeTouchListener = new View.OnTouchListener() {
+      View.OnTouchListener gridNodeTouchListener = (v, event) -> {
+//        v.performClick();
+        switch (event.getAction()) {
+          case MotionEvent.ACTION_DOWN:
+            float xPoint = event.getX();
+            float yPoint = event.getY();
+            boolean isPointOutOfCircle = (grid.centerOffsetX -xPoint)*(grid.centerOffsetX -xPoint)
+                + (grid.centerOffsetY -yPoint)*(grid.centerOffsetY -yPoint) > grid.width * grid.width / 4;
 
-        @Override
-        public boolean onTouch(final View v, MotionEvent event) {
-          switch (event.getAction()) {
-            case MotionEvent.ACTION_DOWN:
-              float xPoint = event.getX();
-              float yPoint = event.getY();
-              boolean isPointOutOfCircle = (grid.centerOffsetX -xPoint)*(grid.centerOffsetX -xPoint) + (grid.centerOffsetY -yPoint)*(grid.centerOffsetY -yPoint) > grid.width * grid.width / 4;
-
-              if (isPointOutOfCircle) return false;
-              else v.setSelected(true);
-              break;
-            case MotionEvent.ACTION_OUTSIDE:
-              break;
-            case MotionEvent.ACTION_CANCEL:
-              break;
-            case MotionEvent.ACTION_MOVE:
-              break;
-            case MotionEvent.ACTION_SCROLL:
-              break;
-            case MotionEvent.ACTION_UP:
-              v.setSelected(false);
-              CircleImageView view = (CircleImageView) v;
-              OnGridHexClick(view.getHex());
-              break;
-          }
-          return true;
+            if (isPointOutOfCircle) return false;
+            else v.setSelected(true);
+            break;
+          case MotionEvent.ACTION_OUTSIDE:
+            break;
+          case MotionEvent.ACTION_CANCEL:
+            break;
+          case MotionEvent.ACTION_MOVE:
+            break;
+          case MotionEvent.ACTION_SCROLL:
+            break;
+          case MotionEvent.ACTION_UP:
+            v.setSelected(false);
+            OnGridHexClick((CircleImageView) v);
+            break;
         }
+        return true;
       };
 
       for(Cube cube : grid.nodes) {
@@ -755,7 +826,7 @@ public class MainActivity extends BaseSocketActivity {
 
       return grid;
     } catch (Exception e) {
-      Toast.makeText(MainActivity.this, "Sorry, there was a problem initializing the application.", Toast.LENGTH_LONG).show();
+      displayMessage("Sorry, there was a problem initializing the application.");
       e.printStackTrace();
     }
 
@@ -771,21 +842,21 @@ public class MainActivity extends BaseSocketActivity {
     }
     String viewId = construction.viewId;
     if (viewId == null) {
-      viewId = BuildingView.createTag(construction.locations);
+      viewId = createTag(construction.locations);
     }
     switch (construction.type) {
-      case SETTLEMENT:
-        BuildingView v = settlementLayer.findViewWithTag(viewId);
-        Drawable settleImg = createColoredBuilding(p.color, construction.type); //
-        v.setImageDrawable(settleImg);
-        v.setType(ConstructionType.CITY);
-        break;
       case CITY:
         BuildingView bV = settlementLayer.findViewWithTag(viewId);
-        Drawable cityImg = createColoredBuilding(p.color, construction.type); //
-        bV.setImageDrawable(cityImg);
-        bV.setType(ConstructionType.NONE);
         bV.setClickable(false);
+      case SETTLEMENT:
+        bV = settlementLayer.findViewWithTag(viewId);
+        Drawable buildingImg = createColoredBuilding(p.color, construction.type);
+        bV.setImageDrawable(buildingImg);
+        bV.setType(ConstructionType.CITY);
+        // only need opponents as owners
+        if (!storage.isItMe(construction.owner)){
+          updateHexOwners(viewId, construction.owner);
+        }
         break;
       case STREET:
         StreetView s = streetLayer.findViewWithTag(viewId);
@@ -822,6 +893,14 @@ public class MainActivity extends BaseSocketActivity {
 
   private void showView(View v) {
     v.setVisibility(View.VISIBLE);
+  }
+
+  private void updateHexOwners(String viewId, int id) {
+    Matcher m = Pattern.compile("-?\\d-?\\d").matcher(viewId);
+    while (m.find()) {
+      CircleImageView v = gridLayout.findViewWithTag(m.group());
+      if (v != null) v.addOwner(id);
+    }
   }
 
   private void updatePlayerCards() {

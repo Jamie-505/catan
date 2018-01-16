@@ -29,15 +29,16 @@ public final class Constants {
   public static final String NEW_CONSTRUCT ="Bauvorgang";
   public static final String OPPONENT ="Mitspieler";
   public static final String PLAYER = "Spieler";
+  public static final String ROBBER = "Räuber";
   public static final String ROBBER_AT = "Räuber versetzt";
-  public static final String ROBBER_TO ="Räuber versetzten";
+  public static final String ROBBER_TO ="Räuber versetzen";
   public static final String ROLL_DICE = "Würfeln";
   public static final String SEA_TRADE = "Seehandel";
   public static final String SERVER_RES = "Serverantwort";
   public static final String STATUS_UPD = "Statusupdate"; //genutzt
   public static final String ERROR_COLOR = "Farbe bereits"; //genutzt
 	public static final String ERROR_NAME = "Name bereits"; //genutzt
-  public static final String TOSS_CARD = "Karte abgeben";
+  public static final String TOSS_CARDS = "Karten abgeben";
   public static final String TRADE = "trade";
   public static final String TRD_ABORTED = "Handelsangebot abgebrochen";
   public static final String TRD_ACC = "Handelsangebot angenommen";
@@ -92,6 +93,7 @@ public final class Constants {
   public final static String ROAD_CONSTRUCTION = "Straßenbau";
   public final static String SETTLEMENT = "Siedlung";
   public final static String STREET = "Strasse";
+  public final static String TARGET = "Ziel";
   public final static String TYPE = "Typ";
   public final static String UNKNOWN = "Unbekannt";
   public final static String VICTORY_PT = "Siegpunkt";

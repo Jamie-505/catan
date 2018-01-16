@@ -54,6 +54,10 @@ public class Hex {
     return loc.x + ":" + loc.y;
   }
 
+  public Location getLocation() {
+    return this.loc;
+  }
+
   public int getX() {
     return loc.x;
   }

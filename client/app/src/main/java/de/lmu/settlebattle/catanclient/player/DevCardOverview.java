@@ -8,6 +8,9 @@ public class DevCardOverview {
   @SerializedName(INVENTION)
   private int invention;
 
+  @SerializedName(KNIGHT)
+  private  int knight;
+
   @SerializedName(MONOPOL)
   private int monopol;
 
@@ -20,22 +23,16 @@ public class DevCardOverview {
   @SerializedName(UNKNOWN)
   private int unknown;
 
-  //region Constructors
-  public DevCardOverview() {
-    this.monopol = this.invention =
-        this.rdConstr = this.victPt = 0;
-  }
-
-
   public DevCardOverview(int[] qnts) {
     this.invention = qnts[0];
     this.monopol = qnts[1];
     this.rdConstr = qnts[2];
     this.victPt = qnts[4];
+    this.knight = qnts[5];
   }
 
   public int[] getQnts() {
-    return new int[] { invention, monopol, rdConstr, victPt, unknown };
+    return new int[] { invention, monopol, rdConstr, victPt, knight, unknown };
   }
 
   public int getTotalAmnt() {

@@ -2,13 +2,12 @@ package de.lmu.settleBattle.catanServer;
 
 import org.junit.Before;
 import org.junit.Test;
-
 import java.util.List;
-
 import static de.lmu.settleBattle.catanServer.Constants.*;
 import static org.junit.Assert.*;
 
 public class GameControllerTest {
+    private CatanSocketHandler handler;
     private GameController gameController;
     private Player player1;
     private Player player2;
@@ -16,7 +15,8 @@ public class GameControllerTest {
 
     @Before
     public void setUp() throws Exception {
-        gameController = new GameController();
+        handler = new CatanSocketHandler();
+        gameController = handler.getGameCtrl();
 
         player1 = new Player(1);
         player1.setName("name1");
@@ -51,7 +51,7 @@ public class GameControllerTest {
 
     @Test
     public void setPlayerActive() throws Exception {
-        gameController.setPlayerActive(player1, Constants.BUILD_SETTLEMENT);
+        gameController.activatePlayer(player1, Constants.BUILD_SETTLEMENT);
 
         assertTrue(gameController.getPlayer(1).getStatus() == Constants.BUILD_SETTLEMENT);
         assertTrue(gameController.getPlayer(2).getStatus() == Constants.WAIT);
@@ -121,13 +121,26 @@ public class GameControllerTest {
     }
     //endregion
 
+    public boolean robberActivated(int id, int opponentId, Location newRobberLoc) {
+        boolean activated;
+
+        try {
+            gameController.activateRobber(id, opponentId, newRobberLoc);
+            activated = true;
+        } catch (CatanException ex) {
+            activated = false;
+        }
+
+        return activated;
+    }
+
     //region moveRobber
     @Test
-    public void moveRobber() {
+    public void moveRobber() throws CatanException {
         int currentId = gameController.getCurrent().getId();
 
         //board contains no settlements so there is no one to rob
-        assertTrue(gameController.activateRobber(currentId, 7, new Location(-1, 0)));
+        assertTrue(robberActivated(currentId, 7, new Location(-1, 0)));
 
         //only one player can be robbed, target is specified
         int robbedId = currentId == 2 ? 3 : 2;
@@ -136,14 +149,14 @@ public class GameControllerTest {
         Building s1 = new Building(robbedId, BuildingType.SETTLEMENT, new Location[]{new Location(2, 0), new Location(1, 1), new Location(2, 1)});
         gameController.getBoard().addSettlement(s1);
 
-        assertTrue(gameController.activateRobber(currentId, robbedId, new Location(2, 0)));
+        assertTrue(robberActivated(currentId, robbedId, new Location(2, 0)));
         assertTrue(gameController.getPlayer(robbedId).getRawMaterialCount() == 1);
 
         //only one player can be robbed, target is not specified
         Building s2 = new Building(robbedId, BuildingType.SETTLEMENT, new Location[]{new Location(-3, 0), new Location(-2, 0), new Location(-2, -1)});
         gameController.getBoard().addSettlement(s2);
 
-        assertTrue(gameController.activateRobber(currentId, 7, new Location(-2, 0)));
+        assertTrue(robberActivated(currentId, 7, new Location(-2, 0)));
         assertTrue(gameController.getPlayer(robbedId).getRawMaterialCount() == 0);
 
         int thirdId = currentId == 1 ? 3 : 1;
@@ -161,7 +174,7 @@ public class GameControllerTest {
         int robbedRmCount = p1.getRawMaterialCount();
         int thirdRmCount = p2.getRawMaterialCount();
 
-        assertTrue(gameController.activateRobber(currentId, 7, new Location(0, 0)));
+        assertTrue(robberActivated(currentId, 7, new Location(0, 0)));
 
         //one of them got robbed
         assertTrue(p1.getRawMaterialCount() == robbedRmCount - 1 || p2.getRawMaterialCount() == thirdRmCount - 1);
@@ -174,7 +187,7 @@ public class GameControllerTest {
         gameController.getBoard().addSettlement(s6);
 
         int currentRmCount = gameController.getCurrent().getRawMaterialCount();
-        assertTrue(gameController.activateRobber(currentId, -1, new Location(0, -2)));
+        assertTrue(robberActivated(currentId, -1, new Location(0, -2)));
         assertTrue(currentRmCount == gameController.getCurrent().getRawMaterialCount());
     }
     //endregion
@@ -184,13 +197,16 @@ public class GameControllerTest {
     @Test
     public void KI_initialPhase() throws Exception {
         gameController.setKI(player1);
+        player1.addPropertyChangeListener(handler);
         gameController.setKI(player2);
+        player2.addPropertyChangeListener(handler);
 
         Player player4 = new Player(4, true);
         player4.setName("Hering");
         player4.setColor(Color.RED);
 
         gameController.addPlayer(player4);
+        player4.addPropertyChangeListener(handler);
         player4.setStatus(START_GAME);
 
         assertEquals(WAIT_FOR_GAME_START, player4.getStatus());
@@ -220,7 +236,7 @@ public class GameControllerTest {
 
         //player 3 places his second road
         Building r1 = new Building(player3.getId(), BuildingType.ROAD, gameController.getBoard()
-                .getFreeRoadLoc(player3, gameController.isBuildingPhaseActive()));
+                .getFreeRoadLoc(player3, gameController.isInitialPhaseActive()));
         gameController.placeBuilding(r1);
 
         assertEquals(BUILD_SETTLEMENT, player3.getStatus());
@@ -246,12 +262,12 @@ public class GameControllerTest {
 
         //player 3 places his second road
         Building r2 = new Building(player3.getId(), BuildingType.ROAD, gameController.getBoard()
-                .getFreeRoadLoc(player3, gameController.isBuildingPhaseActive()));
-        gameController.placeBuilding(r2);
+                .getFreeRoadLoc(player3, gameController.isInitialPhaseActive()));
+        assertTrue(gameController.placeBuilding(r2));
 
         assertTrue(gameController.getBoard().getSettlements().size() >= 8);
         assertTrue(gameController.getBoard().getRoads().size() >= 8);
-        assertFalse(gameController.isBuildingPhaseActive());
+        assertFalse(gameController.isInitialPhaseActive());
 
         assertEquals(DICE, player3.getStatus());
         assertEquals(WAIT, player4.getStatus());
@@ -261,12 +277,14 @@ public class GameControllerTest {
         //player 3 must dice and his status will be set to TRADE_OR_BUILD
         gameController.dice(player3.getId());
 
-        assertEquals(TRADE_OR_BUILD, player3.getStatus());
+        assertTrue(player3.getStatus().equals(TRADE_OR_BUILD) || player3.getStatus().equals(ROBBER_TO));
     }
 
     @Test
     public void KI_statusupdates() {
         gameController.setKI(player3);
+        player3.addPropertyChangeListener(handler);
+
         player3.setRawMaterialDeck(new RawMaterialOverview(1, 4, 5, 3, 0));
         player3.setStatus(EXTRACT_CARDS_DUE_TO_ROBBER);
 
@@ -276,14 +294,15 @@ public class GameControllerTest {
 
         Player player = gameController.getCurrent();
         gameController.setKI(player);
-        gameController.setPlayerActive(player, ROBBER_TO);
+        player.addPropertyChangeListener(handler);
+        gameController.activatePlayer(player, ROBBER_TO);
 
         assertFalse(loc.equals(gameController.getBoard().getRobber().getLocation()));
     }
     //endregion
 
     @Test
-    public void rawMaterialDistribution_InitialPhase() throws IllegalAccessException {
+    public void rawMaterialDistribution_InitialPhase() throws CatanException {
 
         initializeGame();
 
@@ -294,7 +313,7 @@ public class GameControllerTest {
                     .getRandomFreeSettlementLoc());
             assertTrue(gameController.placeBuilding(s));
             Building r = new Building(player.getId(), BuildingType.ROAD, gameController.getBoard()
-                    .getFreeRoadLoc(player, gameController.isBuildingPhaseActive()));
+                    .getFreeRoadLoc(player, gameController.isInitialPhaseActive()));
             assertTrue(gameController.placeBuilding(r));
 
             if (i < 3) assertEquals(0, player.getRawMaterialCount());

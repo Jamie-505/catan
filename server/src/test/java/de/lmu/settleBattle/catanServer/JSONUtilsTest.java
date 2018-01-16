@@ -22,13 +22,11 @@ public class JSONUtilsTest {
   private static TradeRequest tradeRequest;
   private static TradeRequest tradeRequest_Accepted;
   private static Location l1;
-  private static Location l2;
-  private static Location l3;
   private static Board board;
 
   //region initialize
   @BeforeClass
-  public static void initialize() {
+  public static void initialize() throws CatanException {
     player1 = new Player(0);
     player1.setColor(Color.WHITE);
     player1.setName("Lucy");
@@ -39,8 +37,8 @@ public class JSONUtilsTest {
 
     city = new Building(BuildingType.CITY, 42);
     l1 = new Location(1, 0);
-    l2 = new Location(1, 1);
-    l3 = new Location(2, 0);
+    Location l2 = new Location(1, 1);
+    Location l3 = new Location(2, 0);
     city.build(new Location[]{l1, l2, l3});
 
     road = new Building(BuildingType.ROAD, 3);
@@ -258,7 +256,8 @@ public class JSONUtilsTest {
 
   @Test
   public void developmentCardBoughtShouldBeCorrect() throws Exception {
-    JSONObject payload = JSONUtils.createJSON(CatanMessage.developmentCardBought(4, DevCardType.KNIGHT));
+    JSONObject payload = JSONUtils.createJSON(CatanMessage.developmentCardBought(4, DevCardType.KNIGHT))
+            .getJSONObject(Constants.CARD_SOLD);
 
     assertEquals(4, payload.get(Constants.PLAYER));
     assertEquals(Constants.KNIGHT, payload.get(Constants.CARD_BUY));

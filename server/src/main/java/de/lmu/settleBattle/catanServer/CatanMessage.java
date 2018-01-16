@@ -107,10 +107,15 @@ public class CatanMessage {
      * @param diceResult
      * @return JSON structured String containing the dice result
      */
-    public static TextMessage throwDice(int id, int[] diceResult) {
+    public static TextMessage throwDice(int id, int[] diceResult) throws CatanException {
 
-        if (diceResult.length != 2)
-            throw new IllegalArgumentException("The array must have length 2");
+        if (diceResult.length != 2) {
+            StringBuilder arrayToString = new StringBuilder();
+            for (int i = 0; i < diceResult.length; i++)
+                arrayToString.append(i).append(": ").append(diceResult[i]).append(", ");
+
+            throw new CatanException("No valid array " + arrayToString, false);
+        }
 
         JSONObject payload = new JSONObject();
         payload.put(PLAYER, id);
@@ -233,7 +238,11 @@ public class CatanMessage {
     public static TextMessage robberMoved(Player player, Robber robber, Player victim) {
         JSONObject payload = robber.toJSON();
         payload.put(Constants.PLAYER, player.getId());
-        payload.put(Constants.DESTINATION, victim.getId());
+
+        int id = -1;
+        if (victim != null) id = victim.getId();
+
+        payload.put(Constants.DESTINATION, id);
 
         return new TextMessage(JSONUtils.setJSONType(Constants.ROBBER_AT, payload).toString());
     }
@@ -251,7 +260,14 @@ public class CatanMessage {
         JSONObject payload = new JSONObject();
         payload.put(Constants.PLAYER, playerId);
         payload.put(Constants.CARD_BUY, type.toString());
-        return new TextMessage(payload.toString());
+        return new TextMessage(JSONUtils.setJSONType(CARD_SOLD,payload).toString());
+    }
+
+    public static TextMessage developmentCardBought_Public(int playerId) {
+        JSONObject payload = new JSONObject();
+        payload.put(Constants.PLAYER, playerId);
+        payload.put(Constants.CARD_BUY, UNKNOWN);
+        return new TextMessage(JSONUtils.setJSONType(CARD_SOLD,payload).toString());
     }
     //endregion
 
@@ -302,10 +318,10 @@ public class CatanMessage {
         return new TextMessage(JSONUtils.setJSONType(Constants.CARD_KNIGHT, payload).toString());
     }
 
-    public static TextMessage roadConstructionCard(Building road1, Building road2) throws Exception {
+    public static TextMessage roadConstructionCard(Building road1, Building road2) throws CatanException {
 
-        if (!road1.isRoad() || !road2.isRoad() ) throw new IllegalArgumentException("Can only build road with this card.");
-        if (road1.getOwner() != road2.getOwner()) throw new Exception("the two roads must be of the same owner");
+        if (!road1.isRoad() || !road2.isRoad() ) throw new CatanException("Mit dieser Karte können nur Straßen gebaut werden");
+        if (road1.getOwner() != road2.getOwner()) throw new CatanException("Beide Straßen müssen den gleichen Eigentümer haben");
 
         JSONObject payload = new JSONObject();
         payload.put(Constants.PLAYER, road1.getOwner());
@@ -355,9 +371,9 @@ public class CatanMessage {
 
     public static TextMessage playerLeft(String id) {
         JSONObject payload = new JSONObject();
-        payload.put(MESSAGE, "Player " + id + " left the game.");
+        payload.put("Spieler ist weg", id);
 
-        return new TextMessage(payload.toString());
+        return new TextMessage(JSONUtils.setJSONType(MESSAGE, payload).toString());
     }
 
     public static TextMessage sendBuildMessage(Building building) {

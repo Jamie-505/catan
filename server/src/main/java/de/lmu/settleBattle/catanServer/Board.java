@@ -50,47 +50,21 @@ public class Board extends JSONStringBuilder {
         cities = new ArrayList<>();
         havens = new Haven[9];
         robber = new Robber();
-        initializeFields();
-        initializeHavens();
+
+        try {
+            initializeFields();
+            initializeHavens();
+        } catch (CatanException ex) {
+            ex.printStackTrace();
+        }
     }
 
-//
-//    /**
-//     * this mehod creats a ring on fields
-//     * @param level
-//     */
-//    public Location[] createFieldLocationsLevel(int level){
-//        int numberOfFields = level*6;
-//        int originX = 0;
-//        int originY = 0;
-//        Location[] locations = new Location[numberOfFields];
-//        for(int i = 1; i <= numberOfFields; i++){
-//            originY = originY - level;
-//            if (originX == level){
-//
-//                for(int j = 1; j <= level; j++){
-//                    locations[i] = new Location(originX, originY);
-//                    i++;
-//                }
-//            }
-//            if (originY == -level){
-//                for(int j = 1; j <= level; j++){
-//                    locations[i] = new Location(originX, originY);
-//                    i++;
-//                    originX++;
-//                }
-//            }
-//            locations[i] = new Location(originX, originY);
-//            ++originX;
-//
-//        }
-//        return locations;
-//    }
-
     /**
-     * this method initialize the field
+     * this method initializes the fields
+     *
+     * @throws CatanException
      */
-    private void initializeFields() {
+    private void initializeFields() throws CatanException {
         //create a list of fields
         Field[] boardFields = new Field[18];
         //adding 3 tiles each
@@ -164,19 +138,15 @@ public class Board extends JSONStringBuilder {
         System.arraycopy(boardFields, 0, fields, 0, boardFields.length);
         // add desert in the middle
         fields[18] = new Field(RawMaterialType.DESERT, fieldLocations[18]);
-
-        /*
-        // add water
-        for (int i = 19; i < 37; i++) {
-            fields[i] = new Field(RawMaterialType.WATER, fieldLocations[i]);
-        }*/
     }
 
-    /**
-     * this method initialize the havens
-     */
-    private void initializeHavens() {
 
+    /**
+     * this method initializes the havens
+     *
+     * @throws CatanException
+     */
+    private void initializeHavens() throws CatanException {
 
         //initialize the locations
         havenLocations[0] = new Location(1, -3);
@@ -214,18 +184,96 @@ public class Board extends JSONStringBuilder {
 
     }
 
+    public Location getRandomFieldLoc() {
+        Random random = new Random();
+        return fields[random.nextInt(19)].getLocation();
+    }
+
+    /**
+     * finds adjacent locations
+     * @param location location object to find neighbors for
+     * @return list of locations that are adjacent to a field ordered
+     * as circle around location
+     */
     public ArrayList<Location> getAdjacentLocations(Location location) {
         int x = location.getX();
         int y = location.getY();
         ArrayList<Location> neighbors = new ArrayList();
-        neighbors.add(new Location(x, y + 1));
-        neighbors.add(new Location(x + 1, y));
-        neighbors.add(new Location(x + 1, y - 1));
-        neighbors.add(new Location(x, y - 1));
-        neighbors.add(new Location(x - 1, y));
-        neighbors.add(new Location(x - 1, y + 1));
+
+        try {
+            neighbors.add(new Location(x, y + 1));
+            neighbors.add(new Location(x + 1, y));
+            neighbors.add(new Location(x + 1, y - 1));
+            neighbors.add(new Location(x, y - 1));
+            neighbors.add(new Location(x - 1, y));
+            neighbors.add(new Location(x - 1, y + 1));
+        } catch (CatanException ex) {
+            ex.printStackTrace();
+        }
+
         return neighbors;
     }
+
+    /**
+     * returns random adjacent road for road
+     * finds road location array containing loc[0]
+     * and adjacent to loc[1] if loc[0] is not water
+     * field, otherwise the other way around
+     *
+     * @param loc Location array containing 2 locations
+     * @return adjacent location or null if all are occupied
+     */
+    private Location[] getFreeRoadLoc(Location[] loc) {
+        Location[] rLocs;
+
+        int startLoc = loc[0].isWaterField() ? 1 : 0;
+        int compareLoc = (startLoc + 1) % 2;
+
+        Location l1 = loc[startLoc];
+        Location lCompare = loc[compareLoc];
+
+        List<Location> adjacentLocs = getAdjacentLocations(l1);
+        int index = adjacentLocs.indexOf(lCompare);
+
+        //there are 2 possibilities if loc[0] is fix and the other
+        //location must be adjacent to loc[1] --> i < 2 in loop
+        for (int i = 0; i < 2; i++) {
+            //in 1st loop check one and in the other loop the other possibility
+            int locInt = i == 0 ? (index + 1) : (index - 1);
+            locInt = Math.floorMod(locInt, adjacentLocs.size());
+
+            if (locInt == -1) locInt = adjacentLocs.size()-1;
+
+            Location l2 = adjacentLocs.get(locInt);
+            rLocs = new Location[]{l1, l2};
+
+            //if location is free, take this one
+            if (canBeBuiltHere(rLocs))
+                return rLocs;
+        }
+
+        return null;
+    }
+
+    /**
+     * returns random adjacent free road for road
+     *
+     * @param loc Location array containing 2 locations
+     * @return adjacent location
+     */
+    public Location[] getFreeAdjacentRoad(Location[] loc) {
+        if (loc.length != 2) return null;
+
+        Location[] rLocs = getFreeRoadLoc(loc);
+
+        //turn locations around so former loc[1] is fix and an adjacent road for loc[0] will be found
+        if (rLocs == null && !loc[0].isWaterField()) rLocs = getFreeRoadLoc(new Location[] {loc[1], loc[0]});
+
+        return rLocs;
+    }
+
+
+
 
     /**
      * returns the harvest that is distributed for one building
@@ -233,7 +281,7 @@ public class Board extends JSONStringBuilder {
      * @param building
      * @return
      */
-    public RawMaterialOverview getHarvest(Building building) {
+    public RawMaterialOverview getHarvest(Building building) throws CatanException {
         RawMaterialOverview overview = new RawMaterialOverview();
 
         if (building.isRoad() || building.getLocations().length <= 2) return overview;
@@ -249,14 +297,25 @@ public class Board extends JSONStringBuilder {
         return overview;
     }
 
-    public Location[] getFreeRoadLoc(Player player, boolean initialPhase) throws IllegalAccessException {
+    public Location[] getFreeRoadLoc(Player player, boolean initialPhase) throws CatanException {
         List<Building> buildings = new ArrayList<Building>();
 
         if (initialPhase) buildings.add(player.getLastSettlement());
-        else buildings.addAll(player.getSettlementsAndCities());
+        else {
+            //get any road connected to road or settlement of the player
+            buildings.addAll(player.getSettlementsAndCities());
+            buildings.addAll(player.roads);
+        }
+
+        Collections.shuffle(buildings);
 
         for (Building s : buildings) {
-            if (s.getOwner() == player.getId()) {
+            if (s.isRoad()) {
+                //find adjacent road
+                Location[] rLocs = getFreeAdjacentRoad(s.getLocations());
+                if (rLocs != null) return rLocs;
+
+            } else {
                 for (int i = 0; i < 3; i++) {
                     Location[] locs = new Location[2];
 
@@ -269,9 +328,14 @@ public class Board extends JSONStringBuilder {
             }
         }
 
-        throw new IllegalAccessException("No road can be built");
+        throw new CatanException("Es wurde keine gültige Location für eine deiner Straßen gefunden", true);
     }
 
+    /**
+     * searches for free corners for settlements
+     *
+     * @return Location[] array to place a settlement at
+     */
     public Location[] getRandomFreeSettlementLoc() {
         Location[] locs = null;
 
@@ -297,6 +361,13 @@ public class Board extends JSONStringBuilder {
         return locs;
     }
 
+    /**
+     * checks if this location is already occupied or if it's a settlement
+     * if distance rule is fulfilled
+     *
+     * @param locs locs to check for
+     * @return true if the location is valid, false if not
+     */
     public boolean canBeBuiltHere(Location[] locs) {
         if (locs == null) return false;
 
@@ -317,6 +388,13 @@ public class Board extends JSONStringBuilder {
         return true;
     }
 
+    /**
+     * checks if building is connected to a haven so the player is
+     * allowed to trade at the havens' conditions
+     *
+     * @param building building object
+     * @return true if the building is connected to a haven
+     */
     public boolean isConnectedToHaven(Building building) {
         for (Haven haven : havens) {
             if (building.isBuiltAroundHere(haven.getLocations(), false)) {
@@ -350,7 +428,7 @@ public class Board extends JSONStringBuilder {
      * @param initialPhase initial phase is active
      * @return true if building was built, otherwise false
      */
-    public boolean placeBuilding(Building bld, boolean initialPhase) throws IllegalAccessException {
+    public boolean placeBuilding(Building bld, boolean initialPhase) throws CatanException {
         boolean built = false;
 
         switch (bld.getType()) {
@@ -370,7 +448,7 @@ public class Board extends JSONStringBuilder {
     }
 
     private boolean placeSettlement(Building bld, boolean initialPhaseActive)
-            throws IllegalAccessException {
+            throws CatanException {
         if (!bld.isSettlement()) return false;
 
         boolean cornerAroundIsOccupied = false;
@@ -399,7 +477,7 @@ public class Board extends JSONStringBuilder {
 
         if (cornerAroundIsOccupied)
             //building cannot be placed because of distance rule or corner is already occupied
-            throw new IllegalAccessException("Location bereits besetzt oder Abstandsregel nicht eingehalten");
+            throw new CatanException("Location bereits besetzt oder Abstandsregel nicht eingehalten", true);
 
 
         //in the initial phase a sLocs can be placed anywhere
@@ -412,7 +490,7 @@ public class Board extends JSONStringBuilder {
     }
 
 
-    private boolean placeRoad(Building bld) {
+    private boolean placeRoad(Building bld) throws CatanException {
 
         boolean cornerAroundIsOccupiedByMe = false;
         boolean edgeIsOccupied = false;
@@ -438,10 +516,12 @@ public class Board extends JSONStringBuilder {
             }
         }
 
+        if (edgeIsOccupied)
+            throw new CatanException("Diese Kante ist bereits besetzt.", true);
+
         // roads can only be placed on edges that are connected to a sLocs/city of the player
         // or another road of the player
-        if (!edgeIsOccupied &&
-                (cornerAroundIsOccupiedByMe || edgeAroundIsOccupiedByMe)) {
+        if ((cornerAroundIsOccupiedByMe || edgeAroundIsOccupiedByMe)) {
             return this.addRoadOrSettlement(bld);
         }
 
@@ -449,9 +529,10 @@ public class Board extends JSONStringBuilder {
     }
 
     private boolean placeCity(Building bld, boolean initialPhaseActive)
-            throws IllegalAccessException {
+            throws CatanException {
+
         if (initialPhaseActive)
-            throw new IllegalAccessException("Stadt kann nicht in initialer Bauphase gebaut werden");
+            throw new CatanException("Stadt kann nicht in initialer Bauphase gebaut werden", true);
 
         boolean cornerIsOccupied = false;
         Building foundCorner = null;
@@ -583,7 +664,9 @@ public class Board extends JSONStringBuilder {
      * @param number
      * @return
      */
-    public Map<Building, RawMaterialType> getBuildingsOnDistributingFields(int number) {
+    public Map<Building, RawMaterialType> getBuildingsOnDistributingFields(int number)
+            throws CatanException {
+
         Map<Building, RawMaterialType> buildingList = new HashMap<>();
 
         Field[] fields = getFieldsWithNumber(number);
@@ -602,7 +685,7 @@ public class Board extends JSONStringBuilder {
                 //exclude road from distribution
                 //this case cannot occur, but now it's tested
                 if (bld.isRoad())
-                    throw new IllegalArgumentException("No road should be in settlements or cities list");
+                    throw new CatanException("Für eine Straße werden keine Rohstoffe ausgeschüttet.", true);
 
                 //player retrieves raw materials for building
                 for (Location loc : bld.getLocations()) {
@@ -636,7 +719,6 @@ public class Board extends JSONStringBuilder {
             for (Location l : bld.getLocations()) {
                 if (l.equals(loc) && !bld.isRoad()) {
                     owners.add(bld.getOwner());
-                    continue;
                 }
             }
         }
@@ -696,4 +778,42 @@ public class Board extends JSONStringBuilder {
     public void addSettlement(Building bld) {
         if (bld.isSettlement()) settlements.add(bld);
     }
+
+    //region unused
+
+//
+//    /**
+//     * this mehod creats a ring on fields
+//     * @param level
+//     */
+//    public Location[] createFieldLocationsLevel(int level){
+//        int numberOfFields = level*6;
+//        int originX = 0;
+//        int originY = 0;
+//        Location[] locations = new Location[numberOfFields];
+//        for(int i = 1; i <= numberOfFields; i++){
+//            originY = originY - level;
+//            if (originX == level){
+//
+//                for(int j = 1; j <= level; j++){
+//                    locations[i] = new Location(originX, originY);
+//                    i++;
+//                }
+//            }
+//            if (originY == -level){
+//                for(int j = 1; j <= level; j++){
+//                    locations[i] = new Location(originX, originY);
+//                    i++;
+//                    originX++;
+//                }
+//            }
+//            locations[i] = new Location(originX, originY);
+//            ++originX;
+//
+//        }
+//        return locations;
+//    }
+
+
+    //endregion
 }

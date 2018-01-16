@@ -84,7 +84,7 @@ public class TradeRequest extends JSONStringBuilder {
 
         //set fire = true if something changed
         boolean fire = (!this.answers.containsKey(fellowPlayerId) ||
-                this.answers.get(fellowPlayerId) != accept) ? true : false;
+                this.answers.get(fellowPlayerId) != accept);
 
         if (fire) {
             this.answers.put(fellowPlayerId, accept);
@@ -103,7 +103,7 @@ public class TradeRequest extends JSONStringBuilder {
     }
 
     public void cancel() {
-        boolean fire = (!this.cancelled) ? true:false;
+        boolean fire = !this.cancelled;
         this.cancelled = true;
 
         if (fire)
@@ -115,12 +115,12 @@ public class TradeRequest extends JSONStringBuilder {
         return !this.cancelled && !this.executed && this.answers.containsKey(fellowPlayerId) &&
                 this.answers.get(fellowPlayerId);
     }
-    public void execute(int fellowPlayerId) {
+    public void execute(int fellowPlayerId) throws CatanException {
         if (this.playerId == fellowPlayerId)
-            throw new IllegalArgumentException("This trade cannot be executed with the same player who offered it!");
+            throw new CatanException(String.format("Der Handel %s kann nicht von dir selbst angenommen werden.", this.id));
 
         if (!this.canBeExecutedBy(fellowPlayerId))
-            throw new IllegalArgumentException("This trade cannot be executed by fellow player " + fellowPlayerId);
+            throw new CatanException(String.format("Spieler %s kann den Handel nicht ausführen. Hat er angenommen?", fellowPlayerId, this.id));
 
         this.executedWith = fellowPlayerId;
         this.executed = true;

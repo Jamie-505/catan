@@ -34,22 +34,20 @@ public class SocketUtils {
     }
 
     //region build
-    public boolean build(int id, TextMessage message) throws IllegalAccessException {
+    public boolean build(int id, TextMessage message) throws CatanException {
         Building building = gson.fromJson(JSONUtils.createJSON(message)
                 .getJSONObject(Constants.BUILD).toString(), Building.class);
         if (building.getOwner() == id)
-            return this.gameCtrl.placeBuilding(building);
-        else throw new IllegalAccessException(
-                String.format("Owner %s cannot build building for owner %s", id, building.getOwner()));
+            return this.gameCtrl.placeBuilding(building, true);
+        else throw new CatanException(
+                String.format("Spieler %s kann kein Gebäude mit der ID %s bauen.", id, building.getOwner()));
     }
     //endregion
 
     //region applyRoadConstructionCard
-    public boolean applyRoadConstructionCard(WebSocketSession session, TextMessage message) throws Exception {
+    public void applyRoadConstructionCard(WebSocketSession session, TextMessage message) throws CatanException {
 
-        //player id
         Player player = gameCtrl.getPlayer(session.getId());
-        if (!player.hasRoadConstructionCard()) return false;
 
         //the first road
         Location[] locs1 = gson.fromJson(JSONUtils.createJSON(message)
@@ -57,36 +55,17 @@ public class SocketUtils {
 
         Building road1 = new Building(player.getId(), BuildingType.ROAD, locs1);
 
-        //add roads to board directly
-        boolean successful = this.gameCtrl.getBoard().placeBuilding
-                (road1, false);
+        Location[] locs2 = gson.fromJson(JSONUtils.createJSON(message)
+                .getJSONObject(Constants.CARD_RD_CON).getJSONArray("Strasse 2").toString(), Location[].class);
 
-        if (successful) {
-            //the second road
-            Location[] locs2 = gson.fromJson(JSONUtils.createJSON(message)
-                    .getJSONObject(Constants.CARD_RD_CON).getJSONArray("Strasse 2").toString(), Location[].class);
+        Building road2 = new Building(player.getId(), BuildingType.ROAD, locs2);
 
-            Building road2 = new Building(player.getId(), BuildingType.ROAD, locs2);
-
-            successful = this.gameCtrl.getBoard().placeBuilding(road2,false);
-        }
-
-        //remove construction card
-        if (successful) {
-            try {
-                this.gameCtrl.getPlayer(player.getId()).removeDevelopmentCard(DevCardType.ROAD_CONSTRUCTION);
-                successful = true;
-            } catch (Exception ex) {
-                ex.printStackTrace();
-                successful = false;
-            }
-        }
-        return successful;
+        gameCtrl.applyRoadConstructionCard(player, road1, road2);
     }
     //endregion
 
     //region performHandshake
-    public boolean performHandshake(WebSocketSession session) throws InterruptedException, IOException {
+    public boolean performHandshake(WebSocketSession session) throws IOException {
         TextMessage idAllocation = CatanMessage.welcomeNewPlayer(toInt(session.getId()));
         session.sendMessage(idAllocation);
 
@@ -99,7 +78,7 @@ public class SocketUtils {
 
     //region assignPlayerData
     public void assignPlayerData(WebSocketSession session, TextMessage message)
-            throws InterruptedException, IOException, IllegalAccessException {
+            throws CatanException {
         JSONObject json = JSONUtils.createJSON(message);
         Player gPlayer = gson.fromJson(json.get(PLAYER).toString(), Player.class);
         Color color = gPlayer.getColor();
@@ -115,23 +94,24 @@ public class SocketUtils {
 
         } else {
             if (!validName)
-                throw new IllegalAccessException(CatanMessage.error(Constants.NAME_ALREADY_ASSIGNED).toString());
+                throw new CatanException(Constants.NAME_ALREADY_ASSIGNED, true);
 
             if (!validColor)
-                throw new IllegalAccessException(CatanMessage.error(Constants.COLOR_ALREADY_ASSIGNED).toString());
+                throw new CatanException(Constants.COLOR_ALREADY_ASSIGNED, true);
 
         }
     }
     //endregion
 
     //region handleStartGameMessage
-    public void handleStartGameMessage(WebSocketSession session, TextMessage message) {
+    public void handleStartGameMessage(WebSocketSession session, TextMessage message)
+            throws CatanException {
         JSONObject json = (JSONUtils.createJSON(message)).
                 getJSONObject(Constants.START_GAME);
 
-        if (json.length() == 0) {
-            setStatus(session.getId(), Constants.WAIT_FOR_GAME_START);
-        }
+        if (json.length() != 0) throw new CatanException("Die Nachricht ist falsch formatiert.");
+
+        setStatus(session.getId(), Constants.WAIT_FOR_GAME_START);
     }
     //endregion
 
@@ -142,21 +122,21 @@ public class SocketUtils {
     }
     //endregion
 
-    public boolean buyDevCard(WebSocketSession session) {
+    public void buyDevCard(WebSocketSession session) throws CatanException {
         Player player = gameCtrl.getPlayer(session.getId());
-        return gameCtrl.buyDevelopmentCard(player);
+        gameCtrl.buyDevelopmentCard(player);
     }
 
     //region trading
-    public boolean seatrade(WebSocketSession session, TextMessage message) {
+    public void seatrade(WebSocketSession session, TextMessage message) throws CatanException {
         TradeRequest tradeRequest = CatanMessage.seatradeToTradeRequest(SEA_TRADE, message);
 
         //at least one raw material must be offered/requested
         if (tradeRequest.getOffer().getTotalCount() < 1 || tradeRequest.getRequest().getTotalCount() < 1)
-            return false;
+            throw new CatanException("Das Angebot und die Nachfrage müssen mehr als einen Rohstoff enthalten.");
 
         Player player = gameCtrl.getPlayer(session.getId());
-        return gameCtrl.seaTrade(player, tradeRequest);
+        gameCtrl.seaTrade(player, tradeRequest);
     }
 
     public TradeRequest tradeOffer(WebSocketSession session, TextMessage message) {
@@ -167,51 +147,48 @@ public class SocketUtils {
         return tradeRequest;
     }
 
-    public boolean tradeAccepted(WebSocketSession session, TextMessage message) {
+    public void tradeAccepted(WebSocketSession session, TextMessage message) throws CatanException {
         JSONObject payload = JSONUtils.createJSON(message).getJSONObject(TRD_RES);
-        int tradeId = (Integer)payload.get(TRADE_ID);
-        boolean accept = (Boolean)payload.get(ACCEPT);
+        int tradeId = (Integer) payload.get(TRADE_ID);
+        boolean accept = (Boolean) payload.get(ACCEPT);
 
         TradeRequest tr = getTradeRequest(tradeId);
 
-        if (tr != null) {
+        if (tr == null)
+            throw new CatanException(String.format(INVALID_TRD_ID, tradeId), true);
 
-            //player can only accept trade offer if he can afford the request
-            Player player = gameCtrl.getPlayer(session.getId());
-            if (player.canAfford(tr.getRequest())) {
-                tr.accept(accept, toInt(session.getId()));
-                return true;
-            }
-        }
-        return false;
+        //player can only accept trade offer if he can afford the request
+        Player player = gameCtrl.getPlayer(session.getId());
+
+        if (!player.canAfford(tr.getRequest()))
+            throw new CatanException("Du besitzt die geforderten Rohstoffe nicht.", true, tr);
+
+        tr.accept(accept, toInt(session.getId()));
     }
 
-    public boolean tradeCancelled(TextMessage message) {
+    public void tradeCancelled(TextMessage message) throws CatanException {
         JSONObject payload = JSONUtils.createJSON(message).getJSONObject(TRD_REJ);
         int tradeId = (Integer) payload.get(TRADE_ID);
         TradeRequest tr = getTradeRequest(tradeId);
 
-        if (tr != null) {
-            tr.cancel();
-            tradeRequests.remove(tr);
-            return true;
-        }
-        return false;
+        if (tr == null)
+            throw new CatanException(String.format(INVALID_TRD_ID, tradeId), true);
+
+        tr.cancel();
+        tradeRequests.remove(tr);
     }
 
-    public boolean tradeConduction(WebSocketSession session, TextMessage message) {
-        boolean conducted = false;
-
+    public void tradeConduction(WebSocketSession session, TextMessage message) throws CatanException {
         JSONObject payload = JSONUtils.createJSON(message).getJSONObject(TRD_SEL);
-        Integer id = (Integer) payload.get(TRADE_ID);
+        Integer tradeId = (Integer) payload.get(TRADE_ID);
         Integer fellowId = (Integer) payload.get(FELLOW_PLAYER);
-        TradeRequest tr = getTradeRequest(id);
+        TradeRequest tr = getTradeRequest(tradeId);
 
-        if (tr != null) {
-            conducted = gameCtrl.domesticTrade(tr, toInt(session.getId()), fellowId);
-            if (conducted) tradeRequests.remove(tr);
-        }
-        return conducted;
+        if (tr == null)
+            throw new CatanException(String.format(INVALID_TRD_ID, tradeId), true);
+
+        gameCtrl.domesticTrade(tr, toInt(session.getId()), fellowId);
+        tradeRequests.remove(tr);
     }
 
     public TradeRequest getTradeRequest(int tradeId) {
@@ -224,17 +201,17 @@ public class SocketUtils {
     //endregion
 
     //region robber functions
-    public boolean moveRobber(WebSocketSession session, TextMessage message) {
-        return moveRobber(session, message, ROBBER_TO);
+    public void moveRobber(WebSocketSession session, TextMessage message) throws CatanException {
+        moveRobber(session, message, ROBBER_TO);
     }
 
-    public boolean moveRobber(WebSocketSession session, TextMessage message, String type) {
+    public void moveRobber(WebSocketSession session, TextMessage message, String type) throws CatanException {
         JSONObject payload = JSONUtils.createJSON(message).getJSONObject(type);
         Location loc = gson.fromJson(payload.getJSONObject(PLACE).toString(), Location.class);
 
         int id = payload.has(DESTINATION) ? (Integer) payload.get(DESTINATION) : -1;
 
-        return gameCtrl.activateRobber(toInt(session.getId()), id, loc);
+        gameCtrl.activateRobber(toInt(session.getId()), id, loc);
     }
 
     /**
@@ -244,12 +221,11 @@ public class SocketUtils {
      * @param message
      * @return
      */
-    public boolean tossRawMaterials(WebSocketSession session, TextMessage message) {
-        JSONObject json = JSONUtils.createJSON(message).getJSONObject(TOSS_CARDS).getJSONObject(TOSS);
-        JSONObject rawMaterialJSON = json.getJSONObject(Constants.RAW_MATERIALS);
+    public void tossRawMaterials(WebSocketSession session, TextMessage message) throws CatanException {
+        JSONObject rawMaterialJSON = JSONUtils.createJSON(message).getJSONObject(TOSS_CARDS);
         RawMaterialOverview overview = gson.fromJson(rawMaterialJSON.toString(), RawMaterialOverview.class);
 
-        return gameCtrl.tossRawMaterialCards(toInt(session.getId()), overview);
+        gameCtrl.tossRawMaterialCards(toInt(session.getId()), overview);
     }
 
     public boolean endGame(WebSocketSession session) {
@@ -257,35 +233,32 @@ public class SocketUtils {
         return gameCtrl.endGame(gameCtrl.getPlayer(session.getId()));
     }
 
-    public boolean applyInventionCard(WebSocketSession session, TextMessage message) throws Exception {
+    public void applyInventionCard(WebSocketSession session, TextMessage message) throws Exception {
         Player player = gameCtrl.getPlayer(session.getId());
 
         JSONObject json = JSONUtils.createJSON(message).getJSONObject(INVENTION);
         JSONObject rawMaterialJSON = json.getJSONObject(Constants.RAW_MATERIALS);
         RawMaterialOverview overview = gson.fromJson(rawMaterialJSON.toString(), RawMaterialOverview.class);
 
-        return gameCtrl.applyInventionCard(player, overview);
+        gameCtrl.applyInventionCard(player, overview);
     }
 
-    public boolean applyMonopolyCard(WebSocketSession session, TextMessage message) throws Exception {
+    public void applyMonopolyCard(WebSocketSession session, TextMessage message) throws Exception {
         Player monoPlayer = gameCtrl.getPlayer(session.getId());
 
         JSONObject json = JSONUtils.createJSON(message).getJSONObject(MONOPOLE);
         JSONObject rawMaterialJSON = json.getJSONObject(Constants.RAW_MATERIAL);
         RawMaterialType type = gson.fromJson(rawMaterialJSON.toString(), RawMaterialType.class);
 
-        return gameCtrl.applyMonopoleCard(monoPlayer, type);
+        gameCtrl.applyMonopoleCard(monoPlayer, type);
     }
 
-    public boolean applyKnightCard(WebSocketSession session, TextMessage message) throws Exception {
+    public void applyKnightCard(WebSocketSession session, TextMessage message) throws Exception {
         Player player = gameCtrl.getPlayer(session.getId());
 
-        if (player.playKnight()) {
-            gameCtrl.assignGreatestArmy(player);
-            return moveRobber(session, message, CARD_KNIGHT);
-        }
-
-        return false;
+        player.applyKnightCard();
+        gameCtrl.assignGreatestArmy(player);
+        moveRobber(session, message, CARD_KNIGHT);
     }
 
     //endregion

@@ -39,6 +39,13 @@ public class CatanSocketHandler extends TextWebSocketHandler implements Property
                 }
         );
 
+        utils.getGameCtrl().addPropertyChangeListener(e -> {
+            if (e.getPropertyName().equals(ROBBER_AT)) {
+                System.out.println("Robber was moved");
+                sendMessageToAll((TextMessage) e.getNewValue());
+            }
+        });
+
         this.sessions = Collections.synchronizedSet(new HashSet<WebSocketSession>());
     }
 
@@ -47,7 +54,7 @@ public class CatanSocketHandler extends TextWebSocketHandler implements Property
     }
 
     public GameController getGameCtrl() {
-        return getUtils().getGameCtrl();
+        return utils.getGameCtrl();
     }
 
     //region afterConnectionEstablished
@@ -69,8 +76,8 @@ public class CatanSocketHandler extends TextWebSocketHandler implements Property
             // sending session id to the client that just connected
             TextMessage verifyProtocol = CatanMessage.serverProtocol();
             sendSynchronizedMessage(session, verifyProtocol);
-        } catch (IllegalAccessException e) {
-            sendError(session, "Cannot join this game");
+        } catch (CatanException e) {
+            if (e.sendToClient()) sendError(session, e.getMessage());
             e.printStackTrace();
         }
     }
@@ -81,26 +88,20 @@ public class CatanSocketHandler extends TextWebSocketHandler implements Property
     public void handleTextMessage(WebSocketSession session, TextMessage message) {
 
         System.out.println("Message from " + session.getId() + ": " + message.getPayload());
+        boolean OK = true;
+        String errorMessage = "";
+        Object errorObject = null;
 
         try {
             String type = JSONUtils.getMessageType(message);
-            boolean OK = false;
-            String errorMessage = "";
 
             switch (type) {
                 case HANDSHAKE:
-                    if (utils.performHandshake(session))
-                        sendFellowPlayers(session);
+                    if (utils.performHandshake(session)) sendOpponents(session);
                     break;
 
                 case PLAYER:
-                    try {
-                        utils.assignPlayerData(session, message);
-                    } catch (IllegalAccessException ex) {
-                        ex.printStackTrace();
-                        errorMessage = ex.getMessage();
-                        OK = false;
-                    }
+                    utils.assignPlayerData(session, message);
                     break;
 
                 case START_GAME:
@@ -112,86 +113,69 @@ public class CatanSocketHandler extends TextWebSocketHandler implements Property
                     break;
 
                 case BUILD:
-                    try {
-                        OK = utils.build(SocketUtils.toInt(session.getId()), message);
-                        if (!OK) errorMessage = "Das Gebäude kann nicht gebaut werden.";
-                    } catch (IllegalAccessException ex) {
-                        errorMessage = ex.getMessage();
-                        OK = false;
-                    }
+                    OK = utils.build(SocketUtils.toInt(session.getId()), message);
+                    if (!OK) errorMessage = "Das Gebäude kann nicht gebaut werden.";
                     break;
 
                 case ROLL_DICE:
-                    OK = getGameCtrl().dice(SocketUtils.toInt(session.getId()));
-                    if (!OK) errorMessage = "Du bist nicht am Zug";
+                    getGameCtrl().dice(SocketUtils.toInt(session.getId()));
                     break;
 
                 case CARD_MONOPOLY:
                     sendMessageToAll(CatanMessage.monopoleCard(SocketUtils.toInt(session.getId()), message));
-                    OK = utils.applyMonopolyCard(session, message);
-                    if (!OK) errorMessage = "Die Monopolkarte konnte nicht ausgespielt werden.";
+                    utils.applyMonopolyCard(session, message);
                     break;
 
                 case CARD_INVENTION:
                     sendMessageToAll(CatanMessage.inventionCard(SocketUtils.toInt(session.getId()), message));
-                    OK = utils.applyInventionCard(session, message);
-                    if (!OK) errorMessage = "Die Karte Erfindung kann nicht ausgespielt werden.";
+                    utils.applyInventionCard(session, message);
                     break;
 
                 case CARD_KNIGHT:
                     sendMessageToAll(CatanMessage.knightCard(SocketUtils.toInt(session.getId()), message));
-                    OK = utils.applyKnightCard(session, message);
-                    if (!OK) errorMessage = "Die Ritterkarte konnte nicht ausgespielt werden.";
+                    utils.applyKnightCard(session, message);
                     break;
 
                 case CARD_RD_CON:
                     sendMessageToAll(CatanMessage.roadConstructionCard(SocketUtils.toInt(session.getId()), message));
-                    OK = utils.applyRoadConstructionCard(session, message);
-                    if (!OK) errorMessage = "Die Straßenkonstruktionskarte konnte nicht ausgespielt werden.";
+                    utils.applyRoadConstructionCard(session, message);
                     break;
 
                 case ROBBER_TO:
-                    OK = utils.moveRobber(session, message);
-                    if (!OK) errorMessage = "Der Räuber kann nicht versetzt werden.";
+                    utils.moveRobber(session, message);
+                    if (getGameCtrl().realPlayersAreReady())
+                        getGameCtrl().activateKIs();
                     break;
 
                 case TOSS_CARDS:
-                    OK = utils.tossRawMaterials(session, message);
-                    if (!OK) errorMessage = "Die Rohstoffe konnten nicht reduziert werden.";
+                    utils.tossRawMaterials(session, message);
+                    if (getGameCtrl().realPlayersAreReady())
+                        getGameCtrl().activateKIs();
                     break;
 
                 case CARD_BUY:
-                    OK = utils.buyDevCard(session);
-                    if (!OK) errorMessage = "Es konnte keine Entwicklungskarte gekauft werden.";
+                    utils.buyDevCard(session);
                     break;
 
                 case SEA_TRADE:
-                    OK = utils.seatrade(session, message);
-                    if (!OK) errorMessage = "Der Seehandel kann nicht durchgeführt werden";
+                    utils.seatrade(session, message);
                     break;
 
                 case TRD_REQ:
                     TradeRequest tradeRequest = utils.tradeOffer(session, message);
-                    OK = addTradeRequest(tradeRequest);
-                    if (!OK) errorMessage = "Das Handelsangebot ist ungültig.";
+                    addTradeRequest(tradeRequest);
                     break;
 
                 case TRD_RES:
-                    OK = utils.tradeAccepted(session, message);
-                    if (!OK) errorMessage =
-                            "Der Spieler kann das Handelsangebot nicht annehmen, da er entweder " +
-                                    "die geforderten Rohstoffe nicht besitzt oder die Handels-ID ungültig ist.";
+                    utils.tradeAccepted(session, message);
                     break;
 
                 case TRD_SEL:
-                    OK = utils.tradeConduction(session, message);
-                    if (!OK)
-                        errorMessage = "Der Handel konnte nicht durchgeführt werden. Haben beide Parteien genügend Rohstoffe?";
+                    utils.tradeConduction(session, message);
                     break;
 
                 case TRD_REJ:
-                    OK = utils.tradeCancelled(message);
-                    if (!OK) errorMessage = "Die Handels-ID exitsiert nicht.";
+                    utils.tradeCancelled(message);
                     break;
 
                 case END_TURN:
@@ -199,34 +183,47 @@ public class CatanSocketHandler extends TextWebSocketHandler implements Property
                     break;
 
                 case ADD_KI:
-                    try {
-                        Player newPlayer = getGameCtrl().addKI();
-                        newPlayer.addPropertyChangeListener(this);
-                        newPlayer.setStatus(WAIT_FOR_GAME_START);
-                        sendOK(session);
+                    Player newPlayer = getGameCtrl().addKI();
+                    newPlayer.addPropertyChangeListener(this);
+                    newPlayer.setStatus(WAIT_FOR_GAME_START);
 
-                        if (utils.getGameCtrl().readyToStartGame()) {
-                            sendMessageToAll(CatanMessage.startGame(utils.getGameCtrl().getBoard()));
-                            getGameCtrl().startGame();
-                        }
-
-                    } catch (Exception ex) {
-                        OK = false;
-                        errorMessage = "Es konnte keine KI hinzugefügt werden.";
+                    if (utils.getGameCtrl().readyToStartGame()) {
+                        sendMessageToAll(CatanMessage.startGame(utils.getGameCtrl().getBoard()));
+                        getGameCtrl().startGame();
                     }
                     break;
             }
 
-            if (OK) sendOK(session);
-            else if (!errorMessage.equals(""))
-                sendError(session, errorMessage);
+
+        } catch (CatanException ex) {
+
+            if (ex.sendToClient()) {
+                errorMessage = ex.getMessage();
+            } else {
+                ex.printStackTrace();
+                errorMessage = "";
+            }
+
+            OK = false;
+            errorObject = ex.getErrorObject();
 
         } catch (Exception e) {
             e.printStackTrace();
+        } finally {
+            if (OK) sendOK(session);
+            else if (!errorMessage.equals("")) {
+                System.out.printf("Send error to: %s %s\n", session.getId(), errorMessage);
+                sendError(session, errorMessage);
+            }
+
+            if (errorObject instanceof TradeRequest) {
+                TradeRequest tr = (TradeRequest) errorObject;
+                tr.accept(false, SocketUtils.toInt(session.getId()));
+            }
         }
     }
 
-    private void nextMove() throws IOException {
+    private void nextMove() {
         Player current = utils.getGameCtrl().getCurrent();
 
         //current player has won the game
@@ -243,7 +240,7 @@ public class CatanSocketHandler extends TextWebSocketHandler implements Property
     @Override
     public void afterConnectionClosed(WebSocketSession session, CloseStatus status) throws Exception {
         super.afterConnectionClosed(session, status);
-        System.out.println("Session " + session.getId() + " has ended");
+        System.out.printf("Session %s has ended\n", session.getId());
 
         // remove the session from sessions list
         sessions.remove(session);
@@ -324,7 +321,7 @@ public class CatanSocketHandler extends TextWebSocketHandler implements Property
     }
     //endregion
 
-    private void sendFellowPlayers(WebSocketSession session) throws IOException {
+    private void sendOpponents(WebSocketSession session) {
         for (Player player : utils.getGameCtrl().getPlayers())
             if (player.getId() != SocketUtils.toInt(session.getId()))
                 sendSynchronizedMessage(session, CatanMessage.statusUpdate(player));
@@ -347,12 +344,12 @@ public class CatanSocketHandler extends TextWebSocketHandler implements Property
 
         try {
             synchronized (session) {
-                System.out.printf("Send Message to %s: %s", SocketUtils.toInt(session.getId()), message.getPayload());
+                System.out.printf("Send Message to %s: %s\n", SocketUtils.toInt(session.getId()), message.getPayload());
                 session.sendMessage(message);
             }
 
         } catch (IOException ex) {
-            System.out.printf("Send error to: %s %s ", session.getId(), ex.getMessage());
+            System.out.printf("Send error to: %s %s\n", session.getId(), ex.getMessage());
             ex.printStackTrace();
         }
     }
@@ -364,16 +361,16 @@ public class CatanSocketHandler extends TextWebSocketHandler implements Property
     //endregion
 
     //region trading
-    public boolean addTradeRequest(TradeRequest tradeRequest) {
-
+    public boolean addTradeRequest(TradeRequest tradeRequest) throws CatanException {
 
         //at least one raw material must be requested/offered
         if (tradeRequest.getOffer().getTotalCount() < 1 || tradeRequest.getRequest().getTotalCount() < 1)
-            return false;
+            throw new CatanException("Angebot/Nachfrage müssen je mindestens einen Rohstoff enthalten.", true);
 
         //has player offered raw materials ?
         Player player = utils.getGameCtrl().getPlayer(tradeRequest.getPlayerId());
-        if (!player.canAfford(tradeRequest.getOffer())) return false;
+        if (!player.canAfford(tradeRequest.getOffer()))
+            throw new CatanException("Du hast nicht genug Rohstoffe, um diesen Handel anzubieten.", true);
 
         tradeRequest.addPropertyChangeListener(evt -> {
             TradeRequest trChanged = (TradeRequest) evt.getNewValue();
@@ -403,29 +400,126 @@ public class CatanSocketHandler extends TextWebSocketHandler implements Property
 
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
+        Player player = (Player) evt.getNewValue();
+
+        boolean sendStatusUpdate;
+
+        System.out.printf("Property '%s': '%s' -> '%s'%n",
+                evt.getPropertyName(), evt.getOldValue(), player.getStatus());
+
+        sendStatusUpdate = handlePlayerPropertyChange(evt, player);
+
         try {
-            Player player = (Player) evt.getNewValue();
-            boolean sendStatusUpdate = true;
+            if (sendStatusUpdate) {
+                System.out.println("Send status update");
+                sendStatusUpdate(player);
+            }
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        }
 
-            System.out.printf("Property '%s': '%s' -> '%s'%n",
-                    evt.getPropertyName(), evt.getOldValue(), player.getStatus());
+        if (player.isKI()) {
+            handleKIPropertyChange(evt, player);
+        }
+    }
 
+    //endregion
+
+    private void handleKIPropertyChange(PropertyChangeEvent evt, Player ki) {
+        if (!ki.isKI() || !evt.getPropertyName().equals(STATUS_UPD)) return;
+
+        try {
+            switch (ki.getStatus()) {
+                case START_GAME:
+                    ki.setStatus(WAIT_FOR_GAME_START);
+                    break;
+
+                case EXTRACT_CARDS_DUE_TO_ROBBER:
+                    //KI has to extract cards
+                    getGameCtrl().getBoard().getRobber().robPlayer(ki);
+
+                    if (!ki.getNextStatus().equals(WAIT) && !ki.getNextStatus().equals(""))
+                        getGameCtrl().deactivateKI(ki);
+                    else { ki.activateNextStatus(); }
+                    break;
+
+                case DICE:
+                    getGameCtrl().dice(ki.getId());
+                    break;
+
+                case BUILD_SETTLEMENT:
+                    Building settlement = new Building(ki.getId(),
+                            BuildingType.SETTLEMENT, getGameCtrl().getBoard().getRandomFreeSettlementLoc());
+                    getGameCtrl().placeBuilding(settlement, true);
+                    break;
+
+                case BUILD_STREET:
+                    Building street = new Building(ki.getId(), BuildingType.ROAD,
+                            getGameCtrl().getBoard().getFreeRoadLoc(ki, getGameCtrl().isInitialPhaseActive()));
+                    getGameCtrl().placeBuilding(street, true);
+                    break;
+
+                case TRADE_OR_BUILD:
+                    if (ki.canAfford(BuildingType.SETTLEMENT)) {
+                        Building s = new Building(ki.getId(), BuildingType.SETTLEMENT, getGameCtrl().getBoard().getRandomFreeSettlementLoc());
+                        getGameCtrl().placeBuilding(s, true);
+                    } else if (ki.canAfford(BuildingType.ROAD)) {
+                        Building r = new Building(ki.getId(), BuildingType.ROAD, getGameCtrl().getBoard().getFreeRoadLoc(ki, getGameCtrl().isInitialPhaseActive()));
+                        getGameCtrl().placeBuilding(r, true);
+                    } else if (ki.canAffordDevCard()) {
+                        getGameCtrl().buyDevelopmentCard(ki);
+                    }
+
+                    nextMove();
+
+                    break;
+
+                case ROBBER_TO:
+                    boolean activated;
+                    try {
+                        getGameCtrl().activateRobber(ki.getId(), -1, getGameCtrl().getBoard().getRandomFieldLoc());
+                        activated = true;
+                    } catch (CatanException ex) {
+                        System.out.println(ex.getMessage());
+                        activated = false;
+                    }
+
+                    //try second time
+                    if (!activated)
+                        getGameCtrl().activateRobber(ki.getId(), -1, getGameCtrl().getBoard().getRandomFieldLoc());
+
+                    break;
+
+            }
+        } catch (CatanException ex) {
+
+            //initialize next move if exception was thrown during TRADE_OR_BUILD_STATUS
+            if ((ki.getStatus().equals(TRADE_OR_BUILD) || ki.getStatus().equals(ROBBER_TO)))
+                nextMove();
+        }
+    }
+
+    private boolean handlePlayerPropertyChange(PropertyChangeEvent evt, Player player) {
+        boolean sendStatusUpdate = true;
+
+        try {
             switch (evt.getPropertyName()) {
 
-                case SU_ONLY_TO_ME:
-                    sendStatusUpdateToMe(player);
+                case TRD_DECR_NO_STAT_UPD:
                     sendStatusUpdate = false;
-                    break;
                 case TRD_DECR:
                     RawMaterialOverview costs = (RawMaterialOverview) evt.getOldValue();
                     sendMessageToAll(CatanMessage.costs(getGameCtrl().getCurrent().getId(), costs, false));
                     break;
+
                 case TRD_INCR:
                     RawMaterialOverview harvest = (RawMaterialOverview) evt.getOldValue();
                     sendMessageToAll(CatanMessage.harvest(getGameCtrl().getCurrent().getId(), harvest, false));
                     break;
 
-                //if there was a decrease/increase of raw materials send harvest/cost messages
+                case RMO_INCR_NO_STAT_UPD:
+                    sendStatusUpdate = false;
+                    //if there was a decrease/increase of raw materials send harvest/cost messages
                 case RMO_INCR:
                     RawMaterialOverview harvest2 = (RawMaterialOverview) evt.getOldValue();
                     sendMessageToAll(Integer.toHexString(player.getId()),   //parse id back to hex string (session id)
@@ -433,6 +527,8 @@ public class CatanSocketHandler extends TextWebSocketHandler implements Property
                             CatanMessage.harvest(player.getId(), harvest2, true));
                     break;
 
+                case RMO_DECR_NO_STAT_UPD:
+                    sendStatusUpdate = false;
                 case RMO_DECR:
                     RawMaterialOverview costs2 = (RawMaterialOverview) evt.getOldValue();
                     sendMessageToAll(Integer.toHexString(player.getId()),   //parse id back to hex string (session id)
@@ -443,34 +539,30 @@ public class CatanSocketHandler extends TextWebSocketHandler implements Property
                 case DICE:
                     sendMessageToAll(CatanMessage.throwDice(player.getId(), (int[]) evt.getOldValue()));
                     sendStatusUpdate = false;
+                    System.out.println("Dice: send no status update");
+                    break;
+
+                case DEV_CARD_BUY:
+                    TextMessage msg1 = CatanMessage.developmentCardBought(player.getId(), (DevCardType) evt.getOldValue());
+                    TextMessage msg2 = CatanMessage.developmentCardBought_Public(player.getId());
+                    sendMessageToAll(Integer.toHexString(player.getId()), msg1, msg2);
                     break;
 
                 case VP_INCR:
-                case DEV_CARD_BUY:
+                case END_TURN:
+                case STATUS_UPD:
                     sendStatusUpdate = true;
                     break;
-
-                case END_TURN:
-                    //TODO
-                    break;
+                default:
+                    sendStatusUpdate = false;
             }
+        } catch (CatanException ex) {
+            ex.printStackTrace();
 
-            if (sendStatusUpdate) sendStatusUpdate(player);
-        } catch (IOException ex) {
-            System.out.printf("An exception occured %s", ex.getMessage());
+            if (ex.sendToClient())
+                sendMessageToAll(CatanMessage.error(ex.getMessage()));
         }
 
+        return sendStatusUpdate;
     }
-
-    public void endGame(WebSocketSession session) {
-        Player winner = utils.getGameCtrl().getPlayer(session.getId());
-        if (winner.hasWon() && winner.getId() == this.utils.getGameCtrl().getPlayerWithHighestPoints().getId()) {
-            sendMessageToAll(CatanMessage.endGame(winner));
-            this.utils.endGame(session);
-        }
-    }
-
-
-    //endregion
-
 }

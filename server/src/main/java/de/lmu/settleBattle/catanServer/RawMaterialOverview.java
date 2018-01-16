@@ -81,9 +81,9 @@ public class RawMaterialOverview extends JSONStringBuilder {
      * @param type type of raw material to increase
      * @param i    value to be added
      */
-    public void increase(RawMaterialType type, int i) {
+    public void increase(RawMaterialType type, int i) throws CatanException {
         //the method increase must not decrease an amount
-        if (i < 0) throw new IllegalArgumentException("increase cannot be called with negative value");
+        if (i < 0) throw new CatanException("i ist negativ und somit ungültig (Wert: " + i + ")", true);
 
         switch (type) {
             case ORE:
@@ -121,11 +121,12 @@ public class RawMaterialOverview extends JSONStringBuilder {
      * @param type type of raw material to decrease
      * @param i    value to be subtracted
      */
-    public void decrease(RawMaterialType type, int i) throws IllegalArgumentException {
-        if (i < 0) throw new IllegalArgumentException("decrease cannot be called with negative value");
+    public void decrease(RawMaterialType type, int i) throws CatanException {
+        if (i < 0) throw new CatanException(String.format("i ist negativ und somit ungültig (Wert: %s)", i), true);
 
         int typeCount = getTypeCount(type);
-        if (i > typeCount) throw new IllegalArgumentException("Cannot decrease more ore than existing");
+        if (i > typeCount)
+            throw new CatanException(String.format("%s kann nicht um %s verringert werden. (Haben %s)", type.toString(), i, typeCount), true);
 
         switch (type) {
             case ORE:
@@ -147,21 +148,21 @@ public class RawMaterialOverview extends JSONStringBuilder {
     }
 
     public void decrease(RawMaterialOverview overview)
-            throws IllegalArgumentException {
+            throws CatanException {
         if (this.oreCount < overview.oreCount)
-            throw new IllegalArgumentException("Cannot decrease more ore than existing");
+            throw new CatanException(String.format("Erz kann nicht um %s verringert werden. (Haben %s)", oreCount, overview.oreCount));
 
         if (this.wheatCount < overview.wheatCount)
-            throw new IllegalArgumentException("Cannot decrease more wheat than existing");
+            throw new CatanException(String.format("Getreide kann nicht um %s verringert werden. (Haben %s)", wheatCount, overview.wheatCount));
 
         if (this.woodCount < overview.woodCount)
-            throw new IllegalArgumentException("Cannot decrease more wood than existing");
+            throw new CatanException(String.format("Holz kann nicht um %s verringert werden. (Haben %s)", woodCount, overview.woodCount));
 
         if (this.woolCount < overview.woolCount)
-            throw new IllegalArgumentException("Cannot decrease more wool than existing");
+            throw new CatanException(String.format("Wolle kann nicht um %s verringert werden. (Haben %s)", woolCount, overview.woolCount));
 
         if (this.clayCount < overview.clayCount)
-            throw new IllegalArgumentException("Cannot decrease more clay than existing");
+            throw new CatanException(String.format("Lehm kann nicht um %s verringert werden. (Haben %s)", clayCount, overview.clayCount));
 
         this.oreCount -= overview.oreCount;
         this.clayCount -= overview.clayCount;
@@ -180,7 +181,7 @@ public class RawMaterialOverview extends JSONStringBuilder {
      * @throws IllegalArgumentException
      */
 
-    public RawMaterialType withdrawRandomCard() throws IllegalArgumentException {
+    public RawMaterialType withdrawRandomCard() throws CatanException {
 
         List<RawMaterialType> cards = this.getTypes();
         Random random = new Random();
@@ -385,6 +386,12 @@ public class RawMaterialOverview extends JSONStringBuilder {
         if (clayCount > 0) types.add(RawMaterialType.CLAY);
 
         return types;
+    }
+
+    @Override
+    public String toString() {
+        String pattern = "Erz:%s, Lehm:%s, Getreide:%s, Wolle:%s, Holz:%s";
+        return String.format(pattern, oreCount, clayCount, wheatCount, woolCount, woodCount);
     }
 }
 

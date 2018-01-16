@@ -5,6 +5,8 @@ import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 import org.json.JSONObject;
 
+import static de.lmu.settleBattle.catanServer.Constants.*;
+
 public class DevelopmentCardOverview extends JSONStringBuilder {
 
     @Expose
@@ -54,10 +56,10 @@ public class DevelopmentCardOverview extends JSONStringBuilder {
     }
     //endregion
 
-    //region decrease
-    public void increase(DevCardType type, int i) {
+    //region increase
+    public void increase(DevCardType type, int i) throws CatanException {
         //the method increase must not decrease an amount
-        if (i < 0) return;
+        if (i < 0) throw new CatanException(String.format("i ist negativ und somit ungültig. (Wert: %s)", i), false);
 
         switch(type) {
             case INVENTION:
@@ -80,28 +82,28 @@ public class DevelopmentCardOverview extends JSONStringBuilder {
     //endregion
 
     //region decrease
-    public void decrease(DevCardType type, int i)  throws Exception {
-        if (i < 0) throw new Exception();
+    public void decrease(DevCardType type, int i)  throws CatanException {
+        if (i < 0) throw new CatanException(String.format("i ist negativ und somit ungültig. (Wert: %s)", i), false);
 
         switch(type) {
             case INVENTION:
-                if (i > invention) throw new Exception();
+                if (i > invention) throw new CatanException(String.format(INVALID_DEV_CARDS_DECREASE, i, invention), false);
                 invention -= i;
                 break;
             case KNIGHT:
-                if (i > knight) throw new Exception();
+                if (i > knight) throw new CatanException(String.format(INVALID_DEV_CARDS_DECREASE, i, knight), false);
                 knight -= i;
                 break;
             case ROAD_CONSTRUCTION:
-                if (i > roadConstruction) throw new Exception();
+                if (i > roadConstruction) throw new CatanException(String.format(INVALID_DEV_CARDS_DECREASE, i, roadConstruction), false);
                 roadConstruction -= i;
                 break;
             case MONOPOLE:
-                if (i > monopole) throw new Exception();
+                if (i > monopole) throw new CatanException(String.format(INVALID_DEV_CARDS_DECREASE, i, monopole), false);
                 monopole -= i;
                 break;
             case VICTORY_POINT:
-                if (i > victoryPoint) throw new Exception();
+                if (i > victoryPoint) throw new CatanException(String.format(INVALID_DEV_CARDS_DECREASE, i, victoryPoint), false);
                 victoryPoint -= i;
                 break;
         }
@@ -148,6 +150,7 @@ public class DevelopmentCardOverview extends JSONStringBuilder {
         json.put(Constants.UNKNOWN, getTotalCount());
         return json.toString();
     }
+
     /**
      * determines costs to buy a development card
      * @return RawMaterialOverview representing costs

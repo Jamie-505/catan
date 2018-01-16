@@ -23,9 +23,12 @@ public class Haven extends JSONStringBuilder {
         setName();
     }
 
-    public Haven(Location[] locations, RawMaterialType harvest) {
+    public Haven(Location[] locations, RawMaterialType harvest) throws CatanException {
         this(harvest);
-        if (locations.length != 2) throw new IllegalArgumentException("locations must contain 2 Location objects");
+
+        if (locations.length != 2) throw new CatanException("Keine gültige Kante. Das Attay hat die Länge " +
+                locations.length, false);
+
         this.locations = locations;
         setName();
     }

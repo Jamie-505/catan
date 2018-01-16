@@ -1,7 +1,7 @@
 package de.lmu.settleBattle.catanServer;
+
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
-
 import java.util.List;
 import java.util.Random;
 
@@ -12,7 +12,11 @@ public class Robber extends JSONStringBuilder {
     private Location location;
 
     public Robber() {
-        this.location = new Location(0,0);
+        try {
+            this.location = new Location(0, 0);
+        } catch (CatanException ex) {
+            ex.printStackTrace();
+        }
     }
 
     public Robber(Location location) {
@@ -23,15 +27,11 @@ public class Robber extends JSONStringBuilder {
         return this.location;
     }
 
-    public boolean move(Location newLoc) {
-        boolean ret = false;
+    public void move(Location newLoc) throws CatanException {
+        if (!isValidNewLocation(newLoc))
+            throw new CatanException(String.format("Der Räuber kann nicht nach %s versetzt werden", newLoc.toString()), true);
 
-        if (isValidNewLocation(newLoc)) {
-            this.location = newLoc;
-            ret = true;
-        }
-
-        return ret;
+        this.location = newLoc;
     }
 
     public boolean isValidNewLocation(Location loc) {
@@ -44,7 +44,7 @@ public class Robber extends JSONStringBuilder {
      * <preconditions: number 7 is rolled>
      * <postconditions: player gets a card from another players>
      */
-    public boolean robPlayer(Player current, Player target) {
+    public boolean robPlayer(Player current, Player target) throws CatanException {
         List<RawMaterialType> types = target.getRawMaterialTypes();
         if (types.size() == 0) return false;
 
@@ -52,13 +52,17 @@ public class Robber extends JSONStringBuilder {
         RawMaterialType type = types.get(random.nextInt(types.size()));
 
         RawMaterialOverview overview = new RawMaterialOverview(type, 1);
+
         target.decreaseRawMaterials(overview);
-        current.increaseRawMaterials(overview);
+
+        //do not send status update when increasing here because the player has
+        //still status "Räuber versetzen" and client should not react to this
+        current.increaseRawMaterials(overview, false);
 
         return true;
     }
 
-    public void robPlayer(Player player) {
+    public void robPlayer(Player player) throws CatanException {
 
         int toWithdraw = player.hasToExtractCards() ? player.getRawMaterialCount() / 2 : 0;
         for (int i = toWithdraw; i > 0; i--) {
@@ -66,10 +70,19 @@ public class Robber extends JSONStringBuilder {
         }
     }
 
-    public boolean robPlayer(Player player, RawMaterialOverview overview) throws IllegalArgumentException {
-        if (player == null || !player.canAfford(overview)) return false;
+    /**
+     * player should have specified which cards he wants to extract if he has more
+     * than 7 raw materials, then robber takes care of this
+     * @param player player who extracts cards
+     * @param overview cards to extract
+     * @throws CatanException if player has not enought raw materials
+     */
+    public void robPlayer(Player player, RawMaterialOverview overview) throws CatanException {
+        if (player == null || !player.canAfford(overview))
+            throw new CatanException("Du besitzt die abgegebenen Rohstoffe nicht.", true);
 
-        player.decreaseRawMaterials(overview);
-        return true;
+        //do not send status update because then the player would have the status
+        //EXTRACT_CARDS_DUE_TO_ROBBER again and the game would not continue
+        player.decreaseRawMaterials(overview, false);
     }
 }

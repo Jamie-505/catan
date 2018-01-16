@@ -14,31 +14,17 @@ public class Location extends JSONStringBuilder {
         this.y = 0;
     }
 
-    public Location (int x, int y){
+    public Location (int x, int y) throws CatanException {
         if (!isValidLoc(x,y))
-            throw new IllegalArgumentException("The location coordinates do not have the required values.");
+            throw new CatanException(String.format("Die Koordinaten (%s, %s) sind nicht gültig.", x,y), true);
 
         this.x = x;
         this.y = y;
     }
 
-    /**
-     *<method name: none>
-     *<description: none>
-     *<preconditions: none>
-     *<postconditions: none>
-     */
-
     public int getX(){
         return x;
     }
-
-    /**
-     *<method name: none>
-     *<description: none>
-     *<preconditions: none>
-     *<postconditions: none>
-     */
     public int getY(){
         return y;
     }
@@ -77,6 +63,6 @@ public class Location extends JSONStringBuilder {
 
     @Override
     public String toString() {
-        return "x:" + x + "_y:" + y;
+        return "( x:" + x + ", y:" + y + " )";
     }
 }

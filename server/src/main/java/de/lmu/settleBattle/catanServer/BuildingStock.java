@@ -31,9 +31,9 @@ public class BuildingStock {
         this.settlementCount += 1;
     }
 
-    public boolean decrease(BuildingType type) {
-        if (getCount(type) < 1)
-            return false;
+    public void decrease(BuildingType type) throws CatanException {
+        if (getCount(type) < 1) throw new CatanException(String.format("Es ist keine %s mehr vorhanden.", type.toString()),
+                true);
 
         switch (type) {
             case CITY:
@@ -46,6 +46,5 @@ public class BuildingStock {
                 roadCount--;
                 break;
         }
-        return true;
     }
 }

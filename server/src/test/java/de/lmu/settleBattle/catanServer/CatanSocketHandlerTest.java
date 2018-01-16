@@ -149,7 +149,7 @@ public class CatanSocketHandlerTest {
         try {
             handler.getUtils().assignPlayerData(session2, setPlayerData("Eminem", Color.RED));
             assigned = true;
-        } catch (IllegalAccessException ex) {
+        } catch (CatanException ex) {
             assigned = false;
         }
 
@@ -227,8 +227,7 @@ public class CatanSocketHandlerTest {
     //endregion
 
     //region buildBuildingWithInvalidLocation
-    private void buildBuildingWithInvalidLocation(BuildingType type, Location[] locs)
-            throws IOException, IllegalAccessException {
+    private void buildBuildingWithInvalidLocation(BuildingType type, Location[] locs) throws CatanException {
         TestWebSocketSession session = getCurrentSession();
         String id = session.getId();
 
@@ -244,7 +243,7 @@ public class CatanSocketHandlerTest {
         try {
             sBuilt = handler.getUtils().build(SocketUtils.toInt(session.getId()), CatanMessage.sendBuildMessage(building));
         }
-        catch (IllegalAccessException ex) {
+        catch (CatanException ex) {
             sBuilt = false;
         }
 
@@ -260,7 +259,7 @@ public class CatanSocketHandlerTest {
 
     //region buildBuildingWithValidLocation
     private void buildBuildingWithValidLocation(BuildingType type, Location[] locs)
-            throws IOException, IllegalAccessException {
+            throws CatanException {
         TestWebSocketSession session = getCurrentSession();
 
         Building building = new Building(SocketUtils.toInt(session.getId()), type, locs);
@@ -270,7 +269,14 @@ public class CatanSocketHandlerTest {
         Board board = handler.getGameCtrl().getBoard();
         int builtBuildingCnt = board.getBuildingsSize();
 
-        boolean sBuilt = handler.getUtils().build(SocketUtils.toInt(session.getId()), CatanMessage.sendBuildMessage(building));
+        boolean sBuilt;
+        try {
+            sBuilt = handler.getUtils().build(SocketUtils.toInt(session.getId()), CatanMessage.sendBuildMessage(building));
+        }
+        catch (CatanException ex) {
+            sBuilt = false;
+        }
+
         assertTrue(board.getBuildingsSize() == builtBuildingCnt+1);
         assertTrue(sBuilt);
 

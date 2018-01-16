@@ -75,6 +75,8 @@ public class Player extends JSONStringBuilder implements Comparable, Cloneable {
     protected ArrayList<Haven> havens;
 
     private boolean isKI;
+    private String nextStatus;
+    private boolean isDeactivated;
     //endregion
 
     //region Constructors
@@ -107,6 +109,8 @@ public class Player extends JSONStringBuilder implements Comparable, Cloneable {
 
         this.havens = new ArrayList<>();
         this.isKI = false;
+        this.nextStatus = WAIT;
+        this.isDeactivated = false;
     }
 
     /**
@@ -148,6 +152,7 @@ public class Player extends JSONStringBuilder implements Comparable, Cloneable {
 
         int[] result = dice.roll();
 
+        System.out.printf("%s diced %s. fire property change", this.id, result[0]+result[1]);
         changes.firePropertyChange(DICE, result, this);
 
         return result;
@@ -163,17 +168,18 @@ public class Player extends JSONStringBuilder implements Comparable, Cloneable {
      * <preconditions: player has the required cards to buy and his turn is up>
      * <postconditions: player gets a development card in exchange for his material cards>
      */
-    public void addDevelopmentCard(DevCardType card, int amount) throws Exception {
+    public void addDevelopmentCard(DevCardType card, int amount) throws CatanException {
         this.developmentDeck.increase(card, amount);
-        if(card == DevCardType.VICTORY_POINT){
+        if (card == DevCardType.VICTORY_POINT) {
             this.victoryPtsHidden += amount;
             increaseVictoryPoints(amount, false);
         }
 
-        changes.firePropertyChange(DEV_CARD_BUY, "null", this);
+        changes.firePropertyChange(DEV_CARD_BUY, card, this);
     }
 
     //region trade
+
     /**
      * <method name: trade>
      * <description: none>
@@ -181,10 +187,10 @@ public class Player extends JSONStringBuilder implements Comparable, Cloneable {
      * <postconditions: none>
      */
     public void trade(RawMaterialOverview offer, RawMaterialOverview request)
-            throws IllegalArgumentException {
+            throws CatanException {
 
         this.rawMaterialDeck.decrease(offer);
-        changes.firePropertyChange(TRD_DECR, offer, this);
+        changes.firePropertyChange(TRD_DECR_NO_STAT_UPD, offer, this);
 
         this.rawMaterialDeck.increase(request);
         changes.firePropertyChange(TRD_INCR, request, this);
@@ -192,14 +198,16 @@ public class Player extends JSONStringBuilder implements Comparable, Cloneable {
     //endregion
 
     //region hasXTo1Haven
+
     /**
      * returns if the player can trade 3:1 or 2:1
+     *
      * @param count
      * @return
      */
-    public boolean hasXTo1Haven(int count) {
+    public boolean hasXTo1Haven(int count) throws CatanException {
         if (count != 3 && count != 2)
-            throw new IllegalArgumentException("There is no " + count + " to 1 haven");
+            throw new CatanException("Es gibt keinen " + count + ":1 Hafen", false);
 
         if (count == 3) {
             for (Haven haven : havens) {
@@ -257,21 +265,33 @@ public class Player extends JSONStringBuilder implements Comparable, Cloneable {
         return this.victoryPtsTotal >= 10;
     }
 
-    public void decreaseRawMaterials(RawMaterialOverview overview) throws IllegalArgumentException {
+    public void decreaseRawMaterials(RawMaterialOverview overview, boolean sendStatusUpdate)
+            throws CatanException {
         if (overview.getTotalCount() == 0) return;
 
         this.rawMaterialDeck.decrease(overview);
-        changes.firePropertyChange(RMO_DECR, overview, this);
+
+        String property = sendStatusUpdate ? RMO_DECR : RMO_DECR_NO_STAT_UPD;
+        changes.firePropertyChange(property, overview, this);
     }
 
-    public void increaseRawMaterials(RawMaterialOverview overview) throws IllegalArgumentException {
+    public void decreaseRawMaterials(RawMaterialOverview overview) throws CatanException {
+        decreaseRawMaterials(overview, true);
+    }
+
+    public void increaseRawMaterials(RawMaterialOverview overview, boolean sendStatusUpdate) throws CatanException {
         if (overview.getTotalCount() == 0) return;
 
         this.rawMaterialDeck.increase(overview);
-        changes.firePropertyChange(RMO_INCR, overview, this);
+        String property = sendStatusUpdate ? RMO_INCR : RMO_INCR_NO_STAT_UPD;
+        changes.firePropertyChange(property, overview, this);
     }
 
-    public void removeDevelopmentCard(DevCardType type) throws Exception {
+    public void increaseRawMaterials(RawMaterialOverview overview) throws CatanException {
+        increaseRawMaterials(overview, true);
+    }
+
+    public void removeDevelopmentCard(DevCardType type) throws CatanException {
         this.developmentDeck.decrease(type, 1);
     }
 
@@ -279,41 +299,41 @@ public class Player extends JSONStringBuilder implements Comparable, Cloneable {
         return this.developmentDeck.hasRoadConstructionCard();
     }
 
+    public boolean isActive() {
+        return this.status.equals(EXTRACT_CARDS_DUE_TO_ROBBER) || this.status.equals(ROBBER_TO) ||
+                this.status.equals(TRADE_OR_BUILD) || this.status.equals(EXTRACT_CARDS_DUE_TO_ROBBER);
+    }
+
     private int increaseArmyCount() {
         return armyCount++;
     }
 
     /**
-     * plays knight card if player possesses one
-     * @return
+     * applys knight card
      */
-    public boolean playKnight() {
-        boolean done = false;
-        try {
-            if (developmentDeck.hasKnightCard()) {
-                developmentDeck.decrease(DevCardType.KNIGHT, 1);
-                increaseArmyCount();
-                done = true;
-            }
-        }
-        catch (Exception ex) {
-            ex.printStackTrace();
-            done = false;
-        }
-        return done;
+    public void applyKnightCard() throws CatanException {
+        if (!developmentDeck.hasKnightCard())
+            throw new CatanException(String.format(PLAYER_HAS_NO_DEV_CARD, this.id, DevCardType.KNIGHT.toString()), true);
+
+        developmentDeck.decrease(DevCardType.KNIGHT, 1);
+        increaseArmyCount();
     }
 
-    public void decreaseVictoryPoints(int i) throws Exception {
-        if(this.victoryPtsTotal <= 0) throw new Exception();
-        this.victoryPtsTotal -= - i;
+    public void decreaseVictoryPoints(int i) throws CatanException {
+        if (this.victoryPtsTotal <= 0)
+            throw new CatanException(String.format("Siegpunkte können nicht um %s verringert werden. (Haben %s)", i, victoryPtsTotal), true);
+        this.victoryPtsTotal -= -i;
     }
 
-    public void increaseVictoryPoints(int amount, boolean showAll){
+    public void increaseVictoryPoints(int amount, boolean sendStatusUpdate)
+            throws CatanException {
+        if (amount < 0)
+            throw new CatanException(String.format("amount ist negativ und somit ungültig (Wert: %s)", amount), false);
+
         int oldVpAmount = this.victoryPtsTotal;
         this.victoryPtsTotal = victoryPtsTotal + amount;
 
-        if (showAll) changes.firePropertyChange(VP_INCR, oldVpAmount, this);
-        else changes.firePropertyChange(SU_ONLY_TO_ME, oldVpAmount, this);
+        if (sendStatusUpdate) changes.firePropertyChange(VP_INCR, oldVpAmount, this);
     }
 
     /**
@@ -323,14 +343,14 @@ public class Player extends JSONStringBuilder implements Comparable, Cloneable {
      * @return
      */
     public boolean hasToExtractCards() {
-        return rawMaterialDeck.getTotalCount() >= 7;
+        return rawMaterialDeck.getTotalCount() > 7;
     }
 
-    public boolean hasRawMaterial(RawMaterialType type){
+    public boolean hasRawMaterial(RawMaterialType type) {
         return this.rawMaterialDeck.getTypeCount(type) >= 1;
     }
 
-    public int getRawMaterialCount(RawMaterialType type){
+    public int getRawMaterialCount(RawMaterialType type) {
         return this.rawMaterialDeck.getTypeCount(type);
     }
 
@@ -338,8 +358,8 @@ public class Player extends JSONStringBuilder implements Comparable, Cloneable {
         return this.developmentDeck.hasMonopoleCard();
     }
 
-    public void removeDevelopmentCard(DevCardType type , int amount) throws Exception {
-        this.developmentDeck.decrease(type,amount);
+    public void removeDevelopmentCard(DevCardType type, int amount) throws CatanException {
+        this.developmentDeck.decrease(type, amount);
     }
 
     public boolean canAffordDevCard() {
@@ -360,98 +380,47 @@ public class Player extends JSONStringBuilder implements Comparable, Cloneable {
 
     //region Properties
 
-    /**
-     * <method name: getId>
-     * <description: this is a getter method for the id>
-     * <preconditions: none>
-     * <postconditions: none>
-     */
+
     public int getId() {
         return id;
     }
 
-    /**
-     * <method name: getArmyCount>
-     * <description: this is a getter method for the army count>
-     * <preconditions: none>
-     * <postconditions: none>
-     */
     public int getArmyCount() {
         return armyCount;
     }
 
-
-    /**
-     * <method name: getStatus>
-     * <description: this is a getter method for the status>
-     * <preconditions: none>
-     * <postconditions: none>
-     */
     public String getStatus() {
         return status;
     }
 
-    /**
-     * <method name: setStatus>
-     * <description: this method is a setter method for the status>
-     * <preconditions: none>
-     * <postconditions: none>
-     */
-
     public void setStatus(String newStatus) {
+        if(newStatus.equals("")) return;
+
         boolean fire = !newStatus.equals(this.status);
         if (fire) {
             String oldStatus = this.status;
             this.status = newStatus;
-            changes.firePropertyChange(SU_TO_ALL, oldStatus, this);
+            changes.firePropertyChange(STATUS_UPD, oldStatus, this);
         }
     }
-
-    /**
-     * <method name: getName>
-     * <description: this is a getter method for the name>
-     * <preconditions: none>
-     * <postconditions: none>
-     */
 
     public String getName() {
         return name;
     }
 
-    /**
-     * <method name: setName>
-     * <description: this is a setter method for the name>
-     * <preconditions: none>
-     * <postconditions: none>
-     */
-
     public void setName(String name) {
         this.name = name;
     }
-
-    /**
-     * <method name: getColor>
-     * <description: this is a getter method for the color>
-     * <preconditions: none>
-     * <postconditions: none>
-     */
 
     public Color getColor() {
         return color;
     }
 
-    /**
-     * <method name: setColor>
-     * <description: this is a setter method for the color>
-     * <preconditions: none>
-     * <postconditions: none>
-     */
-
-    public void setColor(Color color) {
-        boolean fire = !color.equals(this.color);
-        this.color = color;
+    public void setColor(Color newColor) {
+        boolean fire = !newColor.equals(this.color);
+        this.color = newColor;
         if (fire)
-            changes.firePropertyChange(SU_TO_ALL, "null", this);
+            changes.firePropertyChange(STATUS_UPD, "null", this);
     }
 
     public boolean isKI() {
@@ -462,53 +431,49 @@ public class Player extends JSONStringBuilder implements Comparable, Cloneable {
         this.isKI = isKI;
     }
 
-    /**
-     * <method name: isLongestRoad>
-     * <description: this method checks if a road is the greatest>
-     * <preconditions: none>
-     * <postconditions: none>
-     */
     public boolean isLongestRoad() {
         return longestRoad;
     }
 
-    /**
-     * <method name: setLongestRoad>
-     * <description: this a setter method for the longest road >
-     * <preconditions: none>
-     * <postconditions: none>
-     */
     public void setLongestRoad(boolean boo) {
         this.longestRoad = boo;
     }
-
-
-    /**
-     * <method name: isGreatestArmy>
-     * <description: this method checks if an army is the greatest>
-     * <preconditions: none>
-     * <postconditions: none>
-     */
 
     public boolean isGreatestArmy() {
         return greatestArmy;
     }
 
-    /**
-     * <method name: setGreatestArmy>
-     * <description: this is a setter method for the greatest army>
-     * <preconditions: none>
-     * <postconditions: none>
-     */
-
     public void setGreatestArmy(boolean boo) {
         this.greatestArmy = boo;
     }
-    //endregion
 
     public int getVictoryPointsCount() {
         return victoryPtsTotal;
     }
+
+    public String getNextStatus() {
+        return nextStatus;
+    }
+
+    public void setNextStatus(String nextStatus) {
+        this.nextStatus = nextStatus;
+    }
+
+    public void activateNextStatus() {
+        String next = this.nextStatus.equals("") ? WAIT : this.nextStatus;
+        this.nextStatus = "";
+        this.setStatus(next);
+    }
+
+    public boolean isDeactivated() {
+        return isDeactivated;
+    }
+
+    public void setDeactivated(boolean deactivated) {
+        this.status = WAIT;
+        isDeactivated = deactivated;
+    }
+    //endregion
 
     @Override
     public String toJSONString_Unknown() {
@@ -521,7 +486,7 @@ public class Player extends JSONStringBuilder implements Comparable, Cloneable {
         hiddenJSON.put(RAW_MATERIALS, this.rawMaterialDeck.toJSON_Unknown());
 
         hiddenJSON.remove(VICTORY_PTS);
-        hiddenJSON.put(VICTORY_PTS, this.victoryPtsTotal-this.victoryPtsHidden);
+        hiddenJSON.put(VICTORY_PTS, this.victoryPtsTotal - this.victoryPtsHidden);
 
         return hiddenJSON.toString();
     }
@@ -567,7 +532,7 @@ public class Player extends JSONStringBuilder implements Comparable, Cloneable {
         return stock;
     }
 
-    public void addBuilding(Building bld) {
+    public void addBuilding(Building bld) throws CatanException {
         switch (bld.getType()) {
             case ROAD:
                 roads.add(bld);
@@ -600,8 +565,7 @@ public class Player extends JSONStringBuilder implements Comparable, Cloneable {
 
     public Building getLastSettlement() {
         if (this.settlements.size() == 0) return null;
-
-        return this.settlements.get(settlements.size()-1);
+        return this.settlements.get(settlements.size() - 1);
     }
 
     public List<Building> getSettlements() {
@@ -627,12 +591,12 @@ public class Player extends JSONStringBuilder implements Comparable, Cloneable {
         return type;
     }
 
-    public DevelopmentCardOverview getDevelopmentDeck(){
+    public DevelopmentCardOverview getDevelopmentDeck() {
         return developmentDeck;
     }
 
     public void removeKnightCard() throws Exception {
-        this.developmentDeck.decrease(DevCardType.KNIGHT,1);
+        this.developmentDeck.decrease(DevCardType.KNIGHT, 1);
     }
 
     //____________FOR TESTING___________________________

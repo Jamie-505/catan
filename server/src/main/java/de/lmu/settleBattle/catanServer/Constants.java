@@ -15,7 +15,6 @@ public class Constants {
     public final static String BUILD_STREET = "Strasse bauen";
     public final static String DICE = "Würfeln";
     public final static String EXTRACT_CARDS_DUE_TO_ROBBER = "Karten wegen Räuber abgeben";
-    public final static String MOVE_ROBBER = "Räuber versetzen";
     public final static String TRADE_OR_BUILD = "Handeln oder bauen";
     public final static String WAIT = "Warten";
 
@@ -42,7 +41,7 @@ public class Constants {
     public final static String LONGEST_RD = "Längste Handelsstrasse";
     public final static String NEW_BUILDING ="Bauvorgang";
     public final static String ROBBER_AT = "Räuber versetzt";
-    public final static String ROBBER_TO ="Räuber versetzten";
+    public final static String ROBBER_TO ="Räuber versetzen";
     public final static String ROLL_DICE = "Würfeln";
     public final static String SEA_TRADE = "Seehandel";
     public final static String SERVER_RES = "Serverantwort";
@@ -125,14 +124,21 @@ public class Constants {
 
     //PropertyChanges
     public final static String TRD_DECR = "Trade Decrease";
+    public final static String TRD_DECR_NO_STAT_UPD = "Trade Decrease NO UPDATE";
     public final static String TRD_INCR = "Trade Increase";
     public final static String RMO_INCR = "RawMaterial Increase";
+    public final static String RMO_INCR_NO_STAT_UPD = "RawMaterial Increase NO UPDATE";
+    public final static String RMO_DECR_NO_STAT_UPD = "RawMaterial Decrease NO UPDATE";
     public final static String RMO_DECR = "RawMaterial Decrease";
     public final static String TDR_REQ_ACC = "TR Accept";
     public final static String TDR_REQ_CANCEL = "TR Cancel";
     public final static String TDR_REQ_EXE = "TR Execute";
-    public final static String SU_TO_ALL = "SU_TO_ALL";
-    public final static String SU_ONLY_TO_ME = "SU_ONLY_TO_ME";
     public final static String VP_INCR = "Victory Pts Increased";
     public final static String DEV_CARD_BUY = "DevCard Bought";
+
+    //Exception Messages
+    final static String PLAYER_HAS_NO_DEV_CARD = "Der Spieler %s besitzt keine Entwicklungskarte vom Typ %s";
+    final static String INVALID_LOC_ARRAY = "Das übergebene Array ist ungültig für eine %s: %s";
+    final static String INVALID_TRD_ID = "Das Handelsangebot mit der ID %s existiert nicht.";
+    final static String INVALID_DEV_CARDS_DECREASE = "Entwicklungskarten können nicht um %s verringert werden. (Haben: %s)";
 }

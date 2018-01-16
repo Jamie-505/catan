@@ -3,6 +3,10 @@ package de.lmu.settleBattle.catanServer;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
+import java.util.Arrays;
+
+import static de.lmu.settleBattle.catanServer.Constants.*;
+
 public class Building extends JSONStringBuilder {
 
     @Expose
@@ -38,25 +42,25 @@ public class Building extends JSONStringBuilder {
         this.owner = owner;
     }
 
-    public Building(int owner, BuildingType type, Location[] loc) {
-        this(type, owner);
 
-        if (loc.length == locations.length) {
-            this.locations = loc;
-        } else throw new IllegalArgumentException();
-    }
-
-    public Building(int owner, String viewID, BuildingType type, Location[] loc) {
-        this(owner, type, loc);
-        this.viewID = viewID;
-    }
-
-    public Building(BuildingType type, Location[] loc) {
+    public Building(BuildingType type, Location[] loc) throws CatanException {
         this(type);
 
         if (loc.length == locations.length) {
             this.locations = loc;
-        } else throw new IllegalArgumentException();
+        } else throw new CatanException(
+                String.format(INVALID_LOC_ARRAY, type.toString(), Arrays.toString(loc)),
+                false);
+    }
+
+    public Building(int owner, BuildingType type, Location[] loc) throws CatanException {
+        this(type, loc);
+        this.owner = owner;
+    }
+
+    public Building(int owner, String viewID, BuildingType type, Location[] loc) throws CatanException {
+        this(owner, type, loc);
+        this.viewID = viewID;
     }
 
     private void initializeLocations(BuildingType type) {
@@ -65,12 +69,13 @@ public class Building extends JSONStringBuilder {
     }
     //endregion
 
-    public void build(Location[] loc) throws IllegalArgumentException {
+    public void build(Location[] loc) throws CatanException {
 
         if (((this.isSettlement() || this.isCity()) && loc.length == 3) ||
                 this.isRoad() && loc.length == 2) {
             this.locations = loc;
-        } else throw new IllegalArgumentException();
+        } else throw new CatanException(String.format(INVALID_LOC_ARRAY, Arrays.toString(loc), this.type.toString()),
+                false);
     }
 
     public int getOwner() {
@@ -112,9 +117,9 @@ public class Building extends JSONStringBuilder {
      * two Location[] Objects are equal and exactlyHere == true
      * otherwise false
      *
-     * @param loc
-     * @param exactlyHere
-     * @return
+     * @param loc loc to search for buildings
+     * @param exactlyHere specifies if searched for exact location or adjacent
+     * @return true if around loc a building is built
      */
     public boolean isBuiltAroundHere(Location[] loc, boolean exactlyHere) {
         int matchCount = 0;
@@ -124,9 +129,9 @@ public class Building extends JSONStringBuilder {
             edgesAreAdjacent = edgesAreAdjacent(loc);
 
         else {
-            for (int i = 0; i < loc.length; i++) {
-                for (int j = 0; j < locations.length; j++) {
-                    if ((loc[i].compare(locations[j]))) {
+            for (Location aLoc : loc) {
+                for (Location bLoc : locations) {
+                    if ((aLoc.compare(bLoc))) {
                         matchCount++;
                     }
                 }
@@ -172,9 +177,8 @@ public class Building extends JSONStringBuilder {
 
     /**
      * get costs of a special Building type
-     *
-     * @param type BuildingType
-     * @return RawMaterialOverview object
+     * @param type BuildingType to get costs of
+     * @return costs of building type
      */
     public static RawMaterialOverview getCosts(BuildingType type) {
         switch (type) {

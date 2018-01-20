@@ -92,7 +92,7 @@ public class RawMaterialOverview {
   }
 
   public int[] getQnts() {
-    return new int[] { clayCount, oreCount, wheatCount, woodCount, woolCount, unknown };
+    return new int[] { woodCount, clayCount, woolCount, wheatCount, oreCount, unknown };
   }
 
   public int getTotalAmnt() {

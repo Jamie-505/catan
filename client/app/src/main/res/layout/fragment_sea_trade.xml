@@ -1,119 +1,225 @@
 <?xml version="1.0" encoding="utf-8"?>
 <android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
   xmlns:app="http://schemas.android.com/apk/res-auto"
-  xmlns:tools="http://schemas.android.com/tools"
   android:layout_width="wrap_content"
   android:layout_height="wrap_content"
-  tools:layout_editor_absoluteY="81dp">
+  android:background="@color/fragmentBackground">
 
-  <!-- this part disables the clicking on the tiles behind the fragment -->
+  <!--prevent clicks on the background-->
   <android.support.constraint.ConstraintLayout
-    android:layout_width="match_parent"
-    android:layout_height="374dp"
-    android:layout_marginTop="8dp"
-    android:layout_marginBottom="8dp"
+    android:layout_width="0dp"
+    android:layout_height="0dp"
     android:clickable="true"
     android:focusable="true"
     app:layout_constraintBottom_toBottomOf="parent"
     app:layout_constraintEnd_toEndOf="parent"
-    app:layout_constraintHorizontal_bias="0.5"
     app:layout_constraintStart_toStartOf="parent"
     app:layout_constraintTop_toTopOf="parent" />
+  <!--end-->
 
   <android.support.constraint.ConstraintLayout
-    android:layout_width="wrap_content"
+    android:layout_width="match_parent"
     android:layout_height="wrap_content"
     app:layout_constraintBottom_toBottomOf="parent"
     app:layout_constraintEnd_toEndOf="parent"
-    app:layout_constraintHorizontal_bias="0.5"
     app:layout_constraintStart_toStartOf="parent"
     app:layout_constraintTop_toTopOf="parent">
 
-    <TextView
-      android:id="@+id/tradeOfferText"
-      android:layout_width="97dp"
-      android:layout_height="24dp"
-      android:layout_marginTop="8dp"
-      android:layout_marginBottom="8dp"
-      android:ems="10"
-      android:text="@string/offer_resource"
-      android:textAlignment="center"
-      app:layout_constraintBottom_toTopOf="@id/offeredResource"
-      app:layout_constraintEnd_toEndOf="@id/offeredResource"
-      app:layout_constraintHorizontal_bias="0.504"
-      app:layout_constraintLeft_toLeftOf="parent"
-      app:layout_constraintRight_toRightOf="parent"
-      app:layout_constraintStart_toStartOf="@id/offeredResource"
-      app:layout_constraintTop_toTopOf="@+id/guideline3"
-      app:layout_constraintVertical_bias="0.0" />
-    <TextView
-      android:id="@+id/tradeRequestText"
-      android:layout_width="wrap_content"
-      android:layout_height="16dp"
-      android:layout_marginBottom="77dp"
-      android:ems="10"
-      android:text="@string/request_trade"
-      android:textAlignment="center"
-      app:layout_constraintBottom_toTopOf="@+id/requestedResources"
-      app:layout_constraintEnd_toEndOf="@+id/requestedResources"
-      app:layout_constraintStart_toStartOf="@+id/requestedResources" />
-
-    <Spinner
-      android:id="@+id/offeredResource"
-      android:layout_width="216dp"
-      android:layout_height="32dp"
-      android:layout_marginTop="8dp"
-      android:layout_marginBottom="104dp"
-      app:layout_constraintBottom_toTopOf="@+id/tradeRequestText"
-      app:layout_constraintEnd_toEndOf="@+id/tradeRequestText"
-      app:layout_constraintHorizontal_bias="0.49"
-      app:layout_constraintLeft_toLeftOf="parent"
-      app:layout_constraintRight_toRightOf="parent"
-      app:layout_constraintStart_toStartOf="@+id/tradeRequestText"
-      app:layout_constraintTop_toBottomOf="@+id/tradeOfferText" />
-
-    <Spinner
-      android:id="@+id/requestedResources"
-      android:layout_width="313dp"
-      android:layout_height="0dp"
-      android:layout_marginBottom="48dp"
-      app:layout_constraintBottom_toTopOf="@+id/sendTradeBtn"
+    <android.support.v7.widget.CardView
+      android:id="@+id/offer_card"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      app:cardCornerRadius="8dp"
+      app:cardElevation="8dp"
+      app:cardUseCompatPadding="true"
+      app:layout_constraintBottom_toTopOf="@id/req_card"
       app:layout_constraintEnd_toEndOf="parent"
-      app:layout_constraintEnd_toStartOf="@+id/guideline4"
-      app:layout_constraintHorizontal_bias="0.5"
-      app:layout_constraintStart_toEndOf="@+id/guideline2"
-      app:layout_constraintStart_toStartOf="parent" />
+      app:layout_constraintStart_toStartOf="parent"
+      app:layout_constraintTop_toTopOf="parent">
 
-    <android.support.constraint.Guideline
-      android:id="@+id/guideline2"
-      android:layout_width="wrap_content"
+      <android.support.constraint.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:padding="16dp">
+
+        <TextView
+          android:id="@+id/trade_offer_text"
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content"
+          android:layout_marginBottom="8dp"
+          android:ems="16"
+          android:text="@string/offer_resource"
+          android:textAlignment="center"
+          app:layout_constraintBottom_toTopOf="@id/trade_offer_selection"
+          app:layout_constraintEnd_toEndOf="parent"
+          app:layout_constraintStart_toStartOf="parent"
+          app:layout_constraintTop_toTopOf="parent" />
+
+        <RadioGroup
+          android:id="@+id/trade_offer_selection"
+          android:layout_width="match_parent"
+          android:layout_height="55dp"
+          android:orientation="horizontal"
+          app:layout_constraintBottom_toBottomOf="parent"
+          app:layout_constraintEnd_toEndOf="parent"
+          app:layout_constraintStart_toStartOf="parent"
+          app:layout_constraintTop_toBottomOf="@id/trade_offer_text">
+          <RadioButton
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:paddingTop="16dp"
+            android:button="@null"
+            android:drawableTop="@drawable/ic_wood"
+            android:text="@string/wood"
+            android:textColor="@color/transparent"
+            android:textSize="0sp" />
+          <RadioButton
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:paddingTop="16dp"
+            android:button="@null"
+            android:drawableTop="@drawable/ic_clay"
+            android:text="@string/clay"
+            android:textColor="@color/transparent"
+            android:textSize="0sp" />
+          <RadioButton
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:paddingTop="16dp"
+            android:button="@null"
+            android:drawableTop="@drawable/ic_sheep"
+            android:text="@string/wool"
+            android:textColor="@color/transparent"
+            android:textSize="0sp" />
+          <RadioButton
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:paddingTop="16dp"
+            android:button="@null"
+            android:drawableTop="@drawable/ic_wheat"
+            android:text="@string/wheat"
+            android:textColor="@color/transparent"
+            android:textSize="0sp" />
+          <RadioButton
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:paddingTop="16dp"
+            android:button="@null"
+            android:drawableTop="@drawable/ic_ore"
+            android:text="@string/ore"
+            android:textColor="@color/transparent"
+            android:textSize="0sp" />
+        </RadioGroup>
+      </android.support.constraint.ConstraintLayout>
+    </android.support.v7.widget.CardView>
+
+    <android.support.v7.widget.CardView
+      android:id="@+id/req_card"
+      android:layout_width="match_parent"
       android:layout_height="wrap_content"
-      android:orientation="vertical"
-      app:layout_constraintGuide_begin="16dp" />
-    <android.support.constraint.Guideline
-      android:id="@+id/guideline3"
-      android:layout_width="wrap_content"
-      android:layout_height="wrap_content"
-      android:orientation="horizontal"
-      app:layout_constraintGuide_percent="0.0" />
-    <android.support.constraint.Guideline
-      android:id="@+id/guideline4"
-      android:layout_width="wrap_content"
-      android:layout_height="wrap_content"
-      android:orientation="vertical"
-      app:layout_constraintGuide_begin="367dp" />
+      app:cardCornerRadius="8dp"
+      app:cardElevation="8dp"
+      app:cardUseCompatPadding="true"
+      app:layout_constraintBottom_toTopOf="@id/send_trade_btn"
+      app:layout_constraintEnd_toEndOf="parent"
+      app:layout_constraintStart_toStartOf="parent"
+      app:layout_constraintTop_toBottomOf="@id/offer_card">
+
+      <android.support.constraint.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:padding="16dp">
+
+        <TextView
+          android:id="@+id/trade_req_text"
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content"
+          android:layout_marginBottom="8dp"
+          android:ems="16"
+          android:text="@string/request_trade"
+          android:textAlignment="center"
+          app:layout_constraintBottom_toTopOf="@id/trade_req_selection"
+          app:layout_constraintEnd_toEndOf="parent"
+          app:layout_constraintStart_toStartOf="parent"
+          app:layout_constraintTop_toTopOf="parent" />
+
+        <RadioGroup
+          android:id="@+id/trade_req_selection"
+          android:layout_width="match_parent"
+          android:layout_height="55dp"
+          android:orientation="horizontal"
+          app:layout_constraintBottom_toBottomOf="parent"
+          app:layout_constraintEnd_toEndOf="parent"
+          app:layout_constraintStart_toStartOf="parent"
+          app:layout_constraintTop_toBottomOf="@id/trade_req_text">
+          <RadioButton
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:paddingTop="16dp"
+            android:button="@null"
+            android:drawableTop="@drawable/ic_wood"
+            android:text="@string/wood"
+            android:textColor="@color/transparent"
+            android:textSize="0sp" />
+          <RadioButton
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:paddingTop="16dp"
+            android:button="@null"
+            android:drawableTop="@drawable/ic_clay"
+            android:text="@string/clay"
+            android:textColor="@color/transparent"
+            android:textSize="0sp" />
+          <RadioButton
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:paddingTop="16dp"
+            android:button="@null"
+            android:drawableTop="@drawable/ic_sheep"
+            android:text="@string/wool"
+            android:textColor="@color/transparent"
+            android:textSize="0sp" />
+          <RadioButton
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:paddingTop="16dp"
+            android:button="@null"
+            android:drawableTop="@drawable/ic_wheat"
+            android:text="@string/wheat"
+            android:textColor="@color/transparent"
+            android:textSize="0sp" />
+          <RadioButton
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:paddingTop="16dp"
+            android:button="@null"
+            android:drawableTop="@drawable/ic_ore"
+            android:text="@string/ore"
+            android:textColor="@color/transparent"
+            android:textSize="0sp" />
+        </RadioGroup>
+      </android.support.constraint.ConstraintLayout>
+    </android.support.v7.widget.CardView>
+
     <Button
-      android:id="@+id/sendTradeBtn"
+      android:id="@+id/send_trade_btn"
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
       android:layout_marginBottom="8dp"
-      android:text="Tausche!"
+      android:text="@string/trade"
+      app:layout_constraintTop_toBottomOf="@id/req_card"
       app:layout_constraintBottom_toBottomOf="parent"
       app:layout_constraintEnd_toEndOf="parent"
-      app:layout_constraintHorizontal_bias="0.5"
       app:layout_constraintStart_toStartOf="parent" />
-
   </android.support.constraint.ConstraintLayout>
-
-
 </android.support.constraint.ConstraintLayout>

@@ -4,7 +4,6 @@ import static de.lmu.settlebattle.catanclient.utils.Constants.RAW_MATERIALS;
 import static de.lmu.settlebattle.catanclient.utils.Constants.TOSS_CARDS;
 import static de.lmu.settlebattle.catanclient.utils.JSONUtils.createJSONString;
 
-import android.content.Context;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -22,9 +21,6 @@ import java.util.Locale;
 public class TossCardsFragment extends MainActivityFragment {
 
   private Button okBtn;
-  private FragmentCloser fragCloser;
-  private FragmentMessageDeliverer mailMan;
-  private FragmentMessageDisplayer fragMsgDisp;
   private Gson gson = new Gson();
   private int numPickCnt;
   private int tossCardCnt;
@@ -35,8 +31,8 @@ public class TossCardsFragment extends MainActivityFragment {
   public View onCreateView(LayoutInflater inflater, ViewGroup container,
       Bundle savedInstanceState) {
     if (getArguments() != null) {
-      rawMat = gson
-          .fromJson(getArguments().getString(RAW_MATERIALS), RawMaterialOverview.class);
+      rawMat = gson.fromJson(getArguments().getString(RAW_MATERIALS),
+              RawMaterialOverview.class);
     }
     // Inflate the layout for this fragment
     View fragmentView = inflater.inflate(R.layout.fragment_toss_cards, container, false);
@@ -72,8 +68,8 @@ public class TossCardsFragment extends MainActivityFragment {
     okBtn = fragmentView.findViewById(R.id.okBtn);
     okBtn.setOnClickListener((View v) -> {
       RawMaterialOverview tossedCards = createTossCardObj();
-      mailMan.sendMsgToServer(createJSONString(TOSS_CARDS, tossedCards));
-      fragCloser.closeFragment(this);
+      fragHandler.sendMsgToServer(createJSONString(TOSS_CARDS, tossedCards));
+      fragHandler.closeFragment(this);
     });
 
     return fragmentView;
@@ -87,7 +83,7 @@ public class TossCardsFragment extends MainActivityFragment {
       np.setLimitExceededListener((limit, exceededValue) -> {
         String message = String.format(Locale.GERMAN,
             "Du kannst den Wert nicht auf %d setzen", exceededValue);
-        fragMsgDisp.displayMessageFromFragment(message);
+        fragHandler.displayFragMsg(message);
       });
       np.setValueChangedListener((value, action) -> {
         if (action == ActionEnum.DECREMENT) {
@@ -101,23 +97,6 @@ public class TossCardsFragment extends MainActivityFragment {
           okBtn.setEnabled(false);
         }
       });
-    }
-
-
-  }
-
-  @Override
-  public void onAttach(Context context) {
-    super.onAttach(context);
-    if (context instanceof FragmentMessageDisplayer
-        && context instanceof FragmentCloser
-        && context instanceof FragmentMessageDeliverer) {
-      fragCloser = (FragmentCloser) context;
-      fragMsgDisp = (FragmentMessageDisplayer) context;
-      mailMan = (FragmentMessageDeliverer) context;
-    } else {
-      throw new RuntimeException(
-          context.toString() + "must implement correct Interface");
     }
   }
 

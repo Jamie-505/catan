@@ -2,7 +2,9 @@
 <android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
   xmlns:app="http://schemas.android.com/apk/res-auto"
   android:layout_width="wrap_content"
-  android:layout_height="wrap_content">
+  android:layout_height="wrap_content"
+  android:background="@color/fragmentBackground"
+  xmlns:numberpicker="http://schemas.android.com/apk/res-auto">
 
   <!-- this part disables the clicking on the tiles behind the fragment -->
   <android.support.constraint.ConstraintLayout
@@ -23,22 +25,17 @@
     app:layout_constraintStart_toStartOf="parent"
     app:layout_constraintTop_toTopOf="parent">
 
-
     <android.support.v7.widget.CardView
-      android:id="@+id/requestContainer"
+      android:id="@+id/offer_container"
       android:layout_width="match_parent"
       android:layout_height="wrap_content"
-      android:layout_marginTop="8dp"
-      android:layout_marginStart="8dp"
-      android:layout_marginEnd="8dp"
       app:cardCornerRadius="8dp"
       app:cardElevation="8dp"
       app:cardUseCompatPadding="true"
-      app:contentPadding="8dp"
-      app:layout_constraintBottom_toTopOf="@id/offerContainer"
-      app:layout_constraintEnd_toEndOf="parent"
+      app:layout_constraintTop_toTopOf="parent"
       app:layout_constraintStart_toStartOf="parent"
-      app:layout_constraintTop_toTopOf="parent">
+      app:layout_constraintEnd_toEndOf="parent"
+      app:layout_constraintBottom_toTopOf="@id/req_container">
 
       <LinearLayout
         android:layout_width="match_parent"
@@ -47,7 +44,8 @@
         <TextView
           android:layout_width="match_parent"
           android:layout_height="wrap_content"
-          android:text="@string/request_trade"
+          android:text="@string/offer_txt"
+          android:layout_marginBottom="8dp"
           android:textAlignment="center"
           android:textSize="18sp" />
         <LinearLayout
@@ -55,32 +53,6 @@
           android:layout_height="match_parent"
           android:gravity="center"
           android:orientation="horizontal">
-          <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:paddingStart="4dp"
-            android:paddingEnd="4dp"
-            android:gravity="center"
-            android:orientation="vertical">
-            <TextView
-              android:layout_width="wrap_content"
-              android:layout_height="wrap_content"
-              android:text="@string/ore"
-              android:textAlignment="center"
-              android:textSize="24sp" />
-            <EditText
-              android:id="@+id/reqOreCnt"
-              android:layout_width="match_parent"
-              android:layout_height="wrap_content"
-              android:ems="10"
-              android:inputType="number"
-              android:selectAllOnFocus="true"
-              android:singleLine="true"
-              android:text="0"
-              android:textAlignment="center"
-              android:textSize="24sp" />
-          </LinearLayout>
 
           <LinearLayout
             android:layout_width="wrap_content"
@@ -90,102 +62,113 @@
             android:paddingEnd="4dp"
             android:gravity="center"
             android:orientation="vertical">
-            <TextView
+            <ImageView
               android:layout_width="wrap_content"
               android:layout_height="wrap_content"
-              android:text="@string/wheat"
-              android:textSize="24sp" />
-            <EditText
-              android:id="@+id/reqWheatCnt"
-              android:layout_width="match_parent"
-              android:layout_height="wrap_content"
-              android:ems="10"
-              android:inputType="number"
-              android:selectAllOnFocus="true"
-              android:singleLine="true"
-              android:text="0"
+              android:padding="16dp"
+              android:background="@drawable/ic_wood"
               android:textAlignment="center"
-              android:textAllCaps="false"
               android:textSize="24sp" />
+            <com.travijuu.numberpicker.library.NumberPicker
+              android:id="@+id/offer_wood_cnt"
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              numberpicker:value="0"
+              numberpicker:custom_layout="@layout/number_picker"
+              numberpicker:focusable="false"
+              numberpicker:unit="1" />
           </LinearLayout>
 
           <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:paddingStart="4dp"
-            android:paddingEnd="4dp"
+            android:padding="4dp"
             android:gravity="center"
             android:orientation="vertical">
-            <TextView
+            <ImageView
               android:layout_width="wrap_content"
               android:layout_height="wrap_content"
-              android:text="@string/wood"
+              android:padding="16dp"
+              android:background="@drawable/ic_clay"
               android:textSize="24sp" />
-            <EditText
-              android:id="@+id/reqWoodCnt"
-              android:layout_width="match_parent"
+            <com.travijuu.numberpicker.library.NumberPicker
+              android:id="@+id/offer_clay_cnt"
+              android:layout_width="wrap_content"
               android:layout_height="wrap_content"
-              android:ems="10"
-              android:inputType="number"
-              android:selectAllOnFocus="true"
-              android:singleLine="true"
-              android:text="0"
-              android:textAlignment="center"
-              android:textSize="24sp" />
+              numberpicker:value="0"
+              numberpicker:custom_layout="@layout/number_picker"
+              numberpicker:focusable="false"
+              numberpicker:unit="1" />
           </LinearLayout>
 
           <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:paddingStart="4dp"
-            android:paddingEnd="4dp"
+            android:padding="4dp"
             android:gravity="center"
             android:orientation="vertical">
-            <TextView
+            <ImageView
               android:layout_width="wrap_content"
               android:layout_height="wrap_content"
-              android:text="@string/clay"
+              android:padding="16dp"
+              android:background="@drawable/ic_sheep"
               android:textSize="24sp" />
-            <EditText
-              android:id="@+id/reqClayCnt"
-              android:layout_width="match_parent"
+            <com.travijuu.numberpicker.library.NumberPicker
+              android:id="@+id/offer_wool_cnt"
+              android:layout_width="wrap_content"
               android:layout_height="wrap_content"
-              android:ems="10"
-              android:inputType="number"
-              android:selectAllOnFocus="true"
-              android:singleLine="true"
-              android:text="0"
-              android:textAlignment="center"
-              android:textSize="24sp" />
+              numberpicker:value="0"
+              numberpicker:custom_layout="@layout/number_picker"
+              numberpicker:focusable="false"
+              numberpicker:unit="1" />
           </LinearLayout>
 
           <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:paddingStart="4dp"
-            android:paddingEnd="4dp"
+            android:padding="4dp"
             android:gravity="center"
             android:orientation="vertical">
-            <TextView
+            <ImageView
               android:layout_width="wrap_content"
               android:layout_height="wrap_content"
-              android:text="@string/wool"
-              android:textAlignment="center"
+              android:padding="16dp"
+              android:background="@drawable/ic_wheat"
               android:textSize="24sp" />
-            <EditText
-              android:id="@+id/reqWoolCnt"
-              android:layout_width="match_parent"
+            <com.travijuu.numberpicker.library.NumberPicker
+              android:id="@+id/offer_wheat_cnt"
+              android:layout_width="wrap_content"
               android:layout_height="wrap_content"
-              android:ems="10"
-              android:inputType="number"
-              android:selectAllOnFocus="true"
-              android:singleLine="true"
-              android:text="0"
-              android:textAlignment="center"
+              numberpicker:value="0"
+              numberpicker:custom_layout="@layout/number_picker"
+              numberpicker:focusable="false"
+              numberpicker:unit="1" />
+          </LinearLayout>
+
+          <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:padding="4dp"
+            android:gravity="center"
+            android:orientation="vertical">
+            <ImageView
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:padding="16dp"
+              android:background="@drawable/ic_ore"
               android:textSize="24sp" />
+            <com.travijuu.numberpicker.library.NumberPicker
+              android:id="@+id/offer_ore_cnt"
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              numberpicker:value="0"
+              numberpicker:custom_layout="@layout/number_picker"
+              numberpicker:focusable="false"
+              numberpicker:unit="1" />
           </LinearLayout>
         </LinearLayout>
       </LinearLayout>
@@ -193,86 +176,33 @@
     </android.support.v7.widget.CardView>
 
     <android.support.v7.widget.CardView
-      android:id="@+id/offerContainer"
+      android:id="@+id/req_container"
       android:layout_width="match_parent"
       android:layout_height="wrap_content"
-      android:layout_marginStart="8dp"
-      android:layout_marginEnd="8dp"
       app:cardCornerRadius="8dp"
       app:cardElevation="8dp"
       app:cardUseCompatPadding="true"
-      app:contentPadding="8dp"
-      app:layout_constraintBottom_toTopOf="@id/actionContainer"
-      app:layout_constraintEnd_toEndOf="parent"
+      app:layout_constraintTop_toBottomOf="@id/offer_container"
       app:layout_constraintStart_toStartOf="parent"
-      app:layout_constraintTop_toBottomOf="@id/requestContainer">
+      app:layout_constraintEnd_toEndOf="parent"
+      app:layout_constraintBottom_toTopOf="@id/action_container">
 
       <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical">
         <TextView
-          android:id="@+id/offerText"
           android:layout_width="match_parent"
           android:layout_height="wrap_content"
-          android:text="@string/offer_resource"
+          android:text="@string/req_text"
+          android:layout_marginBottom="8dp"
           android:textAlignment="center"
           android:textSize="18sp" />
         <LinearLayout
           android:layout_width="match_parent"
           android:layout_height="match_parent"
+          android:gravity="center"
           android:orientation="horizontal">
-          <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:paddingStart="4dp"
-            android:paddingEnd="4dp"
-            android:gravity="center"
-            android:orientation="vertical">
-            <TextView
-              android:layout_width="wrap_content"
-              android:layout_height="wrap_content"
-              android:text="@string/ore"
-              android:textSize="24sp" />
-            <EditText
-              android:id="@+id/offerOreCnt"
-              android:layout_width="match_parent"
-              android:layout_height="wrap_content"
-              android:ems="10"
-              android:inputType="number"
-              android:selectAllOnFocus="true"
-              android:singleLine="true"
-              android:text="0"
-              android:textAlignment="center"
-              android:textSize="24sp" />
-          </LinearLayout>
-
-          <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:paddingStart="4dp"
-            android:paddingEnd="4dp"
-            android:gravity="center_horizontal|center"
-            android:orientation="vertical">
-            <TextView
-              android:layout_width="wrap_content"
-              android:layout_height="wrap_content"
-              android:text="@string/wheat"
-              android:textSize="24sp" />
-            <EditText
-              android:id="@+id/offerWheatCnt"
-              android:layout_width="match_parent"
-              android:layout_height="wrap_content"
-              android:ems="10"
-              android:inputType="number"
-              android:selectAllOnFocus="true"
-              android:singleLine="true"
-              android:text="0"
-              android:textAlignment="center"
-              android:textSize="24sp" />
-          </LinearLayout>
 
           <LinearLayout
             android:layout_width="wrap_content"
@@ -282,93 +212,130 @@
             android:paddingEnd="4dp"
             android:gravity="center"
             android:orientation="vertical">
-            <TextView
+            <ImageView
               android:layout_width="wrap_content"
               android:layout_height="wrap_content"
-              android:text="@string/wood"
-              android:textSize="24sp" />
-            <EditText
-              android:id="@+id/offerWoodCnt"
-              android:layout_width="match_parent"
-              android:layout_height="wrap_content"
-              android:ems="10"
-              android:inputType="number"
-              android:selectAllOnFocus="true"
-              android:singleLine="true"
-              android:text="0"
+              android:padding="16dp"
+              android:background="@drawable/ic_wood"
               android:textAlignment="center"
               android:textSize="24sp" />
+            <com.travijuu.numberpicker.library.NumberPicker
+              android:id="@+id/req_wood_cnt"
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              numberpicker:value="0"
+              numberpicker:custom_layout="@layout/number_picker"
+              numberpicker:focusable="false"
+              numberpicker:unit="1" />
           </LinearLayout>
 
           <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:paddingStart="4dp"
-            android:paddingEnd="4dp"
+            android:padding="4dp"
             android:gravity="center"
             android:orientation="vertical">
-            <TextView
+            <ImageView
               android:layout_width="wrap_content"
               android:layout_height="wrap_content"
-              android:text="@string/clay"
+              android:padding="16dp"
+              android:background="@drawable/ic_clay"
               android:textSize="24sp" />
-            <EditText
-              android:id="@+id/offerClayCnt"
-              android:layout_width="match_parent"
+            <com.travijuu.numberpicker.library.NumberPicker
+              android:id="@+id/req_clay_cnt"
+              android:layout_width="wrap_content"
               android:layout_height="wrap_content"
-              android:ems="10"
-              android:inputType="number"
-              android:selectAllOnFocus="true"
-              android:singleLine="true"
-              android:text="0"
-              android:textAlignment="center"
-              android:textSize="24sp" />
+              numberpicker:value="0"
+              numberpicker:custom_layout="@layout/number_picker"
+              numberpicker:focusable="false"
+              numberpicker:unit="1" />
           </LinearLayout>
 
           <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:paddingStart="4dp"
-            android:paddingEnd="4dp"
+            android:padding="4dp"
             android:gravity="center"
             android:orientation="vertical">
-            <TextView
+            <ImageView
               android:layout_width="wrap_content"
               android:layout_height="wrap_content"
-              android:text="@string/wool"
+              android:padding="16dp"
+              android:background="@drawable/ic_sheep"
               android:textSize="24sp" />
-            <EditText
-              android:id="@+id/offerWoolCnt"
-              android:layout_width="match_parent"
+            <com.travijuu.numberpicker.library.NumberPicker
+              android:id="@+id/req_wool_cnt"
+              android:layout_width="wrap_content"
               android:layout_height="wrap_content"
-              android:ems="10"
-              android:inputType="number"
-              android:selectAllOnFocus="true"
-              android:singleLine="true"
-              android:text="0"
-              android:textAlignment="center"
+              numberpicker:value="0"
+              numberpicker:custom_layout="@layout/number_picker"
+              numberpicker:focusable="false"
+              numberpicker:unit="1" />
+          </LinearLayout>
+
+          <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:padding="4dp"
+            android:gravity="center"
+            android:orientation="vertical">
+            <ImageView
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:padding="16dp"
+              android:background="@drawable/ic_wheat"
               android:textSize="24sp" />
+            <com.travijuu.numberpicker.library.NumberPicker
+              android:id="@+id/req_wheat_cnt"
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              numberpicker:value="0"
+              numberpicker:custom_layout="@layout/number_picker"
+              numberpicker:focusable="false"
+              numberpicker:unit="1" />
+          </LinearLayout>
+
+          <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:padding="4dp"
+            android:gravity="center"
+            android:orientation="vertical">
+            <ImageView
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:padding="16dp"
+              android:background="@drawable/ic_ore"
+              android:textSize="24sp" />
+            <com.travijuu.numberpicker.library.NumberPicker
+              android:id="@+id/req_ore_cnt"
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              numberpicker:value="0"
+              numberpicker:custom_layout="@layout/number_picker"
+              numberpicker:focusable="false"
+              numberpicker:unit="1" />
           </LinearLayout>
         </LinearLayout>
       </LinearLayout>
-
     </android.support.v7.widget.CardView>
 
     <android.support.constraint.ConstraintLayout
-      android:id="@+id/actionContainer"
+      android:id="@+id/action_container"
       android:layout_width="match_parent"
       android:layout_height="wrap_content"
-      android:layout_marginTop="8dp"
       android:layout_marginBottom="8dp"
       app:layout_constraintBottom_toBottomOf="parent"
       app:layout_constraintEnd_toEndOf="parent"
       app:layout_constraintStart_toStartOf="parent"
-      app:layout_constraintTop_toBottomOf="@id/offerContainer">
+      app:layout_constraintTop_toBottomOf="@id/req_container">
 
       <Button
-        android:id="@+id/sendTradeBtn"
+        android:id="@+id/send_trade_btn"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:elevation="8dp"
@@ -381,18 +348,14 @@
         app:layout_constraintTop_toTopOf="parent"/>
 
       <android.support.v7.widget.CardView
-        android:id="@+id/tradeStatus"
+        android:id="@+id/trade_status"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="8dp"
-        android:layout_marginStart="8dp"
-        android:layout_marginEnd="8dp"
         android:visibility="gone"
         app:cardCornerRadius="8dp"
         app:cardElevation="8dp"
-        app:cardUseCompatPadding="true"
         app:contentPadding="8dp"
-        app:layout_constraintBottom_toTopOf="@id/cancelBtn"
+        app:layout_constraintBottom_toTopOf="@id/cancel_btn"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
@@ -401,12 +364,6 @@
           android:layout_width="match_parent"
           android:layout_height="match_parent"
           android:orientation="vertical">
-          <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/wait_for_other_players"
-            android:textAlignment="center"
-            android:textSize="18sp" />
           <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
@@ -481,7 +438,7 @@
       </android.support.v7.widget.CardView>
 
       <Button
-        android:id="@+id/cancelBtn"
+        android:id="@+id/cancel_btn"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:elevation="8dp"
@@ -491,7 +448,7 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/tradeStatus"/>
+        app:layout_constraintTop_toBottomOf="@id/trade_status"/>
 
     </android.support.constraint.ConstraintLayout>
 

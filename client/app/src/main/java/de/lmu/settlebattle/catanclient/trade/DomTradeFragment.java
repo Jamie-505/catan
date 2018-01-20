@@ -1,6 +1,7 @@
 package de.lmu.settlebattle.catanclient.trade;
 
 import static de.lmu.settlebattle.catanclient.utils.Constants.DISPLAY_ERROR;
+import static de.lmu.settlebattle.catanclient.utils.Constants.RAW_MATERIALS;
 import static de.lmu.settlebattle.catanclient.utils.Constants.TRADE;
 import static de.lmu.settlebattle.catanclient.utils.Constants.TRD_ABORTED;
 import static de.lmu.settlebattle.catanclient.utils.Constants.TRD_ACC;
@@ -21,12 +22,13 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+import com.travijuu.numberpicker.library.Enums.ActionEnum;
+import com.travijuu.numberpicker.library.NumberPicker;
 import de.lmu.settlebattle.catanclient.MainActivity;
 import de.lmu.settlebattle.catanclient.MainActivityFragment;
 import de.lmu.settlebattle.catanclient.R;
@@ -52,7 +54,7 @@ public class DomTradeFragment extends MainActivityFragment {
             }
             break;
           case TRD_ABORTED:
-            mainActivity.onBackPressed();
+            closeFragment();
             break;
           case TRD_ACC:
             trade = gson.fromJson(intent.getStringExtra(TRADE), Trade.class);
@@ -79,18 +81,43 @@ public class DomTradeFragment extends MainActivityFragment {
   private CardView tradeStatus;
   private MainActivity mainActivity;
   private Map<String, int[]> tradeInfo = new HashMap<>();
-  private String[] fields = new String[] { "Clay", "Ore", "Wheat", "Wood", "Wool" };
-  private String[] types = new String[] { "offer", "req" };
+  private RawMaterialOverview rawMat;
+  private String[] fields = new String[] { "wood", "clay", "wool", "wheat", "ore" };
+  private String[] types = new String[] { "offer_", "req_" };
   private Trade trade;
   private View fragmentView;
 
   @Override
   public View onCreateView(LayoutInflater inflater, ViewGroup container,
       Bundle savedInstanceState) {
-    fragmentView = inflater.inflate(R.layout.fragment_dom_trade, container, false);
+    if (getArguments() != null) {
+      rawMat = gson.fromJson(getArguments().getString(RAW_MATERIALS),
+          RawMaterialOverview.class);
+    }
+    fragmentView = inflater
+        .inflate(R.layout.fragment_dom_trade, container, false);
     // Inflate the layout for this fragment
     mainActivity = (MainActivity) getActivity();
 
+    NumberPicker woodCnt = fragmentView.findViewById(R.id.offer_wood_cnt);
+    woodCnt.setMax(rawMat.getWoodCount());
+    woodCnt.setUnit(1);
+
+    NumberPicker clayCnt = fragmentView.findViewById(R.id.offer_clay_cnt);
+    clayCnt.setMax(rawMat.getClayCount());
+    clayCnt.setUnit(1);
+
+    NumberPicker woolCnt = fragmentView.findViewById(R.id.offer_wool_cnt);
+    woolCnt.setMax(rawMat.getWoolCount());
+    woolCnt.setUnit(1);
+
+    NumberPicker wheatCnt = fragmentView.findViewById(R.id.offer_wheat_cnt);
+    wheatCnt.setMax(rawMat.getWheatCount());
+    wheatCnt.setUnit(1);
+
+    NumberPicker oreCnt = fragmentView.findViewById(R.id.offer_ore_cnt);
+    oreCnt.setMax(rawMat.getOreCount());
+    oreCnt.setUnit(1);
 
     IntentFilter filter = new IntentFilter();
     filter.addAction(DISPLAY_ERROR);
@@ -105,9 +132,9 @@ public class DomTradeFragment extends MainActivityFragment {
 
   @Override
   public void onViewCreated(View view, Bundle savedInstanceState) {
-    cancelBtn = (Button) fragmentView.findViewById(R.id.cancelBtn);
-    sendTradeBtn = (Button) fragmentView.findViewById(R.id.sendTradeBtn);
-    tradeStatus = (CardView) fragmentView.findViewById(R.id.tradeStatus);
+    cancelBtn = fragmentView.findViewById(R.id.cancel_btn);
+    sendTradeBtn = fragmentView.findViewById(R.id.send_trade_btn);
+    tradeStatus = fragmentView.findViewById(R.id.trade_status);
 
     cancelBtn.setOnClickListener((View v) -> cancelTrade());
 
@@ -126,11 +153,11 @@ public class DomTradeFragment extends MainActivityFragment {
     for (String type : types) {
       for (String resource : fields) {
         int resId = getResources().getIdentifier(
-            type + resource + "Cnt",
+            type + resource + "_cnt",
             "id",
             getActivity().getPackageName());
-        EditText resourceEdtxt = (EditText) fragmentView.findViewById(resId);
-        resourceEdtxt.setText("0");
+        NumberPicker resourceEdtxt = fragmentView.findViewById(resId);
+        resourceEdtxt.setValue(0);
       }
     }
   }
@@ -143,7 +170,11 @@ public class DomTradeFragment extends MainActivityFragment {
     trade.accept = null;
     String reply;
     reply = createJSONString(TRD_REJ, trade);
-    mainActivity.mService.sendMessage(reply);
+    fragHandler.sendMsgToServer(reply);
+  }
+
+  private void closeFragment() {
+    fragHandler.popBackstack(this);
   }
 
   private void sendTradeRequest() {
@@ -152,20 +183,22 @@ public class DomTradeFragment extends MainActivityFragment {
       int i = 0;
       for (String resource : fields) {
         int resId = getResources().getIdentifier(
-            type + resource + "Cnt",
+            type + resource + "_cnt",
             "id",
             mainActivity.getPackageName());
-        EditText resourceEdtxt = (EditText) fragmentView.findViewById(resId);
-        qnts[i++] = Integer.valueOf(resourceEdtxt.getText().toString(), 10);
+        NumberPicker resourceEdtxt = fragmentView.findViewById(resId);
+        qnts[i++] = resourceEdtxt.getValue();
+        resourceEdtxt.setActionEnabled(ActionEnum.DECREMENT, false);
+        resourceEdtxt.setActionEnabled(ActionEnum.INCREMENT, false);
       }
       tradeInfo.put(type, qnts);
     }
-    RawMaterialOverview offer = new RawMaterialOverview(tradeInfo.get("offer"));
-    RawMaterialOverview req = new RawMaterialOverview(tradeInfo.get("req"));
+    RawMaterialOverview offer = new RawMaterialOverview(tradeInfo.get("offer_"));
+    RawMaterialOverview req = new RawMaterialOverview(tradeInfo.get("req_"));
     Trade trade = new Trade(offer, req);
 
     String tradeMsg = createJSONString(TRD_REQ, trade);
-    mainActivity.mService.sendMessage(tradeMsg);
+    fragHandler.sendMsgToServer(tradeMsg);
   }
 
   private void setPlayers(String playersJSON) {
@@ -207,7 +240,7 @@ public class DomTradeFragment extends MainActivityFragment {
                 finalTrade.id = trade.id;
                 finalTrade.opponent = id;
                 String answer = JSONUtils.createJSONString(TRD_SEL, finalTrade);
-                mainActivity.mService.sendMessage(answer);
+                fragHandler.sendMsgToServer(answer);
               });
               playerStatus.setClickable(true);
             } else {
@@ -219,9 +252,8 @@ public class DomTradeFragment extends MainActivityFragment {
       }
     } catch (Exception e) {
       if (isAdded()) {
-        mainActivity = (MainActivity) getActivity();
-        mainActivity.onBackPressed();
-        mainActivity.displayMessage("Hoppla, da ist wohl was schief gelaufen");
+        fragHandler.popBackstack(this);
+        fragHandler.displayFragMsg("Hoppla, da ist wohl was schief gelaufen");
       }
     }
   }

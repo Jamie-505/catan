@@ -5,15 +5,16 @@ import static de.lmu.settlebattle.catanclient.utils.Constants.BOARD;
 import static de.lmu.settlebattle.catanclient.utils.Constants.BUILD;
 import static de.lmu.settlebattle.catanclient.utils.Constants.BUILD_CITY;
 import static de.lmu.settlebattle.catanclient.utils.Constants.BUILD_SETTLEMENT;
-import static de.lmu.settlebattle.catanclient.utils.Constants.BUILD_VILLAGE;
 import static de.lmu.settlebattle.catanclient.utils.Constants.BUILD_STREET;
 import static de.lmu.settlebattle.catanclient.utils.Constants.BUILD_TRADE;
+import static de.lmu.settlebattle.catanclient.utils.Constants.BUILD_VILLAGE;
 import static de.lmu.settlebattle.catanclient.utils.Constants.CARD_BUY;
 import static de.lmu.settlebattle.catanclient.utils.Constants.DICE_RESULT;
 import static de.lmu.settlebattle.catanclient.utils.Constants.DICE_THROW;
 import static de.lmu.settlebattle.catanclient.utils.Constants.DISPLAY_ERROR;
 import static de.lmu.settlebattle.catanclient.utils.Constants.END_TURN;
 import static de.lmu.settlebattle.catanclient.utils.Constants.ERROR_MSG;
+import static de.lmu.settlebattle.catanclient.utils.Constants.LOCATION;
 import static de.lmu.settlebattle.catanclient.utils.Constants.NEW_CONSTRUCT;
 import static de.lmu.settlebattle.catanclient.utils.Constants.OK;
 import static de.lmu.settlebattle.catanclient.utils.Constants.OWNER;
@@ -65,9 +66,7 @@ import com.google.gson.Gson;
 import com.sdsmdg.harjot.vectormaster.VectorMasterDrawable;
 import com.sdsmdg.harjot.vectormaster.models.PathModel;
 import com.sothree.slidinguppanel.SlidingUpPanelLayout;
-import de.lmu.settlebattle.catanclient.MainActivityFragment.FragmentCloser;
-import de.lmu.settlebattle.catanclient.MainActivityFragment.FragmentMessageDeliverer;
-import de.lmu.settlebattle.catanclient.MainActivityFragment.FragmentMessageDisplayer;
+import de.lmu.settlebattle.catanclient.MainActivityFragment.FragmentHandler;
 import de.lmu.settlebattle.catanclient.dice.DiceFragment;
 import de.lmu.settlebattle.catanclient.grid.Board;
 import de.lmu.settlebattle.catanclient.grid.Construction;
@@ -77,7 +76,6 @@ import de.lmu.settlebattle.catanclient.grid.Cube;
 import de.lmu.settlebattle.catanclient.grid.Grid;
 import de.lmu.settlebattle.catanclient.grid.Hex;
 import de.lmu.settlebattle.catanclient.grid.Location;
-import de.lmu.settlebattle.catanclient.robber.Robber;
 import de.lmu.settlebattle.catanclient.grid.StorageMap;
 import de.lmu.settlebattle.catanclient.grid.building.BuildingView;
 import de.lmu.settlebattle.catanclient.grid.building.BuildingViewN;
@@ -94,6 +92,7 @@ import de.lmu.settlebattle.catanclient.player.Storage;
 import de.lmu.settlebattle.catanclient.playerCards.CardItem;
 import de.lmu.settlebattle.catanclient.playerCards.CardPagerAdapter;
 import de.lmu.settlebattle.catanclient.playerCards.ShadowTransformer;
+import de.lmu.settlebattle.catanclient.robber.Robber;
 import de.lmu.settlebattle.catanclient.robber.RobberFragment;
 import de.lmu.settlebattle.catanclient.robber.TossCardsFragment;
 import de.lmu.settlebattle.catanclient.trade.DomTradeFragment;
@@ -103,8 +102,7 @@ import de.lmu.settlebattle.catanclient.trade.TradeOfferFragment;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class MainActivity extends BaseSocketActivity implements FragmentCloser,
-    FragmentMessageDisplayer, FragmentMessageDeliverer {
+public class MainActivity extends BaseSocketActivity implements FragmentHandler {
 
   // LogCat tag
   private static final String TAG = MainActivity.class.getSimpleName();
@@ -128,7 +126,6 @@ public class MainActivity extends BaseSocketActivity implements FragmentCloser,
   private Button seaTradeBtn;
   private ConstructionsLayer settlementLayer;
   private ConstructionsLayer streetLayer;
-  private DomTradeFragment domTradeFragment = new DomTradeFragment();
   private FragmentManager fragmentManager = getFragmentManager();
   private Gson gson = new Gson();
   private ImageButton diceBtn;
@@ -555,30 +552,35 @@ public class MainActivity extends BaseSocketActivity implements FragmentCloser,
     mViewPager.setOffscreenPageLimit(3);
   }
 
-  private void moveRobber(Location newRobberLoc) {
+  private boolean moveRobber(Location newRobberLoc) {
     if (currentRobberTile.getHex().getLocation() == newRobberLoc) {
       displayMessage("Der Räuber braucht ein neues Zuhause!");
+      return false;
     } else {
       currentRobberTile.showRobber(false);
       currentRobberTile = findViewByLoc(newRobberLoc);
       currentRobberTile.showRobber(true);
+      return true;
     }
   }
 
   private void OnGridHexClick(CircleImageView cV) {
     if (enableRobber) {
-      moveRobber(cV.getHex().getLocation());
-      if (cV.getOwners().size() > 1) {
-        Bundle robberBundle = new Bundle();
-        robberBundle.putIntegerArrayList(OWNER, cV.getOwners());
-        RobberFragment robberFragment = new RobberFragment();
-        robberFragment.setArguments(robberBundle);
-        enableRobber = false;
-        showFragment(robberFragment);
-      } else if (cV.getOwners().size() == 1) {
-        sendRobberMsg(cV.getOwners().get(0));
-      } else {
-        sendRobberMsg(null);
+      if(moveRobber(cV.getHex().getLocation())) {
+        if (cV.getOwners().size() > 1) {
+          Bundle robberBundle = new Bundle();
+          robberBundle.putIntegerArrayList(OWNER, cV.getOwners());
+          robberBundle.putString(LOCATION, gson.toJson(
+              currentRobberTile.getHex().getLocation()));
+          RobberFragment robberFragment = new RobberFragment();
+          robberFragment.setArguments(robberBundle);
+          enableRobber = false;
+          showFragmentViaBackstack(robberFragment);
+        } else if (cV.getOwners().size() == 1) {
+          sendRobberMsg(cV.getOwners().get(0));
+        } else {
+          sendRobberMsg(null);
+        }
       }
     }
   }
@@ -618,7 +620,7 @@ public class MainActivity extends BaseSocketActivity implements FragmentCloser,
           diceBundle.putString(DICE_THROW, intent.getStringExtra(DICE_THROW));
           DiceFragment diceFragment = new DiceFragment();
           diceFragment.setArguments(diceBundle);
-          showFragment(diceFragment);
+          showFragmentViaBackstack(diceFragment);
           break;
         case DISPLAY_ERROR:
           displayMessage(intent.getStringExtra(ERROR_MSG));
@@ -658,10 +660,12 @@ public class MainActivity extends BaseSocketActivity implements FragmentCloser,
           tossCardBundle.putString(RAW_MATERIALS, rawMaterials);
           TossCardsFragment f = new TossCardsFragment();
           f.setArguments(tossCardBundle);
-          showFragment(f);
+          showFragmentNoBackstack(f);
           break;
         case TRD_FIN:
-          onBackPressed();
+          if (fragmentManager.getBackStackEntryCount() > 0) {
+            fragmentManager.popBackStack();
+          }
           Trade t = gson.fromJson(intent.getStringExtra(TRADE), Trade.class);
           showTradeSummary(t);
           break;
@@ -669,7 +673,7 @@ public class MainActivity extends BaseSocketActivity implements FragmentCloser,
           Bundle tradeBundle = new Bundle();
           tradeBundle.putString(TRADE, intent.getStringExtra(TRADE));
           tradeOfferFragment.setArguments(tradeBundle);
-          showFragment(tradeOfferFragment);
+          showFragmentViaBackstack(tradeOfferFragment);
           break;
       }
       updatePlayerViews();
@@ -689,13 +693,20 @@ public class MainActivity extends BaseSocketActivity implements FragmentCloser,
       String diceMsg = createJSONString(ROLL_DICE, new Object());
       mService.sendMessage(diceMsg);
     });
-    domTradeBtn.setOnClickListener((View v) -> showFragment(domTradeFragment));
+    domTradeBtn.setOnClickListener((View v) -> {
+      Bundle tradeBundle = new Bundle();
+      String rawMaterials = gson.toJson(self.rawMaterials);
+      tradeBundle.putString(RAW_MATERIALS, rawMaterials);
+      DomTradeFragment f = new DomTradeFragment();
+      f.setArguments(tradeBundle);
+      showFragmentViaBackstack(f);
+    });
     endTurnBtn.setOnClickListener((View v) -> {
       disableClickLayers();
       isItTimeToBuild = false;
       endTurn();
     });
-    seaTradeBtn.setOnClickListener((View v) -> showFragment(seaTradeFragment));
+    seaTradeBtn.setOnClickListener((View v) -> showFragmentViaBackstack(seaTradeFragment));
   }
 
   private void setIntentFilters() {
@@ -881,7 +892,14 @@ public class MainActivity extends BaseSocketActivity implements FragmentCloser,
     }
   }
 
-  private void showFragment(MainActivityFragment f) {
+  private void showFragmentNoBackstack(MainActivityFragment f) {
+    FragmentTransaction ft = fragmentManager.beginTransaction();
+    ft.add(R.id.fragmentContainer, f, f.tag());
+    ft.show(f);
+    ft.commit();
+  }
+
+  private void showFragmentViaBackstack(MainActivityFragment f) {
     FragmentTransaction ft = fragmentManager.beginTransaction();
     ft.addToBackStack(f.tag());
     if (fragmentManager.findFragmentByTag(f.tag()) == null) {
@@ -967,13 +985,19 @@ public class MainActivity extends BaseSocketActivity implements FragmentCloser,
 
 // --------------------- interface methods ---------------------------------
   @Override
-  public void displayMessageFromFragment(String msg) {
+  public void closeFragment(MainActivityFragment f) {
+    hideFragment(f);
+  }
+  @Override
+  public void displayFragMsg(String msg) {
     displayMessage(msg);
   }
 
   @Override
-  public void closeFragment(MainActivityFragment f) {
-    hideFragment(f);
+  public void popBackstack(MainActivityFragment f) {
+    if (fragmentManager.getBackStackEntryCount() > 0) {
+      fragmentManager.popBackStack();
+    }
   }
 
   @Override

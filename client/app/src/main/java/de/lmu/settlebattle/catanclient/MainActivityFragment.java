@@ -1,19 +1,28 @@
 package de.lmu.settlebattle.catanclient;
 
 import android.app.Fragment;
+import android.content.Context;
 
 public abstract class MainActivityFragment extends Fragment {
 
-  public interface FragmentCloser {
+  protected FragmentHandler fragHandler;
+
+  @Override
+  public void onAttach(Context context) {
+    super.onAttach(context);
+    if (context instanceof FragmentHandler) {
+      fragHandler = (FragmentHandler) context;
+    } else {
+      throw new RuntimeException(
+          context.toString() + " must implement correct Interface");
+    }
+  }
+
+  public interface FragmentHandler {
     void closeFragment(MainActivityFragment f);
-  }
-
-  public interface FragmentMessageDeliverer {
+    void displayFragMsg(String msg);
+    void popBackstack(MainActivityFragment f);
     void sendMsgToServer(String msg);
-  }
-
-  public interface FragmentMessageDisplayer {
-    void displayMessageFromFragment(String msg);
   }
 
   public String tag() {

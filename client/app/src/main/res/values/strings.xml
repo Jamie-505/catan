@@ -51,8 +51,8 @@
   <string name="starten">Spiel Starten</string>
   <string name="player_name_input_hint">Bitte gebe deinen Spielernamen hier ein</string>
   <string name="wait_for_other_players">Warte auf andere Spieler…</string>
-  <string name="offer_resource">ich gebe</string>
-  <string name="request_trade">ich verlange</string>
+  <string name="offer_resource">ich tausche</string>
+  <string name="request_trade">gegen</string>
   <string name="ok">OK</string>
   <string name="offer_txt">Angebot:</string>
   <string name="req_text">Nachfrage:</string>
@@ -74,5 +74,6 @@
   <string name="select_robber_target">Wähle aus wen du bestehlen willst</string>
   <string name="toss_cards">Diese Karten abgeben</string>
   <string name="toss_cards_bc_robber">Karten wegen Räuber abgeben</string>
+  <string name="trade">Tausche!</string>
 
 </resources>

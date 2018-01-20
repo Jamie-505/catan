@@ -28,11 +28,11 @@ public class DiceFragment extends MainActivityFragment {
     // Inflate the layout for this fragment
     View fragmentView = inflater.inflate(R.layout.fragment_dice_result, container, false);
 
-    TextView diceSumTxt = (TextView) fragmentView.findViewById(R.id.diceSumTxt);
+    TextView diceSumTxt = fragmentView.findViewById(R.id.diceSumTxt);
     diceSumTxt.setText(String.valueOf(dice.getSum()));
 
-    ImageView dice1Img = (ImageView) fragmentView.findViewById(R.id.dice1Image);
-    ImageView dice2Img = (ImageView) fragmentView.findViewById(R.id.dice2Image);
+    ImageView dice1Img = fragmentView.findViewById(R.id.dice1Image);
+    ImageView dice2Img = fragmentView.findViewById(R.id.dice2Image);
     String dice1 = "dice" + dice.getDice()[0];
     String dice2 = "dice" + dice.getDice()[1];
     int resId1 = getResources().getIdentifier(dice1, "drawable", getActivity().getPackageName());
@@ -40,8 +40,8 @@ public class DiceFragment extends MainActivityFragment {
     dice1Img.setImageResource(resId1);
     dice2Img.setImageResource(resId2);
 
-    Button okBtn = (Button) fragmentView.findViewById(R.id.diceOkBtn);
-    okBtn.setOnClickListener((View v) -> getActivity().onBackPressed());
+    Button okBtn = fragmentView.findViewById(R.id.diceOkBtn);
+    okBtn.setOnClickListener((View v) -> fragHandler.popBackstack(this));
 
     return fragmentView;
   }

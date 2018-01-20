@@ -41,7 +41,7 @@ public class TradeOfferFragment extends MainActivityFragment {
             updateTradeStatus(tradeUpd.opponent, tradeUpd.accept);
             break;
           case TRD_ABORTED:
-            mainActivity.onBackPressed();
+            closeFragment();
             break;
         }
       }
@@ -56,7 +56,7 @@ public class TradeOfferFragment extends MainActivityFragment {
   private MainActivity mainActivity;
   private Player trader;
   private Player[] players = new Player[3];
-  private String[] fields = new String[] { "Clay", "Ore", "Wheat", "Wood", "Wool" };
+  private String[] fields = new String[] { "wood", "clay", "wool", "wheat", "ore" };
   private Trade trade;
   private View view;
 
@@ -79,10 +79,10 @@ public class TradeOfferFragment extends MainActivityFragment {
       int i = 0;
       // fill fields with correct amounts
       for (String resource : fields) {
-        int resIdOffer = getResources().getIdentifier("offer" + resource + "Cnt","id", mainActivity.getPackageName());
+        int resIdOffer = getResources().getIdentifier("offer_" + resource + "_cnt","id", mainActivity.getPackageName());
         TextView offerAmount = view.findViewById(resIdOffer);
         offerAmount.setText(String.valueOf(trade.offer.getQnts()[i]));
-        int resIdReq = getResources().getIdentifier("req" + resource + "Cnt","id", mainActivity.getPackageName());
+        int resIdReq = getResources().getIdentifier("req_" + resource + "_cnt","id", mainActivity.getPackageName());
         TextView reqAmount = view.findViewById(resIdReq);
         reqAmount.setText(String.valueOf(trade.request.getQnts()[i++]));
       }
@@ -102,6 +102,10 @@ public class TradeOfferFragment extends MainActivityFragment {
         .registerReceiver(broadcastReceiver, filter);
 
     return view;
+  }
+
+  private void closeFragment() {
+    fragHandler.popBackstack(this);
   }
 
   private void setOnClickListener() {
@@ -133,7 +137,7 @@ public class TradeOfferFragment extends MainActivityFragment {
     trade.accept = answer;
     String reply;
     reply = createJSONString(TRD_RES, trade);
-    mainActivity.mService.sendMessage(reply);
+    fragHandler.sendMsgToServer(reply);
   }
 
   private void setPlayers(String playersJSON) {
@@ -165,11 +169,11 @@ public class TradeOfferFragment extends MainActivityFragment {
           int resIdSta = getResources().getIdentifier(
               "p"+i+"Status", "id", getActivity().getPackageName()
           );
-          LinearLayout playerView = (LinearLayout) view.findViewById(resIdCon);
+          LinearLayout playerView = view.findViewById(resIdCon);
           playerView.setVisibility(View.VISIBLE);
-          TextView playerName = (TextView) view.findViewById(resIdNam);
+          TextView playerName = view.findViewById(resIdNam);
           playerName.setText(players[i].name);
-          ImageButton playerStatus = (ImageButton) view.findViewById(resIdSta);
+          ImageButton playerStatus = view.findViewById(resIdSta);
           int colorId = getResources().getIdentifier(
               players[i].color.toLowerCase(), "color", getActivity().getPackageName()
           );
@@ -185,9 +189,8 @@ public class TradeOfferFragment extends MainActivityFragment {
       }
     } catch (Exception e) {
       if (isAdded()) {
-        mainActivity = (MainActivity) getActivity();
-        mainActivity.onBackPressed();
-        mainActivity.displayMessage("Hoppla, da ist wohl was schief gelaufen");
+        fragHandler.popBackstack(this);
+        fragHandler.displayFragMsg("Hoppla, da ist wohl was schief gelaufen");
       }
     }
   }

@@ -35,10 +35,11 @@ public final class Constants {
   public static final String ROLL_DICE = "Würfeln";
   public static final String SEA_TRADE = "Seehandel";
   public static final String SERVER_RES = "Serverantwort";
-  public static final String STATUS_UPD = "Statusupdate"; //genutzt
-  public static final String ERROR_COLOR = "Farbe bereits"; //genutzt
-	public static final String ERROR_NAME = "Name bereits"; //genutzt
+  public static final String STATUS_UPD = "Statusupdate";
+  public static final String ERROR_COLOR = "Farbe bereits";
+	public static final String ERROR_NAME = "Name bereits";
   public static final String TOSS_CARDS = "Karten abgeben";
+  public static final String TOSS_CARDS_REQ = "Karten wegen Räuber abgeben";
   public static final String TRADE = "trade";
   public static final String TRD_ABORTED = "Handelsangebot abgebrochen";
   public static final String TRD_ACC = "Handelsangebot angenommen";
@@ -113,10 +114,11 @@ public final class Constants {
   public final static String BUILD_TRADE = "Handeln oder bauen";
   public final static String BUILD_VILLAGE = "Dorf bauen";
   public final static String DEV_CARDS = "Entwicklungskarten";
+  public final static String DEV_CARD_BOUGHT = "Entwicklungskarte gekauft";
   public final static String ORANGE = "Orange";
   public final static String PLAYER_COLOR = "Farbe";
   public final static String PLAYER_ID = "id";
-  public final static String PLAYER_ID_WON_GAME = "Spieler %1$s hat das Spiel gewonnen.";
+  public final static String PLAYER_ID_WON_GAME = "Spieler %s hat das Spiel gewonnen.";
   public final static String PLAYER_NAME = "Name";
   public final static String PLAYER_STATE = "Status";
   public final static String RAW_MATERIALS = "Rohstoffe";

@@ -34,7 +34,7 @@ public class RawMaterialOverview {
         this.woolCount = this.wheatCount = initAmount;
   }
 
-  public RawMaterialOverview(int clay, int ore, int wheat, int wood, int wool) {
+  public RawMaterialOverview(int wood, int clay, int wool, int wheat, int ore) {
     this.clayCount = clay;
     this.oreCount = ore;
     this.woodCount = wood;
@@ -43,11 +43,11 @@ public class RawMaterialOverview {
   }
 
   public RawMaterialOverview(int[] qnts) {
-    this.clayCount = qnts[0];
-    this.oreCount = qnts[1];
-    this.wheatCount = qnts[2];
-    this.woodCount = qnts[3];
-    this.woolCount = qnts[4];
+    this.woodCount = qnts[0];
+    this.clayCount = qnts[1];
+    this.woolCount = qnts[2];
+    this.wheatCount = qnts[3];
+    this.oreCount = qnts[4];
   }
 
   public RawMaterialOverview(String type, int initAmount) {

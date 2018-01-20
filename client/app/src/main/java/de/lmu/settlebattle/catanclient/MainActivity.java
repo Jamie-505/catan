@@ -19,6 +19,7 @@ import static de.lmu.settlebattle.catanclient.utils.Constants.OK;
 import static de.lmu.settlebattle.catanclient.utils.Constants.OWNER;
 import static de.lmu.settlebattle.catanclient.utils.Constants.PLAYER;
 import static de.lmu.settlebattle.catanclient.utils.Constants.PLAYER_WAIT;
+import static de.lmu.settlebattle.catanclient.utils.Constants.RAW_MATERIALS;
 import static de.lmu.settlebattle.catanclient.utils.Constants.ROBBER;
 import static de.lmu.settlebattle.catanclient.utils.Constants.ROBBER_AT;
 import static de.lmu.settlebattle.catanclient.utils.Constants.ROBBER_TO;
@@ -64,6 +65,9 @@ import com.google.gson.Gson;
 import com.sdsmdg.harjot.vectormaster.VectorMasterDrawable;
 import com.sdsmdg.harjot.vectormaster.models.PathModel;
 import com.sothree.slidinguppanel.SlidingUpPanelLayout;
+import de.lmu.settlebattle.catanclient.MainActivityFragment.FragmentCloser;
+import de.lmu.settlebattle.catanclient.MainActivityFragment.FragmentMessageDeliverer;
+import de.lmu.settlebattle.catanclient.MainActivityFragment.FragmentMessageDisplayer;
 import de.lmu.settlebattle.catanclient.dice.DiceFragment;
 import de.lmu.settlebattle.catanclient.grid.Board;
 import de.lmu.settlebattle.catanclient.grid.Construction;
@@ -91,6 +95,7 @@ import de.lmu.settlebattle.catanclient.playerCards.CardItem;
 import de.lmu.settlebattle.catanclient.playerCards.CardPagerAdapter;
 import de.lmu.settlebattle.catanclient.playerCards.ShadowTransformer;
 import de.lmu.settlebattle.catanclient.robber.RobberFragment;
+import de.lmu.settlebattle.catanclient.robber.TossCardsFragment;
 import de.lmu.settlebattle.catanclient.trade.DomTradeFragment;
 import de.lmu.settlebattle.catanclient.trade.SeaTradeFragment;
 import de.lmu.settlebattle.catanclient.trade.Trade;
@@ -98,7 +103,8 @@ import de.lmu.settlebattle.catanclient.trade.TradeOfferFragment;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class MainActivity extends BaseSocketActivity {
+public class MainActivity extends BaseSocketActivity implements FragmentCloser,
+    FragmentMessageDisplayer, FragmentMessageDeliverer {
 
   // LogCat tag
   private static final String TAG = MainActivity.class.getSimpleName();
@@ -643,9 +649,16 @@ public class MainActivity extends BaseSocketActivity {
           showView(diceBtn);
           mViewPager.setCurrentItem(0, true);
           mCardAdapter.getCardViewAt(0).findViewById(R.id.cardContain).setBackgroundColor(Color.WHITE);
-          break;
         case STATUS_UPD:
           updatePlayerViews();
+          break;
+        case TOSS_CARDS:
+          Bundle tossCardBundle = new Bundle();
+          String rawMaterials = gson.toJson(self.rawMaterials);
+          tossCardBundle.putString(RAW_MATERIALS, rawMaterials);
+          TossCardsFragment f = new TossCardsFragment();
+          f.setArguments(tossCardBundle);
+          showFragment(f);
           break;
         case TRD_FIN:
           onBackPressed();
@@ -659,6 +672,7 @@ public class MainActivity extends BaseSocketActivity {
           showFragment(tradeOfferFragment);
           break;
       }
+      updatePlayerViews();
     } else {
       Log.e(TAG, "Received intend had no action");
     }
@@ -699,6 +713,7 @@ public class MainActivity extends BaseSocketActivity {
     filter.addAction(ROBBER_TO);
     filter.addAction(ROLL_DICE);
     filter.addAction(STATUS_UPD);
+    filter.addAction(TOSS_CARDS);
     filter.addAction(TRD_ABORTED);
     filter.addAction(TRD_FIN);
     filter.addAction(TRD_OFFER);
@@ -948,6 +963,22 @@ public class MainActivity extends BaseSocketActivity {
     selfWoodCnt.setText(String.valueOf(res.getWoodCount()));
     selfWoolCnt.setText(String.valueOf(res.getWoolCount()));
     selfDevCardCnt.setText(String.valueOf(self.devCards.getTotalAmnt()));
+  }
+
+// --------------------- interface methods ---------------------------------
+  @Override
+  public void displayMessageFromFragment(String msg) {
+    displayMessage(msg);
+  }
+
+  @Override
+  public void closeFragment(MainActivityFragment f) {
+    hideFragment(f);
+  }
+
+  @Override
+  public void sendMsgToServer(String msg) {
+    mService.sendMessage(msg);
   }
 }
 

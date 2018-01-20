@@ -1,0 +1,207 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+  xmlns:app="http://schemas.android.com/apk/res-auto"
+  xmlns:tools="http://schemas.android.com/tools"
+  android:layout_width="wrap_content"
+  android:layout_height="wrap_content"
+  xmlns:numberpicker="http://schemas.android.com/apk/res-auto">
+
+  <!-- this part disables the clicking on the tiles behind the fragment -->
+  <android.support.constraint.ConstraintLayout
+    android:layout_width="0dp"
+    android:layout_height="0dp"
+    android:clickable="true"
+    android:focusable="true"
+    app:layout_constraintBottom_toBottomOf="parent"
+    app:layout_constraintEnd_toEndOf="parent"
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintTop_toTopOf="parent" />
+
+  <android.support.constraint.ConstraintLayout
+    android:layout_width="wrap_content"
+    android:layout_height="match_parent"
+    app:layout_constraintBottom_toBottomOf="parent"
+    app:layout_constraintEnd_toEndOf="parent"
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintTop_toTopOf="parent">
+
+
+    <android.support.v7.widget.CardView
+      android:layout_width="match_parent"
+      android:layout_height="match_parent"
+      app:cardCornerRadius="8dp"
+      app:cardElevation="8dp"
+      app:cardUseCompatPadding="true"
+      app:layout_constraintEnd_toEndOf="parent"
+      app:layout_constraintStart_toStartOf="parent"
+      app:layout_constraintTop_toTopOf="parent"
+      app:layout_constraintBottom_toBottomOf="parent">
+
+      <android.support.constraint.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="16dp">
+
+        <LinearLayout
+          android:id="@+id/countersContainer"
+          android:layout_width="match_parent"
+          android:layout_height="match_parent"
+          android:padding="16dp"
+          android:orientation="vertical"
+          app:layout_constraintBottom_toTopOf="@id/okBtn"
+          app:layout_constraintTop_toTopOf="parent"
+          app:layout_constraintStart_toStartOf="parent"
+          app:layout_constraintEnd_toEndOf="parent"
+          tools:layout_editor_absoluteX="16dp">
+          <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/toss_cards_bc_robber"
+            android:textAlignment="center"
+            android:textSize="18sp" />
+          <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:orientation="horizontal">
+            <LinearLayout
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:layout_weight="1"
+              android:padding="4dp"
+              android:gravity="center"
+              android:orientation="vertical">
+              <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="16dp"
+                android:background="@drawable/ic_wood"
+                android:textAlignment="center"
+                android:textSize="24sp" />
+
+              <com.travijuu.numberpicker.library.NumberPicker
+                android:id="@+id/woodCnt"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                numberpicker:value="0"
+                numberpicker:custom_layout="@layout/number_picker"
+                numberpicker:focusable="false"
+                numberpicker:unit="1" />
+            </LinearLayout>
+
+            <LinearLayout
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:layout_weight="1"
+              android:padding="4dp"
+              android:gravity="center"
+              android:orientation="vertical">
+              <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="16dp"
+                android:background="@drawable/ic_clay"
+                android:textSize="24sp" />
+              <com.travijuu.numberpicker.library.NumberPicker
+                android:id="@+id/clayCnt"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                numberpicker:value="0"
+                numberpicker:custom_layout="@layout/number_picker"
+                numberpicker:focusable="false"
+                numberpicker:unit="1" />
+            </LinearLayout>
+
+            <LinearLayout
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:layout_weight="1"
+              android:padding="4dp"
+              android:gravity="center"
+              android:orientation="vertical">
+              <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="16dp"
+                android:background="@drawable/ic_sheep"
+                android:textSize="24sp" />
+              <com.travijuu.numberpicker.library.NumberPicker
+                android:id="@+id/woolCnt"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                numberpicker:value="0"
+                numberpicker:custom_layout="@layout/number_picker"
+                numberpicker:focusable="false"
+                numberpicker:unit="1" />
+            </LinearLayout>
+
+            <LinearLayout
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:layout_weight="1"
+              android:padding="4dp"
+              android:gravity="center"
+              android:orientation="vertical">
+              <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="16dp"
+                android:background="@drawable/ic_wheat"
+                android:textSize="24sp" />
+              <com.travijuu.numberpicker.library.NumberPicker
+                android:id="@+id/wheatCnt"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                numberpicker:value="0"
+                numberpicker:custom_layout="@layout/number_picker"
+                numberpicker:focusable="false"
+                numberpicker:unit="1" />
+            </LinearLayout>
+
+            <LinearLayout
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:layout_weight="1"
+              android:padding="4dp"
+              android:gravity="center"
+              android:orientation="vertical">
+              <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="16dp"
+                android:background="@drawable/ic_ore"
+                android:textSize="24sp" />
+              <com.travijuu.numberpicker.library.NumberPicker
+                android:id="@+id/oreCnt"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                numberpicker:value="0"
+                numberpicker:custom_layout="@layout/number_picker"
+                numberpicker:focusable="false"
+                numberpicker:unit="1" />
+            </LinearLayout>
+          </LinearLayout>
+        </LinearLayout>
+
+        <Button
+          android:id="@+id/okBtn"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:layout_marginBottom="8dp"
+          android:elevation="8dp"
+          android:enabled="false"
+          android:text="@string/toss_cards"
+          android:textAlignment="center"
+          app:layout_constraintBottom_toBottomOf="parent"
+          app:layout_constraintEnd_toEndOf="parent"
+          app:layout_constraintStart_toStartOf="parent"
+          app:layout_constraintTop_toBottomOf="@id/countersContainer" />
+
+      </android.support.constraint.ConstraintLayout>
+
+    </android.support.v7.widget.CardView>
+
+  </android.support.constraint.ConstraintLayout>
+
+
+</android.support.constraint.ConstraintLayout>

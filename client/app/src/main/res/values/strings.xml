@@ -72,5 +72,7 @@
   <string name="add_ki">Füge KI hinzu</string>
   <string name="end_turn">Zug beenden</string>
   <string name="select_robber_target">Wähle aus wen du bestehlen willst</string>
+  <string name="toss_cards">Diese Karten abgeben</string>
+  <string name="toss_cards_bc_robber">Karten wegen Räuber abgeben</string>
 
 </resources>

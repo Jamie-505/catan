@@ -26,6 +26,8 @@ import static de.lmu.settlebattle.catanclient.utils.Constants.ROBBER_AT;
 import static de.lmu.settlebattle.catanclient.utils.Constants.ROBBER_TO;
 import static de.lmu.settlebattle.catanclient.utils.Constants.ROLL_DICE;
 import static de.lmu.settlebattle.catanclient.utils.Constants.STATUS_UPD;
+import static de.lmu.settlebattle.catanclient.utils.Constants.TOSS_CARDS;
+import static de.lmu.settlebattle.catanclient.utils.Constants.TOSS_CARDS_REQ;
 import static de.lmu.settlebattle.catanclient.utils.Constants.TO_SERVER;
 import static de.lmu.settlebattle.catanclient.utils.Constants.TO_STORAGE;
 import static de.lmu.settlebattle.catanclient.utils.Constants.TRADE;
@@ -229,6 +231,22 @@ public class WebSocketService extends Service {
       case OK:
         broadcast(OK);
         break;
+      case ROBBER_AT:
+        String robberStr = mail[1].toString();
+        Robber robber = gson.fromJson(robberStr, Robber.class);
+        if (storage.isItMe(robber.player)) {
+          broadcast(ROBBER_AT);
+        } else {
+          Intent robberIntent = new Intent(ROBBER);
+          robberIntent.putExtra(ROBBER, robberStr);
+          broadcast(robberIntent);
+        }
+        break;
+      case ROBBER_TO:
+        if (itsMe) {
+          broadcast(ROBBER_TO);
+        }
+        break;
       case ROLL_DICE:
         if (itsMe) {
           broadcast(ROLL_DICE);
@@ -243,6 +261,11 @@ public class WebSocketService extends Service {
           storage.storeOpponent(player);
         }
         broadcast(STATUS_UPD);
+        break;
+      case TOSS_CARDS_REQ:
+        if (itsMe) {
+          broadcast(TOSS_CARDS);
+        }
         break;
       case TO_SERVER:
         broadcast(PROTOCOL_SUPPORTED);
@@ -272,22 +295,6 @@ public class WebSocketService extends Service {
         }
         tradeIntent.putExtra(TRADE, gson.toJson(trade));
         broadcast(tradeIntent);
-        break;
-      case ROBBER_AT:
-        String robberStr = mail[1].toString();
-        Robber robber = gson.fromJson(robberStr, Robber.class);
-        if (storage.isItMe(robber.player)) {
-          broadcast(ROBBER_AT);
-        } else {
-          Intent robberIntent = new Intent(ROBBER);
-          robberIntent.putExtra(ROBBER, robberStr);
-          broadcast(robberIntent);
-        }
-        break;
-      case ROBBER_TO:
-        if (itsMe) {
-          broadcast(ROBBER_TO);
-        }
         break;
     }
   }

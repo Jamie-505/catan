@@ -63,4 +63,6 @@ dependencies {
     compile 'com.sothree.slidinguppanel:library:3.4.0'
     // SVG Mutation
     compile 'com.sdsmdg.harjot:vectormaster:1.1.1'
+    // number picker
+    compile 'com.github.travijuu:numberpicker:1.0.7'
 }

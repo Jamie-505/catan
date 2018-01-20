@@ -199,34 +199,13 @@
           android:layout_marginTop="12dp">
 
           <ImageView
-            android:id="@+id/wheat"
-            android:layout_width="28dp"
-            android:layout_height="28dp"
-            android:src="@drawable/ic_wheat"
-            app:layout_constraintEnd_toStartOf="@id/slidePnlWheatCnt"
-            app:layout_constraintHorizontal_bias="0.5"
-            app:layout_constraintStart_toStartOf="parent" />
-
-          <TextView
-            android:id="@+id/slidePnlWheatCnt"
-            android:layout_width="28dp"
-            android:layout_height="match_parent"
-            android:paddingRight="8dp"
-            android:text="0"
-            android:textColor="@color/title_gray"
-            android:textSize="28sp"
-            app:layout_constraintEnd_toStartOf="@id/wood"
-            app:layout_constraintHorizontal_bias="0.5"
-            app:layout_constraintStart_toEndOf="@id/wheat" />
-
-          <ImageView
             android:id="@+id/wood"
             android:layout_width="28dp"
             android:layout_height="28dp"
             android:src="@drawable/ic_wood"
             app:layout_constraintEnd_toStartOf="@id/slidePnlWoodCnt"
             app:layout_constraintHorizontal_bias="0.5"
-            app:layout_constraintStart_toEndOf="@id/slidePnlWheatCnt" />
+            app:layout_constraintStart_toStartOf="parent" />
 
           <TextView
             android:id="@+id/slidePnlWoodCnt"
@@ -236,30 +215,29 @@
             android:text="0"
             android:textColor="@color/title_gray"
             android:textSize="28sp"
-            app:layout_constraintEnd_toStartOf="@id/iron"
+            app:layout_constraintEnd_toStartOf="@id/brick"
             app:layout_constraintHorizontal_bias="0.5"
             app:layout_constraintStart_toEndOf="@id/wood" />
 
           <ImageView
-            android:id="@+id/iron"
+            android:id="@+id/brick"
             android:layout_width="28dp"
             android:layout_height="28dp"
-            android:src="@drawable/ic_ore"
-            app:layout_constraintEnd_toStartOf="@id/slidePnlOreCnt"
+            android:src="@drawable/ic_clay"
+            app:layout_constraintEnd_toStartOf="@id/slidePnlClayCnt"
             app:layout_constraintHorizontal_bias="0.5"
             app:layout_constraintStart_toEndOf="@id/slidePnlWoodCnt" />
 
           <TextView
-            android:id="@+id/slidePnlOreCnt"
+            android:id="@+id/slidePnlClayCnt"
             android:layout_width="28dp"
             android:layout_height="match_parent"
-            android:paddingRight="8dp"
             android:text="0"
             android:textColor="@color/title_gray"
             android:textSize="28sp"
             app:layout_constraintEnd_toStartOf="@id/sheep"
             app:layout_constraintHorizontal_bias="0.5"
-            app:layout_constraintStart_toEndOf="@id/iron" />
+            app:layout_constraintStart_toEndOf="@id/brick" />
 
           <ImageView
             android:id="@+id/sheep"
@@ -268,7 +246,7 @@
             android:src="@drawable/ic_sheep"
             app:layout_constraintEnd_toStartOf="@id/slidePnlWoolCnt"
             app:layout_constraintHorizontal_bias="0.5"
-            app:layout_constraintStart_toEndOf="@id/slidePnlOreCnt" />
+            app:layout_constraintStart_toEndOf="@id/slidePnlClayCnt" />
 
           <TextView
             android:id="@+id/slidePnlWoolCnt"
@@ -278,29 +256,51 @@
             android:text="0"
             android:textColor="@color/title_gray"
             android:textSize="28sp"
-            app:layout_constraintEnd_toStartOf="@id/brick"
+            app:layout_constraintEnd_toStartOf="@id/wheat"
             app:layout_constraintHorizontal_bias="0.5"
             app:layout_constraintStart_toEndOf="@id/sheep" />
 
           <ImageView
-            android:id="@+id/brick"
+            android:id="@+id/wheat"
             android:layout_width="28dp"
             android:layout_height="28dp"
-            android:src="@drawable/ic_clay"
-            app:layout_constraintEnd_toStartOf="@id/slidePnlClayCnt"
+            android:src="@drawable/ic_wheat"
+            app:layout_constraintEnd_toStartOf="@id/slidePnlWheatCnt"
             app:layout_constraintHorizontal_bias="0.5"
             app:layout_constraintStart_toEndOf="@id/slidePnlWoolCnt" />
 
           <TextView
-            android:id="@+id/slidePnlClayCnt"
+            android:id="@+id/slidePnlWheatCnt"
             android:layout_width="28dp"
             android:layout_height="match_parent"
+            android:paddingRight="8dp"
+            android:text="0"
+            android:textColor="@color/title_gray"
+            android:textSize="28sp"
+            app:layout_constraintEnd_toStartOf="@id/iron"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toEndOf="@id/wheat" />
+
+          <ImageView
+            android:id="@+id/iron"
+            android:layout_width="28dp"
+            android:layout_height="28dp"
+            android:src="@drawable/ic_ore"
+            app:layout_constraintEnd_toStartOf="@id/slidePnlOreCnt"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toEndOf="@id/slidePnlWheatCnt" />
+
+          <TextView
+            android:id="@+id/slidePnlOreCnt"
+            android:layout_width="28dp"
+            android:layout_height="match_parent"
+            android:paddingRight="8dp"
             android:text="0"
             android:textColor="@color/title_gray"
             android:textSize="28sp"
             app:layout_constraintEnd_toStartOf="@id/card"
             app:layout_constraintHorizontal_bias="0.5"
-            app:layout_constraintStart_toEndOf="@id/brick" />
+            app:layout_constraintStart_toEndOf="@id/iron" />
 
           <ImageView
             android:id="@+id/card"
@@ -309,7 +309,7 @@
             android:src="@drawable/entwicklungkarten"
             app:layout_constraintEnd_toStartOf="@id/slidePnlDevCardCnt"
             app:layout_constraintHorizontal_bias="0.5"
-            app:layout_constraintStart_toEndOf="@id/slidePnlClayCnt" />
+            app:layout_constraintStart_toEndOf="@id/slidePnlOreCnt" />
 
           <TextView
             android:id="@+id/slidePnlDevCardCnt"
@@ -356,7 +356,7 @@
     android:layout_marginBottom="8dp"
     android:layout_marginStart="32dp"
     android:layout_marginEnd="32dp"
-    android:background="#000000"
+    android:background="@android:color/transparent"
     android:elevation="40dp"
     app:layout_constraintBottom_toTopOf="parent"
     app:layout_constraintEnd_toEndOf="parent"

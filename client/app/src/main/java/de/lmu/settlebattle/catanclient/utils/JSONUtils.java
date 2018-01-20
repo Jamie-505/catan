@@ -63,6 +63,8 @@ public class JSONUtils {
         case HARVEST:
         case COSTS:
           return new String[] {"TODO"};
+        case DEV_CARD_BOUGHT:
+          return new String[] {"TODO"};
         default:
           return displayError("Protokoll wird nicht unterstützt");
       }
@@ -80,6 +82,7 @@ public class JSONUtils {
       case GAME_READY:
       case GAME_START:
       case GAME_WAIT:
+      case TOSS_CARDS_REQ:
       case ROBBER_TO:
       case ROLL_DICE:
         return new Object[] { player.status, player };

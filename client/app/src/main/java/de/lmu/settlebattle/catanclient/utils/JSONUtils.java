@@ -38,7 +38,7 @@ public class JSONUtils {
           return new String[] { GAME_START, board.getString(BOARD) };
         case GET_ID:
           Player player = gson.fromJson(jObj.getString(GET_ID), Player.class);
-          return new Object[] { TO_STORAGE, player };
+          return new Object[] { GET_ID, player };
         case HANDSHAKE:
           return completeHandshake(jObj.getJSONObject(HANDSHAKE));
         case NEW_CONSTRUCT:

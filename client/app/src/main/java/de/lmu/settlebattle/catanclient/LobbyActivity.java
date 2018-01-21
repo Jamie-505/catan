@@ -24,7 +24,6 @@ public class LobbyActivity extends BaseSocketActivity {
 
   private Player[] players = new Player[4];
   private Gson gson = new Gson();
-  private Storage storage;
 
   private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
     @Override
@@ -34,10 +33,10 @@ public class LobbyActivity extends BaseSocketActivity {
         startGame.putExtra(BOARD, intent.getStringExtra(BOARD));
         startActivity(startGame);
       } else if (intent.getAction().equals(PLAYER_UPDATE)) {
-        String allPlayers = storage.getAllPlayersAsJson();
+        String allPlayers = Storage.getAllPlayersAsJson();
         updatePlayers(allPlayers);
       } else if (intent.getAction().equals(PLAYER_WAIT)) {
-        String allPlayers = storage.getAllPlayersAsJson();
+        String allPlayers = Storage.getAllPlayersAsJson();
         updatePlayers(allPlayers);
       }
     }
@@ -49,19 +48,17 @@ public class LobbyActivity extends BaseSocketActivity {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_lobby);
 
-    storage = new Storage(getApplicationContext());
-
     Intent intent = getIntent();
     updatePlayers(intent.getStringExtra(ALL_PLAYERS));
     setIntentFilter();
 
-    Button startGameBtn = (Button) findViewById(R.id.startGameBtn);
+    Button startGameBtn = findViewById(R.id.startGameBtn);
     startGameBtn.setOnClickListener(
         (View v) -> {
           mService.sendMessage(createJSONString(GAME_READY, null));
           startGameBtn.setText(R.string.wait_for_other_players);
         });
-    Button addKiBtn = (Button) findViewById(R.id.kiBtn);
+    Button addKiBtn = findViewById(R.id.kiBtn);
     addKiBtn.setOnClickListener((View v) -> {
       mService.sendMessage(createJSONString(ADD_KI, null));
     });
@@ -99,13 +96,13 @@ public class LobbyActivity extends BaseSocketActivity {
                   .getIdentifier("player" + (i + 1), "id", getPackageName()));
           opponentCard.setVisibility(View.VISIBLE);
 
-          TextView opponentName = (TextView) findViewById(getResources().getIdentifier(
+          TextView opponentName = findViewById(getResources().getIdentifier(
               "p" + (i + 1) + "Name", "id", getPackageName()));
           opponentName.setText(players[i].name);
 
           int oColorId = getResources().getIdentifier(players[i].color.toLowerCase()
               , "color", getPackageName());
-          ImageButton opponentColor = (ImageButton) findViewById(getResources().getIdentifier(
+          ImageButton opponentColor = findViewById(getResources().getIdentifier(
               "p" + (i + 1) + "Status","id", getPackageName()));
           opponentColor.setBackgroundColor(getResources().getColor(oColorId));
           if (players[i].status.equals(GAME_WAIT)) {
@@ -113,7 +110,7 @@ public class LobbyActivity extends BaseSocketActivity {
           }
         }
       } catch (NullPointerException e) {
-        ConstraintLayout opponentCard = (ConstraintLayout) findViewById(
+        ConstraintLayout opponentCard = findViewById(
             getResources().getIdentifier("player" + (i + 1), "id", getPackageName()));
         opponentCard.setVisibility(View.GONE);
       }

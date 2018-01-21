@@ -109,7 +109,6 @@ public class MainActivity extends BaseSocketActivity implements FragmentHandler 
 
   private boolean isItTimeToBuild;
   private boolean enableRobber;
-  public Storage storage;
   private Player self;
   private Player[] allPlayers;
 
@@ -161,9 +160,8 @@ public class MainActivity extends BaseSocketActivity implements FragmentHandler 
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_main);
-    storage = new Storage(this);
-    self = storage.getPlayer();
-    allPlayers = storage.getAllPlayers();
+    self = Storage.getSelf();
+    allPlayers = Storage.getAllPlayers();
     setIntentFilters();
 
     Intent startActivity = getIntent();
@@ -604,7 +602,7 @@ public class MainActivity extends BaseSocketActivity implements FragmentHandler 
         case BUILD_TRADE:
           updatePlayerViews();
           Player p = gson.fromJson(intent.getStringExtra(PLAYER), Player.class);
-          if (storage.isItMe(p.id)) {
+          if (Storage.isItMe(p.id)) {
             // needed because of double status updates from the server
             enableRobber = false;
             isItTimeToBuild = true;
@@ -699,7 +697,7 @@ public class MainActivity extends BaseSocketActivity implements FragmentHandler 
       tradeBundle.putString(RAW_MATERIALS, rawMaterials);
       DomTradeFragment f = new DomTradeFragment();
       f.setArguments(tradeBundle);
-      showFragmentViaBackstack(f);
+      showFragmentNoBackstack(f);
     });
     endTurnBtn.setOnClickListener((View v) -> {
       disableClickLayers();
@@ -861,11 +859,7 @@ public class MainActivity extends BaseSocketActivity implements FragmentHandler 
 
   private void showConstruction(Construction construction) {
     Player p;
-    if (storage.isItMe(construction.owner)) {
-      p = self;
-    } else {
-      p = storage.getOpponent(construction.owner);
-    }
+    p = Storage.getPlayer(construction.owner);
     String viewId = construction.viewId;
     if (viewId == null) {
       viewId = createTag(construction.locations);
@@ -880,7 +874,7 @@ public class MainActivity extends BaseSocketActivity implements FragmentHandler 
         bV.setImageDrawable(buildingImg);
         bV.setType(ConstructionType.CITY);
         // only need opponents as owners
-        if (!storage.isItMe(construction.owner)){
+        if (!Storage.isItMe(construction.owner)){
           updateHexOwners(viewId, construction.owner);
         }
         break;
@@ -912,13 +906,8 @@ public class MainActivity extends BaseSocketActivity implements FragmentHandler 
   }
 
   private void showTradeSummary(Trade t) {
-    Player p1 = storage.getOpponent(t.player);
-    Player p2 = storage.getOpponent(t.opponent);
-    if (p1 == null) {
-      p1 = storage.getPlayer();
-    } else if (p2 == null) {
-      p2 = storage.getPlayer();
-    }
+    Player p1 = Storage.getPlayer(t.player);
+    Player p2 = Storage.getPlayer(t.opponent);
     String msg = String.format("Handel zwischen %s und %s wurde abgeschlossen",
         p1.name, p2.name);
     displayMessage(msg);
@@ -967,8 +956,8 @@ public class MainActivity extends BaseSocketActivity implements FragmentHandler 
   }
 
   private void updatePlayerViews() {
-    self = storage.getPlayer();
-    allPlayers = storage.getAllPlayers();
+    self = Storage.getSelf();
+    allPlayers = Storage.getAllPlayers();
     updatePlayerCards();
     updateSlidePanel();
   }

@@ -36,8 +36,6 @@ public final class Constants {
   public static final String SEA_TRADE = "Seehandel";
   public static final String SERVER_RES = "Serverantwort";
   public static final String STATUS_UPD = "Statusupdate";
-  public static final String ERROR_COLOR = "Farbe bereits";
-	public static final String ERROR_NAME = "Name bereits";
   public static final String TOSS_CARDS = "Karten abgeben";
   public static final String TOSS_CARDS_REQ = "Karten wegen Räuber abgeben";
   public static final String TRADE = "trade";
@@ -131,14 +129,8 @@ public final class Constants {
   public static final String TO_SERVER = "Send To Server";
   public static final String TO_STORAGE = "Send To Storage";
 
-  // Storage
-  public static final String KEY_SHARED_PREF = "CATAN_APP";
-  public static final String KEY_SESSION_ID = "sessionId";
-  public static final String KEY_PLAYER = "storagePlayer";
-
   // Version Constants
   public static final String VERSION_PROTOCOL = "1.0";
-  public static final String VERSION_SERVER = "CatanBackendServer 0.1 (sepgroup03)";
   public static final String VERSION_CLIENT = "AndroidClient 0.1 (sepgroup03)";
 
 

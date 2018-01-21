@@ -14,6 +14,7 @@ import static de.lmu.settlebattle.catanclient.utils.Constants.ERROR_MSG;
 import static de.lmu.settlebattle.catanclient.utils.Constants.GAME_READY;
 import static de.lmu.settlebattle.catanclient.utils.Constants.GAME_START;
 import static de.lmu.settlebattle.catanclient.utils.Constants.GAME_WAIT;
+import static de.lmu.settlebattle.catanclient.utils.Constants.GET_ID;
 import static de.lmu.settlebattle.catanclient.utils.Constants.NEW_CONSTRUCT;
 import static de.lmu.settlebattle.catanclient.utils.Constants.NEXT_ACTIVITY;
 import static de.lmu.settlebattle.catanclient.utils.Constants.OK;
@@ -68,7 +69,6 @@ public class WebSocketService extends Service {
 
   private final IBinder binder = new WebSocketsBinder();
   private Gson gson = new Gson();
-  private Storage storage;
   private WebSocketClient webSocketClient;
   private LocalBroadcastManager localBroadcastManager;
 
@@ -91,7 +91,6 @@ public class WebSocketService extends Service {
   @Override
   public int onStartCommand(Intent intent, int flags, int startId) {
     Log.i(TAG, "onStartCommand");
-    storage = new Storage(getApplicationContext());
     Intent connectionIntent = new Intent(ACTION_CONNECTION_ESTABLISHED);
     if (localBroadcastManager == null) {
       localBroadcastManager = LocalBroadcastManager.getInstance(this);
@@ -106,9 +105,6 @@ public class WebSocketService extends Service {
 
   @Override
   public IBinder onBind(Intent intent) {
-    if (storage == null) {
-      storage = new Storage(getApplicationContext());
-    }
     if (localBroadcastManager == null) {
       localBroadcastManager = LocalBroadcastManager.getInstance(this);
     }
@@ -144,7 +140,8 @@ public class WebSocketService extends Service {
     try {
       if (mail[1] instanceof Player) {
         player = (Player) mail[1];
-        itsMe = storage.isItMe(player);
+        if (Storage.isItMe(player.id)) itsMe = true;
+        if (Storage.getSessionId() != -1) Storage.storePlayer(player);
       }
     } catch (ArrayIndexOutOfBoundsException e) {
       // nothing to do here
@@ -170,13 +167,7 @@ public class WebSocketService extends Service {
         }
         break;
       case BUILD_TRADE:
-        if (itsMe) {
-          // should cause select player activity so switch to lobby
-          storage.storePlayer(player);
-        } else {
-          storage.storeOpponent(player);
-          // updates lobby with latest data
-        }
+        Storage.storePlayer(player);
         Intent buildTrade = new Intent(BUILD_TRADE);
         buildTrade.putExtra(PLAYER, gson.toJson(player));
         broadcast(buildTrade);
@@ -190,12 +181,11 @@ public class WebSocketService extends Service {
         displayError(mail[1].toString());
         break;
       case GAME_READY:
+        Storage.storePlayer(player);
         if (itsMe) {
           // should cause select player activity so switch to lobby
-          storage.storePlayer(player);
           broadcast(NEXT_ACTIVITY);
         } else {
-          storage.storeOpponent(player);
           // updates lobby with latest data
           broadcast(PLAYER_UPDATE);
         }
@@ -206,13 +196,8 @@ public class WebSocketService extends Service {
         broadcast(gameStart);
         break;
       case GAME_WAIT:
-        if (itsMe) {
-          // should cause select player activity so switch to lobby
-          storage.storePlayer(player);
-        } else {
-          storage.storeOpponent(player);
-          // updates lobby with latest data
-        }
+        Storage.storePlayer(player);
+        // updates lobby with latest data
         broadcast(PLAYER_WAIT);
         break;
       case NEW_CONSTRUCT:
@@ -234,7 +219,7 @@ public class WebSocketService extends Service {
       case ROBBER_AT:
         String robberStr = mail[1].toString();
         Robber robber = gson.fromJson(robberStr, Robber.class);
-        if (storage.isItMe(robber.player)) {
+        if (Storage.isItMe(robber.player)) {
           broadcast(ROBBER_AT);
         } else {
           Intent robberIntent = new Intent(ROBBER);
@@ -255,11 +240,7 @@ public class WebSocketService extends Service {
         }
         break;
       case STATUS_UPD:
-        if (itsMe) {
-          storage.storePlayer(player);
-        } else {
-          storage.storeOpponent(player);
-        }
+        Storage.storePlayer(player);
         broadcast(STATUS_UPD);
         break;
       case TOSS_CARDS_REQ:
@@ -271,9 +252,10 @@ public class WebSocketService extends Service {
         broadcast(PROTOCOL_SUPPORTED);
         webSocketClient.send(mail[1].toString());
         break;
-      case TO_STORAGE:
-        Log.d(TAG, ((Player) mail[1]).id + " --> TO_STORAGE");
-        storage.storePlayer((Player) mail[1]);
+      case GET_ID:
+        Log.d(TAG, (player.id + " --> TO_STORAGE"));
+        Storage.storeSessionId(player.id);
+        Storage.storePlayer(player);
         break;
       case TRD_ABORTED:
         broadcast(TRD_ABORTED);
@@ -288,7 +270,7 @@ public class WebSocketService extends Service {
       case TRD_OFFER:
         trade = (Trade) mail[1];
         Intent tradeIntent;
-        if (storage.isItMe(trade.player)) {
+        if (Storage.isItMe(trade.player)) {
           tradeIntent = new Intent(TRD_SENT);
         } else {
           tradeIntent = new Intent(TRD_OFFER);

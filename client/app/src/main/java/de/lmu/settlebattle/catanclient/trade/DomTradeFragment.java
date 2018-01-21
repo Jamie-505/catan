@@ -34,6 +34,7 @@ import de.lmu.settlebattle.catanclient.MainActivityFragment;
 import de.lmu.settlebattle.catanclient.R;
 import de.lmu.settlebattle.catanclient.player.Player;
 import de.lmu.settlebattle.catanclient.player.RawMaterialOverview;
+import de.lmu.settlebattle.catanclient.player.Storage;
 import de.lmu.settlebattle.catanclient.utils.JSONUtils;
 import java.lang.reflect.Type;
 import java.util.HashMap;
@@ -64,8 +65,10 @@ public class DomTradeFragment extends MainActivityFragment {
             trade = gson.fromJson(intent.getStringExtra(TRADE), Trade.class);
             if (sendTradeBtn != null && tradeStatus != null) {
               sendTradeBtn.setVisibility(View.GONE);
+              disableNumPicks();
               tradeStatus.setVisibility(View.VISIBLE);
               cancelBtn.setVisibility(View.VISIBLE);
+
             }
             updateTradeStatus(-1, false);
             break;
@@ -132,11 +135,14 @@ public class DomTradeFragment extends MainActivityFragment {
 
   @Override
   public void onViewCreated(View view, Bundle savedInstanceState) {
+    Button initCnclBtn = fragmentView.findViewById(R.id.init_cancel_btn);
     cancelBtn = fragmentView.findViewById(R.id.cancel_btn);
     sendTradeBtn = fragmentView.findViewById(R.id.send_trade_btn);
     tradeStatus = fragmentView.findViewById(R.id.trade_status);
 
     cancelBtn.setOnClickListener((View v) -> cancelTrade());
+
+    initCnclBtn.setOnClickListener((View v) -> fragHandler.closeFragment(this));
 
     sendTradeBtn.setOnClickListener((View v) -> {
       sendTradeRequest();
@@ -174,7 +180,21 @@ public class DomTradeFragment extends MainActivityFragment {
   }
 
   private void closeFragment() {
-    fragHandler.popBackstack(this);
+    fragHandler.closeFragment(this);
+  }
+
+  private void disableNumPicks() {
+    for (String type : types) {
+      for (String resource : fields) {
+        int resId = getResources().getIdentifier(
+            type + resource + "_cnt",
+            "id",
+            mainActivity.getPackageName());
+        NumberPicker resourceEdtxt = fragmentView.findViewById(resId);
+        resourceEdtxt.setActionEnabled(ActionEnum.DECREMENT, false);
+        resourceEdtxt.setActionEnabled(ActionEnum.INCREMENT, false);
+      }
+    }
   }
 
   private void sendTradeRequest() {
@@ -188,8 +208,6 @@ public class DomTradeFragment extends MainActivityFragment {
             mainActivity.getPackageName());
         NumberPicker resourceEdtxt = fragmentView.findViewById(resId);
         qnts[i++] = resourceEdtxt.getValue();
-        resourceEdtxt.setActionEnabled(ActionEnum.DECREMENT, false);
-        resourceEdtxt.setActionEnabled(ActionEnum.INCREMENT, false);
       }
       tradeInfo.put(type, qnts);
     }
@@ -209,7 +227,7 @@ public class DomTradeFragment extends MainActivityFragment {
 
   private void updateTradeStatus(int id, boolean accepted) {
     try {
-      String allPlayers = mainActivity.storage.getAllPlayersAsJson();
+      String allPlayers = Storage.getAllPlayersAsJson();
       setPlayers(allPlayers);
 
       for (int i = 0; i < players.length; i++) {
@@ -252,7 +270,7 @@ public class DomTradeFragment extends MainActivityFragment {
       }
     } catch (Exception e) {
       if (isAdded()) {
-        fragHandler.popBackstack(this);
+        fragHandler.closeFragment(this);
         fragHandler.displayFragMsg("Hoppla, da ist wohl was schief gelaufen");
       }
     }

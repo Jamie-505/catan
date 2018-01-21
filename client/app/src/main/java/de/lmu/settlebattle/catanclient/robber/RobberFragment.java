@@ -18,6 +18,7 @@ import de.lmu.settlebattle.catanclient.MainActivityFragment;
 import de.lmu.settlebattle.catanclient.R;
 import de.lmu.settlebattle.catanclient.grid.Location;
 import de.lmu.settlebattle.catanclient.player.Player;
+import de.lmu.settlebattle.catanclient.player.Storage;
 import java.util.ArrayList;
 
 public class RobberFragment extends MainActivityFragment {
@@ -58,7 +59,7 @@ public class RobberFragment extends MainActivityFragment {
 
   private void setPlayers(ArrayList<Integer> ids) {
     for (Integer id : ids) {
-      targets[ids.indexOf(id)] = mainActivity.storage.getOpponent(id);
+      targets[ids.indexOf(id)] = Storage.getPlayer(id);
     }
     try {
 

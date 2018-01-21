@@ -18,7 +18,6 @@ import android.view.View;
 import android.widget.Button;
 import de.lmu.settlebattle.catanclient.network.WebSocketService;
 import de.lmu.settlebattle.catanclient.network.WebSocketService.WebSocketsBinder;
-import de.lmu.settlebattle.catanclient.player.Storage;
 
 public class StartActivity extends Activity {
 
@@ -59,10 +58,6 @@ public class StartActivity extends Activity {
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.startscreen);
-
-    // erase old data
-    Storage storage = new Storage(this);
-    storage.clear();
 
     try {
       getActionBar().hide();

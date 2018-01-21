@@ -26,6 +26,7 @@ import de.lmu.settlebattle.catanclient.MainActivity;
 import de.lmu.settlebattle.catanclient.MainActivityFragment;
 import de.lmu.settlebattle.catanclient.R;
 import de.lmu.settlebattle.catanclient.player.Player;
+import de.lmu.settlebattle.catanclient.player.Storage;
 import java.lang.reflect.Type;
 
 public class TradeOfferFragment extends MainActivityFragment {
@@ -68,7 +69,7 @@ public class TradeOfferFragment extends MainActivityFragment {
 
     if (getArguments() != null) {
       trade = gson.fromJson(getArguments().getString(TRADE), Trade.class);
-      trader = mainActivity.storage.getOpponent(trade.player);
+      trader = Storage.getPlayer(trade.player);
       TextView playerName = view.findViewById(R.id.playerName);
       playerName.setText(trader.name);
       ImageButton playerIcon = view.findViewById(R.id.playerIcon);
@@ -154,7 +155,7 @@ public class TradeOfferFragment extends MainActivityFragment {
 
   private void updateTradeStatus(int id, boolean accepted) {
     try {
-      String allPlayers = mainActivity.storage.getAllPlayersAsJson();
+      String allPlayers = Storage.getAllPlayersAsJson();
       setPlayers(allPlayers);
 
       for (int i = 0; i < players.length; i++) {

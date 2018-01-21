@@ -1,102 +1,73 @@
 package de.lmu.settlebattle.catanclient.player;
 
-import static de.lmu.settlebattle.catanclient.utils.Constants.KEY_PLAYER;
-import static de.lmu.settlebattle.catanclient.utils.Constants.KEY_SESSION_ID;
-import static de.lmu.settlebattle.catanclient.utils.Constants.KEY_SHARED_PREF;
-
-import android.content.Context;
-import android.content.SharedPreferences;
-import android.content.SharedPreferences.Editor;
 import com.google.gson.Gson;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 public class Storage {
 
   private final String TAG = this.getClass().getSimpleName();
 
-  private SharedPreferences sharedPrefs;
-  private Gson gson = new Gson();
+  private static int ownId = -1;
+  private static HashMap<Integer, Player> players = new HashMap<>();
+  private static Gson gson = new Gson();
 
   // needs to be static so all instances of storage can access it
   private static ArrayList<Integer> opponentIds = new ArrayList<>();
 
-
-  public Storage(Context context) {
-    this.sharedPrefs = context.getSharedPreferences(KEY_SHARED_PREF, Context.MODE_PRIVATE);
+  public static boolean isItMe(Player p) {
+    return p.id == ownId;
   }
 
-  public boolean isItMe(Player p) {
-    return p.id == getSessionId();
+  public static boolean isItMe(int id) {
+    return id == ownId;
   }
 
-  public boolean isItMe(int id) {
-    return id == getSessionId();
+  public static void storeSessionId(int sessionId) {
+    ownId = sessionId;
   }
 
-  public void storeSessionId(int sessionId) {
-    Editor editor = sharedPrefs.edit();
-    editor.putInt(KEY_SESSION_ID, sessionId);
-    editor.apply();
+  public static int getSessionId() { return ownId; }
+
+  public static Player getSelf() {
+    return players.get(ownId);
   }
 
-  public int getSessionId() { return sharedPrefs.getInt(KEY_SESSION_ID, 0); }
-
-  public void storePlayer(Player player) {
-    storeSessionId(player.id);
-    String pJSON = gson.toJson(player);
-    Editor editor = sharedPrefs.edit();
-    editor.putString(KEY_PLAYER, pJSON);
-    editor.apply();
-  }
-
-  public Player getPlayer() {
-    String playerString = sharedPrefs.getString(KEY_PLAYER, null);
-    return gson.fromJson(playerString, Player.class);
-  }
-
-  public void storeOpponent(Player opponent) {
-    Integer id = opponent.id;
-    if (!opponentIds.contains(id)) {
-      opponentIds.add(id);
+  public static void storePlayer(Player player) {
+    if (!opponentIds.contains(player.id) && player.id != ownId) {
+      opponentIds.add(player.id);
     }
-    String oJSON = gson.toJson(opponent);
-    Editor editor = sharedPrefs.edit();
-    // maybe the key needs to be something like player2
-    // then I need a map or array to connect the id to each player
-    editor.putString(String.valueOf(id), oJSON);
-    editor.apply();
+    players.put(player.id, player);
   }
 
-  public Player getOpponent(int id) {
-    String opponentString = sharedPrefs.getString(String.valueOf(id), null);
-    return gson.fromJson(opponentString, Player.class);
+  public static Player getPlayer(int id) {
+    return players.get(id);
   }
 
-  public String getAllPlayersAsJson() {
+  public static String getAllPlayersAsJson() {
     // +1 because own player is also added not just opponents
-    Player[] allPlayers = new Player[opponentIds.size()+1];
-    allPlayers[0] = gson.fromJson(sharedPrefs.getString(KEY_PLAYER, null), Player.class);
+    Player[] allPlayers = new Player[players.size()];
+    allPlayers[0] = players.get(ownId);
     int index = 0;
-    for (Integer id : opponentIds) {
-      index++;
-      allPlayers[index] = getOpponent(id);
+    if (opponentIds.size() > 0) {
+      for (Integer id : opponentIds) {
+        index++;
+        allPlayers[index] = getPlayer(id);
+      }
     }
     return gson.toJson(allPlayers);
   }
 
-  public Player[] getAllPlayers() {
+  public static Player[] getAllPlayers() {
     // +1 because own player is also added not just opponents
-    Player[] allPlayers = new Player[opponentIds.size()+1];
-    allPlayers[0] = gson.fromJson(sharedPrefs.getString(KEY_PLAYER, null), Player.class);
+    Player[] allPlayers = new Player[players.size()];
+    // make sure own player is on 1st index
+    allPlayers[0] = players.get(ownId);
     int index = 0;
     for (Integer id : opponentIds) {
       index++;
-      allPlayers[index] = getOpponent(id);
+      allPlayers[index] = getPlayer(id);
     }
     return allPlayers;
-  }
-
-  public void clear() {
-    sharedPrefs.edit().clear().apply();
   }
 }

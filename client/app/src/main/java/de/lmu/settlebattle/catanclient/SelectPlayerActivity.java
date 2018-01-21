@@ -15,7 +15,6 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
-import android.widget.TextView;
 import android.content.BroadcastReceiver;
 
 import de.lmu.settlebattle.catanclient.utils.JSONUtils;
@@ -24,7 +23,6 @@ import java.util.HashMap;
 
 public class SelectPlayerActivity extends BaseSocketActivity {
 
-  private Storage storage;
   private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
     @Override
     public void onReceive(Context context, Intent intent) {
@@ -33,7 +31,7 @@ public class SelectPlayerActivity extends BaseSocketActivity {
       } else if (intent.getAction().equals(NEXT_ACTIVITY)) {
         Intent enterLobby = new Intent(SelectPlayerActivity.this,
             LobbyActivity.class);
-        String allPlayers = storage.getAllPlayersAsJson();
+        String allPlayers = Storage.getAllPlayersAsJson();
         enterLobby.putExtra(ALL_PLAYERS, allPlayers);
         startActivity(enterLobby);
       }
@@ -44,8 +42,6 @@ public class SelectPlayerActivity extends BaseSocketActivity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_select_player);
-
-    storage = new Storage(getApplicationContext());
 
     IntentFilter filter = new IntentFilter();
     filter.addAction(DISPLAY_ERROR);
@@ -62,19 +58,16 @@ public class SelectPlayerActivity extends BaseSocketActivity {
     // Apply the adapter to the spinner
 		spinner.setAdapter(adapter);
 
-    Button confirmBtn = (Button) findViewById(R.id.enterLobbyBtn);
-		EditText pNameField = (EditText) findViewById(R.id.input_player_name);
+    Button confirmBtn = findViewById(R.id.enterLobbyBtn);
+		EditText pNameField = findViewById(R.id.input_player_name);
 
-    EditText.OnEditorActionListener enterListener = new EditText.OnEditorActionListener() {
-      @Override
-      public boolean onEditorAction(TextView inputField, int actionId, KeyEvent event) {
-        if (actionId == EditorInfo.IME_ACTION_DONE
-            && event.getAction() == KeyEvent.ACTION_DOWN) {
-          String pColor = spinner.getSelectedItem().toString();
-          sendPlayerInfo(inputField.getText().toString(), pColor);
-        }
-        return true;
+    EditText.OnEditorActionListener enterListener = (inputField, actionId, event) -> {
+      if (actionId == EditorInfo.IME_ACTION_DONE
+          && event.getAction() == KeyEvent.ACTION_DOWN) {
+        String pColor = spinner.getSelectedItem().toString();
+        sendPlayerInfo(inputField.getText().toString(), pColor);
       }
+      return true;
     };
 
     confirmBtn.setOnClickListener((View v) -> {
@@ -97,7 +90,7 @@ public class SelectPlayerActivity extends BaseSocketActivity {
     HashMap<String, Object> playerInfo = new HashMap<>();
     playerInfo.put(PLAYER_NAME, name);
     playerInfo.put(PLAYER_COLOR, color);
-    playerInfo.put(PLAYER_ID, storage.getSessionId());
+    playerInfo.put(PLAYER_ID, Storage.getSessionId());
     String pInfo = JSONUtils.createJSONString(PLAYER, playerInfo);
     mService.sendMessage(pInfo);
   }

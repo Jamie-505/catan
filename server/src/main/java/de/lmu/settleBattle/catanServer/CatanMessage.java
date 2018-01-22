@@ -381,4 +381,11 @@ public class CatanMessage {
 
         return new TextMessage(payload.put(BUILD, building.toJSON()).toString());
     }
+
+    public static TextMessage chatMessage(int playerId, TextMessage message) {
+        JSONObject payload = JSONUtils.createJSON(message).getJSONObject(CHAT_OUT);
+        payload.put(Constants.SENDER, playerId);
+        return new TextMessage(JSONUtils.setJSONType(Constants.CHAT_IN, payload).toString());
+
+    }
 }

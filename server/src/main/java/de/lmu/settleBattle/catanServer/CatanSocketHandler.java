@@ -96,6 +96,13 @@ public class CatanSocketHandler extends TextWebSocketHandler implements Property
             String type = JSONUtils.getMessageType(message);
 
             switch (type) {
+
+                case CHAT_OUT:
+                    sendMessageToAll(CatanMessage.chatMessage(
+                        SocketUtils.toInt(session.getId()), message)
+                    );
+                    break;
+
                 case HANDSHAKE:
                     if (utils.performHandshake(session)) sendOpponents(session);
                     break;

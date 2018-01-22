@@ -9,6 +9,7 @@ import static de.lmu.settlebattle.catanclient.utils.Constants.BUILD_STREET;
 import static de.lmu.settlebattle.catanclient.utils.Constants.BUILD_TRADE;
 import static de.lmu.settlebattle.catanclient.utils.Constants.BUILD_VILLAGE;
 import static de.lmu.settlebattle.catanclient.utils.Constants.CARD_BUY;
+import static de.lmu.settlebattle.catanclient.utils.Constants.CHAT_IN;
 import static de.lmu.settlebattle.catanclient.utils.Constants.DICE_RESULT;
 import static de.lmu.settlebattle.catanclient.utils.Constants.DICE_THROW;
 import static de.lmu.settlebattle.catanclient.utils.Constants.DISPLAY_ERROR;
@@ -45,6 +46,9 @@ import android.graphics.Color;
 import android.graphics.Point;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.LayerDrawable;
+import android.media.Ringtone;
+import android.media.RingtoneManager;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
 import android.support.v4.content.LocalBroadcastManager;
@@ -67,6 +71,8 @@ import com.sdsmdg.harjot.vectormaster.VectorMasterDrawable;
 import com.sdsmdg.harjot.vectormaster.models.PathModel;
 import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 import de.lmu.settlebattle.catanclient.MainActivityFragment.FragmentHandler;
+import de.lmu.settlebattle.catanclient.chat.ChatFragment;
+import de.lmu.settlebattle.catanclient.chat.ChatMessage;
 import de.lmu.settlebattle.catanclient.dice.DiceFragment;
 import de.lmu.settlebattle.catanclient.grid.Board;
 import de.lmu.settlebattle.catanclient.grid.Construction;
@@ -123,6 +129,7 @@ public class MainActivity extends BaseSocketActivity implements FragmentHandler 
   private Button domTradeBtn;
   private Button endTurnBtn;
   private Button seaTradeBtn;
+  private ChatFragment chatFragment = new ChatFragment();
   private ConstructionsLayer settlementLayer;
   private ConstructionsLayer streetLayer;
   private FragmentManager fragmentManager = getFragmentManager();
@@ -583,6 +590,21 @@ public class MainActivity extends BaseSocketActivity implements FragmentHandler 
     }
   }
 
+  /**
+   * Plays device's default notification sound
+   * */
+  public void playBeep() {
+    try {
+      Uri notification = RingtoneManager
+          .getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
+      Ringtone r = RingtoneManager.getRingtone(this,
+          notification);
+      r.play();
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+  }
+
   private void reactToIntent(Intent intent) {
     String action = intent.getAction();
     if (action != null) {
@@ -611,6 +633,15 @@ public class MainActivity extends BaseSocketActivity implements FragmentHandler 
             domTradeBtn.setVisibility(View.VISIBLE);
             seaTradeBtn.setVisibility(View.VISIBLE);
             endTurnBtn.setVisibility(View.VISIBLE);
+          }
+          break;
+        case CHAT_IN:
+          ChatMessage cMsg = gson.fromJson(
+              intent.getStringExtra(CHAT_IN), ChatMessage.class);
+          chatFragment.appendMessage(cMsg);
+          if (!Storage.isItMe(cMsg.getSenderId())) {
+            playBeep();
+            displayMessage("Neue Chatnachricht erhalten");
           }
           break;
         case DICE_RESULT:
@@ -712,6 +743,7 @@ public class MainActivity extends BaseSocketActivity implements FragmentHandler 
     filter.addAction(BUILD_VILLAGE);
     filter.addAction(BUILD_STREET);
     filter.addAction(BUILD_TRADE);
+    filter.addAction(CHAT_IN);
     filter.addAction(DICE_RESULT);
     filter.addAction(DISPLAY_ERROR);
     filter.addAction(NEW_CONSTRUCT);

@@ -1,8 +1,10 @@
 package de.lmu.settlebattle.catanclient.player;
 
 import com.google.gson.Gson;
+import de.lmu.settlebattle.catanclient.chat.ChatMessage;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 public class Storage {
 
@@ -11,6 +13,7 @@ public class Storage {
   private static int ownId = -1;
   private static HashMap<Integer, Player> players = new HashMap<>();
   private static Gson gson = new Gson();
+  private static List<ChatMessage> chatMessages = new ArrayList<>();
 
   // needs to be static so all instances of storage can access it
   private static ArrayList<Integer> opponentIds = new ArrayList<>();
@@ -38,6 +41,14 @@ public class Storage {
       opponentIds.add(player.id);
     }
     players.put(player.id, player);
+  }
+
+  public static void addChatMsg(ChatMessage msg) {
+    chatMessages.add(msg);
+  }
+
+  public static List<ChatMessage> getChatMessages() {
+    return chatMessages;
   }
 
   public static Player getPlayer(int id) {

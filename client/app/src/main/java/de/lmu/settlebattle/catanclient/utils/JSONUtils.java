@@ -27,6 +27,8 @@ public class JSONUtils {
       String msgType = jObj.keys().next();
 
       switch (msgType) {
+        case CHAT_IN:
+          return new String[] { CHAT_IN, jObj.getString(msgType)};
         case DICE_RESULT:
           String dice = jObj.getString(DICE_RESULT);
           return new String[] { DICE_RESULT, dice };

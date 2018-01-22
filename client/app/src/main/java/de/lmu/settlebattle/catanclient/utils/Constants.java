@@ -80,7 +80,7 @@ public final class Constants {
   public final static String HAVEN = "Hafen";
   public final static String KNIGHT = "Ritter";
   public final static String MONOPOLE = "Monopol";
-  public final static String NOTIFICATION = "Nachricht";
+  public final static String CONTENT = "Nachricht";
   public final static String NUMBER = "Zahl";
   public final static String OFFER = "Angebot";
   public final static String ORE = "Erz";
@@ -89,6 +89,7 @@ public final class Constants {
   public final static String PROTOCOL = "Protokoll";
   public final static String REQUEST = "Nachfrage";
   public final static String ROAD_CONSTRUCTION = "Straßenbau";
+  public final static String SENDER = "Absender";
   public final static String SETTLEMENT = "Siedlung";
   public final static String STREET = "Strasse";
   public final static String TARGET = "Ziel";

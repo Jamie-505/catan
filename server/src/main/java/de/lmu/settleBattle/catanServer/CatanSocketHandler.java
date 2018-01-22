@@ -40,10 +40,14 @@ public class CatanSocketHandler extends TextWebSocketHandler implements Property
         );
 
         utils.getGameCtrl().addPropertyChangeListener(e -> {
-            if (e.getPropertyName().equals(ROBBER_AT)) {
-                System.out.println("Robber was moved");
-                sendMessageToAll((TextMessage) e.getNewValue());
+            switch (e.getPropertyName()) {
+                case ROBBER_AT:
+                    System.out.println("Robber was moved");
+                    sendMessageToAll((TextMessage) e.getNewValue());
+                    break;
             }
+
+
         });
 
         this.sessions = Collections.synchronizedSet(new HashSet<WebSocketSession>());
@@ -99,7 +103,7 @@ public class CatanSocketHandler extends TextWebSocketHandler implements Property
 
                 case CHAT_OUT:
                     sendMessageToAll(CatanMessage.chatMessage(
-                        SocketUtils.toInt(session.getId()), message)
+                            SocketUtils.toInt(session.getId()), message)
                     );
                     break;
 
@@ -114,8 +118,7 @@ public class CatanSocketHandler extends TextWebSocketHandler implements Property
                 case START_GAME:
                     utils.handleStartGameMessage(session, message);
                     if (utils.getGameCtrl().readyToStartGame()) {
-                        sendMessageToAll(CatanMessage.startGame(utils.getGameCtrl().getBoard()));
-                        getGameCtrl().startGame();
+                        this.startGame();
                     }
                     break;
 
@@ -195,8 +198,7 @@ public class CatanSocketHandler extends TextWebSocketHandler implements Property
                     newPlayer.setStatus(WAIT_FOR_GAME_START);
 
                     if (utils.getGameCtrl().readyToStartGame()) {
-                        sendMessageToAll(CatanMessage.startGame(utils.getGameCtrl().getBoard()));
-                        getGameCtrl().startGame();
+                        this.startGame();
                     }
                     break;
             }
@@ -228,6 +230,19 @@ public class CatanSocketHandler extends TextWebSocketHandler implements Property
                 tr.accept(false, SocketUtils.toInt(session.getId()));
             }
         }
+    }
+
+    private void startGame() {
+        getGameCtrl().defineTurnOrder();
+
+        int[] ids = new int[getGameCtrl().getPlayers().size()];
+
+        for (int i = 0; i < getGameCtrl().getPlayers().size(); i++) {
+            ids[i] = getGameCtrl().getPlayers().get(i).getId();
+        }
+
+        sendMessageToAll(CatanMessage.startGame(utils.getGameCtrl().getBoard(), ids));
+        getGameCtrl().startGame();
     }
 
     private void nextMove() {
@@ -447,7 +462,9 @@ public class CatanSocketHandler extends TextWebSocketHandler implements Property
 
                     if (!ki.getNextStatus().equals(WAIT) && !ki.getNextStatus().equals(""))
                         getGameCtrl().deactivateKI(ki);
-                    else { ki.activateNextStatus(); }
+                    else {
+                        ki.activateNextStatus();
+                    }
                     break;
 
                 case DICE:

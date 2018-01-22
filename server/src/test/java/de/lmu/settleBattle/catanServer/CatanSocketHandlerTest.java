@@ -5,8 +5,6 @@ import org.junit.*;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketMessage;
 
-import javax.websocket.Session;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -129,6 +127,7 @@ public class CatanSocketHandlerTest {
         p2.setStatus(WAIT_FOR_GAME_START);
         p3.setStatus(WAIT_FOR_GAME_START);
 
+        handler.getGameCtrl().defineTurnOrder();
         handler.getGameCtrl().startGame();
     }
 
@@ -194,6 +193,7 @@ public class CatanSocketHandlerTest {
         Board board = CatanMessage.extractBoard(session1.getLast());
         assertTrue(board.getBuildingsSize() == 0);
 
+        handler.getGameCtrl().defineTurnOrder();
         handler.getUtils().getGameCtrl().startGame();
 
         p3 = CatanMessage.statusUpdateToPlayer(session3.getLast());
@@ -241,7 +241,7 @@ public class CatanSocketHandlerTest {
 
         boolean sBuilt;
         try {
-            sBuilt = handler.getUtils().build(SocketUtils.toInt(session.getId()), CatanMessage.sendBuildMessage(building));
+            sBuilt = handler.getUtils().build(SocketUtils.toInt(session.getId()), CatanMessage.getBuildMessage(building));
         }
         catch (CatanException ex) {
             sBuilt = false;
@@ -271,7 +271,7 @@ public class CatanSocketHandlerTest {
 
         boolean sBuilt;
         try {
-            sBuilt = handler.getUtils().build(SocketUtils.toInt(session.getId()), CatanMessage.sendBuildMessage(building));
+            sBuilt = handler.getUtils().build(SocketUtils.toInt(session.getId()), CatanMessage.getBuildMessage(building));
         }
         catch (CatanException ex) {
             sBuilt = false;

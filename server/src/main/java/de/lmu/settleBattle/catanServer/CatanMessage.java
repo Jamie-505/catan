@@ -169,6 +169,18 @@ public class CatanMessage {
         JSONObject payload = JSONUtils.setJSONType(Constants.CARD, board.toJSON());
         return new TextMessage(JSONUtils.setJSONType(START_CON, payload).toString());
     }
+
+    public static TextMessage startGame(Board board, int[] ids) {
+        JSONObject payload = JSONUtils.setJSONType(Constants.CARD, board.toJSON());
+        payload.put(TURN_ORDER, ids);
+        return new TextMessage(JSONUtils.setJSONType(START_CON, payload).toString());
+    }
+
+    public static TextMessage getTurnOrderMessage(int[] ids) {
+        JSONObject payload = new JSONObject();
+        payload.put(TURN_ORDER, ids);
+        return new TextMessage(payload.toString());
+    }
     //endregion
 
     //region endGame
@@ -376,9 +388,8 @@ public class CatanMessage {
         return new TextMessage(JSONUtils.setJSONType(MESSAGE, payload).toString());
     }
 
-    public static TextMessage sendBuildMessage(Building building) {
+    public static TextMessage getBuildMessage(Building building) {
         JSONObject payload = new JSONObject();
-
         return new TextMessage(payload.put(BUILD, building.toJSON()).toString());
     }
 

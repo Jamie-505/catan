@@ -69,6 +69,7 @@ public class GameControllerTest {
     }
 
     public void initializeGame() {
+        gameController.defineTurnOrder();
         gameController.startGame();
     }
 

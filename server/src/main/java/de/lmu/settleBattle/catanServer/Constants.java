@@ -124,18 +124,19 @@ public class Constants {
     public final static String VICTORY_POINT_DESC = "";
 
     //PropertyChanges
-    public final static String TRD_DECR = "Trade Decrease";
-    public final static String TRD_DECR_NO_STAT_UPD = "Trade Decrease NO UPDATE";
-    public final static String TRD_INCR = "Trade Increase";
-    public final static String RMO_INCR = "RawMaterial Increase";
-    public final static String RMO_INCR_NO_STAT_UPD = "RawMaterial Increase NO UPDATE";
-    public final static String RMO_DECR_NO_STAT_UPD = "RawMaterial Decrease NO UPDATE";
-    public final static String RMO_DECR = "RawMaterial Decrease";
-    public final static String TDR_REQ_ACC = "TR Accept";
-    public final static String TDR_REQ_CANCEL = "TR Cancel";
-    public final static String TDR_REQ_EXE = "TR Execute";
-    public final static String VP_INCR = "Victory Pts Increased";
-    public final static String DEV_CARD_BUY = "DevCard Bought";
+    final static String TRD_DECR = "Trade Decrease";
+    final static String TRD_DECR_NO_STAT_UPD = "Trade Decrease NO UPDATE";
+    final static String TRD_INCR = "Trade Increase";
+    final static String RMO_INCR = "RawMaterial Increase";
+    final static String RMO_INCR_NO_STAT_UPD = "RawMaterial Increase NO UPDATE";
+    final static String RMO_DECR_NO_STAT_UPD = "RawMaterial Decrease NO UPDATE";
+    final static String RMO_DECR = "RawMaterial Decrease";
+    final static String TDR_REQ_ACC = "TR Accept";
+    final static String TDR_REQ_CANCEL = "TR Cancel";
+    final static String TDR_REQ_EXE = "TR Execute";
+    final static String VP_INCR = "Victory Pts Increased";
+    final static String DEV_CARD_BUY = "DevCard Bought";
+    final static String TURN_ORDER = "Reihenfolge";
 
     //Exception Messages
     final static String PLAYER_HAS_NO_DEV_CARD = "Der Spieler %s besitzt keine Entwicklungskarte vom Typ %s";

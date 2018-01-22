@@ -2,7 +2,6 @@ package de.lmu.settleBattle.catanServer;
 
 import static de.lmu.settleBattle.catanServer.Constants.*;
 import java.beans.PropertyChangeSupport;
-import java.nio.file.Watchable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -59,7 +58,7 @@ public class GameController {
      */
     public boolean startGame() {
         if (readyToStartGame()) {
-            defineTurnOrder();
+            //defineTurnOrder();
             initializeBuildingPhase();
             gameStarted = true;
             activatePlayer(getCurrent().getId(), BUILD_SETTLEMENT);
@@ -95,16 +94,28 @@ public class GameController {
         return currentTurn % players.size();
     }
 
+    /**
+     * determines player who can move next
+     * @return player to turn next
+     */
     public Player nextMove() {
         return this.initialPhaseActive ? next_initialPhase() : next_gameStarted();
     }
 
+    /**
+     * will be called if game is started aleady and building phase is over
+     * @return player to turn next
+     */
     private Player next_gameStarted() {
         currentTurn++;
         if (!initialPhaseActive) activatePlayer(getCurrent().getId(), DICE);
         return players.get(this.getCurrentIndex());
     }
 
+    /**
+     * will be called if the initial phase is active
+     * @return player to turn next
+     */
     private Player next_initialPhase() {
         Player player;
         if (round == 1) {
@@ -295,7 +306,7 @@ public class GameController {
     /**
      * updates status of player if the building phase is active or just ended
      *
-     * @param id id of tha player
+     * @param id id of the player
      */
     private void updateStatus(int id) {
         if (getCurrent().getId() != id) {

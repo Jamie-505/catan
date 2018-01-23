@@ -48,8 +48,8 @@ public class StartActivity extends Activity {
         connected = true;
       }
       if(intent.getAction().equals(PROTOCOL_SUPPORTED)) {
-        compatible = true;
-        btnConnect.setText(R.string.btn_join);
+        Intent nextIntent = new Intent(StartActivity.this, SelectPlayerActivity.class);
+        startActivity(nextIntent);
       }
     }
   };
@@ -68,26 +68,20 @@ public class StartActivity extends Activity {
     btnConnect = findViewById(R.id.connectButton);
 
     btnConnect.setOnClickListener((View v) -> {
-      if (!connected) {
-        btnConnect.setText(R.string.btn_connect);
-        new Thread("webSocketThread") {
-          public void run() {
-            Intent serviceIntent = new Intent(StartActivity.this,
-                WebSocketService.class);
-            startService(serviceIntent);
-          }
-        }.start();
-        LocalBroadcastManager.getInstance(this).registerReceiver(broadcastReceiver,
-            new IntentFilter(ACTION_CONNECTION_ESTABLISHED));
-        LocalBroadcastManager.getInstance(this).registerReceiver(broadcastReceiver,
-            new IntentFilter(PROTOCOL_SUPPORTED));
-        Intent bindIntent = new Intent(this, WebSocketService.class);
-        bindService(bindIntent, mConnection, Context.BIND_AUTO_CREATE);
-      } else if (compatible) {
-        Intent nextIntent = new Intent(StartActivity.this, SelectPlayerActivity.class);
-        startActivity(nextIntent);
-      }
-
+      btnConnect.setText(R.string.btn_connect);
+      new Thread("webSocketThread") {
+        public void run() {
+          Intent serviceIntent = new Intent(StartActivity.this,
+              WebSocketService.class);
+          startService(serviceIntent);
+        }
+      }.start();
+      LocalBroadcastManager.getInstance(this).registerReceiver(broadcastReceiver,
+          new IntentFilter(ACTION_CONNECTION_ESTABLISHED));
+      LocalBroadcastManager.getInstance(this).registerReceiver(broadcastReceiver,
+          new IntentFilter(PROTOCOL_SUPPORTED));
+      Intent bindIntent = new Intent(this, WebSocketService.class);
+      bindService(bindIntent, mConnection, Context.BIND_AUTO_CREATE);
     });
   }
 

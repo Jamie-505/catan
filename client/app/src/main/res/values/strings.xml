@@ -1,6 +1,6 @@
 <resources>
   <string name="app_name">CatanClient</string>
-  <string name="author_name">By SettleBattle</string>
+  <string name="author_name">Made with <node>&#x2764;</node> By SettleBattle</string>
   <string name="btn_join">Beitreten</string>
   <string name="btn_send">Send</string>
   <string name="btn_connect">Verbindung wird hergestellt…</string>
@@ -49,7 +49,7 @@
 
   <string name="title_activity_lobby_activitiy">LobbyActivitiy</string>
   <string name="starten">Spiel Starten</string>
-  <string name="player_name_input_hint">Bitte gebe deinen Spielernamen hier ein</string>
+  <string name="player_name_input_hint">Wie möchtest du heißen?</string>
   <string name="wait_for_other_players">Warte auf andere Spieler…</string>
   <string name="offer_resource">ich tausche</string>
   <string name="request_trade">gegen</string>
@@ -75,5 +75,6 @@
   <string name="toss_cards">Diese Karten abgeben</string>
   <string name="toss_cards_bc_robber">Karten wegen Räuber abgeben</string>
   <string name="trade">Tausche!</string>
+  <string name="choose_color">Wähle deine Farbe:</string>
 
 </resources>

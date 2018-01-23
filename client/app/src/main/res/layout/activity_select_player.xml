@@ -8,43 +8,101 @@
   android:layout_height="match_parent"
   tools:context=".MainActivity">
 
-  <Spinner
-    android:id="@+id/farben"
-    android:layout_width="0dp"
-    android:layout_height="21dp"
-    android:layout_marginBottom="16dp"
-    android:layout_marginStart="8dp"
-    android:layout_marginEnd="8dp"
-    app:layout_constraintBottom_toTopOf="@id/input_player_name"
+  <ImageView
+    android:id="@+id/imageView"
+    android:layout_width="150dp"
+    android:layout_height="150dp"
+    android:contentDescription="@string/welcome_text"
+    android:src="@drawable/starticon"
+    app:layout_constraintBottom_toTopOf="@id/textView"
     app:layout_constraintEnd_toEndOf="parent"
-    app:layout_constraintStart_toStartOf="parent" />
+    app:layout_constraintLeft_toLeftOf="parent"
+    app:layout_constraintRight_toRightOf="parent"
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintTop_toTopOf="parent"
+    app:srcCompat="@drawable/starticon" />
 
-  <EditText
-    android:id="@+id/input_player_name"
-    android:layout_width="0dp"
+  <TextView
+    android:id="@+id/textView"
+    android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:layout_marginTop="8dp"
+    android:layout_marginStart="8dp"
+    android:layout_marginEnd="8dp"
+    android:text="@string/game_name"
+    android:textAppearance="@android:style/TextAppearance.Material.Display2"
+    app:layout_constraintBottom_toTopOf="@id/farben"
+    app:layout_constraintEnd_toEndOf="parent"
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintTop_toBottomOf="@id/imageView" />
+
+  <TextView
+    android:id="@+id/textView2"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_marginTop="36dp"
     android:layout_marginBottom="8dp"
     android:layout_marginStart="8dp"
     android:layout_marginEnd="8dp"
-    android:ems="10"
+    android:text="@string/choose_color"
+    android:textAlignment="center"
+    android:textAppearance="@android:style/TextAppearance.Material.Subhead"
+    app:layout_constraintBottom_toTopOf="@id/farben"
+    app:layout_constraintEnd_toEndOf="parent"
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintTop_toBottomOf="@id/textView" />
+
+  <Spinner
+    android:id="@+id/farben"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:backgroundTint="@color/white"
+    android:textAlignment="inherit"
+    app:layout_constraintBottom_toTopOf="@id/input_player_name"
+    app:layout_constraintEnd_toEndOf="parent"
+    app:layout_constraintLeft_toLeftOf="parent"
+    app:layout_constraintRight_toRightOf="parent"
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintTop_toBottomOf="@id/textView" />
+
+  <EditText
+    android:id="@+id/input_player_name"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_marginStart="8dp"
+    android:layout_marginEnd="8dp"
+    android:textSize="18sp"
     android:hint="@string/player_name_input_hint"
-    android:inputType="textPersonName"
+    android:inputType="textCapWords"
+    android:padding="10dp"
+    android:background="@color/white"
+    android:textColor="@color/colorPrimaryDark"
+    android:textColorHint="@color/text_msg_input"
     app:layout_constraintBottom_toTopOf="@id/enterLobbyBtn"
     app:layout_constraintEnd_toEndOf="parent"
     app:layout_constraintStart_toStartOf="parent"
-    app:layout_constraintTop_toTopOf="parent"
-    app:layout_constraintVertical_bias="0.32999998" />
+    app:layout_constraintTop_toBottomOf="@id/farben" />
 
   <Button
     android:id="@+id/enterLobbyBtn"
-    android:layout_width="0dp"
-    android:layout_height="48dp"
-    android:layout_gravity="bottom"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
     android:layout_marginBottom="8dp"
     android:layout_marginEnd="8dp"
     android:layout_marginStart="8dp"
     android:text="@string/beitreten"
+    app:layout_constraintTop_toBottomOf="@id/input_player_name"
+    app:layout_constraintBottom_toBottomOf="parent"
+    app:layout_constraintEnd_toEndOf="parent"
+    app:layout_constraintStart_toStartOf="parent" />
+
+  <TextView
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="16dp"
+    android:text="@string/author_name"
+    android:textColor="@color/body_background_green"
+    android:textSize="12sp"
     app:layout_constraintBottom_toBottomOf="parent"
     app:layout_constraintEnd_toEndOf="parent"
     app:layout_constraintStart_toStartOf="parent" />

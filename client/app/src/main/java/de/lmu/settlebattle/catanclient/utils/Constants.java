@@ -93,6 +93,7 @@ public final class Constants {
   public final static String SETTLEMENT = "Siedlung";
   public final static String STREET = "Strasse";
   public final static String TARGET = "Ziel";
+  public final static String TURN_ORDER = "Reihenfolge";
   public final static String TYPE = "Typ";
   public final static String UNKNOWN = "Unbekannt";
   public final static String VICTORY_PT = "Siegpunkt";

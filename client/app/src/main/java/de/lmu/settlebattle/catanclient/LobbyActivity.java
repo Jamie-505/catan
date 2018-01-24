@@ -1,6 +1,13 @@
 package de.lmu.settlebattle.catanclient;
 
-import static de.lmu.settlebattle.catanclient.utils.Constants.*;
+import static de.lmu.settlebattle.catanclient.utils.Constants.ADD_KI;
+import static de.lmu.settlebattle.catanclient.utils.Constants.ALL_PLAYERS;
+import static de.lmu.settlebattle.catanclient.utils.Constants.BOARD;
+import static de.lmu.settlebattle.catanclient.utils.Constants.GAME_READY;
+import static de.lmu.settlebattle.catanclient.utils.Constants.GAME_START;
+import static de.lmu.settlebattle.catanclient.utils.Constants.GAME_WAIT;
+import static de.lmu.settlebattle.catanclient.utils.Constants.PLAYER_UPDATE;
+import static de.lmu.settlebattle.catanclient.utils.Constants.PLAYER_WAIT;
 import static de.lmu.settlebattle.catanclient.utils.JSONUtils.createJSONString;
 
 import android.content.BroadcastReceiver;

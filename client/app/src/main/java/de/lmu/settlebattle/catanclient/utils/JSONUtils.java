@@ -4,6 +4,7 @@ import static de.lmu.settlebattle.catanclient.utils.Constants.*;
 
 import com.google.gson.Gson;
 import de.lmu.settlebattle.catanclient.player.Player;
+import de.lmu.settlebattle.catanclient.player.Storage;
 import de.lmu.settlebattle.catanclient.trade.Trade;
 import de.lmu.settlebattle.catanclient.utils.Message.Error;
 import java.util.HashMap;
@@ -36,8 +37,10 @@ public class JSONUtils {
           Error error = gson.fromJson(jObj.getString(ERROR), Error.class);
           return displayError(error.Message);
         case GAME_START:
-          JSONObject board = new JSONObject(jObj.getString(GAME_START));
-          return new String[] { GAME_START, board.getString(BOARD) };
+          JSONObject game = new JSONObject(jObj.getString(GAME_START));
+          int[] order = gson.fromJson(game.getString(TURN_ORDER), int[].class);
+          Storage.saveTurnOrder(order);
+          return new String[] { GAME_START, game.getString(BOARD) };
         case GET_ID:
           Player player = gson.fromJson(jObj.getString(GET_ID), Player.class);
           return new Object[] { GET_ID, player };

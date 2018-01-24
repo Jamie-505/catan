@@ -31,7 +31,6 @@ import static de.lmu.settlebattle.catanclient.utils.Constants.STATUS_UPD;
 import static de.lmu.settlebattle.catanclient.utils.Constants.TOSS_CARDS;
 import static de.lmu.settlebattle.catanclient.utils.Constants.TOSS_CARDS_REQ;
 import static de.lmu.settlebattle.catanclient.utils.Constants.TO_SERVER;
-import static de.lmu.settlebattle.catanclient.utils.Constants.TO_STORAGE;
 import static de.lmu.settlebattle.catanclient.utils.Constants.TRADE;
 import static de.lmu.settlebattle.catanclient.utils.Constants.TRD_ABORTED;
 import static de.lmu.settlebattle.catanclient.utils.Constants.TRD_ACC;

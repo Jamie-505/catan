@@ -116,7 +116,6 @@ public class MainActivity extends BaseSocketActivity implements FragmentHandler 
   private boolean isItTimeToBuild;
   private boolean enableRobber;
   private Player self;
-  private Player[] allPlayers;
 
   private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
     @Override
@@ -168,7 +167,6 @@ public class MainActivity extends BaseSocketActivity implements FragmentHandler 
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_main);
     self = Storage.getSelf();
-    allPlayers = Storage.getAllPlayers();
     setIntentFilters();
 
     Intent startActivity = getIntent();
@@ -200,7 +198,7 @@ public class MainActivity extends BaseSocketActivity implements FragmentHandler 
       radius = extras.getInt("GRID_RADIUS", 3);
     }
 
-    initializePlayerCards(allPlayers);
+    initializePlayerCards(Storage.getAllPlayers());
 
     initGridView(radius, board.fields);
     currentRobberTile = findViewByLoc(new Location(0, 0));
@@ -958,6 +956,7 @@ public class MainActivity extends BaseSocketActivity implements FragmentHandler 
   }
 
   private void updatePlayerCards() {
+    Player[] allPlayers = Storage.getAllPlayers();
     for (int i = 0; i < allPlayers.length; i++) {
       Player p = allPlayers[i];
       CardView cardView = mCardAdapter.getCardViewAt(i);
@@ -988,8 +987,6 @@ public class MainActivity extends BaseSocketActivity implements FragmentHandler 
   }
 
   private void updatePlayerViews() {
-    self = Storage.getSelf();
-    allPlayers = Storage.getAllPlayers();
     updatePlayerCards();
     updateSlidePanel();
   }

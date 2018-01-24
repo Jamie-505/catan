@@ -14,6 +14,7 @@ public class Storage {
   private static HashMap<Integer, Player> players = new HashMap<>();
   private static Gson gson = new Gson();
   private static List<ChatMessage> chatMessages = new ArrayList<>();
+  private static int[] turnOrder;
 
   // needs to be static so all instances of storage can access it
   private static ArrayList<Integer> opponentIds = new ArrayList<>();
@@ -56,7 +57,6 @@ public class Storage {
   }
 
   public static String getAllPlayersAsJson() {
-    // +1 because own player is also added not just opponents
     Player[] allPlayers = new Player[players.size()];
     allPlayers[0] = players.get(ownId);
     int index = 0;
@@ -70,15 +70,15 @@ public class Storage {
   }
 
   public static Player[] getAllPlayers() {
-    // +1 because own player is also added not just opponents
     Player[] allPlayers = new Player[players.size()];
-    // make sure own player is on 1st index
-    allPlayers[0] = players.get(ownId);
     int index = 0;
-    for (Integer id : opponentIds) {
-      index++;
-      allPlayers[index] = getPlayer(id);
+    for (int id : turnOrder) {
+      allPlayers[index++] = getPlayer(id);
     }
     return allPlayers;
+  }
+
+  public static void saveTurnOrder(int[] order) {
+    turnOrder = order;
   }
 }

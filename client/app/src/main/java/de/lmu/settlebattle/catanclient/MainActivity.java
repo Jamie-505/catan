@@ -578,7 +578,7 @@ public class MainActivity extends BaseSocketActivity implements FragmentHandler 
           RobberFragment robberFragment = new RobberFragment();
           robberFragment.setArguments(robberBundle);
           enableRobber = false;
-          showFragmentViaBackstack(robberFragment);
+          showFragmentNoBackstack(robberFragment);
         } else if (cV.getOwners().size() == 1) {
           sendRobberMsg(cV.getOwners().get(0));
         } else {
@@ -992,6 +992,7 @@ public class MainActivity extends BaseSocketActivity implements FragmentHandler 
   }
 
   private void updateSlidePanel() {
+    self = Storage.getSelf();
     RawMaterialOverview res = self.rawMaterials;
     selfClayCnt.setText(String.valueOf(res.getClayCount()));
     selfOreCnt.setText(String.valueOf(res.getOreCount()));

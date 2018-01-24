@@ -2,6 +2,8 @@ package de.lmu.settleBattle.catanServer;
 
 import org.junit.Before;
 import org.junit.Test;
+
+import java.util.ArrayList;
 import java.util.List;
 import static de.lmu.settleBattle.catanServer.Constants.*;
 import static org.junit.Assert.*;
@@ -324,4 +326,55 @@ public class GameControllerTest {
         }
     }
     //endregion
+
+    private void longestRoadScenario1(Player p1, Player p2) throws CatanException {
+        p1.roads = new ArrayList<>();
+        p2.roads = new ArrayList<>();
+
+        p1.roads.add(new Building(p1.getId(), BuildingType.ROAD, new Location[]{new Location(0,0), new Location(0,1)}));
+        p1.roads.add(new Building(p1.getId(), BuildingType.ROAD, new Location[]{new Location(-1,1), new Location(0,1)}));
+        p1.roads.add(new Building(p1.getId(), BuildingType.ROAD, new Location[]{new Location(-1,2), new Location(0,1)}));
+        p1.roads.add(new Building(p1.getId(), BuildingType.ROAD, new Location[]{new Location(-1,2), new Location(0,2)}));
+
+        p2.roads.add(new Building(p1.getId(), BuildingType.ROAD, new Location[]{new Location(-1,3), new Location(0,2)}));
+        p2.roads.add(new Building(p1.getId(), BuildingType.ROAD, new Location[]{new Location(0,3), new Location(0,2)}));
+        p2.roads.add(new Building(p1.getId(), BuildingType.ROAD, new Location[]{new Location(-1,3), new Location(-1,2)}));
+        p2.roads.add(new Building(p1.getId(), BuildingType.ROAD, new Location[]{new Location(-1,2), new Location(-2,3)}));
+
+        for (Building road : p1.roads) { gameController.getBoard().addRoad(road); }
+
+        for (Building road : p2.roads) { gameController.getBoard().addRoad(road); }
+    }
+
+    @Test
+    public void assignLongestRoad() throws CatanException {
+        longestRoadScenario1(player1, player2);
+
+        Building newRoad = new Building(player1.getId(), BuildingType.ROAD, new Location[]{new Location(0,0), new Location(1,0)});
+        player1.roads.add(newRoad);
+        gameController.assignLongestRoad(newRoad, player1);
+
+        assertEquals(player1, gameController.getPlayerWithLongestRoad());
+        assertTrue(player1.hasLongestRoad());
+        assertFalse(player2.hasLongestRoad());
+        assertEquals(5, gameController.getBoard().getLongestRoadLength());
+
+        Building newRoad2 = new Building(player2.getId(), BuildingType.ROAD, new Location[]{new Location(-2,2), new Location(-2,3)});
+        player2.roads.add(newRoad2);
+        gameController.assignLongestRoad(newRoad2, player2);
+
+        assertEquals(player1, gameController.getPlayerWithLongestRoad());
+        assertTrue(player1.hasLongestRoad());
+        assertFalse(player2.hasLongestRoad());
+        assertEquals(5, gameController.getBoard().getLongestRoadLength());
+
+        Building newRoad3 = new Building(player2.getId(), BuildingType.ROAD, new Location[]{new Location(-2,2), new Location(-3,3)});
+        player1.roads.add(newRoad3);
+        gameController.assignLongestRoad(newRoad3, player2);
+
+        assertEquals(player2, gameController.getPlayerWithLongestRoad());
+        assertTrue(player2.hasLongestRoad());
+        assertFalse(player1.hasLongestRoad());
+        assertEquals(6, gameController.getBoard().getLongestRoadLength());
+    }
 }

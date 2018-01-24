@@ -572,7 +572,7 @@ public class CatanSocketHandler extends TextWebSocketHandler implements Property
                     sendMessageToAll(Integer.toHexString(player.getId()), msg1, msg2);
                     break;
 
-                case VP_INCR:
+                case VICTORY_PTS:
                 case END_TURN:
                 case STATUS_UPD:
                     sendStatusUpdate = true;

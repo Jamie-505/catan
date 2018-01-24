@@ -134,6 +134,7 @@ public class Constants {
     final static String TDR_REQ_ACC = "TR Accept";
     final static String TDR_REQ_CANCEL = "TR Cancel";
     final static String TDR_REQ_EXE = "TR Execute";
+    final static String VP_DECR = "Victory Pts Decreased";
     final static String VP_INCR = "Victory Pts Increased";
     final static String DEV_CARD_BUY = "DevCard Bought";
     final static String TURN_ORDER = "Reihenfolge";

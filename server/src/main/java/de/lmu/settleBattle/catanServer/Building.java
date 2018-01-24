@@ -86,6 +86,11 @@ public class Building extends JSONStringBuilder {
         return locations;
     }
 
+    /**
+     * when given a location it would return true if the location is adjacent
+     * @param loc
+     * @return
+     */
     public boolean edgesAreAdjacent(Location[] loc) {
 
         if (!this.isRoad() || loc.length != 2) return false;
@@ -102,9 +107,11 @@ public class Building extends JSONStringBuilder {
                     if (xEquals && yEquals) return false;
 
                     else if ((xEquals && Math.abs(loc[iRemote].getY() - this.locations[iLocal].getY()) == 1 ||
-                            yEquals && Math.abs(loc[iRemote].getX() - this.locations[iLocal].getX()) == 1) ||
+                        yEquals && Math.abs(loc[iRemote].getX() - this.locations[iLocal].getX()) == 1) ||
+                        ( ( loc[iRemote].getX() - this.locations[iLocal].getX() ) +
+                            ( loc[iRemote].getY() - this.locations[iLocal].getY() )  ) == 0  &&
                             Math.abs(loc[iRemote].getX() - this.locations[iLocal].getX()) == 1 &&
-                                    Math.abs(loc[iRemote].getY() - this.locations[iLocal].getY()) == 1)
+                            Math.abs(loc[iRemote].getY() - this.locations[iLocal].getY()) == 1)
                         return true;
                 }
             }
@@ -190,5 +197,16 @@ public class Building extends JSONStringBuilder {
                 return new RawMaterialOverview(0, 3, 0, 0, 2);
         }
         return null;
+    }
+
+    @Override
+    public String toString() {
+        String locString = "";
+
+        for (Location loc : this.locations) {
+            locString += "<"+loc.toString()+"> ";
+        }
+
+        return this.type.toString() + ":" + locString;
     }
 }

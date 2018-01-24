@@ -6,7 +6,6 @@ import com.google.gson.annotations.SerializedName;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.util.*;
-import java.util.Collections;
 
 
 public class Board extends JSONStringBuilder {
@@ -37,6 +36,8 @@ public class Board extends JSONStringBuilder {
     @Expose
     @SerializedName(Constants.ROBBER)
     private Robber robber;
+
+    private int longestRoadLength = 0;
 
     private int[] numberOrder = {5, 2, 6, 3, 8, 10, 9, 12, 11, 4, 8, 10, 9, 4, 5, 6, 3, 11};
     private Location[] fieldLocations = new Location[37];
@@ -329,6 +330,232 @@ public class Board extends JSONStringBuilder {
         }
 
         throw new CatanException("Es wurde keine gültige Location für eine deiner Straßen gefunden", true);
+    }
+
+    /**
+     * takes a road, gets all its four neighbours if available,
+     * gets all connected roads for each, count the longest distinct path for each,
+     * take the longest two and add one to them and return the result,
+     * if the two longest roots are adjacent then no need to add one
+     * @param road the road that is newly placed
+     * @param builder the player who's building the road
+     * @param alternativePath is used to go to a different neighbor first if necessary
+     * @return int equal to the longest road count for that player
+     */
+    public ArrayList<Building> getLongestRoad(Building road, Player builder, boolean alternativePath,
+    boolean stopRecursion) {
+        try {
+            ArrayList<Building> allRoads = new ArrayList<>(builder.getRoads());
+            ArrayList<Building> visitedRoads = new ArrayList<>();
+            ArrayList<Building> longestPath = new ArrayList<>();
+            ArrayList<Building> currentPath = new ArrayList<>();
+            ArrayList<Building> neighbors;
+            Building currentRoad = road;
+            Building ancestor = road;
+
+            // first run
+            visitedRoads.add(road);
+            longestPath.add(road);
+            currentPath.add(road);
+            neighbors = getNeighbors(currentRoad, allRoads);
+
+            if (neighbors.size() != 0) {
+                // traverse down on the first unvisited Street
+                ancestor = currentRoad;
+                if (alternativePath && neighbors.size() > 1) {
+                    currentRoad = neighbors.get(1);
+                } else {
+                    currentRoad = neighbors.get(0);
+                }
+                longestPath.add(currentRoad);
+                currentPath.add(currentRoad);
+            }
+
+            while (!(currentRoad == road) || hasUnvisitedNeighbors(road, null, allRoads,
+                visitedRoads, true)) {
+                if (!visitedRoads.contains(currentRoad))
+                    visitedRoads.add(currentRoad);
+                if (currentRoad == road) {
+                    neighbors = getNeighbors(currentRoad, allRoads);
+                } else {
+                    neighbors = getChildNeighbors(currentRoad, ancestor, allRoads);
+                }
+
+                // to prevent infinite loops we can manually decide if we want to make sure we go into this branch
+                if (!stopRecursion) {
+
+                    // if this is true it means we created a circle in our graph
+                    if (ancestor != road && neighbors.contains(road) && !neighborsAreAdjacent(road,
+                        allRoads)) {
+                        // should even work if we have more or circles that are bigger than one hex in diameter
+                        try {
+                            // find out which location do the current road and the root share
+                            // which is the center of the circle
+                            Location commonLocation = null;
+                            for (Location location : currentRoad.getLocations()) {
+                                if (Arrays.asList(road.getLocations()).contains(location)) {
+                                    commonLocation = location;
+                                }
+                            }
+                            // find all roads that have a dead end
+                            ArrayList<Building> deadEnds = new ArrayList<>();
+                            for (Building r : allRoads) {
+                                if (!Arrays.asList(r.getLocations()).contains(commonLocation)) {
+                                    if (getNeighbors(r, allRoads).size() == 1
+                                        || neighborsAreAdjacent(r, allRoads)) {
+                                        deadEnds.add(r);
+                                    }
+                                }
+                            }
+
+                            // in case we only have circles
+                            // adds all roads that are not build around the common location
+                            if (deadEnds.size() == 0) {
+                                for (Building r : allRoads) {
+                                    deadEnds.add(r);
+                                }
+                            }
+
+                            // test different possibilities
+                            boolean[] alternatives = new boolean[]{false, true};
+
+                            for (Building r : deadEnds) {
+                                if (getNeighbors(r, allRoads).size() == 2) {
+                                    for (boolean alternative : alternatives) {
+                                        ArrayList<Building> outOfTheBoxRoad = getLongestRoad(r,
+                                            builder,
+                                            alternative, true);
+                                        if (outOfTheBoxRoad.size() > longestPath.size()) {
+                                            longestPath = new ArrayList<>(outOfTheBoxRoad);
+                                        }
+                                    }
+                                } else {
+                                    ArrayList<Building> outOfTheBoxRoad = getLongestRoad(r, builder,
+                                        false, true);
+                                    if (outOfTheBoxRoad.size() > longestPath.size()) {
+                                        longestPath = new ArrayList<>(outOfTheBoxRoad);
+                                    }
+                                }
+                            }
+                        } catch (Exception e) {
+                            System.out.println("We detected a round about in " + builder.getName()
+                                + "'s streets/nThis caused trouble calculating the longest road for this player...");
+                        }
+                    }
+                }
+
+                if (hasUnvisitedNeighbors(currentRoad, ancestor, allRoads, visitedRoads,
+                    currentRoad == road)) {
+                    // traverse down on the first unvisited Street
+                    for (Building neighbor : neighbors) {
+                        if (!visitedRoads.contains(neighbor)) {
+                            // check if next neighbor of root is not adjacent, so we need to continue counting
+                            if (currentRoad == road && longestPath.size() > 1) {
+                                // check if the element after the root is adjacent to the current unvisited
+                                // neighbor, if not it means we have to continue counting
+                                if (!neighbor.edgesAreAdjacent(longestPath.get(1).getLocations())) {
+                                    currentPath = new ArrayList<>(longestPath);
+                                }
+                            }
+                            ancestor = currentRoad;
+                            currentRoad = neighbor;
+                            currentPath.add(currentRoad);
+                            if (currentPath.size() > longestPath.size()) {
+                                longestPath = new ArrayList<>(currentPath);
+                            }
+                            // only need one neighbor that hasn't been visited yet
+                            break;
+                        }
+                    }
+                } else {
+                    // traverse up
+                    currentPath.remove(currentRoad);
+                    if (currentPath.size() > 0) {
+                        currentRoad = currentPath.get(currentPath.size() - 1);
+                    }
+                    if (currentPath.size() > 1) {
+                        ancestor = currentPath.get(currentPath.size() - 2);
+                    } else {
+                        ancestor = road;
+                    }
+                }
+            }
+            return longestPath;
+        } catch (StackOverflowError stackOverflowError) {
+            stackOverflowError.printStackTrace();
+            ArrayList<Building> returnPath = new ArrayList<>();
+            returnPath.add(road);
+            return returnPath;
+        }
+    }
+
+    private boolean neighborsAreAdjacent(Building r, ArrayList<Building> allRoads) {
+        ArrayList<Building> neighbors = getNeighbors(r, allRoads);
+        return neighbors.size() == 2 && neighbors.get(0)
+            .edgesAreAdjacent(neighbors.get(1).getLocations());
+    }
+
+    private boolean hasUnvisitedNeighbors(Building road, Building ancestor, ArrayList<Building> allRoads,
+        ArrayList<Building> visitedRoads, boolean isRoot) {
+        ArrayList<Building> neighbors;
+        if (isRoot) {
+            neighbors = getNeighbors(road, allRoads);
+        } else {
+            neighbors = getChildNeighbors(road, ancestor, allRoads);
+        }
+        for (Building n : neighbors) {
+            if (!visitedRoads.contains(n)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * finds all neighbor streets
+     * @param road the road you want to find the neighbors of
+     * @param allRoads List of all existing roads for the player
+     * @return Arraylist with a max of 2 roads adjacent to the road
+     */
+
+    private ArrayList<Building> getNeighbors(Building road, ArrayList<Building> allRoads) {
+        if (!(road.isRoad())) {
+            return null;
+        }
+        ArrayList<Building> neighbors = new ArrayList<>();
+        for (Building other: allRoads) {
+            if (road.edgesAreAdjacent(other.getLocations())){
+                neighbors.add(other);
+            }
+        }
+        return neighbors;
+    }
+    /**
+     * finds all neighbor streets that are not neighbors of the ancestor street
+     * @param road the road you want to find the neighbors of
+     * @param ancestor road you visited right before you ended up on the current road
+     * @param allRoads List of all existing roads for the player
+     * @return Arraylist with a max of 2 roads adjacent to the road
+     */
+
+    private ArrayList<Building> getChildNeighbors(Building road, Building ancestor, ArrayList<Building> allRoads) {
+      if (!(road.isRoad())) {
+          return null;
+      }
+      ArrayList<Building> neighbors = new ArrayList<>();
+      for (Building other: allRoads) {
+         if (road.edgesAreAdjacent(other.getLocations())){
+             neighbors.add(other);
+          }
+      }
+      // remove all neighbors of the ancestor
+      for (Building r : allRoads) {
+          if (ancestor.edgesAreAdjacent(r.getLocations())) {
+              neighbors.remove(r);
+          }
+      }
+      neighbors.remove(ancestor);
+      return neighbors;
     }
 
     /**
@@ -769,6 +996,14 @@ public class Board extends JSONStringBuilder {
         return getWaterFieldCount(locs) < 2;
     }
 
+    public int getLongestRoadLength() {
+        return longestRoadLength;
+    }
+
+
+    public void setLongestRoadLength(int longestRoadLength) {
+        this.longestRoadLength = longestRoadLength;
+    }
 
     //____________FOR TESTING___________________________
     public void addRoad(Building bld) {
@@ -779,11 +1014,12 @@ public class Board extends JSONStringBuilder {
         if (bld.isSettlement()) settlements.add(bld);
     }
 
+
     //region unused
 
 //
 //    /**
-//     * this mehod creats a ring on fields
+//     * this method creates a ring of fields
 //     * @param level
 //     */
 //    public Location[] createFieldLocationsLevel(int level){

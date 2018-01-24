@@ -1,6 +1,7 @@
 package de.lmu.settleBattle.catanServer;
 
 import static de.lmu.settleBattle.catanServer.Constants.*;
+
 import java.beans.PropertyChangeSupport;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -36,6 +37,7 @@ public class GameController {
     private int round;
     private boolean isGameOver = false;
     private boolean gameStarted = false;
+    private Player playerWithLongestRoad = null;
     private Player greatestArmyPlayer;
 
     public GameController() {
@@ -96,6 +98,7 @@ public class GameController {
 
     /**
      * determines player who can move next
+     *
      * @return player to turn next
      */
     public Player nextMove() {
@@ -104,6 +107,7 @@ public class GameController {
 
     /**
      * will be called if game is started aleady and building phase is over
+     *
      * @return player to turn next
      */
     private Player next_gameStarted() {
@@ -114,6 +118,7 @@ public class GameController {
 
     /**
      * will be called if the initial phase is active
+     *
      * @return player to turn next
      */
     private Player next_initialPhase() {
@@ -144,6 +149,7 @@ public class GameController {
 
     /**
      * if a real player is active, KIs need to be deactivated sometimes
+     *
      * @param ki ki to be deactivated
      * @return if KI was deactivated (real player is active), otherwise false
      */
@@ -279,9 +285,13 @@ public class GameController {
 
             //increase victory points
             if (!building.isRoad()) {
-                // always add 1 victory point because a new settlement brings 1 victory point and
+                // always add 1 victory point because:
+                // a new settlement brings 1 victory point and
                 // if a city was built then the owner has already received 1 victory point for the settlement he built before
                 owner.increaseVictoryPoints(1, true);
+            } else {
+              //if owner has new longest road, update it
+              assignLongestRoad(building, owner);
             }
 
             //raw material distribution for second settlement
@@ -300,6 +310,44 @@ public class GameController {
 
     public boolean placeBuilding(Building building) throws CatanException {
         return placeBuilding(building, false);
+    }
+
+    /**
+     * assigns longest road to owner if he has longest road
+     *
+     * @param road  new road which has been placed on board
+     * @param owner owner of new road
+     * @throws CatanException
+     */
+    void assignLongestRoad(Building road, Player owner) throws CatanException {
+      //if the player has less than 5 roads or less then the current longest road he cant possibly get the longest road
+      if (owner.getRoads().size() < Math.max(5, board.getLongestRoadLength()) ) return;
+
+      int newRoadLength = getBoard().getLongestRoad(road, owner, false, false).size();
+
+      if (newRoadLength > owner.getLongestRoadLength())
+        owner.setLongestRoadLength(newRoadLength);
+
+      if (isLongestRoad(newRoadLength) && newRoadLength >= 5) {
+        getBoard().setLongestRoadLength(newRoadLength);
+        if (playerWithLongestRoad == null) {
+          owner.setHasLongestRoad(true);
+          playerWithLongestRoad = owner;
+          playerWithLongestRoad.increaseVictoryPoints(2, true);
+        }
+
+        if (owner != playerWithLongestRoad) {
+          playerWithLongestRoad.setHasLongestRoad(false);
+          owner.setHasLongestRoad(true);
+          playerWithLongestRoad.decreaseVictoryPoints(2, true);
+          playerWithLongestRoad = owner;
+          playerWithLongestRoad.increaseVictoryPoints(2, true);
+        }
+      }
+    }
+
+    private boolean isLongestRoad(int newRoadLength) {
+        return board.getLongestRoadLength() < newRoadLength;
     }
     //endregion
 
@@ -500,7 +548,8 @@ public class GameController {
         offer = new RawMaterialOverview(offerType, offerAmount);
         request = new RawMaterialOverview(requestType, 1);
 
-        if (!player.canAfford(offer)) throw new CatanException("Du hast nicht genug Rohstoffe für diesen Handel.", true);
+        if (!player.canAfford(offer))
+            throw new CatanException("Du hast nicht genug Rohstoffe für diesen Handel.", true);
 
         player.trade(offer, request);
     }
@@ -681,8 +730,7 @@ public class GameController {
                 if (opponent != null && opponent.getRawMaterialCount() > 0) {
                     board.getRobber().robPlayer(currentPlayer, opponent);
                     break;
-                }
-                else { opponent = null; }
+                } else { opponent = null; }
             }
         }
 
@@ -717,7 +765,7 @@ public class GameController {
         if (getCurrent().getId() != id) CatanException.throwNotYourTurnException(getCurrent().getId());
         Player player = getCurrent();
 
-        System.out.printf("%s dices" , player.toString());
+        System.out.printf("%s dice", player.toString());
         int[] dice = player.throwDice();
         int sum = dice[0] + dice[1];
 
@@ -731,8 +779,7 @@ public class GameController {
                 if (player.isKI()) {
                     player.setNextStatus(ROBBER_TO);
                     deactivateKI(player);
-                }
-                else { player.setStatus(ROBBER_TO); }
+                } else { player.setStatus(ROBBER_TO); }
             }
         }
 
@@ -760,7 +807,6 @@ public class GameController {
         for (Player player : getPlayers()) {
             if (player.hasToExtractCards()) {
                 if (player.isKI()){ kiList.add(player); }
-
                 else {
                     String nextStatus = (player.getId() == id) ? ROBBER_TO : WAIT;
                     player.setNextStatus(nextStatus);
@@ -800,10 +846,6 @@ public class GameController {
         return board;
     }
 
-    public int getRound() {
-        return this.round;
-    }
-
     public boolean endGame(Player winner) {
         if (!winner.hasWon() || winner.getId() != getPlayerWithHighestPoints().getId()) {
             return false;
@@ -815,12 +857,16 @@ public class GameController {
     public Player getPlayerWithHighestPoints() {
         Player topPlayer = players.get(0);
         for (Player player : players) {
-            if (player.getVictoryPointsCount() > topPlayer.getVictoryPointsCount()) {
+            if (player.getVictoryPoints() > topPlayer.getVictoryPoints()) {
                 topPlayer = player;
             }
         }
         return topPlayer;
 
+    }
+
+    public Player getPlayerWithLongestRoad() {
+        return playerWithLongestRoad;
     }
 
     public RawMaterialOverview getRawMaterialDeck() {

@@ -57,7 +57,9 @@ public class Player extends JSONStringBuilder implements Comparable, Cloneable {
 
     @Expose
     @SerializedName(Constants.LONGEST_RD)
-    private boolean longestRoad;
+    private boolean hasLongestRoad;
+
+    private int longestRoadLength;
 
     @Expose
     @SerializedName(Constants.RAW_MATERIALS)
@@ -96,7 +98,7 @@ public class Player extends JSONStringBuilder implements Comparable, Cloneable {
         this.victoryPtsHidden = 0;
         this.armyCount = 0;
         this.greatestArmy = false;
-        this.longestRoad = false;
+        this.hasLongestRoad = false;
         this.rawMaterialDeck = new RawMaterialOverview(0);
         this.developmentDeck = new DevelopmentCardOverview(0);
 
@@ -319,10 +321,21 @@ public class Player extends JSONStringBuilder implements Comparable, Cloneable {
         increaseArmyCount();
     }
 
-    public void decreaseVictoryPoints(int i) throws CatanException {
-        if (this.victoryPtsTotal <= 0)
-            throw new CatanException(String.format("Siegpunkte können nicht um %s verringert werden. (Haben %s)", i, victoryPtsTotal), true);
-        this.victoryPtsTotal -= -i;
+    public void decreaseVictoryPoints(int amount, boolean sendStatusUpdate) throws CatanException {
+        if (victoryPtsTotal <= 0)
+            throw new CatanException(String.format("Siegpunkte können nicht um %s verringert werden. (Haben %s)",
+                amount, victoryPtsTotal), true);
+        if (amount < 0)
+            throw new CatanException(String.format("amount muss positiv sein (Wert: %s)", amount), false);
+
+        int oldVpAmount = victoryPtsTotal;
+        this.victoryPtsTotal -= amount;
+
+        if (sendStatusUpdate) changes.firePropertyChange(VICTORY_PTS, oldVpAmount, this);
+    }
+
+    public void decreaseVictoryPoints(int amount) throws CatanException {
+        decreaseVictoryPoints(amount, false);
     }
 
     public void increaseVictoryPoints(int amount, boolean sendStatusUpdate)
@@ -331,9 +344,9 @@ public class Player extends JSONStringBuilder implements Comparable, Cloneable {
             throw new CatanException(String.format("amount ist negativ und somit ungültig (Wert: %s)", amount), false);
 
         int oldVpAmount = this.victoryPtsTotal;
-        this.victoryPtsTotal = victoryPtsTotal + amount;
+        this.victoryPtsTotal += amount;
 
-        if (sendStatusUpdate) changes.firePropertyChange(VP_INCR, oldVpAmount, this);
+        if (sendStatusUpdate) changes.firePropertyChange(VICTORY_PTS, oldVpAmount, this);
     }
 
     /**
@@ -431,12 +444,12 @@ public class Player extends JSONStringBuilder implements Comparable, Cloneable {
         this.isKI = isKI;
     }
 
-    public boolean isLongestRoad() {
-        return longestRoad;
+    public boolean hasLongestRoad() {
+        return hasLongestRoad;
     }
 
-    public void setLongestRoad(boolean boo) {
-        this.longestRoad = boo;
+    public void setHasLongestRoad(boolean boo) {
+        this.hasLongestRoad = boo;
     }
 
     public boolean isGreatestArmy() {
@@ -447,9 +460,19 @@ public class Player extends JSONStringBuilder implements Comparable, Cloneable {
         this.greatestArmy = boo;
     }
 
-    public int getVictoryPointsCount() {
-        return victoryPtsTotal;
+    public void setLongestRoadLength(int longestRoadLength) {
+        this.longestRoadLength = longestRoadLength;
     }
+
+    public int getLongestRoadLength() {
+        return longestRoadLength;
+    }
+
+    public int getVictoryPoints() {
+        return this.victoryPtsTotal;
+    }
+    //endregion
+
 
     public String getNextStatus() {
         return nextStatus;
@@ -597,6 +620,10 @@ public class Player extends JSONStringBuilder implements Comparable, Cloneable {
 
     public void removeKnightCard() throws Exception {
         this.developmentDeck.decrease(DevCardType.KNIGHT, 1);
+    }
+
+    public List<Building> getRoads() {
+        return roads;
     }
 
     //____________FOR TESTING___________________________

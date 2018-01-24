@@ -3,8 +3,8 @@ package de.lmu.settleBattle.catanServer;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.awt.*;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import static de.lmu.settleBattle.catanServer.BuildingType.*;
@@ -12,8 +12,10 @@ import static org.junit.Assert.*;
 
 public class BoardTest {
 
-    private Board board;
-    private List<Building> buildings;
+    Board board;
+    List<Building> buildings;
+    Board roadBoard;
+    ArrayList<Building> roads;
 
     //region setUp
     @Before
@@ -141,8 +143,8 @@ public class BoardTest {
     @Test
     public void getFreeRoadLoc() throws CatanException {
 
-        Building s = new Building(1, BuildingType.SETTLEMENT, new Location[] {
-                new Location(0,0), new Location(0,1), new Location(1,0)
+        Building s = new Building(1, BuildingType.SETTLEMENT, new Location[]{
+                new Location(0, 0), new Location(0, 1), new Location(1, 0)
         });
 
         Player player = new Player(1);
@@ -160,4 +162,140 @@ public class BoardTest {
             player.addBuilding(road);
         }
     }
+
+    private void longestRoadScenario1(Player player2) throws CatanException {
+        roadBoard = new Board();
+        player2.roads.clear();
+        roads = new ArrayList<>();
+
+        roads.add(new Building(2, ROAD, new Location[]{new Location(0, 2), new Location(1, 1)}));
+        roads.add(new Building(2, ROAD, new Location[]{new Location(0, 2), new Location(0, 1)}));
+        roads.add(new Building(2, ROAD, new Location[]{new Location(0, 0), new Location(0, 1)}));
+        roads.add(new Building(2, ROAD, new Location[]{new Location(0, 0), new Location(1, 0)}));
+        roads.add(new Building(2, ROAD, new Location[]{new Location(1, 0), new Location(0, 1)}));
+        roads.add(new Building(2, ROAD, new Location[]{new Location(1, 0), new Location(2, 0)}));
+        roads.add(new Building(2, ROAD, new Location[]{new Location(1, 0), new Location(1, 1)}));
+        roads.add(new Building(2, ROAD, new Location[]{new Location(1, 1), new Location(2, 0)}));
+        roads.add(new Building(2, ROAD, new Location[]{new Location(1, 1), new Location(2, 1)}));
+        roads.add(new Building(2, ROAD, new Location[]{new Location(1, 1), new Location(1, 2)}));
+        roads.add(new Building(2, ROAD, new Location[]{new Location(1, 0), new Location(2, -1)}));
+        roads.add(new Building(2, ROAD, new Location[]{new Location(-1, 1), new Location(0, 0)}));
+        roads.add(new Building(2, ROAD, new Location[]{new Location(-1, 1), new Location(0, 1)}));
+        roads.add(new Building(2, ROAD, new Location[]{new Location(-1, 2), new Location(0, 1)}));
+        roads.add(new Building(2, ROAD, new Location[]{new Location(1, -1), new Location(1, 0)}));
+
+        for (int i = 0; i < roads.size(); i++) {
+            roadBoard.addRoad(roads.get(i));
+            player2.addBuilding(roads.get(i));
+        }
+    }
+
+    private void longestRoadScenario2(Player player2) throws CatanException {
+        roadBoard = new Board();
+        player2.roads.clear();
+        roads = new ArrayList<>();
+
+        roads.add(new Building(2, ROAD, new Location[]{new Location(-2, 2), new Location(-1, 1)}));
+        roads.add(new Building(2, ROAD, new Location[]{new Location(-2, 1), new Location(-1, 1)}));
+        roads.add(new Building(2, ROAD, new Location[]{new Location(-2, 2), new Location(-2, 1)}));
+
+        roads.add(new Building(2, ROAD, new Location[]{new Location(3, -1), new Location(2, -1)}));
+        roads.add(new Building(2, ROAD, new Location[]{new Location(3, -2), new Location(2, -1)}));
+        roads.add(new Building(2, ROAD, new Location[]{new Location(3, -2), new Location(2, -2)}));
+        roads.add(new Building(2, ROAD, new Location[]{new Location(3, -3), new Location(2, -2)}));
+
+        for (int i = 0; i < roads.size(); i++) {
+            roadBoard.addRoad(roads.get(i));
+            player2.roads.add(roads.get(i));
+        }
+    }
+
+    private void longestRoadScenario3(Player player2) throws CatanException {
+        roadBoard = new Board();
+        player2.roads.clear();
+        roads = new ArrayList<>();
+
+        roads.add(new Building(2, ROAD, new Location[]{new Location(-2, 2), new Location(-1, 1)}));
+        roads.add(new Building(2, ROAD, new Location[]{new Location(-2, 1), new Location(-1, 1)}));
+        roads.add(new Building(2, ROAD, new Location[]{new Location(-2, 2), new Location(-2, 1)}));
+        roads.add(new Building(2, ROAD, new Location[]{new Location(-2, 2), new Location(-3, 2)}));
+        roads.add(new Building(2, ROAD, new Location[]{new Location(-2, 1), new Location(-3, 2)}));
+
+        for (int i = 0; i < roads.size(); i++) {
+            roadBoard.addRoad(roads.get(i));
+            player2.roads.add(roads.get(i));
+        }
+    }
+
+    private void longestRoadScenario4(Player player2) throws CatanException {
+        roadBoard = new Board();
+        player2.roads.clear();
+        roads = new ArrayList<>();
+
+        Building road = new Building(2, ROAD, new Location[]{new Location(-2, 2), new Location(-1, 1)});
+
+        roadBoard.addRoad(road);
+        roads.add(road);
+        player2.roads.add(road);
+
+    }
+
+    private void longestRoadScenario5(Player player2) throws CatanException {
+        roadBoard = new Board();
+        player2.roads.clear();
+        roads = new ArrayList<>();
+
+        roads.add(new Building(2, ROAD, new Location[]{new Location(-3, 1), new Location(-2, 0)}));
+        roads.add(new Building(2, ROAD, new Location[]{new Location(-3, 0), new Location(-2, 0)}));
+        roads.add(new Building(2, ROAD, new Location[]{new Location(-2, -1), new Location(-2, 0)}));
+        roads.add(new Building(2, ROAD, new Location[]{new Location(-1, -1), new Location(-2, 0)}));
+        roads.add(new Building(2, ROAD, new Location[]{new Location(-2, -1), new Location(-1, -1)}));
+        roads.add(new Building(2, ROAD, new Location[]{new Location(-1, -2), new Location(-1, -1)}));
+        roads.add(new Building(2, ROAD, new Location[]{new Location(-1, -1), new Location(0, -2)}));
+        roads.add(new Building(2, ROAD, new Location[]{new Location(-1, -2), new Location(0, -2)}));
+        roads.add(new Building(2, ROAD, new Location[]{new Location(0, -3), new Location(0, -2)}));
+        roads.add(new Building(2, ROAD, new Location[]{new Location(0, -2), new Location(1, -3)}));
+        roads.add(new Building(2, ROAD, new Location[]{new Location(1, -2), new Location(1, -3)}));
+        roads.add(new Building(2, ROAD, new Location[]{new Location(1, -2), new Location(2, -3)}));
+        roads.add(new Building(2, ROAD, new Location[]{new Location(1, -2), new Location(2, -2)}));
+        roads.add(new Building(2, ROAD, new Location[]{new Location(2, -3), new Location(2, -2)}));
+        roads.add(new Building(2, ROAD, new Location[]{new Location(3, -3), new Location(2, -2)}));
+        roads.add(new Building(2, ROAD, new Location[]{new Location(3, -2), new Location(2, -2)}));
+        roads.add(new Building(2, ROAD, new Location[]{new Location(2, -1), new Location(2, -2)}));
+        roads.add(new Building(2, ROAD, new Location[]{new Location(2, -1), new Location(3, -2)}));
+
+        for (int i = 0; i < roads.size(); i++) {
+            roadBoard.addRoad(roads.get(i));
+            player2.roads.add(roads.get(i));
+        }
+
+        Collections.shuffle(roadBoard.getRoads());
+    }
+
+    //region longestRoadTest
+    @Test
+    public void longestRoadTest() throws CatanException {
+        Player player2 = new Player(2);
+        longestRoadScenario1(player2);
+
+        assertEquals(14, roadBoard.getLongestRoad(roads.get(roads.size() - 1), player2, false, false).size());
+
+        longestRoadScenario2(player2);
+
+        assertEquals(4, roadBoard.getLongestRoad(roads.get(roads.size() - 1), player2, false, false).size());
+
+        longestRoadScenario3(player2);
+
+        assertEquals(3, roadBoard.getLongestRoad(roads.get(roads.size() - 1), player2, false, false).size());
+
+        longestRoadScenario4(player2);
+
+        assertEquals(1, roadBoard.getLongestRoad(roads.get(roads.size() - 1), player2, false, false).size());
+
+        longestRoadScenario5(player2);
+
+        assertEquals(14, roadBoard.getLongestRoad(roads.get(roads.size() - 1), player2, false, false).size());
+
+    }
+    //endregion
 }

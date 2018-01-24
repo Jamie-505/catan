@@ -1,5 +1,7 @@
 package de.lmu.settleBattle.catanServer;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
@@ -114,18 +116,16 @@ public class DevelopmentCardOverview extends JSONStringBuilder {
         return this.monopole > 0;
     }
 
-    public DevCardType withdrawRandomCard(){
+    public DevCardType withdrawRandomCard() throws CatanException {
 
-        DevCardType[] cards = DevCardType.values();
+        List<DevCardType> cards = this.getWithdrawableTypes();
+
+        if (cards.size() < 1) throw new CatanException("Es sind keine Entwicklungskarten mehr vorhanden.", true);
+
         Random random = new Random();
-        DevCardType card = cards[random.nextInt(cards.length)];
-        try {
-            decrease(card, 1);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        DevCardType card = cards.get(random.nextInt(cards.size()));
+        decrease(card, 1);
         return card;
-
     }
 
     public boolean hasInventionCard() {
@@ -142,6 +142,18 @@ public class DevelopmentCardOverview extends JSONStringBuilder {
 
     public boolean hasRoadConstructionCard() {
         return this.roadConstruction > 0;
+    }
+
+    public List<DevCardType> getWithdrawableTypes() {
+        List<DevCardType> types = new ArrayList<>();
+
+        if (knight > 0) types.add(DevCardType.KNIGHT);
+        if (invention > 0) types.add(DevCardType.INVENTION);
+        if (monopole > 0) types.add(DevCardType.MONOPOLE);
+        if (roadConstruction > 0) types.add(DevCardType.ROAD_CONSTRUCTION);
+        if (victoryPoint > 0) types.add(DevCardType.VICTORY_POINT);
+
+        return types;
     }
 
     @Override

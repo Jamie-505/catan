@@ -3,6 +3,9 @@ package de.lmu.settleBattle.catanServer;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Random;
 
 public enum RawMaterialType {
@@ -53,5 +56,11 @@ public enum RawMaterialType {
         return this.equals(RawMaterialType.CLAY) || this.equals(RawMaterialType.ORE) ||
                 this.equals(RawMaterialType.WHEAT) || this.equals(RawMaterialType.WOOL) ||
                 this.equals(RawMaterialType.WOOD);
+    }
+
+    public static RawMaterialType getRandomTradingType() {
+        List<RawMaterialType> types = Arrays.asList(RawMaterialType.WOOL, RawMaterialType.WOOD,RawMaterialType.CLAY, RawMaterialType.ORE, RawMaterialType.WHEAT);
+        Random random = new Random();
+        return types.get(random.nextInt(types.size()));
     }
 }

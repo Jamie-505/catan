@@ -5,6 +5,7 @@ import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.List;
+
 import static de.lmu.settleBattle.catanServer.Constants.*;
 import static org.junit.Assert.*;
 
@@ -199,22 +200,23 @@ public class GameControllerTest {
     //region KI
     @Test
     public void KI_initialPhase() throws Exception {
-        gameController.setKI(player1);
-        player1.addPropertyChangeListener(handler);
-        gameController.setKI(player2);
-        player2.addPropertyChangeListener(handler);
+        player1.setKI(true);
+        player2.setKI(true);
 
         Player player4 = new Player(4, true);
         player4.setName("Hering");
         player4.setColor(Color.RED);
 
         gameController.addPlayer(player4);
-        player4.addPropertyChangeListener(handler);
         player4.setStatus(START_GAME);
+
+        gameController.moveKI(player4);
 
         assertEquals(WAIT_FOR_GAME_START, player4.getStatus());
 
         initializeGame();
+
+        gameController.moveKIs();
 
         //after game initialization game is started an KIs place buildings until player3 has turn
         assertEquals(BUILD_SETTLEMENT, player3.getStatus());
@@ -237,16 +239,19 @@ public class GameControllerTest {
         assertEquals(WAIT, player2.getStatus());
         assertEquals(WAIT, player1.getStatus());
 
-        //player 3 places his second road
+        //player 3 places his first road
         Building r1 = new Building(player3.getId(), BuildingType.ROAD, gameController.getBoard()
                 .getFreeRoadLoc(player3, gameController.isInitialPhaseActive()));
         gameController.placeBuilding(r1);
 
+        //let KIs move
+        gameController.moveKIs();
+
+        //afterwards player3 has turn
         assertEquals(BUILD_SETTLEMENT, player3.getStatus());
         assertEquals(WAIT, player4.getStatus());
         assertEquals(WAIT, player2.getStatus());
         assertEquals(WAIT, player1.getStatus());
-
 
         //player 3 places his second settlement
         sCnt = gameController.getBoard().getSettlements().size();
@@ -268,6 +273,9 @@ public class GameControllerTest {
                 .getFreeRoadLoc(player3, gameController.isInitialPhaseActive()));
         assertTrue(gameController.placeBuilding(r2));
 
+        //let KIs turn
+        gameController.moveKIs();
+
         assertTrue(gameController.getBoard().getSettlements().size() >= 8);
         assertTrue(gameController.getBoard().getRoads().size() >= 8);
         assertFalse(gameController.isInitialPhaseActive());
@@ -280,25 +288,28 @@ public class GameControllerTest {
         //player 3 must dice and his status will be set to TRADE_OR_BUILD
         gameController.dice(player3.getId());
 
-        assertTrue(player3.getStatus().equals(TRADE_OR_BUILD) || player3.getStatus().equals(ROBBER_TO));
+        assertTrue(player3.getStatus().equals(TRADE_OR_BUILD) || player3.getStatus().equals(ROBBER_TO) ||
+                player3.getStatus().equals(WAIT_FOR_ALL_TO_EXTRACT_CARDS));
     }
 
     @Test
-    public void KI_statusupdates() {
-        gameController.setKI(player3);
-        player3.addPropertyChangeListener(handler);
+    public void KI_statusupdates() throws CatanException {
+        player3.setKI(true);
 
         player3.setRawMaterialDeck(new RawMaterialOverview(1, 4, 5, 3, 0));
         player3.setStatus(EXTRACT_CARDS_DUE_TO_ROBBER);
+
+        gameController.moveKI(player3);
 
         assertEquals(7, player3.getRawMaterialCount());
 
         Location loc = gameController.getBoard().getRobber().getLocation();
 
         Player player = gameController.getCurrent();
-        gameController.setKI(player);
-        player.addPropertyChangeListener(handler);
+        player.setKI(true);
+
         gameController.activatePlayer(player, ROBBER_TO);
+        gameController.moveKI(player);
 
         assertFalse(loc.equals(gameController.getBoard().getRobber().getLocation()));
     }
@@ -331,26 +342,30 @@ public class GameControllerTest {
         p1.roads = new ArrayList<>();
         p2.roads = new ArrayList<>();
 
-        p1.roads.add(new Building(p1.getId(), BuildingType.ROAD, new Location[]{new Location(0,0), new Location(0,1)}));
-        p1.roads.add(new Building(p1.getId(), BuildingType.ROAD, new Location[]{new Location(-1,1), new Location(0,1)}));
-        p1.roads.add(new Building(p1.getId(), BuildingType.ROAD, new Location[]{new Location(-1,2), new Location(0,1)}));
-        p1.roads.add(new Building(p1.getId(), BuildingType.ROAD, new Location[]{new Location(-1,2), new Location(0,2)}));
+        p1.roads.add(new Building(p1.getId(), BuildingType.ROAD, new Location[]{new Location(0, 0), new Location(0, 1)}));
+        p1.roads.add(new Building(p1.getId(), BuildingType.ROAD, new Location[]{new Location(-1, 1), new Location(0, 1)}));
+        p1.roads.add(new Building(p1.getId(), BuildingType.ROAD, new Location[]{new Location(-1, 2), new Location(0, 1)}));
+        p1.roads.add(new Building(p1.getId(), BuildingType.ROAD, new Location[]{new Location(-1, 2), new Location(0, 2)}));
 
-        p2.roads.add(new Building(p1.getId(), BuildingType.ROAD, new Location[]{new Location(-1,3), new Location(0,2)}));
-        p2.roads.add(new Building(p1.getId(), BuildingType.ROAD, new Location[]{new Location(0,3), new Location(0,2)}));
-        p2.roads.add(new Building(p1.getId(), BuildingType.ROAD, new Location[]{new Location(-1,3), new Location(-1,2)}));
-        p2.roads.add(new Building(p1.getId(), BuildingType.ROAD, new Location[]{new Location(-1,2), new Location(-2,3)}));
+        p2.roads.add(new Building(p1.getId(), BuildingType.ROAD, new Location[]{new Location(-1, 3), new Location(0, 2)}));
+        p2.roads.add(new Building(p1.getId(), BuildingType.ROAD, new Location[]{new Location(0, 3), new Location(0, 2)}));
+        p2.roads.add(new Building(p1.getId(), BuildingType.ROAD, new Location[]{new Location(-1, 3), new Location(-1, 2)}));
+        p2.roads.add(new Building(p1.getId(), BuildingType.ROAD, new Location[]{new Location(-1, 2), new Location(-2, 3)}));
 
-        for (Building road : p1.roads) { gameController.getBoard().addRoad(road); }
+        for (Building road : p1.roads) {
+            gameController.getBoard().addRoad(road);
+        }
 
-        for (Building road : p2.roads) { gameController.getBoard().addRoad(road); }
+        for (Building road : p2.roads) {
+            gameController.getBoard().addRoad(road);
+        }
     }
 
     @Test
     public void assignLongestRoad() throws CatanException {
         longestRoadScenario1(player1, player2);
 
-        Building newRoad = new Building(player1.getId(), BuildingType.ROAD, new Location[]{new Location(0,0), new Location(1,0)});
+        Building newRoad = new Building(player1.getId(), BuildingType.ROAD, new Location[]{new Location(0, 0), new Location(1, 0)});
         player1.roads.add(newRoad);
         gameController.assignLongestRoad(newRoad, player1);
 
@@ -359,7 +374,7 @@ public class GameControllerTest {
         assertFalse(player2.hasLongestRoad());
         assertEquals(5, gameController.getBoard().getLongestRoadLength());
 
-        Building newRoad2 = new Building(player2.getId(), BuildingType.ROAD, new Location[]{new Location(-2,2), new Location(-2,3)});
+        Building newRoad2 = new Building(player2.getId(), BuildingType.ROAD, new Location[]{new Location(-2, 2), new Location(-2, 3)});
         player2.roads.add(newRoad2);
         gameController.assignLongestRoad(newRoad2, player2);
 
@@ -368,7 +383,7 @@ public class GameControllerTest {
         assertFalse(player2.hasLongestRoad());
         assertEquals(5, gameController.getBoard().getLongestRoadLength());
 
-        Building newRoad3 = new Building(player2.getId(), BuildingType.ROAD, new Location[]{new Location(-2,2), new Location(-3,3)});
+        Building newRoad3 = new Building(player2.getId(), BuildingType.ROAD, new Location[]{new Location(-2, 2), new Location(-3, 3)});
         player1.roads.add(newRoad3);
         gameController.assignLongestRoad(newRoad3, player2);
 

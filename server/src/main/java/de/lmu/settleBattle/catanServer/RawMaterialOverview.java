@@ -150,19 +150,19 @@ public class RawMaterialOverview extends JSONStringBuilder {
     public void decrease(RawMaterialOverview overview)
             throws CatanException {
         if (this.oreCount < overview.oreCount)
-            throw new CatanException(String.format("Erz kann nicht um %s verringert werden. (Haben %s)", oreCount, overview.oreCount));
+            throw new CatanException(String.format("Erz kann nicht um %s verringert werden. (Haben %s)", oreCount, overview.oreCount), true);
 
         if (this.wheatCount < overview.wheatCount)
-            throw new CatanException(String.format("Getreide kann nicht um %s verringert werden. (Haben %s)", wheatCount, overview.wheatCount));
+            throw new CatanException(String.format("Getreide kann nicht um %s verringert werden. (Haben %s)", wheatCount, overview.wheatCount), true);
 
         if (this.woodCount < overview.woodCount)
-            throw new CatanException(String.format("Holz kann nicht um %s verringert werden. (Haben %s)", woodCount, overview.woodCount));
+            throw new CatanException(String.format("Holz kann nicht um %s verringert werden. (Haben %s)", woodCount, overview.woodCount), true);
 
         if (this.woolCount < overview.woolCount)
-            throw new CatanException(String.format("Wolle kann nicht um %s verringert werden. (Haben %s)", woolCount, overview.woolCount));
+            throw new CatanException(String.format("Wolle kann nicht um %s verringert werden. (Haben %s)", woolCount, overview.woolCount), true);
 
         if (this.clayCount < overview.clayCount)
-            throw new CatanException(String.format("Lehm kann nicht um %s verringert werden. (Haben %s)", clayCount, overview.clayCount));
+            throw new CatanException(String.format("Lehm kann nicht um %s verringert werden. (Haben %s)", clayCount, overview.clayCount), true);
 
         this.oreCount -= overview.oreCount;
         this.clayCount -= overview.clayCount;

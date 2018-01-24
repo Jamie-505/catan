@@ -332,8 +332,8 @@ public class CatanMessage {
 
     public static TextMessage roadConstructionCard(Building road1, Building road2) throws CatanException {
 
-        if (!road1.isRoad() || !road2.isRoad() ) throw new CatanException("Mit dieser Karte können nur Straßen gebaut werden");
-        if (road1.getOwner() != road2.getOwner()) throw new CatanException("Beide Straßen müssen den gleichen Eigentümer haben");
+        if (!road1.isRoad() || !road2.isRoad() ) throw new CatanException("Mit dieser Karte können nur Straßen gebaut werden", true);
+        if (road1.getOwner() != road2.getOwner()) throw new CatanException("Beide Straßen müssen den gleichen Eigentümer haben", true);
 
         JSONObject payload = new JSONObject();
         payload.put(Constants.PLAYER, road1.getOwner());
@@ -381,7 +381,7 @@ public class CatanMessage {
 
     //endregion
 
-    public static TextMessage playerLeft(String id) {
+    public static TextMessage playerLeft(int id) {
         JSONObject payload = new JSONObject();
         payload.put("Spieler ist weg", id);
 

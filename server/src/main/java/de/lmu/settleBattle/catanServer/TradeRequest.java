@@ -117,10 +117,10 @@ public class TradeRequest extends JSONStringBuilder {
     }
     public void execute(int fellowPlayerId) throws CatanException {
         if (this.playerId == fellowPlayerId)
-            throw new CatanException(String.format("Der Handel %s kann nicht von dir selbst angenommen werden.", this.id));
+            throw new CatanException(String.format("Der Handel %s kann nicht von dir selbst angenommen werden.", this.id), true);
 
         if (!this.canBeExecutedBy(fellowPlayerId))
-            throw new CatanException(String.format("Spieler %s kann den Handel nicht ausführen. Hat er angenommen?", fellowPlayerId, this.id));
+            throw new CatanException(String.format("Spieler %s kann den Handel nicht ausführen. Hat er angenommen?", fellowPlayerId, this.id), true);
 
         this.executedWith = fellowPlayerId;
         this.executed = true;

@@ -40,7 +40,7 @@ public class SocketUtils {
         if (building.getOwner() == id)
             return this.gameCtrl.placeBuilding(building, true);
         else throw new CatanException(
-                String.format("Spieler %s kann kein Gebäude mit der ID %s bauen.", id, building.getOwner()));
+                String.format("Spieler %s kann kein Gebäude mit der ID %s bauen.", id, building.getOwner()), true);
     }
     //endregion
 
@@ -133,7 +133,7 @@ public class SocketUtils {
 
         //at least one raw material must be offered/requested
         if (tradeRequest.getOffer().getTotalCount() < 1 || tradeRequest.getRequest().getTotalCount() < 1)
-            throw new CatanException("Das Angebot und die Nachfrage müssen mehr als einen Rohstoff enthalten.");
+            throw new CatanException("Das Angebot und die Nachfrage müssen mehr als einen Rohstoff enthalten.", true);
 
         Player player = gameCtrl.getPlayer(session.getId());
         gameCtrl.seaTrade(player, tradeRequest);
@@ -225,7 +225,7 @@ public class SocketUtils {
         JSONObject rawMaterialJSON = JSONUtils.createJSON(message).getJSONObject(TOSS_CARDS);
         RawMaterialOverview overview = gson.fromJson(rawMaterialJSON.toString(), RawMaterialOverview.class);
 
-        gameCtrl.tossRawMaterialCards(toInt(session.getId()), overview);
+        gameCtrl.tossCardsAndUpdateStatus(toInt(session.getId()), overview);
     }
 
     public boolean endGame(WebSocketSession session) {

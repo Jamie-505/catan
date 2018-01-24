@@ -35,9 +35,9 @@ public class GameController {
     private Stack<Player> playerStack;
     private boolean initialPhaseActive;
     private int round;
-    private boolean isGameOver = false;
-    private boolean gameStarted = false;
-    private Player playerWithLongestRoad = null;
+    private boolean gameOver;
+    private boolean gameStarted;
+    private Player playerWithLongestRoad;
     private Player greatestArmyPlayer;
 
     public GameController() {
@@ -49,8 +49,12 @@ public class GameController {
         developmentCardDeck = new DevelopmentCardOverview();
         initialPhaseActive = false;
         round = -1;
+        gameOver = false;
+        gameStarted = false;
+        playerWithLongestRoad = null;
     }
 
+    //region initialize
 
     /**
      * checks if everybody is ready to start
@@ -147,49 +151,138 @@ public class GameController {
         return player;
     }
 
+    //endregion
+    //region KI handling
+
     /**
-     * if a real player is active, KIs need to be deactivated sometimes
-     *
-     * @param ki ki to be deactivated
-     * @return if KI was deactivated (real player is active), otherwise false
+     * moves KIs until real player has turn
      */
-    public boolean deactivateKI(Player ki) {
+    public void moveKIs() {
+        Player current = getCurrent();
 
-        if (!ki.isKI()) return false;
+        //status WAIT_FOR_ALL_TO_EXTRACT_CARDS is no active status --> update if everybody is
+        //ready now, otherwise wait ahead
+        if (current.isKI() && current.getStatus().equals(WAIT_FOR_ALL_TO_EXTRACT_CARDS))
+            moveKI(current);
 
-        boolean deactivateKI = false;
+        if (!getCurrent().isKI() || !getCurrent().isActive())
+            return;
 
+        while (getCurrent().isActive() && getCurrent().isKI()) {
+            moveKI(getCurrent());
+        }
+    }
+
+    /**
+     * performs move for KI according to its status
+     *
+     * @param ki ki to be moved
+     * @throws CatanException
+     */
+    public void moveKI(Player ki) {
+        boolean nextMove = false;
+
+        try {
+            switch (ki.getStatus()) {
+                case START_GAME:
+                    ki.setStatus(WAIT_FOR_GAME_START);
+                    nextMove = false;
+                    break;
+
+                case DICE:
+                    dice(ki.getId());
+                    nextMove = false;
+                    break;
+
+                case BUILD_SETTLEMENT:
+                    Building settlement = new Building(ki.getId(),
+                            BuildingType.SETTLEMENT, board.getRandomFreeSettlementLoc());
+                    placeBuilding(settlement, true);
+                    nextMove = false;
+                    break;
+
+                case BUILD_STREET:
+                    Building street = new Building(ki.getId(), BuildingType.ROAD,
+                            board.getFreeRoadLoc(ki, initialPhaseActive));
+                    placeBuilding(street, true);
+                    nextMove = false;
+                    break;
+
+                case TRADE_OR_BUILD:
+                    //play development card if ki possesses one
+                    try {
+                        if (ki.hasInventionCard()) applyInventionCard(ki);
+                        else if (ki.hasRoadConstructionCard()) applyRoadConstructionCard(ki);
+                        else if (ki.hasMonopoleCard()) applyMonopoleCard(ki, RawMaterialType.getRandomTradingType());
+                        else if (ki.hasKnightCard()) applyKnightCard(ki.getId(), -1, board.getRandomFieldLoc());
+                    } catch (CatanException ex) {
+                        System.out.println("Dieser Zug war nicht gültig, versuche es beim nächsten Mal nochmal");
+                    }
+
+                    if (ki.canAfford(BuildingType.SETTLEMENT)) {
+                        Building s = new Building(ki.getId(), BuildingType.SETTLEMENT, board.getRandomFreeSettlementLoc());
+                        placeBuilding(s, true);
+                    } else if (ki.canAfford(BuildingType.ROAD)) {
+                        Building r = new Building(ki.getId(), BuildingType.ROAD, board.getFreeRoadLoc(ki, initialPhaseActive));
+                        placeBuilding(r, true);
+                    } else if (ki.canAffordDevCard()) {
+                        buyDevelopmentCard(ki);
+                    }
+                    nextMove = true;
+                    break;
+
+                case ROBBER_TO:
+                    if (waitForPlayerToExtractCards(ki.getId()))
+                        nextMove = false;
+
+                    else {
+                        boolean activated;
+                        try {
+                            activateRobber(ki.getId(), -1, board.getRandomFieldLoc());
+                            activated = true;
+                        } catch (CatanException ex) {
+                            System.out.println(ex.getMessage());
+                            activated = false;
+                        }
+
+                        //try second time
+                        if (!activated)
+                            activateRobber(ki.getId(), -1, board.getRandomFieldLoc());
+
+                        nextMove = false;
+                    }
+                    break;
+
+                case EXTRACT_CARDS_DUE_TO_ROBBER:
+                    //KI has to extract cards
+                    tossRawMaterialCards(ki);
+                    updateStatusAfterCardExtraction(ki);
+                    nextMove = false;
+                    break;
+
+                case WAIT_FOR_ALL_TO_EXTRACT_CARDS:
+                    if (!waitForPlayerToExtractCards(ki.getId()))
+                        updateStatusAfterCardExtraction(ki);
+                    nextMove = false;
+
+            }
+        } catch (CatanException ex) {
+            System.out.println(ex.getMessage());
+            ki.setStatus(WAIT, false);
+        }
+        if (nextMove) nextMove();
+    }
+
+    public boolean waitForPlayerToExtractCards(int id) {
         for (Player player : getRealPlayers()) {
-            if (player.isActive()) deactivateKI = true;
+            if (player.getStatus().equals(EXTRACT_CARDS_DUE_TO_ROBBER) && player.getId() != id)
+                return true;
         }
-
-        if (deactivateKI) ki.setDeactivated(true);
-        else {
-            ki.activateNextStatus();
-            return false;
-        }
-
-        return true;
+        return false;
     }
 
     public void activatePlayer(int id, String status) {
         activatePlayer(getPlayer(id), status);
-    }
-
-    public void activateKIs() {
-        for (Player player : players) {
-            if (player.isDeactivated())
-                player.activateNextStatus();
-        }
-    }
-
-    public boolean realPlayersAreReady() {
-        for (Player player : getRealPlayers()) {
-            if (player.isActive())
-                return false;
-        }
-
-        return true;
     }
 
     /**
@@ -206,8 +299,7 @@ public class GameController {
         for (Player p : players) {
             //compare id because if active player is set to WAIT and afterwards to correct status,
             //client will receive 2 status update messages
-            if (p.getId() != player.getId())
-                p.setStatus(WAIT);
+            if (!p.equals(player.getId())) p.setStatus(WAIT);
         }
 
         player.setStatus(status);
@@ -389,9 +481,9 @@ public class GameController {
 
         RawMaterialOverview price = new RawMaterialOverview(0, 1, 0, 1, 1);
 
-        player.decreaseRawMaterials(price);
         DevCardType type = developmentCardDeck.withdrawRandomCard();
         player.addDevelopmentCard(type, 1);
+        player.decreaseRawMaterials(price);
         this.rawMaterialDeck.increase(price);
     }
 
@@ -399,6 +491,8 @@ public class GameController {
     public void applyMonopoleCard(Player monoPlayer, RawMaterialType targetType) throws CatanException {
         if (!monoPlayer.hasMonopoleCard())
             throw new CatanException(String.format(PLAYER_HAS_NO_DEV_CARD, monoPlayer.getId(), DevCardType.MONOPOLE.toString()), true);
+
+        changes.firePropertyChange(MONOPOLE_PLAYED, targetType, monoPlayer);
 
         monoPlayer.removeDevelopmentCard(DevCardType.MONOPOLE, 1);
 
@@ -421,9 +515,37 @@ public class GameController {
 
         if (built) {
             built = this.board.placeBuilding(road2, false);
+
+            Object[] data = new Object[2];
+            data[0] = road1;
+            data[1] = road2;
+            changes.firePropertyChange(RC_PLAYED, data, player);
+
         }
 
         //remove construction card
+        if (built) {
+            player.removeDevelopmentCard(DevCardType.ROAD_CONSTRUCTION);
+        }
+    }
+
+    public void applyRoadConstructionCard(Player player) throws CatanException {
+        if (!player.hasRoadConstructionCard())
+            throw new CatanException(String.format(PLAYER_HAS_NO_DEV_CARD, player.getId(), DevCardType.ROAD_CONSTRUCTION.toString()), true);
+
+        Building road1 = new Building(player.getId(), BuildingType.ROAD, board.getFreeRoadLoc(player, false));
+        boolean built = this.board.placeBuilding(road1, false);
+
+        if (built) {
+            Building road2 = new Building(player.getId(), BuildingType.ROAD, board.getFreeRoadLoc(player, false));
+            built = this.board.placeBuilding(road2, false);
+
+            Object[] data = new Object[2];
+            data[0] = road1;
+            data[1] = road2;
+            changes.firePropertyChange(RC_PLAYED, data, player);
+        }
+
         if (built) {
             player.removeDevelopmentCard(DevCardType.ROAD_CONSTRUCTION);
         }
@@ -433,12 +555,64 @@ public class GameController {
         if (!player.hasInventionCard())
             throw new CatanException(String.format(PLAYER_HAS_NO_DEV_CARD, player.getId(), DevCardType.INVENTION.toString()), true);
 
-        else if (overview.getTotalCount() != 2)
+        if (overview.getTotalCount() != 2)
             throw new CatanException(String.format("Es können genau 2 Rohstoffe gezogen werden, nicht %s", overview.getTotalCount()), true);
+
+        changes.firePropertyChange(INVENTION_PLAYED, "null", player);
 
         this.rawMaterialDeck.decrease(overview);
         player.increaseRawMaterials(overview);
         player.removeDevelopmentCard(DevCardType.INVENTION, 1);
+
+
+        changes.firePropertyChange(INVENTION_PLAYED, overview, player);
+    }
+
+    /**
+     * applies invention card withdrawing random cards from
+     * game controller deck
+     *
+     * @param player
+     * @throws CatanException
+     */
+    public void applyInventionCard(Player player) throws CatanException {
+        if (!player.hasInventionCard())
+            throw new CatanException(String.format(PLAYER_HAS_NO_DEV_CARD, player.getId(), DevCardType.INVENTION.toString()), true);
+
+        List<RawMaterialType> types = new ArrayList<>();
+
+        for (int i = 0; i < 2; i++) {
+            RawMaterialType type = this.rawMaterialDeck.withdrawRandomCard();
+            types.add(type);
+        }
+
+        RawMaterialOverview overview = new RawMaterialOverview();
+
+        for (RawMaterialType type : types) {
+            overview.increase(type, 1);
+        }
+
+        changes.firePropertyChange(INVENTION_PLAYED, types, player);
+
+        player.increaseRawMaterials(overview);
+    }
+
+
+    public void applyKnightCard(int knightPlayerId, int targetPlayerId, Location newRobberLoc) throws CatanException {
+        Player knightPlayer = getPlayer(knightPlayerId);
+        if (!knightPlayer.equals(getCurrent()))
+            CatanException.throwNotYourTurnException(knightPlayerId);
+
+        if (!knightPlayer.hasInventionCard())
+            throw new CatanException(String.format(PLAYER_HAS_NO_DEV_CARD, knightPlayer.getId(), DevCardType.KNIGHT.toString()), true);
+
+        knightPlayer.applyKnightCard();
+        activateRobber(knightPlayerId, targetPlayerId, newRobberLoc);
+
+        Object[] data = new Object[2];
+        data[0] = targetPlayerId;
+        data[1] = newRobberLoc;
+        changes.firePropertyChange(KNIGHT_PLAYED, data, knightPlayer);
     }
     //endregion
 
@@ -548,8 +722,7 @@ public class GameController {
         offer = new RawMaterialOverview(offerType, offerAmount);
         request = new RawMaterialOverview(requestType, 1);
 
-        if (!player.canAfford(offer))
-            throw new CatanException("Du hast nicht genug Rohstoffe für diesen Handel.", true);
+        if (!player.canAfford(offer)) throw new CatanException("Du hast nicht genug Rohstoffe für diesen Handel.", true);
 
         player.trade(offer, request);
     }
@@ -580,28 +753,26 @@ public class GameController {
     }
 
     public void addPlayer(Player p) throws CatanException {
-        if (gameStarted) throw new CatanException("Das Spiel wurde bereits gestartet.");
+        if (gameStarted) throw new CatanException("Das Spiel wurde bereits gestartet.", true);
 
         if (players.size() < 4) {
-
             players.add(p);
-            //if (p.isKI()) p.addPropertyChangeListener(this);
 
-        } else throw new CatanException("Es sind bereits genug Spieler verbunden.");
+        } else throw new CatanException("Es sind bereits genug Spieler verbunden.", true);
     }
 
     /**
      * adds new KI to game
      *
-     * @throws IllegalAccessException
+     * @throws CatanException if game is already started
      */
     public Player addKI() throws CatanException {
         if (gameStarted)
-            throw new CatanException("Das Spiel ist bereits gestartet.");
+            throw new CatanException("Das Spiel ist bereits gestartet.", true);
 
         Player player = new Player(getValidId(), getValidColor());
         player.setName("KI(" + player.getColor() + ")");
-        setKI(player);
+        player.setKI(true);
         addPlayer(player);
         return player;
     }
@@ -618,15 +789,6 @@ public class GameController {
         }
 
         return realPlayers;
-    }
-
-    public void setKI(int id) {
-        setKI(getPlayer(id));
-    }
-
-    public void setKI(Player player) {
-        //player.addPropertyChangeListener(this);
-        player.setKI(true);
     }
 
     public int getPlayerCount() {
@@ -740,6 +902,20 @@ public class GameController {
     }
 
     /**
+     * toss raw material cards and update status of current player to ROBBER_TO
+     *
+     * @param id       id of player who tossed cards
+     * @param overview overview of raw materials to extract
+     * @throws CatanException if overview contains invalid raw materials
+     */
+    public void tossCardsAndUpdateStatus(int id, RawMaterialOverview overview) throws CatanException {
+        tossRawMaterialCards(id, overview);
+
+        Player player = getPlayer(id);
+        updateStatusAfterCardExtraction(player);
+    }
+
+    /**
      * player tosses cards after a roll of 7 if he has at least 7 raw materials
      *
      * @param id id of the player who has to toss cards
@@ -748,15 +924,27 @@ public class GameController {
     public void tossRawMaterialCards(int id, RawMaterialOverview overview) throws CatanException {
         Player player = getPlayer(id);
 
-        int toWithdraw = player.getRawMaterialCount()/2;
+        int toWithdraw = player.getRawMaterialCount() / 2;
         if (overview.getTotalCount() != toWithdraw)
             throw new CatanException(
                     String.format("Du besitzt %s Rohstoffe und musst deswegen %s und nicht %s abgeben.",
                             player.getRawMaterialCount(), toWithdraw, overview.getTotalCount()), true);
         board.getRobber().robPlayer(player, overview);
+    }
 
-        //set new status for player
-        player.activateNextStatus();
+    public void tossRawMaterialCards(Player player) throws CatanException {
+        board.getRobber().robPlayer(player);
+    }
+
+    public void updateStatusAfterCardExtraction(Player player) {
+        String nextStatus = WAIT;
+
+        if (player.getNextStatus().equals(ROBBER_TO) || player.getStatus().equals(WAIT_FOR_ALL_TO_EXTRACT_CARDS)) {
+            nextStatus = waitForPlayerToExtractCards(player.getId()) ? WAIT_FOR_ALL_TO_EXTRACT_CARDS : ROBBER_TO;
+        }
+
+        player.setNextStatus(WAIT);
+        player.setStatus(nextStatus);
     }
     //endregion
 
@@ -765,22 +953,16 @@ public class GameController {
         if (getCurrent().getId() != id) CatanException.throwNotYourTurnException(getCurrent().getId());
         Player player = getCurrent();
 
-        System.out.printf("%s dice", player.toString());
+        System.out.printf("%s dices ", player.toString());
         int[] dice = player.throwDice();
         int sum = dice[0] + dice[1];
 
         //the robber is activated
         if (sum == 7) {
+            setNextStatusAfterDiceOf7();
+
             //players have to extract cards
             extractCardsDueToRobber();
-
-            //if the active player must not extract cards he can move the robber
-            if (!player.getStatus().equals(EXTRACT_CARDS_DUE_TO_ROBBER)) {
-                if (player.isKI()) {
-                    player.setNextStatus(ROBBER_TO);
-                    deactivateKI(player);
-                } else { player.setStatus(ROBBER_TO); }
-            }
         }
 
         //distribute raw materials
@@ -791,36 +973,51 @@ public class GameController {
             distributeRawMaterial(distribution);
 
             //after raw material distribution player can continue his turn
-            activatePlayer(id, TRADE_OR_BUILD);
+            activatePlayer(player, TRADE_OR_BUILD);
+        }
+    }
+
+    public void setNextStatusAfterDiceOf7() {
+        for (Player player : players) {
+            String nextStatus = player.getId() == getCurrent().getId() ? ROBBER_TO : WAIT;
+            player.setNextStatus(nextStatus);
         }
     }
 
     /**
      * updates status of players who have to toss cards
+     * moveKIs if they have turn
      */
     public void extractCardsDueToRobber() {
-        List<Player> kiList = new ArrayList<>();
-        int id = getCurrent().getId();
+        Player current = getCurrent();
 
-        //first update non KI players because otherwise there will be problems
-        //with status updates
+        //first update all inactive players because the active one may rob
+        //another player afterwards and first, everybody has to extract cards
         for (Player player : getPlayers()) {
+            if (player.equals(current))
+                continue;
+
             if (player.hasToExtractCards()) {
-                if (player.isKI()){ kiList.add(player); }
-                else {
-                    String nextStatus = (player.getId() == id) ? ROBBER_TO : WAIT;
-                    player.setNextStatus(nextStatus);
-                    player.setStatus(EXTRACT_CARDS_DUE_TO_ROBBER);
-                }
+                player.setStatus(EXTRACT_CARDS_DUE_TO_ROBBER);
+
+                //extract cards for KI
+                if (player.isKI()) moveKI(player);
             }
+
+            //if player must not extract cards (except for current player
+            // he can be set to his next status
+            else player.activateNextStatus();
         }
 
-        //update KIs
-        for (Player player : kiList) {
-            String nextStatus = (player.getId() == id) ? ROBBER_TO : WAIT;
-            player.setNextStatus(nextStatus);
-            player.setStatus(EXTRACT_CARDS_DUE_TO_ROBBER);
-        }
+        //extract cards fo KI
+        if (current.hasToExtractCards()) {
+            current.setStatus(EXTRACT_CARDS_DUE_TO_ROBBER);
+            if (current.isKI()) moveKI(current);
+        } else updateStatusAfterCardExtraction(current);
+
+        //go ahead if everybody is ready
+        if (current.isKI() && current.getStatus().equals(ROBBER_TO))
+            moveKIs();
     }
 
     //endregion
@@ -850,7 +1047,7 @@ public class GameController {
         if (!winner.hasWon() || winner.getId() != getPlayerWithHighestPoints().getId()) {
             return false;
         }
-        this.isGameOver = true;
+        this.gameOver = true;
         return true;
     }
 
@@ -918,7 +1115,12 @@ public class GameController {
     }
 
     public boolean isGameOver() {
-        return this.isGameOver;
+        return this.gameOver;
     }
+
+    public DevelopmentCardOverview getDevelopmentCardDeck() { return this.developmentCardDeck; }
+
+    public void setDevelopmentCardDeck(DevelopmentCardOverview devCardDeck) { this.developmentCardDeck = devCardDeck; }
+    //endregion
 }
 

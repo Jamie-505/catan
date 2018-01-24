@@ -17,6 +17,7 @@ public class Constants {
     public final static String EXTRACT_CARDS_DUE_TO_ROBBER = "Karten wegen Räuber abgeben";
     public final static String TRADE_OR_BUILD = "Handeln oder bauen";
     public final static String WAIT = "Warten";
+    public final static String WAIT_FOR_ALL_TO_EXTRACT_CARDS = "Warten bis alle ihre Karten abgegeben haben";
 
     //Message Types
     public final static String BUILD = "Bauen";
@@ -144,4 +145,9 @@ public class Constants {
     final static String INVALID_LOC_ARRAY = "Das übergebene Array ist ungültig für eine %s: %s";
     final static String INVALID_TRD_ID = "Das Handelsangebot mit der ID %s existiert nicht.";
     final static String INVALID_DEV_CARDS_DECREASE = "Entwicklungskarten können nicht um %s verringert werden. (Haben: %s)";
+
+    final static String RC_PLAYED = "Strassenbaukarte ausgespielt";
+    final static String MONOPOLE_PLAYED = "Monopolkarte ausgespielt";
+    final static String KNIGHT_PLAYED = "Ritterkarte ausgespielt";
+    final static String INVENTION_PLAYED = "Erfindungskarte ausgespielt";
 }

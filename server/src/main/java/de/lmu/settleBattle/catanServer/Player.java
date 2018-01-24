@@ -78,7 +78,6 @@ public class Player extends JSONStringBuilder implements Comparable, Cloneable {
 
     private boolean isKI;
     private String nextStatus;
-    private boolean isDeactivated;
     //endregion
 
     //region Constructors
@@ -112,7 +111,6 @@ public class Player extends JSONStringBuilder implements Comparable, Cloneable {
         this.havens = new ArrayList<>();
         this.isKI = false;
         this.nextStatus = WAIT;
-        this.isDeactivated = false;
     }
 
     /**
@@ -155,7 +153,7 @@ public class Player extends JSONStringBuilder implements Comparable, Cloneable {
         int[] result = dice.roll();
 
         System.out.printf("%s diced %s. fire property change", this.id, result[0]+result[1]);
-        changes.firePropertyChange(DICE, result, this);
+        changes.firePropertyChange(ROLL_DICE, result, this);
 
         return result;
     }
@@ -303,7 +301,8 @@ public class Player extends JSONStringBuilder implements Comparable, Cloneable {
 
     public boolean isActive() {
         return this.status.equals(EXTRACT_CARDS_DUE_TO_ROBBER) || this.status.equals(ROBBER_TO) ||
-                this.status.equals(TRADE_OR_BUILD) || this.status.equals(EXTRACT_CARDS_DUE_TO_ROBBER);
+                this.status.equals(TRADE_OR_BUILD) || this.status.equals(BUILD_SETTLEMENT) ||
+                this.status.equals(BUILD_STREET) ||this.status.equals(DICE) || this.status.equals(START_GAME);
     }
 
     private int increaseArmyCount() {
@@ -371,6 +370,8 @@ public class Player extends JSONStringBuilder implements Comparable, Cloneable {
         return this.developmentDeck.hasMonopoleCard();
     }
 
+    public boolean hasKnightCard() {return this.developmentDeck.hasKnightCard();}
+
     public void removeDevelopmentCard(DevCardType type, int amount) throws CatanException {
         this.developmentDeck.decrease(type, amount);
     }
@@ -394,9 +395,7 @@ public class Player extends JSONStringBuilder implements Comparable, Cloneable {
     //region Properties
 
 
-    public int getId() {
-        return id;
-    }
+    public int getId() { return id; }
 
     public int getArmyCount() {
         return armyCount;
@@ -406,15 +405,20 @@ public class Player extends JSONStringBuilder implements Comparable, Cloneable {
         return status;
     }
 
-    public void setStatus(String newStatus) {
+    public void setStatus(String newStatus, boolean sendStatusUpdate) {
         if(newStatus.equals("")) return;
 
         boolean fire = !newStatus.equals(this.status);
-        if (fire) {
-            String oldStatus = this.status;
-            this.status = newStatus;
+        String oldStatus = this.status;
+        this.status = newStatus;
+
+        if (fire && sendStatusUpdate) {
             changes.firePropertyChange(STATUS_UPD, oldStatus, this);
         }
+    }
+
+    public void setStatus(String newStatus) {
+        setStatus(newStatus, true);
     }
 
     public String getName() {
@@ -483,20 +487,10 @@ public class Player extends JSONStringBuilder implements Comparable, Cloneable {
     }
 
     public void activateNextStatus() {
-        String next = this.nextStatus.equals("") ? WAIT : this.nextStatus;
-        this.nextStatus = "";
-        this.setStatus(next);
+        String nextStat = this.nextStatus;
+        this.nextStatus = WAIT;
+        this.setStatus(nextStat);
     }
-
-    public boolean isDeactivated() {
-        return isDeactivated;
-    }
-
-    public void setDeactivated(boolean deactivated) {
-        this.status = WAIT;
-        isDeactivated = deactivated;
-    }
-    //endregion
 
     @Override
     public String toJSONString_Unknown() {
@@ -533,6 +527,15 @@ public class Player extends JSONStringBuilder implements Comparable, Cloneable {
     @Override
     public String toString() {
         return "ID: " + id + "_Name:" + this.getName() + "_Farbe:" + this.getColor() + "_Status:" + this.getStatus();
+    }
+
+    @Override
+    public boolean equals(Object object) {
+        if (object instanceof Player) {
+            Player player = (Player) object;
+            return this.getId() == player.getId();
+        }
+        return false;
     }
 
     public List<Building> getBuildings(BuildingType type) {

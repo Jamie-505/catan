@@ -9,6 +9,7 @@ import static de.lmu.settlebattle.catanclient.utils.Constants.BUILD_STREET;
 import static de.lmu.settlebattle.catanclient.utils.Constants.BUILD_TRADE;
 import static de.lmu.settlebattle.catanclient.utils.Constants.BUILD_VILLAGE;
 import static de.lmu.settlebattle.catanclient.utils.Constants.CARD_BUY;
+import static de.lmu.settlebattle.catanclient.utils.Constants.CARD_KNIGHT;
 import static de.lmu.settlebattle.catanclient.utils.Constants.CHAT_IN;
 import static de.lmu.settlebattle.catanclient.utils.Constants.DICE_RESULT;
 import static de.lmu.settlebattle.catanclient.utils.Constants.DICE_THROW;
@@ -73,6 +74,8 @@ import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 import de.lmu.settlebattle.catanclient.MainActivityFragment.FragmentHandler;
 import de.lmu.settlebattle.catanclient.chat.ChatFragment;
 import de.lmu.settlebattle.catanclient.chat.ChatMessage;
+import de.lmu.settlebattle.catanclient.devCards.InventionFragment;
+import de.lmu.settlebattle.catanclient.devCards.MonopoleFragment;
 import de.lmu.settlebattle.catanclient.dice.DiceFragment;
 import de.lmu.settlebattle.catanclient.grid.Board;
 import de.lmu.settlebattle.catanclient.grid.Construction;
@@ -113,8 +116,9 @@ public class MainActivity extends BaseSocketActivity implements FragmentHandler 
   // LogCat tag
   private static final String TAG = MainActivity.class.getSimpleName();
 
-  private boolean isItTimeToBuild;
   private boolean enableRobber;
+  private boolean isItTimeToBuild;
+  private boolean viaKnightCard;
   private Player self;
 
   private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
@@ -580,9 +584,9 @@ public class MainActivity extends BaseSocketActivity implements FragmentHandler 
           enableRobber = false;
           showFragmentNoBackstack(robberFragment);
         } else if (cV.getOwners().size() == 1) {
-          sendRobberMsg(cV.getOwners().get(0));
+          sendRobberMsg(cV.getOwners().get(0), viaKnightCard);
         } else {
-          sendRobberMsg(null);
+          sendRobberMsg(null, viaKnightCard);
         }
       }
     }
@@ -601,6 +605,25 @@ public class MainActivity extends BaseSocketActivity implements FragmentHandler 
     } catch (Exception e) {
       e.printStackTrace();
     }
+  }
+
+  private void playInventionCard() {
+    hideActiveElements();
+    displayMessage("Monopolkarte gespielt: Wähle einen Rohstoff!");
+    showFragmentNoBackstack(new InventionFragment());
+  }
+
+  private void playKnightCard() {
+    viaKnightCard = true;
+    enableRobber = true;
+    hideActiveElements();
+    displayMessage("Ritterkarte gespielt: Versetze den Räuber!");
+  }
+
+  private void playMonoCard() {
+    hideActiveElements();
+    displayMessage("Monopolkarte gespielt: Wähle einen Rohstoff!");
+    showFragmentNoBackstack(new MonopoleFragment());
   }
 
   private void reactToIntent(Intent intent) {
@@ -709,9 +732,14 @@ public class MainActivity extends BaseSocketActivity implements FragmentHandler 
     }
   }
 
-  public void sendRobberMsg(Integer id) {
+  public void sendRobberMsg(Integer id, boolean viaKnight) {
     Robber r = new Robber(currentRobberTile.getHex().getLocation(), id);
-    mService.sendMessage(createJSONString(ROBBER_TO, r));
+    if (viaKnight) {
+      mService.sendMessage(createJSONString(CARD_KNIGHT, r));
+    } else {
+      mService.sendMessage(createJSONString(ROBBER_TO, r));
+    }
+    viaKnightCard = false;
   }
 
   private void setClickListener() {

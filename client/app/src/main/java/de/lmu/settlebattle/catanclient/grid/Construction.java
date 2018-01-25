@@ -21,7 +21,7 @@ public class Construction {
     STREET,
 
     @SerializedName("")
-    NONE;
+    NONE
   }
 
   public Construction(int owner, ConstructionType type, Location[] locations, String viewId) {

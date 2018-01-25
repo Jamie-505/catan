@@ -76,5 +76,10 @@
   <string name="toss_cards_bc_robber">Karten wegen Räuber abgeben</string>
   <string name="trade">Tausche!</string>
   <string name="choose_color">Wähle deine Farbe:</string>
+  <string name="claim_resource">Rohstoff eintreiben</string>
+  <string name="monopole_choice">Wähle dein Monopol:</string>
+  <string name="second_raw_material">2. Rohstoff</string>
+  <string name="first_raw_material">1. Rohstoff</string>
+  <string name="choose_raw_materials">Rohstoffe wählen</string>
 
 </resources>

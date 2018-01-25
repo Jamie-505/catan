@@ -259,6 +259,7 @@ public class DomTradeFragment extends MainActivityFragment {
                 finalTrade.opponent = id;
                 String answer = JSONUtils.createJSONString(TRD_SEL, finalTrade);
                 fragHandler.sendMsgToServer(answer);
+                closeFragment();
               });
               playerStatus.setClickable(true);
             } else {

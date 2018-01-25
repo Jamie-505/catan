@@ -87,6 +87,7 @@ public final class Constants {
   public final static String OWNER = "Owner";
   public final static String LOCATION = "Ort";
   public final static String PROTOCOL = "Protokoll";
+  public final static String RAW_MATERIAL = "Rohstoff";
   public final static String REQUEST = "Nachfrage";
   public final static String ROAD_CONSTRUCTION = "Straßenbau";
   public final static String SENDER = "Absender";

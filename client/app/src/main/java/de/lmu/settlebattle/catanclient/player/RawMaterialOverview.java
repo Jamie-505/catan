@@ -1,6 +1,12 @@
 package de.lmu.settlebattle.catanclient.player;
 
-import static de.lmu.settlebattle.catanclient.utils.Constants.*;
+import static de.lmu.settlebattle.catanclient.utils.Constants.CLAY;
+import static de.lmu.settlebattle.catanclient.utils.Constants.ORE;
+import static de.lmu.settlebattle.catanclient.utils.Constants.UNKNOWN;
+import static de.lmu.settlebattle.catanclient.utils.Constants.WHEAT;
+import static de.lmu.settlebattle.catanclient.utils.Constants.WOOD;
+import static de.lmu.settlebattle.catanclient.utils.Constants.WOOL;
+
 import com.google.gson.annotations.SerializedName;
 
 public class RawMaterialOverview {
@@ -21,13 +27,7 @@ public class RawMaterialOverview {
   private int oreCount;
 
   @SerializedName(UNKNOWN)
-  private int unknown;
-
-  //region Constructors
-  public RawMaterialOverview() {
-    this.clayCount = this.oreCount = this.woodCount =
-        this.woolCount = this.wheatCount = 0;
-  }
+  private int unknownCnt;
 
   public RawMaterialOverview(int initAmount) {
     this.clayCount = this.oreCount = this.woodCount =
@@ -51,7 +51,6 @@ public class RawMaterialOverview {
   }
 
   public RawMaterialOverview(String type, int initAmount) {
-    this();
     switch (type) {
       case WHEAT:
         wheatCount = initAmount;
@@ -68,6 +67,31 @@ public class RawMaterialOverview {
       case WOOD:
         woodCount = initAmount;
         break;
+    }
+  }
+
+  public RawMaterialOverview(String... types) {
+    for (String type : types) {
+      switch (type) {
+        case WOOD:
+          this.woodCount++;
+          break;
+        case CLAY:
+          this.clayCount++;
+          break;
+        case WOOL:
+          this.woolCount++;
+          break;
+        case WHEAT:
+          this.wheatCount++;
+          break;
+        case ORE:
+          this.oreCount++;
+          break;
+        case UNKNOWN:
+          this.unknownCnt++;
+          break;
+      }
     }
   }
 
@@ -92,7 +116,7 @@ public class RawMaterialOverview {
   }
 
   public int[] getQnts() {
-    return new int[] { woodCount, clayCount, woolCount, wheatCount, oreCount, unknown };
+    return new int[] { woodCount, clayCount, woolCount, wheatCount, oreCount, unknownCnt};
   }
 
   public int getTotalAmnt() {

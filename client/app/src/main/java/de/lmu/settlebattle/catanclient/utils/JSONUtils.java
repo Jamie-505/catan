@@ -93,6 +93,7 @@ public class JSONUtils {
       case TOSS_CARDS_REQ:
       case ROBBER_TO:
       case ROLL_DICE:
+      case STATUS_WAIT:
         return new Object[] { player.status, player };
       default:
         return new Object[] { STATUS_UPD, player };

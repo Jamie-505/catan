@@ -150,6 +150,7 @@ public class MainActivity extends BaseSocketActivity implements FragmentHandler 
   private TextView selfWheatCnt;
   private TextView selfWoodCnt;
   private TextView selfWoolCnt;
+  private TextView infobox;
   private TradeOfferFragment tradeOfferFragment = new TradeOfferFragment();
   private RelativeLayout gridLayout;
 
@@ -250,9 +251,9 @@ public class MainActivity extends BaseSocketActivity implements FragmentHandler 
             break;
         }
         slidingPanel.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
-        displayMessage(selectedItem);
+        displaySnackBar(selectedItem);
       } else {
-        displayMessage("Du kannst gerade nicht bauen, evtl musst du erst Würfeln oder auf deinen Zug warten");
+        displaySnackBar("Du kannst gerade nicht bauen, evtl musst du erst Würfeln oder auf deinen Zug warten");
       }
     });
 
@@ -260,6 +261,10 @@ public class MainActivity extends BaseSocketActivity implements FragmentHandler 
     int colorId = getResources().getIdentifier(self.color.toLowerCase(),
         "color", getPackageName());
     dragPanel.setBackgroundColor(getResources().getColor(colorId));
+    infobox = findViewById(R.id.info_box);
+    int colorIdDark = getResources().getIdentifier(self.color.toLowerCase() + "_dark",
+        "color", getPackageName());
+    infobox.setBackgroundColor(getResources().getColor(colorIdDark));
     slidingPanel.addPanelSlideListener(new SlidingUpPanelLayout.PanelSlideListener() {
       @Override
       public void onPanelSlide(View panel, float slideOffset) {
@@ -286,7 +291,6 @@ public class MainActivity extends BaseSocketActivity implements FragmentHandler 
     });
     slidingPanel.setFadeOnClickListener(
         view -> slidingPanel.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED));
-    slidingPanel.setAnchorPoint(0.6f);
     slidingPanel.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
   }
 
@@ -556,7 +560,7 @@ public class MainActivity extends BaseSocketActivity implements FragmentHandler 
 
   private boolean moveRobber(Location newRobberLoc) {
     if (currentRobberTile.getHex().getLocation() == newRobberLoc) {
-      displayMessage("Der Räuber braucht ein neues Zuhause!");
+      displaySnackBar("Der Räuber braucht ein neues Zuhause!");
       return false;
     } else {
       currentRobberTile.showRobber(false);
@@ -604,7 +608,7 @@ public class MainActivity extends BaseSocketActivity implements FragmentHandler 
 
   private void playInventionCard() {
     hideActiveElements();
-    displayMessage("Monopolkarte gespielt: Wähle einen Rohstoff!");
+    setStatus("Monopolkarte gespielt: Wähle einen Rohstoff!");
     showFragmentNoBackstack(new InventionFragment());
   }
 
@@ -612,12 +616,12 @@ public class MainActivity extends BaseSocketActivity implements FragmentHandler 
     viaKnightCard = true;
     enableRobber = true;
     hideActiveElements();
-    displayMessage("Ritterkarte gespielt: Versetze den Räuber!");
+    setStatus("Ritterkarte gespielt: Versetze den Räuber!");
   }
 
   private void playMonoCard() {
     hideActiveElements();
-    displayMessage("Monopolkarte gespielt: Wähle einen Rohstoff!");
+    setStatus("Monopolkarte gespielt: Wähle einen Rohstoff!");
     showFragmentNoBackstack(new MonopoleFragment());
   }
 
@@ -628,13 +632,13 @@ public class MainActivity extends BaseSocketActivity implements FragmentHandler 
         case BUILD_VILLAGE:
           mViewPager.setCurrentItem(0, true);
           mCardAdapter.getCardViewAt(0).findViewById(R.id.cardContain).setBackgroundColor(Color.WHITE);
-          displayMessage("Du kannst jetzt eine Siedlung bauen");
+          setStatus("Du kannst jetzt eine Siedlung bauen");
           enableConstructionLayer(settlementLayer);
           break;
         case BUILD_STREET:
           mViewPager.setCurrentItem(0, true);
           mCardAdapter.getCardViewAt(0).findViewById(R.id.cardContain).setBackgroundColor(Color.WHITE);
-          displayMessage("Du kannst jetzt eine Staße bauen");
+          setStatus("Du kannst jetzt eine Staße bauen");
           enableConstructionLayer(streetLayer);
           break;
         case BUILD_TRADE:
@@ -644,7 +648,7 @@ public class MainActivity extends BaseSocketActivity implements FragmentHandler 
             // needed because of double status updates from the server
             enableRobber = false;
             isItTimeToBuild = true;
-            displayMessage("Du kannst jetzt bauen und handeln!");
+            setStatus("Du kannst jetzt bauen und handeln!");
             diceBtn.setVisibility(View.INVISIBLE);
             domTradeBtn.setVisibility(View.VISIBLE);
             seaTradeBtn.setVisibility(View.VISIBLE);
@@ -657,7 +661,7 @@ public class MainActivity extends BaseSocketActivity implements FragmentHandler 
           chatFragment.appendMessage(cMsg);
           if (!Storage.isItMe(cMsg.getSenderId())) {
             playBeep();
-            displayMessage("Neue Chatnachricht erhalten");
+            displaySnackBar("Neue Chatnachricht erhalten");
           }
           break;
         case DICE_RESULT:
@@ -668,7 +672,7 @@ public class MainActivity extends BaseSocketActivity implements FragmentHandler 
           showFragmentViaBackstack(diceFragment);
           break;
         case DISPLAY_ERROR:
-          displayMessage(intent.getStringExtra(ERROR_MSG));
+          displaySnackBar(intent.getStringExtra(ERROR_MSG));
           break;
         case NEW_CONSTRUCT:
           disableClickLayers();
@@ -680,7 +684,9 @@ public class MainActivity extends BaseSocketActivity implements FragmentHandler 
           hideFragment(seaTradeFragment);
           break;
         case PLAYER_WAIT:
+          setStatus("Ein anderer Spieler ist am Zug");
           hideActiveElements();
+          updatePlayerViews();
           break;
         case ROBBER:
           Robber robber = gson.fromJson(intent.getStringExtra(ROBBER), Robber.class);
@@ -690,9 +696,10 @@ public class MainActivity extends BaseSocketActivity implements FragmentHandler 
           break;
         case ROBBER_TO:
           enableRobber = true;
-          displayMessage("Setze den Räuber an eine neue Stelle");
+          setStatus("Setze den Räuber an eine neue Stelle");
           break;
         case ROLL_DICE:
+          setStatus("Lass die Würfel rollen!");
           showView(diceBtn);
           mViewPager.setCurrentItem(0, true);
           mCardAdapter.getCardViewAt(0).findViewById(R.id.cardContain).setBackgroundColor(Color.WHITE);
@@ -754,6 +761,7 @@ public class MainActivity extends BaseSocketActivity implements FragmentHandler 
     endTurnBtn.setOnClickListener((View v) -> {
       disableClickLayers();
       isItTimeToBuild = false;
+      infobox.setText("Ein anderer Spieler ist am Zug");
       endTurn();
     });
     seaTradeBtn.setOnClickListener((View v) -> showFragmentViaBackstack(seaTradeFragment));
@@ -903,11 +911,15 @@ public class MainActivity extends BaseSocketActivity implements FragmentHandler 
 
       return grid;
     } catch (Exception e) {
-      displayMessage("Sorry, there was a problem initializing the application.");
+      displaySnackBar("Sorry, there was a problem initializing the application.");
       e.printStackTrace();
     }
 
     return null;
+  }
+
+  private void setStatus(String status) {
+    infobox.setText(status);
   }
 
   private void showConstruction(Construction construction) {
@@ -963,7 +975,7 @@ public class MainActivity extends BaseSocketActivity implements FragmentHandler 
     Player p2 = Storage.getPlayer(t.opponent);
     String msg = String.format("Handel zwischen %s und %s wurde abgeschlossen",
         p1.name, p2.name);
-    displayMessage(msg);
+    displaySnackBar(msg);
   }
 
   private void showView(View v) {
@@ -1032,7 +1044,7 @@ public class MainActivity extends BaseSocketActivity implements FragmentHandler 
   }
   @Override
   public void displayFragMsg(String msg) {
-    displayMessage(msg);
+    displaySnackBar(msg);
   }
 
   @Override

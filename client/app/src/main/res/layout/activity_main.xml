@@ -10,9 +10,9 @@
     android:id="@+id/sliding_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:gravity="bottom"
     app:layout_behavior="de.lmu.settlebattle.catanclient.utils.SnackBarBehaviour"
-    sothree:umanoPanelHeight="60dp"
+    android:gravity="bottom"
+    sothree:umanoPanelHeight="98dp"
     sothree:umanoShadowHeight="4dp">
 
     <!-- MAIN CONTENT -->
@@ -158,20 +158,24 @@
     <LinearLayout
       android:id="@+id/dragView"
       android:layout_width="match_parent"
-      android:layout_height="match_parent"
+      android:layout_height="wrap_content"
       android:clickable="true"
       android:focusable="true"
       android:orientation="vertical">
 
-      <LinearLayout
+      <android.support.constraint.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="68dp">
+        android:layout_height="98dp">
+
 
         <android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
           xmlns:app="http://schemas.android.com/apk/res-auto"
+          android:id="@+id/resource_display"
           android:layout_width="match_parent"
-          android:layout_height="match_parent"
-          android:layout_marginTop="12dp">
+          android:layout_height="68dp"
+          android:paddingTop="12dp"
+          app:layout_constraintBottom_toTopOf="@id/info_box"
+          app:layout_constraintTop_toTopOf="parent">
 
           <ImageView
             android:id="@+id/wood"
@@ -285,7 +289,22 @@
             app:layout_constraintEnd_toStartOf="parent"
             app:layout_constraintStart_toEndOf="@id/card" />
         </android.support.constraint.ConstraintLayout>
-      </LinearLayout>
+
+        <TextView
+          android:id="@+id/info_box"
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content"
+          android:text="Ein anderer Spieler ist am Zug"
+          android:textAlignment="center"
+          android:background="@color/orange_dark"
+          android:textSize="22sp"
+          android:paddingTop="8dp"
+          android:paddingBottom="8dp"
+          sothree:layout_constraintEnd_toEndOf="parent"
+          sothree:layout_constraintStart_toStartOf="parent"
+          sothree:layout_constraintBottom_toBottomOf="parent"
+          sothree:layout_constraintTop_toBottomOf="@id/resource_display"/>
+      </android.support.constraint.ConstraintLayout>
 
       <View
         android:layout_width="match_parent"

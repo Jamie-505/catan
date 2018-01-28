@@ -16,7 +16,6 @@ import static de.lmu.settlebattle.catanclient.utils.Constants.GAME_READY;
 import static de.lmu.settlebattle.catanclient.utils.Constants.GAME_START;
 import static de.lmu.settlebattle.catanclient.utils.Constants.GAME_WAIT;
 import static de.lmu.settlebattle.catanclient.utils.Constants.GET_ID;
-import static de.lmu.settlebattle.catanclient.utils.Constants.MESSAGE;
 import static de.lmu.settlebattle.catanclient.utils.Constants.NEW_CONSTRUCT;
 import static de.lmu.settlebattle.catanclient.utils.Constants.NEXT_ACTIVITY;
 import static de.lmu.settlebattle.catanclient.utils.Constants.OK;
@@ -30,6 +29,7 @@ import static de.lmu.settlebattle.catanclient.utils.Constants.ROBBER_AT;
 import static de.lmu.settlebattle.catanclient.utils.Constants.ROBBER_TO;
 import static de.lmu.settlebattle.catanclient.utils.Constants.ROLL_DICE;
 import static de.lmu.settlebattle.catanclient.utils.Constants.STATUS_UPD;
+import static de.lmu.settlebattle.catanclient.utils.Constants.STATUS_WAIT;
 import static de.lmu.settlebattle.catanclient.utils.Constants.TOSS_CARDS;
 import static de.lmu.settlebattle.catanclient.utils.Constants.TOSS_CARDS_REQ;
 import static de.lmu.settlebattle.catanclient.utils.Constants.TO_SERVER;
@@ -255,6 +255,11 @@ public class WebSocketService extends Service {
       case STATUS_UPD:
         Storage.storePlayer(player);
         broadcast(STATUS_UPD);
+        break;
+      case STATUS_WAIT:
+        if (itsMe) broadcast(PLAYER_WAIT);
+        else broadcast(STATUS_UPD);
+        Storage.storePlayer(player);
         break;
       case TOSS_CARDS_REQ:
         if (itsMe) {

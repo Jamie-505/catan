@@ -27,7 +27,7 @@ public abstract class BaseSocketActivity extends AppCompatActivity {
     public void onReceive(Context context, Intent intent) {
       if (intent.getAction().equals(PLAYER_LEFT)) {
         Player p = Storage.getPlayer(intent.getIntExtra(PLAYER_LEFT, -1));
-        displayMessage(
+        displaySnackBar(
             String.format("%s hat die Verbindung verloren - eine KI übernimmt",
             p.name));
       }
@@ -85,7 +85,7 @@ public abstract class BaseSocketActivity extends AppCompatActivity {
     super.onStop();
   }
 
-  public void displayMessage(String msg){
+  public void displaySnackBar(String msg){
     View layout = findViewById(R.id.contain);
     Snackbar snackbar = Snackbar.make(layout, msg, Snackbar.LENGTH_LONG);
     snackbar.show();

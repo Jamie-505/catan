@@ -70,7 +70,7 @@ public class JSONUtils {
           return new String[] { msgType, jObj.getString(msgType) };
         case HARVEST:
         case COSTS:
-          return new String[] {"TODO"};
+          return new String[] { msgType, jObj.getString(msgType) };
         case DEV_CARD_BOUGHT:
           return new String[] {"TODO"};
         default:
@@ -139,50 +139,5 @@ public class JSONUtils {
     msgMap.put(messageType, body);
     return gson.toJson(msgMap);
   }
-
-//
-//        String sessionId = jObj.getString("sessionId");
-//
-//        // Save the session id in shared preferences
-//        storage.storeSessionId(sessionId);
-//
-//        Log.i(TAG, "Your session id: " + storage.getSessionId());
-//
-//      } else if (flag.equalsIgnoreCase(TAG_NEW)) {
-//        // If the flag is 'new', new person joined the room
-//        String name = jObj.getString("name");
-//        String message = jObj.getString("message");
-//
-//        // number of people online
-//        String onlineCount = jObj.getString("onlineCount");
-//
-//        showToast(name + message + ". Currently " + onlineCount
-//            + " people online!");
-//
-//      } else if (flag.equalsIgnoreCase(TAG_MESSAGE)) {
-//        // if the flag is 'message', new message received
-//        String fromName = name;
-//        String message = jObj.getString("message");
-//        String sessionId = jObj.getString("sessionId");
-//        boolean isSelf = true;
-//
-//        // Checking if the message was sent by you
-//        if (!sessionId.equals(storage.getSessionId())) {
-//          fromName = jObj.getString("name");
-//          isSelf = false;
-//        }
-//
-//        JsonMessage m = new JsonMessage(fromName, message, isSelf);
-//
-//        // Appending the message to chat list
-//        appendMessage(m);
-//
-//      } else if (flag.equalsIgnoreCase(TAG_EXIT)) {
-//        // If the flag is 'exit', somebody left the conversation
-//        String name = jObj.getString("name");
-//        String message = jObj.getString("message");
-//
-//        showToast(name + message);
-//      }
 
 }

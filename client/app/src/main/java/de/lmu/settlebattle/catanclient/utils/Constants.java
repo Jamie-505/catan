@@ -8,7 +8,6 @@ public final class Constants {
   public static final String CARD_BUY = "Entwicklungskarte kaufen";
   public static final String CARD_KNIGHT = "Ritter ausspielen";
   public static final String CARD_RD_CON = "Straßenbaukarte ausspielen";
-  public static final String CARD_SOLD = "Entwicklungskarte gekauft";
   public static final String CHAT_IN = "Chatnachricht";
   public static final String CHAT_OUT = "Chatnachricht senden";
   public static final String COSTS = "Kosten";
@@ -52,11 +51,7 @@ public final class Constants {
   public static final String VICTORY_PTS = "Siegpunkte";
 
   // Broadcast
-  public static final String ACTION_COLOR_ASSIGNED = "colorAssigned";
   public static final String ACTION_CONNECTION_ESTABLISHED = "connectionEstablished";
-  public static final String ACTION_MSG_RECEIVED = "msgReceived";
-  public static final String ACTION_MSG_TO_SEND = "sendMsg";
-  public static final String ACTION_NAME_ASSIGNED = "nameAssigned";
   public static final String ACTION_NETWORK_STATE_CHANGED = "networkStateChanged";
   public static final String DISPLAY_ERROR = "displayMessage";
 	public static final String ERROR_MSG = "errorMsg";
@@ -77,7 +72,6 @@ public final class Constants {
   public final static String CLAY = "Lehm";
   public final static String DICE_THROW = "Wurf";
   public final static String FIELDS = "Felder";
-  public final static String HAVEN = "Hafen";
   public final static String KNIGHT = "Ritter";
   public final static String MONOPOLE = "Monopol";
   public final static String CONTENT = "Nachricht";
@@ -131,17 +125,9 @@ public final class Constants {
   // Service
   public static final String ALL_PLAYERS = "allPlayers";
   public static final String TO_SERVER = "Send To Server";
-  public static final String TO_STORAGE = "Send To Storage";
 
   // Version Constants
   public static final String VERSION_PROTOCOL = "1.0";
   public static final String VERSION_CLIENT = "AndroidClient 0.1 (sepgroup03)";
 
-
-  // FARBEN
-
-  public static final String BLAU = "blau";
-  public static final String WEIS = "weis";
-
-  public static final String LOG_UI = "Die Siedler UI";
 }

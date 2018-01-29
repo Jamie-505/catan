@@ -29,19 +29,6 @@ public class RawMaterialOverview {
   @SerializedName(UNKNOWN)
   private int unknownCnt;
 
-  public RawMaterialOverview(int initAmount) {
-    this.clayCount = this.oreCount = this.woodCount =
-        this.woolCount = this.wheatCount = initAmount;
-  }
-
-  public RawMaterialOverview(int wood, int clay, int wool, int wheat, int ore) {
-    this.clayCount = clay;
-    this.oreCount = ore;
-    this.woodCount = wood;
-    this.woolCount = wool;
-    this.wheatCount = wheat;
-  }
-
   public RawMaterialOverview(int[] qnts) {
     this.woodCount = qnts[0];
     this.clayCount = qnts[1];
@@ -95,25 +82,15 @@ public class RawMaterialOverview {
     }
   }
 
-  public int getClayCount() {
-    return clayCount;
-  }
+  public int getClayCount() { return clayCount; }
 
-  public int getOreCount() {
-    return oreCount;
-  }
+  public int getOreCount() { return oreCount; }
 
-  public int getWheatCount() {
-    return wheatCount;
-  }
+  public int getWheatCount() { return wheatCount; }
 
-  public int getWoodCount() {
-    return woodCount;
-  }
+  public int getWoodCount() { return woodCount; }
 
-  public int getWoolCount() {
-    return woolCount;
-  }
+  public int getWoolCount() { return woolCount; }
 
   public int[] getQnts() {
     return new int[] { woodCount, clayCount, woolCount, wheatCount, oreCount, unknownCnt};
@@ -125,5 +102,43 @@ public class RawMaterialOverview {
       size += q;
     }
     return size;
+  }
+
+  @Override
+  public String toString() {
+    String retVal = "";
+    int[] qnts = getQnts();
+    for (int i = 0; i < qnts.length; i++) {
+      if (qnts[i] > 0) {
+        switch (i) {
+          case 0:
+            retVal += qnts[i] + " Holz, ";
+            break;
+          case 1:
+            retVal += qnts[i] + " Lehm, ";
+            break;
+          case 2:
+            retVal += qnts[i] + " Wolle, ";
+            break;
+          case 3:
+            retVal += qnts[i] + " Getreide, ";
+            break;
+          case 4:
+            retVal += qnts[i] + " Erz, ";
+            break;
+          case 5:
+            retVal += qnts[i] + " unbekannte Rohstoffe, ";
+            break;
+        }
+      }
+    }
+    if (retVal.isEmpty()) {
+      retVal = "keine Rohstoffe";
+    } else {
+      // remove trailing white space and ,
+      retVal = retVal.trim();
+      retVal = retVal.substring(0, retVal.length()-1);
+    }
+    return retVal;
   }
 }

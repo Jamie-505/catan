@@ -65,4 +65,6 @@ dependencies {
     compile 'com.sdsmdg.harjot:vectormaster:1.1.1'
     // number picker
     compile 'com.github.travijuu:numberpicker:1.0.7'
+    // queueable snackbar
+    compile 'com.github.antonygolovin:fluentsnackbar:1.0.0'
 }

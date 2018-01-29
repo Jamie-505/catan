@@ -10,7 +10,6 @@
     android:id="@+id/sliding_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    app:layout_behavior="de.lmu.settlebattle.catanclient.utils.SnackBarBehaviour"
     android:gravity="bottom"
     sothree:umanoPanelHeight="98dp"
     sothree:umanoShadowHeight="4dp">
@@ -172,6 +171,8 @@
           xmlns:app="http://schemas.android.com/apk/res-auto"
           android:id="@+id/resource_display"
           android:layout_width="match_parent"
+          app:layout_constraintStart_toStartOf="parent"
+          app:layout_constraintEnd_toEndOf="parent"
           android:layout_height="68dp"
           android:paddingTop="12dp"
           app:layout_constraintBottom_toTopOf="@id/info_box"
@@ -185,7 +186,7 @@
             app:layout_constraintEnd_toStartOf="@id/slidePnlWoodCnt"
             app:layout_constraintStart_toStartOf="parent" />
 
-          <TextView
+          <TextSwitcher
             android:id="@+id/slidePnlWoodCnt"
             android:layout_width="28dp"
             android:layout_height="match_parent"
@@ -194,7 +195,20 @@
             android:textColor="@color/title_gray"
             android:textSize="28sp"
             app:layout_constraintEnd_toStartOf="@id/brick"
-            app:layout_constraintStart_toEndOf="@id/wood" />
+            app:layout_constraintStart_toEndOf="@id/wood">
+            <TextView
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:text="0"
+              android:textColor="@color/title_gray"
+              android:textSize="28sp" />
+            <TextView
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:text="0"
+              android:textColor="@color/title_gray"
+              android:textSize="28sp" />
+          </TextSwitcher>
 
           <ImageView
             android:id="@+id/brick"
@@ -204,7 +218,7 @@
             app:layout_constraintEnd_toStartOf="@id/slidePnlClayCnt"
             app:layout_constraintStart_toEndOf="@id/slidePnlWoodCnt" />
 
-          <TextView
+          <TextSwitcher
             android:id="@+id/slidePnlClayCnt"
             android:layout_width="28dp"
             android:layout_height="match_parent"
@@ -212,7 +226,20 @@
             android:textColor="@color/title_gray"
             android:textSize="28sp"
             app:layout_constraintEnd_toStartOf="@id/sheep"
-            app:layout_constraintStart_toEndOf="@id/brick" />
+            app:layout_constraintStart_toEndOf="@id/brick">
+            <TextView
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:text="0"
+              android:textColor="@color/title_gray"
+              android:textSize="28sp" />
+            <TextView
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:text="0"
+              android:textColor="@color/title_gray"
+              android:textSize="28sp" />
+          </TextSwitcher>
 
           <ImageView
             android:id="@+id/sheep"
@@ -222,7 +249,7 @@
             app:layout_constraintEnd_toStartOf="@id/slidePnlWoolCnt"
             app:layout_constraintStart_toEndOf="@id/slidePnlClayCnt" />
 
-          <TextView
+          <TextSwitcher
             android:id="@+id/slidePnlWoolCnt"
             android:layout_width="28dp"
             android:layout_height="match_parent"
@@ -231,7 +258,20 @@
             android:textColor="@color/title_gray"
             android:textSize="28sp"
             app:layout_constraintEnd_toStartOf="@id/wheat"
-            app:layout_constraintStart_toEndOf="@id/sheep" />
+            app:layout_constraintStart_toEndOf="@id/sheep">
+            <TextView
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:text="0"
+              android:textColor="@color/title_gray"
+              android:textSize="28sp" />
+            <TextView
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:text="0"
+              android:textColor="@color/title_gray"
+              android:textSize="28sp" />
+          </TextSwitcher>
 
           <ImageView
             android:id="@+id/wheat"
@@ -241,7 +281,7 @@
             app:layout_constraintEnd_toStartOf="@id/slidePnlWheatCnt"
             app:layout_constraintStart_toEndOf="@id/slidePnlWoolCnt" />
 
-          <TextView
+          <TextSwitcher
             android:id="@+id/slidePnlWheatCnt"
             android:layout_width="28dp"
             android:layout_height="match_parent"
@@ -250,7 +290,20 @@
             android:textColor="@color/title_gray"
             android:textSize="28sp"
             app:layout_constraintEnd_toStartOf="@id/iron"
-            app:layout_constraintStart_toEndOf="@id/wheat" />
+            app:layout_constraintStart_toEndOf="@id/wheat">
+            <TextView
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:text="0"
+              android:textColor="@color/title_gray"
+              android:textSize="28sp" />
+            <TextView
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:text="0"
+              android:textColor="@color/title_gray"
+              android:textSize="28sp" />
+          </TextSwitcher>
 
           <ImageView
             android:id="@+id/iron"
@@ -260,7 +313,7 @@
             app:layout_constraintEnd_toStartOf="@id/slidePnlOreCnt"
             app:layout_constraintStart_toEndOf="@id/slidePnlWheatCnt" />
 
-          <TextView
+          <TextSwitcher
             android:id="@+id/slidePnlOreCnt"
             android:layout_width="28dp"
             android:layout_height="match_parent"
@@ -269,8 +322,20 @@
             android:textColor="@color/title_gray"
             android:textSize="28sp"
             app:layout_constraintEnd_toStartOf="@id/card"
-            app:layout_constraintStart_toEndOf="@id/iron" />
-
+            app:layout_constraintStart_toEndOf="@id/iron">
+            <TextView
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:text="0"
+              android:textColor="@color/title_gray"
+              android:textSize="28sp" />
+            <TextView
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:text="0"
+              android:textColor="@color/title_gray"
+              android:textSize="28sp" />
+          </TextSwitcher>
           <ImageView
             android:id="@+id/card"
             android:layout_width="28dp"
@@ -279,7 +344,7 @@
             app:layout_constraintEnd_toStartOf="@id/slidePnlDevCardCnt"
             app:layout_constraintStart_toEndOf="@id/slidePnlOreCnt" />
 
-          <TextView
+          <TextSwitcher
             android:id="@+id/slidePnlDevCardCnt"
             android:layout_width="28dp"
             android:layout_height="match_parent"
@@ -287,23 +352,47 @@
             android:textColor="@color/title_gray"
             android:textSize="28sp"
             app:layout_constraintEnd_toStartOf="parent"
-            app:layout_constraintStart_toEndOf="@id/card" />
+            app:layout_constraintStart_toEndOf="@id/card" >
+            <TextView
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:text="0"
+              android:textColor="@color/title_gray"
+              android:textSize="28sp" />
+            <TextView
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:text="0"
+              android:textColor="@color/title_gray"
+              android:textSize="28sp" />
+          </TextSwitcher>
         </android.support.constraint.ConstraintLayout>
 
-        <TextView
+        <TextSwitcher
           android:id="@+id/info_box"
           android:layout_width="match_parent"
           android:layout_height="wrap_content"
           android:text="Ein anderer Spieler ist am Zug"
           android:textAlignment="center"
-          android:background="@color/orange_dark"
           android:textSize="22sp"
           android:paddingTop="8dp"
           android:paddingBottom="8dp"
           sothree:layout_constraintEnd_toEndOf="parent"
           sothree:layout_constraintStart_toStartOf="parent"
           sothree:layout_constraintBottom_toBottomOf="parent"
-          sothree:layout_constraintTop_toBottomOf="@id/resource_display"/>
+          sothree:layout_constraintTop_toBottomOf="@id/resource_display">
+          <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Ein anderer Spieler ist am Zug"
+            android:textAlignment="center"
+            android:textSize="22sp"/>
+          <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textAlignment="center"
+            android:textSize="22sp"/>
+        </TextSwitcher>
       </android.support.constraint.ConstraintLayout>
 
       <View

@@ -7,6 +7,7 @@ import static de.lmu.settlebattle.catanclient.utils.Constants.BUILD_STREET;
 import static de.lmu.settlebattle.catanclient.utils.Constants.BUILD_TRADE;
 import static de.lmu.settlebattle.catanclient.utils.Constants.BUILD_VILLAGE;
 import static de.lmu.settlebattle.catanclient.utils.Constants.CHAT_IN;
+import static de.lmu.settlebattle.catanclient.utils.Constants.COSTS;
 import static de.lmu.settlebattle.catanclient.utils.Constants.DICE_RESULT;
 import static de.lmu.settlebattle.catanclient.utils.Constants.DICE_THROW;
 import static de.lmu.settlebattle.catanclient.utils.Constants.DISPLAY_ERROR;
@@ -16,6 +17,7 @@ import static de.lmu.settlebattle.catanclient.utils.Constants.GAME_READY;
 import static de.lmu.settlebattle.catanclient.utils.Constants.GAME_START;
 import static de.lmu.settlebattle.catanclient.utils.Constants.GAME_WAIT;
 import static de.lmu.settlebattle.catanclient.utils.Constants.GET_ID;
+import static de.lmu.settlebattle.catanclient.utils.Constants.HARVEST;
 import static de.lmu.settlebattle.catanclient.utils.Constants.NEW_CONSTRUCT;
 import static de.lmu.settlebattle.catanclient.utils.Constants.NEXT_ACTIVITY;
 import static de.lmu.settlebattle.catanclient.utils.Constants.OK;
@@ -178,6 +180,13 @@ public class WebSocketService extends Service {
         Intent newChat = new Intent(CHAT_IN);
         newChat.putExtra(CHAT_IN, mail[1].toString());
         broadcast(newChat);
+        break;
+      case COSTS:
+      case HARVEST:
+        String type = mail[0].toString();
+        Intent harvest = new Intent(type);
+        harvest.putExtra(type, mail[1].toString());
+        broadcast(harvest);
         break;
       case DICE_RESULT:
         Intent diceResult = new Intent(DICE_RESULT);

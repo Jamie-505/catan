@@ -11,11 +11,13 @@ import static de.lmu.settlebattle.catanclient.utils.Constants.BUILD_VILLAGE;
 import static de.lmu.settlebattle.catanclient.utils.Constants.CARD_BUY;
 import static de.lmu.settlebattle.catanclient.utils.Constants.CARD_KNIGHT;
 import static de.lmu.settlebattle.catanclient.utils.Constants.CHAT_IN;
+import static de.lmu.settlebattle.catanclient.utils.Constants.COSTS;
 import static de.lmu.settlebattle.catanclient.utils.Constants.DICE_RESULT;
 import static de.lmu.settlebattle.catanclient.utils.Constants.DICE_THROW;
 import static de.lmu.settlebattle.catanclient.utils.Constants.DISPLAY_ERROR;
 import static de.lmu.settlebattle.catanclient.utils.Constants.END_TURN;
 import static de.lmu.settlebattle.catanclient.utils.Constants.ERROR_MSG;
+import static de.lmu.settlebattle.catanclient.utils.Constants.HARVEST;
 import static de.lmu.settlebattle.catanclient.utils.Constants.LOCATION;
 import static de.lmu.settlebattle.catanclient.utils.Constants.NEW_CONSTRUCT;
 import static de.lmu.settlebattle.catanclient.utils.Constants.OK;
@@ -51,14 +53,10 @@ import android.media.Ringtone;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Bundle;
-import android.support.design.widget.Snackbar;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.ViewPager;
 import android.support.v7.widget.CardView;
-import android.text.BoringLayout.Metrics;
-import android.util.DisplayMetrics;
 import android.util.Log;
-import android.util.TypedValue;
 import android.view.Display;
 import android.view.Gravity;
 import android.view.MotionEvent;
@@ -69,6 +67,7 @@ import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
+import android.widget.TextSwitcher;
 import android.widget.TextView;
 import com.google.gson.Gson;
 import com.sdsmdg.harjot.vectormaster.VectorMasterDrawable;
@@ -79,8 +78,10 @@ import de.lmu.settlebattle.catanclient.chat.ChatFragment;
 import de.lmu.settlebattle.catanclient.chat.ChatMessage;
 import de.lmu.settlebattle.catanclient.devCards.InventionFragment;
 import de.lmu.settlebattle.catanclient.devCards.MonopoleFragment;
+import de.lmu.settlebattle.catanclient.dice.Dice;
 import de.lmu.settlebattle.catanclient.dice.DiceFragment;
 import de.lmu.settlebattle.catanclient.grid.Board;
+import de.lmu.settlebattle.catanclient.grid.CircleImageView;
 import de.lmu.settlebattle.catanclient.grid.Construction;
 import de.lmu.settlebattle.catanclient.grid.Construction.ConstructionType;
 import de.lmu.settlebattle.catanclient.grid.ConstructionsLayer;
@@ -111,6 +112,8 @@ import de.lmu.settlebattle.catanclient.trade.DomTradeFragment;
 import de.lmu.settlebattle.catanclient.trade.SeaTradeFragment;
 import de.lmu.settlebattle.catanclient.trade.Trade;
 import de.lmu.settlebattle.catanclient.trade.TradeOfferFragment;
+import de.lmu.settlebattle.catanclient.utils.Harvest;
+import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -144,13 +147,14 @@ public class MainActivity extends BaseSocketActivity implements FragmentHandler 
   private CircleImageView currentRobberTile;
   private SeaTradeFragment seaTradeFragment = new SeaTradeFragment();
   private SlidingUpPanelLayout slidingPanel;
-  private TextView selfClayCnt;
-  private TextView selfDevCardCnt;
-  private TextView selfOreCnt;
-  private TextView selfWheatCnt;
-  private TextView selfWoodCnt;
-  private TextView selfWoolCnt;
-  private TextView infobox;
+  private TextSwitcher selfClayCnt;
+  private TextSwitcher selfDevCardCnt;
+  private TextSwitcher selfOreCnt;
+  private TextSwitcher selfWheatCnt;
+  private TextSwitcher selfWoodCnt;
+  private TextSwitcher selfWoolCnt;
+  private TextSwitcher infoBox;
+  private TextSwitcher[] textSwitchers;
   private TradeOfferFragment tradeOfferFragment = new TradeOfferFragment();
   private RelativeLayout gridLayout;
 
@@ -186,6 +190,7 @@ public class MainActivity extends BaseSocketActivity implements FragmentHandler 
     domTradeBtn = findViewById(R.id.dom_trade_btn);
     endTurnBtn = findViewById(R.id.end_turn_btn);
     gridLayout = findViewById(R.id.gridLayout);
+    infoBox = findViewById(R.id.info_box);
     seaTradeBtn = findViewById(R.id.seatrade_btn);
     selfClayCnt = findViewById(R.id.slidePnlClayCnt);
     selfDevCardCnt = findViewById(R.id.slidePnlDevCardCnt);
@@ -196,6 +201,14 @@ public class MainActivity extends BaseSocketActivity implements FragmentHandler 
     settlementLayer = findViewById(R.id.layerSettlements);
     slidingPanel = findViewById(R.id.sliding_layout);
     streetLayer = findViewById(R.id.layerStreets);
+
+    textSwitchers = new TextSwitcher[] { selfWoodCnt, selfClayCnt, selfWoolCnt,
+            selfWheatCnt, selfOreCnt, selfDevCardCnt };
+
+    for (TextSwitcher tS : textSwitchers) {
+      tS.setInAnimation(this, android.R.anim.slide_in_left);
+      tS.setOutAnimation(this, android.R.anim.slide_out_right);
+    }
 
     setClickListener();
 
@@ -251,9 +264,9 @@ public class MainActivity extends BaseSocketActivity implements FragmentHandler 
             break;
         }
         slidingPanel.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
-        displaySnackBar(selectedItem);
+        displaySnackBar(selectedItem, null);
       } else {
-        displaySnackBar("Du kannst gerade nicht bauen, evtl musst du erst Würfeln oder auf deinen Zug warten");
+        displaySnackBar("Du kannst gerade nicht bauen, evtl musst du erst Würfeln oder auf deinen Zug warten", null);
       }
     });
 
@@ -261,10 +274,11 @@ public class MainActivity extends BaseSocketActivity implements FragmentHandler 
     int colorId = getResources().getIdentifier(self.color.toLowerCase(),
         "color", getPackageName());
     dragPanel.setBackgroundColor(getResources().getColor(colorId));
-    infobox = findViewById(R.id.info_box);
     int colorIdDark = getResources().getIdentifier(self.color.toLowerCase() + "_dark",
         "color", getPackageName());
-    infobox.setBackgroundColor(getResources().getColor(colorIdDark));
+    infoBox.setBackgroundColor(getResources().getColor(colorIdDark));
+    infoBox.setInAnimation(this, android.R.anim.slide_in_left);
+    infoBox.setOutAnimation(this, android.R.anim.slide_out_right);
     slidingPanel.addPanelSlideListener(new SlidingUpPanelLayout.PanelSlideListener() {
       @Override
       public void onPanelSlide(View panel, float slideOffset) {
@@ -560,7 +574,7 @@ public class MainActivity extends BaseSocketActivity implements FragmentHandler 
 
   private boolean moveRobber(Location newRobberLoc) {
     if (currentRobberTile.getHex().getLocation() == newRobberLoc) {
-      displaySnackBar("Der Räuber braucht ein neues Zuhause!");
+      displaySnackBar("Der Räuber braucht ein neues Zuhause!", null);
       return false;
     } else {
       currentRobberTile.showRobber(false);
@@ -659,20 +673,46 @@ public class MainActivity extends BaseSocketActivity implements FragmentHandler 
           ChatMessage cMsg = gson.fromJson(
               intent.getStringExtra(CHAT_IN), ChatMessage.class);
           chatFragment.appendMessage(cMsg);
+          p = Storage.getPlayer(cMsg.getSenderId());
           if (!Storage.isItMe(cMsg.getSenderId())) {
             playBeep();
-            displaySnackBar("Neue Chatnachricht erhalten");
+            String text = String.format(Locale.GERMAN,
+               "Neue Chatnachricht von %s erhalten", p.name);
+            displaySnackBar(text, cMsg.getSenderId());
+          }
+          break;
+        case COSTS:
+          Harvest costs = gson.fromJson(intent.getStringExtra(COSTS), Harvest.class);
+          if (Storage.isItMe(costs.getPlayerId())) {
+            String update = "Dir wurden " + costs.getRawMaterials() + " abgezogen!";
+            displaySnackBar(update, costs.getPlayerId());
           }
           break;
         case DICE_RESULT:
-          Bundle diceBundle = new Bundle();
-          diceBundle.putString(DICE_THROW, intent.getStringExtra(DICE_THROW));
-          DiceFragment diceFragment = new DiceFragment();
-          diceFragment.setArguments(diceBundle);
-          showFragmentViaBackstack(diceFragment);
+          Dice dice = gson.fromJson(intent.getStringExtra(DICE_THROW), Dice.class);
+          if (Storage.isItMe(dice.getPlayerId())) {
+            Bundle diceBundle = new Bundle();
+            diceBundle.putString(DICE_THROW, intent.getStringExtra(DICE_THROW));
+            DiceFragment diceFragment = new DiceFragment();
+            diceFragment.setArguments(diceBundle);
+            showFragmentViaBackstack(diceFragment);
+          } else {
+            String name = Storage.getPlayer(dice.getPlayerId()).name;
+            int sum = dice.getSum();
+            String text = String.format(
+                Locale.GERMAN, "%s hat eine %d gewürfelt", name, sum);
+            displaySnackBar(text, dice.getPlayerId());
+          }
           break;
         case DISPLAY_ERROR:
-          displaySnackBar(intent.getStringExtra(ERROR_MSG));
+          displaySnackBar(intent.getStringExtra(ERROR_MSG), null);
+          break;
+        case HARVEST:
+          Harvest harvest = gson.fromJson(intent.getStringExtra(HARVEST), Harvest.class);
+          if (Storage.isItMe(harvest.getPlayerId())) {
+            String update = "Du hast " + harvest.getRawMaterials() + " erhalten!";
+            displaySnackBar(update, harvest.getPlayerId());
+          }
           break;
         case NEW_CONSTRUCT:
           disableClickLayers();
@@ -761,7 +801,7 @@ public class MainActivity extends BaseSocketActivity implements FragmentHandler 
     endTurnBtn.setOnClickListener((View v) -> {
       disableClickLayers();
       isItTimeToBuild = false;
-      infobox.setText("Ein anderer Spieler ist am Zug");
+      infoBox.setText("Ein anderer Spieler ist am Zug");
       endTurn();
     });
     seaTradeBtn.setOnClickListener((View v) -> showFragmentViaBackstack(seaTradeFragment));
@@ -773,8 +813,10 @@ public class MainActivity extends BaseSocketActivity implements FragmentHandler 
     filter.addAction(BUILD_STREET);
     filter.addAction(BUILD_TRADE);
     filter.addAction(CHAT_IN);
+    filter.addAction(COSTS);
     filter.addAction(DICE_RESULT);
     filter.addAction(DISPLAY_ERROR);
+    filter.addAction(HARVEST);
     filter.addAction(NEW_CONSTRUCT);
     filter.addAction(OK);
     filter.addAction(PLAYER_WAIT);
@@ -866,7 +908,7 @@ public class MainActivity extends BaseSocketActivity implements FragmentHandler 
         } else {
           Integer pic = (Integer) storageMap.getObjectByCoordinate(hex.getX(), hex.getY());
           if(pic == null) {
-            view.setImageResource(R.drawable.wheat_field);
+            view.setImageResource(R.drawable.desert_field);
           } else {
             view = new CircleImageView(this);
             if(pic != 0) {
@@ -911,7 +953,7 @@ public class MainActivity extends BaseSocketActivity implements FragmentHandler 
 
       return grid;
     } catch (Exception e) {
-      displaySnackBar("Sorry, there was a problem initializing the application.");
+      displaySnackBar("Sorry, there was a problem initializing the application.", null);
       e.printStackTrace();
     }
 
@@ -919,7 +961,7 @@ public class MainActivity extends BaseSocketActivity implements FragmentHandler 
   }
 
   private void setStatus(String status) {
-    infobox.setText(status);
+    infoBox.setText(status);
   }
 
   private void showConstruction(Construction construction) {
@@ -975,7 +1017,7 @@ public class MainActivity extends BaseSocketActivity implements FragmentHandler 
     Player p2 = Storage.getPlayer(t.opponent);
     String msg = String.format("Handel zwischen %s und %s wurde abgeschlossen",
         p1.name, p2.name);
-    displaySnackBar(msg);
+    displaySnackBar(msg, null);
   }
 
   private void showView(View v) {
@@ -1029,12 +1071,21 @@ public class MainActivity extends BaseSocketActivity implements FragmentHandler 
   private void updateSlidePanel() {
     self = Storage.getSelf();
     RawMaterialOverview res = self.rawMaterials;
-    selfClayCnt.setText(String.valueOf(res.getClayCount()));
-    selfOreCnt.setText(String.valueOf(res.getOreCount()));
-    selfWheatCnt.setText(String.valueOf(res.getWheatCount()));
-    selfWoodCnt.setText(String.valueOf(res.getWoodCount()));
-    selfWoolCnt.setText(String.valueOf(res.getWoolCount()));
-    selfDevCardCnt.setText(String.valueOf(self.devCards.getTotalAmnt()));
+    int[] qnts = res.getQnts();
+    for (int i = 0; i < textSwitchers.length; i++) {
+      TextView textView = (TextView) textSwitchers[i].getCurrentView();
+      String current = textView.getText().toString();
+      String update = String.valueOf(qnts[i]);
+      if (!current.equals(update)) {
+        textSwitchers[i].setText(update);
+      }
+    }
+    TextView devCard = (TextView) selfDevCardCnt.getCurrentView();
+    String current = devCard.getText().toString();
+    String update = String.valueOf(self.devCards.getTotalAmnt());
+    if (!current.equals(update)) {
+      selfDevCardCnt.setText(update);
+    }
   }
 
 // --------------------- interface methods ---------------------------------
@@ -1044,7 +1095,7 @@ public class MainActivity extends BaseSocketActivity implements FragmentHandler 
   }
   @Override
   public void displayFragMsg(String msg) {
-    displaySnackBar(msg);
+    displaySnackBar(msg, self.id);
   }
 
   @Override
@@ -1059,4 +1110,3 @@ public class MainActivity extends BaseSocketActivity implements FragmentHandler 
     mService.sendMessage(msg);
   }
 }
-

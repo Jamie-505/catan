@@ -1,4 +1,4 @@
-package de.lmu.settlebattle.catanclient;
+package de.lmu.settlebattle.catanclient.grid;
 
 import static de.lmu.settlebattle.catanclient.utils.Constants.CLAY;
 import static de.lmu.settlebattle.catanclient.utils.Constants.ORE;
@@ -26,6 +26,7 @@ import android.support.v7.widget.AppCompatImageView;
 import android.util.AttributeSet;
 
 import android.view.Gravity;
+import de.lmu.settlebattle.catanclient.R;
 import de.lmu.settlebattle.catanclient.grid.Hex;
 import de.lmu.settlebattle.catanclient.grid.building.BuildingView;
 import java.util.ArrayList;

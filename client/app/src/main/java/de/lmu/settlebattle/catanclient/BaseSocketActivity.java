@@ -14,13 +14,14 @@ import android.support.design.widget.Snackbar;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
-import android.view.View;
+import com.golovin.fluentstackbar.FluentSnackbar;
 import de.lmu.settlebattle.catanclient.network.WebSocketService;
 import de.lmu.settlebattle.catanclient.player.Player;
 import de.lmu.settlebattle.catanclient.player.Storage;
 
 public abstract class BaseSocketActivity extends AppCompatActivity {
 
+  protected FluentSnackbar snackbar;
   protected IntentFilter filter;
   protected BroadcastReceiver superBcReceiver = new BroadcastReceiver() {
     @Override
@@ -29,7 +30,7 @@ public abstract class BaseSocketActivity extends AppCompatActivity {
         Player p = Storage.getPlayer(intent.getIntExtra(PLAYER_LEFT, -1));
         displaySnackBar(
             String.format("%s hat die Verbindung verloren - eine KI übernimmt",
-            p.name));
+            p.name), p.id);
       }
     }
   };
@@ -41,6 +42,8 @@ public abstract class BaseSocketActivity extends AppCompatActivity {
   @Override
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
+
+    snackbar = FluentSnackbar.create(this);
 
     filter = new IntentFilter(PLAYER_LEFT);
     LocalBroadcastManager.getInstance(this).registerReceiver(superBcReceiver, filter);
@@ -85,10 +88,13 @@ public abstract class BaseSocketActivity extends AppCompatActivity {
     super.onStop();
   }
 
-  public void displaySnackBar(String msg){
-    View layout = findViewById(R.id.contain);
-    Snackbar snackbar = Snackbar.make(layout, msg, Snackbar.LENGTH_LONG);
-    snackbar.show();
+  public void displaySnackBar(String msg, Integer playerId){
+    int color = R.color.colorLightGray;
+    if (playerId != null) {
+      Player p = Storage.getPlayer(playerId);
+      color = getResources().getIdentifier(p.color.toLowerCase() , "color", getPackageName());
+    }
+    snackbar.create(msg).textColorRes(color).important().show();
   }
 
 }

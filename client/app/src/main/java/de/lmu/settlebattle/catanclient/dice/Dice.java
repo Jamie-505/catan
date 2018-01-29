@@ -9,16 +9,14 @@ import java.util.Arrays;
 public class Dice {
 
   @SerializedName(PLAYER)
-  private int player;
+  private int playerId;
 
   @SerializedName(DICE_THROW)
   private int[] dice;
 
-  public int[] getDice() {
-    return dice;
-  }
+  public int[] getDice() { return dice; }
 
-  public int getSum() {
-    return Arrays.stream(dice).sum();
-  }
+  public int getSum() { return Arrays.stream(dice).sum(); }
+
+  public int getPlayerId() { return playerId; }
 }

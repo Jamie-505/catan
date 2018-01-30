@@ -81,7 +81,7 @@ public class SelectPlayerActivity extends BaseSocketActivity {
   }
 
   public void displayError(String eMsg){
-    View layout = findViewById(R.id.constraint);
+    View layout = findViewById(R.id.contain);
 	  Snackbar snackbar = Snackbar.make(layout, eMsg, Snackbar.LENGTH_LONG);
 	  snackbar.show();
 	}

@@ -16,10 +16,12 @@ import static de.lmu.settlebattle.catanclient.utils.Constants.GAME_READY;
 import static de.lmu.settlebattle.catanclient.utils.Constants.GAME_START;
 import static de.lmu.settlebattle.catanclient.utils.Constants.GAME_WAIT;
 import static de.lmu.settlebattle.catanclient.utils.Constants.GET_ID;
+import static de.lmu.settlebattle.catanclient.utils.Constants.MESSAGE;
 import static de.lmu.settlebattle.catanclient.utils.Constants.NEW_CONSTRUCT;
 import static de.lmu.settlebattle.catanclient.utils.Constants.NEXT_ACTIVITY;
 import static de.lmu.settlebattle.catanclient.utils.Constants.OK;
 import static de.lmu.settlebattle.catanclient.utils.Constants.PLAYER;
+import static de.lmu.settlebattle.catanclient.utils.Constants.PLAYER_LEFT;
 import static de.lmu.settlebattle.catanclient.utils.Constants.PLAYER_UPDATE;
 import static de.lmu.settlebattle.catanclient.utils.Constants.PLAYER_WAIT;
 import static de.lmu.settlebattle.catanclient.utils.Constants.PROTOCOL_SUPPORTED;
@@ -220,6 +222,12 @@ public class WebSocketService extends Service {
         break;
       case OK:
         broadcast(OK);
+        break;
+      case PLAYER_LEFT:
+        int id = Integer.valueOf(mail[1].toString());
+        Intent playerLeft = new Intent(PLAYER_LEFT);
+        playerLeft.putExtra(PLAYER_LEFT, id);
+        broadcast(playerLeft);
         break;
       case ROBBER_AT:
         String robberStr = mail[1].toString();

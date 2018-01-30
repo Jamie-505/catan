@@ -46,9 +46,12 @@ public class JSONUtils {
           return new Object[] { GET_ID, player };
         case HANDSHAKE:
           return completeHandshake(jObj.getJSONObject(HANDSHAKE));
+        case MESSAGE:
+          JSONObject pLeft = jObj.getJSONObject(MESSAGE);
+          return new String[] { PLAYER_LEFT, pLeft.getString(PLAYER_LEFT) };
         case NEW_CONSTRUCT:
-          String constuct = jObj.getString(NEW_CONSTRUCT);
-          return new String[] {NEW_CONSTRUCT, constuct };
+          String construct = jObj.getString(NEW_CONSTRUCT);
+          return new String[] { NEW_CONSTRUCT, construct };
         case SERVER_RES:
           return new String[] { OK };
         case STATUS_UPD:

@@ -86,6 +86,7 @@ public final class Constants {
   public final static String ORE = "Erz";
   public final static String OWNER = "Owner";
   public final static String LOCATION = "Ort";
+  public final static String PLAYER_LEFT = "Spieler ist weg";
   public final static String PROTOCOL = "Protokoll";
   public final static String RAW_MATERIAL = "Rohstoff";
   public final static String REQUEST = "Nachfrage";
@@ -142,4 +143,5 @@ public final class Constants {
   public static final String BLAU = "blau";
   public static final String WEIS = "weis";
 
+  public static final String LOG_UI = "Die Siedler UI";
 }

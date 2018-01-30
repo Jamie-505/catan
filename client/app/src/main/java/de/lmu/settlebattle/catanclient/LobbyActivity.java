@@ -29,7 +29,7 @@ import java.lang.reflect.Type;
 
 public class LobbyActivity extends BaseSocketActivity {
 
-  private Player[] players = new Player[4];
+  private Player[] players;
   private Gson gson = new Gson();
 
   private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
@@ -40,11 +40,9 @@ public class LobbyActivity extends BaseSocketActivity {
         startGame.putExtra(BOARD, intent.getStringExtra(BOARD));
         startActivity(startGame);
       } else if (intent.getAction().equals(PLAYER_UPDATE)) {
-        String allPlayers = Storage.getAllPlayersAsJson();
-        updatePlayers(allPlayers);
+        updatePlayers(Storage.getAllPlayersAsJson());
       } else if (intent.getAction().equals(PLAYER_WAIT)) {
-        String allPlayers = Storage.getAllPlayersAsJson();
-        updatePlayers(allPlayers);
+        updatePlayers(Storage.getAllPlayersAsJson());
       }
     }
   };
@@ -83,6 +81,10 @@ public class LobbyActivity extends BaseSocketActivity {
 
   private void updatePlayers(String allPlayers) {
     setPlayers(allPlayers);
+    updatePlayers();
+  }
+
+  private void updatePlayers() {
     // player card
     TextView playerName = findViewById(R.id.playerName);
     playerName.setText(players[0].name);
@@ -126,7 +128,6 @@ public class LobbyActivity extends BaseSocketActivity {
 
   private void setPlayers(String playersJSON) {
     Type type = new TypeToken<Player[]>(){}.getType();
-    Player[] allPlayers = gson.fromJson(playersJSON, type);
-    System.arraycopy(allPlayers, 0, players, 0, allPlayers.length);
+    players = gson.fromJson(playersJSON, type);
   }
 }

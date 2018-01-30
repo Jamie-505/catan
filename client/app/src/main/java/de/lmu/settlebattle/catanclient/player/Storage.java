@@ -10,14 +10,12 @@ public class Storage {
 
   private final String TAG = this.getClass().getSimpleName();
 
-  private static int ownId = -1;
-  private static HashMap<Integer, Player> players = new HashMap<>();
-  private static Gson gson = new Gson();
-  private static List<ChatMessage> chatMessages = new ArrayList<>();
-  private static int[] turnOrder;
-
-  // needs to be static so all instances of storage can access it
   private static ArrayList<Integer> opponentIds = new ArrayList<>();
+  private static Gson gson = new Gson();
+  private static HashMap<Integer, Player> players = new HashMap<>();
+  private static int ownId = -1;
+  private static int[] turnOrder;
+  private static List<ChatMessage> chatMessages = new ArrayList<>();
 
   public static boolean isItMe(Player p) {
     return p.id == ownId;

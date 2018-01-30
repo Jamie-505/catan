@@ -55,7 +55,10 @@ import android.support.design.widget.Snackbar;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.ViewPager;
 import android.support.v7.widget.CardView;
+import android.text.BoringLayout.Metrics;
+import android.util.DisplayMetrics;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.Display;
 import android.view.Gravity;
 import android.view.MotionEvent;
@@ -207,8 +210,6 @@ public class MainActivity extends BaseSocketActivity implements FragmentHandler 
     initGridView(radius, board.fields);
     currentRobberTile = findViewByLoc(new Location(0, 0));
     disableClickLayers();
-
-    setSupportActionBar(findViewById(R.id.main_toolbar));
 
     // Liste & Baukostenkarte
     ListView list;
@@ -489,12 +490,6 @@ public class MainActivity extends BaseSocketActivity implements FragmentHandler 
   private void disableClickLayers() {
     settlementLayer.setWithholdTouchEventsFromChildren(true);
     streetLayer.setWithholdTouchEventsFromChildren(true);
-  }
-
-  public void displayMessage(String msg){
-    View layout = findViewById(R.id.contain);
-    Snackbar snackbar = Snackbar.make(layout, msg, Snackbar.LENGTH_LONG);
-    snackbar.show();
   }
 
   private void enableConstructionLayer(ConstructionsLayer layer) {

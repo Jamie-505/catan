@@ -51,8 +51,7 @@ public final class Constants {
   public static final String VICTORY_PTS = "Siegpunkte";
 
   // Broadcast
-  public static final String ACTION_CONNECTION_ESTABLISHED = "connectionEstablished";
-  public static final String ACTION_NETWORK_STATE_CHANGED = "networkStateChanged";
+  public static final String CONNECTION_LOST = "lost the connection";
   public static final String DISPLAY_ERROR = "displayMessage";
 	public static final String ERROR_MSG = "errorMsg";
   public static final String NEXT_ACTIVITY = "nextActivity";
@@ -60,6 +59,7 @@ public final class Constants {
   public static final String PLAYER_UPDATE = "playerUpdate";
   public static final String PLAYER_WAIT = "playerWait";
 	public static final String PROTOCOL_SUPPORTED = "protocolMatch";
+  public static final String NO_CONNECTION = "no connection";
 
   // Error Handling
   public static final String MESSAGE = "Meldung";

@@ -1,12 +1,11 @@
 package de.lmu.settlebattle.catanclient.network;
 
-import static de.lmu.settlebattle.catanclient.utils.Constants.ACTION_CONNECTION_ESTABLISHED;
-import static de.lmu.settlebattle.catanclient.utils.Constants.ACTION_NETWORK_STATE_CHANGED;
 import static de.lmu.settlebattle.catanclient.utils.Constants.BOARD;
 import static de.lmu.settlebattle.catanclient.utils.Constants.BUILD_STREET;
 import static de.lmu.settlebattle.catanclient.utils.Constants.BUILD_TRADE;
 import static de.lmu.settlebattle.catanclient.utils.Constants.BUILD_VILLAGE;
 import static de.lmu.settlebattle.catanclient.utils.Constants.CHAT_IN;
+import static de.lmu.settlebattle.catanclient.utils.Constants.CONNECTION_LOST;
 import static de.lmu.settlebattle.catanclient.utils.Constants.COSTS;
 import static de.lmu.settlebattle.catanclient.utils.Constants.DICE_RESULT;
 import static de.lmu.settlebattle.catanclient.utils.Constants.DICE_THROW;
@@ -20,6 +19,7 @@ import static de.lmu.settlebattle.catanclient.utils.Constants.GET_ID;
 import static de.lmu.settlebattle.catanclient.utils.Constants.HARVEST;
 import static de.lmu.settlebattle.catanclient.utils.Constants.NEW_CONSTRUCT;
 import static de.lmu.settlebattle.catanclient.utils.Constants.NEXT_ACTIVITY;
+import static de.lmu.settlebattle.catanclient.utils.Constants.NO_CONNECTION;
 import static de.lmu.settlebattle.catanclient.utils.Constants.OK;
 import static de.lmu.settlebattle.catanclient.utils.Constants.PLAYER;
 import static de.lmu.settlebattle.catanclient.utils.Constants.PLAYER_LEFT;
@@ -43,10 +43,7 @@ import static de.lmu.settlebattle.catanclient.utils.Constants.TRD_OFFER;
 import static de.lmu.settlebattle.catanclient.utils.Constants.TRD_SENT;
 
 import android.app.Service;
-import android.content.BroadcastReceiver;
-import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.os.Binder;
 import android.os.IBinder;
 import android.support.v4.content.LocalBroadcastManager;
@@ -61,6 +58,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.drafts.Draft_6455;
+import org.java_websocket.exceptions.WebsocketNotConnectedException;
 import org.java_websocket.handshake.ServerHandshake;
 
 
@@ -76,35 +74,26 @@ public class WebSocketService extends Service {
   private WebSocketClient webSocketClient;
   private LocalBroadcastManager localBroadcastManager;
 
-  private BroadcastReceiver messageReceiver = new BroadcastReceiver() {
-    @Override
-    public void onReceive(Context context, Intent intent) {
-      boolean networkIsOn = intent.getBooleanExtra(ACTION_NETWORK_STATE_CHANGED, false);
-      if (networkIsOn) {
-        startSocket();
-      } else {
-        stopSocket();
-      }
-    }
-  };
-
   public WebSocketService() {
-    localBroadcastManager = LocalBroadcastManager.getInstance(this);
+    try {
+      localBroadcastManager = LocalBroadcastManager.getInstance(this);
+    } catch (NullPointerException e) {
+      e.printStackTrace();
+    }
   }
 
   @Override
   public int onStartCommand(Intent intent, int flags, int startId) {
     Log.i(TAG, "onStartCommand");
-    Intent connectionIntent = new Intent(ACTION_CONNECTION_ESTABLISHED);
     if (localBroadcastManager == null) {
       localBroadcastManager = LocalBroadcastManager.getInstance(this);
     }
-    localBroadcastManager.sendBroadcast(connectionIntent);
-    if(!socketConnected){
-      startSocket();
-      socketConnected = true;
+    if(socketConnected) {
+      stopSocket();
     }
-    return START_STICKY;
+    startSocket();
+    socketConnected = true;
+    return START_NOT_STICKY;
   }
 
   @Override
@@ -113,8 +102,6 @@ public class WebSocketService extends Service {
       localBroadcastManager = LocalBroadcastManager.getInstance(this);
     }
     Log.d(TAG, "onBind");
-    localBroadcastManager.registerReceiver(messageReceiver,
-        new IntentFilter(ACTION_NETWORK_STATE_CHANGED));
     if(!socketConnected){
       startSocket();
       socketConnected = true;
@@ -125,7 +112,6 @@ public class WebSocketService extends Service {
   @Override
   public boolean onUnbind(Intent intent) {
     Log.d(TAG, "onUnbind");
-    localBroadcastManager.unregisterReceiver(messageReceiver);
     return false;
   }
 
@@ -309,41 +295,51 @@ public class WebSocketService extends Service {
   }
 
   private void startSocket() {
-    URI uri;
-    try{
-      uri = new URI(WebSocketClientConfig.URL_WEBSOCKET);
-    }
-    catch(URISyntaxException e){
-      e.printStackTrace();
-      return;
-    }
-    webSocketClient = new WebSocketClient(uri, new Draft_6455()){
-      @Override
-      public void onOpen(ServerHandshake handshakedata) {
-        Log.d(TAG, "Websocket onConnect()");
-        connectionOpened();
+      URI uri;
+      try {
+        uri = new URI(WebSocketClientConfig.URL_WEBSOCKET);
+      } catch (URISyntaxException e) {
+        e.printStackTrace();
+        return;
       }
-      @Override
-      public void onMessage(String message) {
-        Log.d(TAG, "Websocket onMessage() -> " + message);
-        messageReceived(message);
-      }
-      @Override
-      public void onClose(int code, String reason, boolean remote) {
-        Log.d(TAG, "Websocket onDisconnect()| code: " + code + " |reason: " + reason + " | remote: " + remote);
-      }
-      @Override
-      public void onError(Exception error) {
-        Log.d(TAG, "Websocket onError()");
-        if (webSocketClient != null) {
-          Log.e(TAG, "Error", error);
+      webSocketClient = new WebSocketClient(uri, new Draft_6455()) {
+        @Override
+        public void onOpen(ServerHandshake handshakedata) {
+          Log.d(TAG, "Websocket onConnect()");
+          socketConnected = true;
         }
-      }
-    };
-    webSocketClient.connect();
+
+        @Override
+        public void onMessage(String message) {
+          Log.d(TAG, "Websocket onMessage() -> " + message);
+          messageReceived(message);
+        }
+
+        @Override
+        public void onClose(int code, String reason, boolean remote) {
+          Log.d(TAG,
+              "Websocket onDisconnect()| code: " + code + " |reason: " + reason + " | remote: "
+                  + remote);
+          stopSocket();
+          broadcast(CONNECTION_LOST);
+        }
+
+        @Override
+        public void onError(Exception error) {
+          Log.d(TAG, "Websocket onError()");
+          if (webSocketClient != null) {
+            Log.e(TAG, "Error", error);
+            stopSocket();
+            localBroadcastManager.sendBroadcast(new Intent(NO_CONNECTION));
+          }
+        }
+      };
+      webSocketClient.connect();
   }
 
-  private void stopSocket() {
+  public void stopSocket() {
+    Storage.clear();
+    socketConnected = false;
     if (webSocketClient != null) {
       webSocketClient.close();
       webSocketClient = null;
@@ -360,15 +356,13 @@ public class WebSocketService extends Service {
     localBroadcastManager.sendBroadcast(errorIntent);
   }
 
-  private void connectionOpened(){
-    socketConnected = true;
-    Intent intent = new Intent(ACTION_CONNECTION_ESTABLISHED);
-    localBroadcastManager.sendBroadcast(intent);
-  }
-
   public void sendMessage(String jsonMsg) {
     Log.d(TAG, "Send to server -> " + jsonMsg);
-    webSocketClient.send(jsonMsg);
+    try {
+      webSocketClient.send(jsonMsg);
+    } catch (WebsocketNotConnectedException e) {
+      broadcast(CONNECTION_LOST);
+    }
   }
 
   public final class WebSocketsBinder extends Binder {

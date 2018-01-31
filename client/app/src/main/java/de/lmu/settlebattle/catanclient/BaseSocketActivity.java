@@ -1,5 +1,6 @@
 package de.lmu.settlebattle.catanclient;
 
+import static de.lmu.settlebattle.catanclient.utils.Constants.CONNECTION_LOST;
 import static de.lmu.settlebattle.catanclient.utils.Constants.PLAYER_LEFT;
 
 import android.content.BroadcastReceiver;
@@ -15,6 +16,7 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import com.golovin.fluentstackbar.FluentSnackbar;
+import com.jakewharton.processphoenix.ProcessPhoenix;
 import de.lmu.settlebattle.catanclient.network.WebSocketService;
 import de.lmu.settlebattle.catanclient.player.Player;
 import de.lmu.settlebattle.catanclient.player.Storage;
@@ -31,6 +33,8 @@ public abstract class BaseSocketActivity extends AppCompatActivity {
         displaySnackBar(
             String.format("%s hat die Verbindung verloren - eine KI übernimmt",
             p.name), p.id);
+      } else if (intent.getAction().equals(CONNECTION_LOST)) {
+        displayConnectionLoss();
       }
     }
   };
@@ -45,8 +49,6 @@ public abstract class BaseSocketActivity extends AppCompatActivity {
 
     snackbar = FluentSnackbar.create(this);
 
-    filter = new IntentFilter(PLAYER_LEFT);
-    LocalBroadcastManager.getInstance(this).registerReceiver(superBcReceiver, filter);
 
     try {
       getActionBar().hide();
@@ -83,6 +85,22 @@ public abstract class BaseSocketActivity extends AppCompatActivity {
   }
 
   @Override
+  protected void onResume() {
+    super.onResume();
+
+    filter = new IntentFilter(PLAYER_LEFT);
+    filter.addAction(CONNECTION_LOST);
+    LocalBroadcastManager.getInstance(this).registerReceiver(superBcReceiver, filter);
+  }
+
+  @Override
+  protected void onPause() {
+    LocalBroadcastManager.getInstance(this).unregisterReceiver(superBcReceiver);
+    super.onPause();
+
+  }
+
+  @Override
   protected void onStop() {
     unbindService(mConnection);
     super.onStop();
@@ -97,4 +115,18 @@ public abstract class BaseSocketActivity extends AppCompatActivity {
     snackbar.create(msg).textColorRes(color).important().show();
   }
 
+  public void displayConnectionLoss() {
+    snackbar.create(R.string.connection_lost)
+        .duration(Snackbar.LENGTH_INDEFINITE)
+        .errorBackgroundColor()
+        .maxLines(8)
+        .important()
+        .actionText("OK")
+        .action(v -> {
+          Intent backToStart = new Intent(this, StartActivity.class);
+          ProcessPhoenix.triggerRebirth(this, backToStart);
+          this.finish();
+        })
+        .show();
+  }
 }

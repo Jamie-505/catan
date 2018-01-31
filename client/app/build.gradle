@@ -67,4 +67,6 @@ dependencies {
     compile 'com.github.travijuu:numberpicker:1.0.7'
     // queueable snackbar
     compile 'com.github.antonygolovin:fluentsnackbar:1.0.0'
+    // restart app
+    compile 'com.jakewharton:process-phoenix:2.0.0'
 }

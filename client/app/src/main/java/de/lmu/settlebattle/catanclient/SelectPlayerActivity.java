@@ -34,6 +34,7 @@ public class SelectPlayerActivity extends BaseSocketActivity {
         String allPlayers = Storage.getAllPlayersAsJson();
         enterLobby.putExtra(ALL_PLAYERS, allPlayers);
         startActivity(enterLobby);
+        finish();
       }
     }
   };

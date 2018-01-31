@@ -31,6 +31,7 @@ public class LobbyActivity extends BaseSocketActivity {
 
   private Player[] players;
   private Gson gson = new Gson();
+  private LocalBroadcastManager localBroadcastManager;
 
   private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
     @Override
@@ -39,6 +40,7 @@ public class LobbyActivity extends BaseSocketActivity {
         Intent startGame = new Intent(LobbyActivity.this, MainActivity.class);
         startGame.putExtra(BOARD, intent.getStringExtra(BOARD));
         startActivity(startGame);
+        finish();
       } else if (intent.getAction().equals(PLAYER_UPDATE)) {
         updatePlayers(Storage.getAllPlayersAsJson());
       } else if (intent.getAction().equals(PLAYER_WAIT)) {
@@ -55,7 +57,7 @@ public class LobbyActivity extends BaseSocketActivity {
 
     Intent intent = getIntent();
     updatePlayers(intent.getStringExtra(ALL_PLAYERS));
-    setIntentFilter();
+    localBroadcastManager = LocalBroadcastManager.getInstance(this);
 
     Button startGameBtn = findViewById(R.id.startGameBtn);
     startGameBtn.setOnClickListener(
@@ -67,7 +69,18 @@ public class LobbyActivity extends BaseSocketActivity {
     addKiBtn.setOnClickListener((View v) -> {
       mService.sendMessage(createJSONString(ADD_KI, null));
     });
+  }
 
+  @Override
+  protected void onResume(){
+    super.onResume();
+    setIntentFilter();
+  }
+
+  @Override
+  protected void onPause() {
+    super.onPause();
+    localBroadcastManager.unregisterReceiver(broadcastReceiver);
   }
 
   private void setIntentFilter() {
@@ -75,8 +88,7 @@ public class LobbyActivity extends BaseSocketActivity {
     filter.addAction(GAME_START);
     filter.addAction(PLAYER_UPDATE);
     filter.addAction(PLAYER_WAIT);
-    LocalBroadcastManager.getInstance(this)
-        .registerReceiver(broadcastReceiver, filter);
+    localBroadcastManager.registerReceiver(broadcastReceiver, filter);
   }
 
   private void updatePlayers(String allPlayers) {

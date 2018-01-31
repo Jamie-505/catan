@@ -1,55 +1,39 @@
 package de.lmu.settlebattle.catanclient;
 
-import static de.lmu.settlebattle.catanclient.utils.Constants.ACTION_CONNECTION_ESTABLISHED;
+import static de.lmu.settlebattle.catanclient.utils.Constants.NO_CONNECTION;
 import static de.lmu.settlebattle.catanclient.utils.Constants.PROTOCOL_SUPPORTED;
 
 import android.app.Activity;
 import android.content.BroadcastReceiver;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.ServiceConnection;
 import android.os.Bundle;
-import android.os.IBinder;
+import android.os.CountDownTimer;
 import android.support.v4.content.LocalBroadcastManager;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import de.lmu.settlebattle.catanclient.network.WebSocketService;
-import de.lmu.settlebattle.catanclient.network.WebSocketService.WebSocketsBinder;
+import java.util.Locale;
 
 public class StartActivity extends Activity {
 
   private final String TAG = StartActivity.class.getSimpleName();
 
   private Button btnConnect;
-  private boolean connected = false;
-  private boolean compatible = false;
-  private WebSocketService wsService;
-
-  private ServiceConnection mConnection = new ServiceConnection() {
-    @Override
-    public void onServiceConnected(ComponentName className, IBinder service) {
-      WebSocketsBinder binder = (WebSocketsBinder) service;
-      wsService = binder.getService();
-    }
-
-    @Override
-    public void onServiceDisconnected(ComponentName componentName) {
-      Log.e(TAG, "onServiceDisconnected");
-    }
-  };
+  private CountDownTimer countDown;
+  private static Thread wSThread;
 
   private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
     @Override
     public void onReceive(Context context, Intent intent) {
-      if(intent.getAction().equals(ACTION_CONNECTION_ESTABLISHED)) {
-        connected = true;
-      }
-      if(intent.getAction().equals(PROTOCOL_SUPPORTED)) {
+      if(PROTOCOL_SUPPORTED.equals(intent.getAction())) {
         Intent nextIntent = new Intent(StartActivity.this, SelectPlayerActivity.class);
         startActivity(nextIntent);
+      } else if (NO_CONNECTION.equals(intent.getAction())) {
+        countDown.cancel();
+        btnConnect.setEnabled(true);
+        btnConnect.setText(R.string.try_reconnect);
       }
     }
   };
@@ -59,36 +43,36 @@ public class StartActivity extends Activity {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.startscreen);
 
-    try {
-      getActionBar().hide();
-    } catch (NullPointerException e) {
-      Log.i(TAG, "No ActionBar to hide...");
-    }
+    IntentFilter filter = new IntentFilter(PROTOCOL_SUPPORTED);
+    filter.addAction(NO_CONNECTION);
+    LocalBroadcastManager.getInstance(this).registerReceiver(broadcastReceiver,filter);
+
+    wSThread = new Thread("webSocketThread") {
+      public void run() {
+        Intent serviceIntent = new Intent(StartActivity.this,
+            WebSocketService.class);
+        startService(serviceIntent);
+      }
+    };
 
     btnConnect = findViewById(R.id.connectButton);
 
     btnConnect.setOnClickListener((View v) -> {
-      btnConnect.setText(R.string.btn_connect);
-      new Thread("webSocketThread") {
-        public void run() {
-          Intent serviceIntent = new Intent(StartActivity.this,
-              WebSocketService.class);
-          startService(serviceIntent);
+      btnConnect.setEnabled(false);
+      countDown = new CountDownTimer(5000, 1000) {
+
+        public void onTick(long millisUntilFinished) {
+          String text = String.format(Locale.GERMAN, "Verbindung wird hergestellt... (%d)", millisUntilFinished/1000);
+          btnConnect.setText(text);
+        }
+
+        public void onFinish() {
+          btnConnect.setText(R.string.try_reconnect);
+          btnConnect.setEnabled(true);
         }
       }.start();
-      LocalBroadcastManager.getInstance(this).registerReceiver(broadcastReceiver,
-          new IntentFilter(ACTION_CONNECTION_ESTABLISHED));
-      LocalBroadcastManager.getInstance(this).registerReceiver(broadcastReceiver,
-          new IntentFilter(PROTOCOL_SUPPORTED));
-      Intent bindIntent = new Intent(this, WebSocketService.class);
-      bindService(bindIntent, mConnection, Context.BIND_AUTO_CREATE);
+      wSThread.start();
     });
-  }
-
-  @Override
-  protected void onStop() {
-    unbindService(mConnection);
-    super.onStop();
   }
 }
 

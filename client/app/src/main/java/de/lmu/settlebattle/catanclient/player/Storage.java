@@ -79,4 +79,11 @@ public class Storage {
   public static void saveTurnOrder(int[] order) {
     turnOrder = order;
   }
+
+  public static void clear() {
+    opponentIds = new ArrayList<>();
+    players = new HashMap<>();
+    ownId = -1;
+    turnOrder = null;
+  }
 }

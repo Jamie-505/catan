@@ -144,19 +144,33 @@
           app:layout_constraintEnd_toEndOf="parent"
           app:layout_constraintStart_toEndOf="@id/dom_trade_btn" />
 
-        <Button
-          android:id="@+id/end_turn_btn"
-          style="@style/Widget.AppCompat.Button.Colored"
-          android:layout_width="0dp"
-          android:layout_height="wrap_content"
-          android:layout_marginBottom="8dp"
-          android:layout_marginStart="8dp"
-          android:layout_marginEnd="8dp"
-          android:text="@string/end_turn"
-          android:visibility="invisible"
-          app:layout_constraintStart_toStartOf="parent"
-          sothree:layout_constraintBottom_toBottomOf="parent"
-          sothree:layout_constraintEnd_toEndOf="parent" />
+      <Button
+        android:id="@+id/end_turn_btn"
+        style="@style/Widget.AppCompat.Button.Colored"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp"
+        android:text="@string/end_turn"
+        android:visibility="invisible"
+        app:layout_constraintStart_toStartOf="parent"
+        sothree:layout_constraintBottom_toBottomOf="parent"
+        sothree:layout_constraintEnd_toEndOf="parent" />
+
+      <Button
+        android:id="@+id/end_rd_con_btn"
+        style="@style/Widget.AppCompat.Button.Colored"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp"
+        android:text="@string/cancel_rd_construction"
+        android:visibility="gone"
+        app:layout_constraintStart_toStartOf="parent"
+        sothree:layout_constraintBottom_toBottomOf="parent"
+        sothree:layout_constraintEnd_toEndOf="parent" />
 
         <ImageButton
           android:id="@+id/open_chat_btn"
@@ -365,29 +379,29 @@
               app:layout_constraintEnd_toStartOf="@id/slidePnlDevCardCnt"
               app:layout_constraintStart_toEndOf="@id/slidePnlOreCnt" />
 
-            <TextSwitcher
-              android:id="@+id/slidePnlDevCardCnt"
-              android:layout_width="28dp"
+          <TextSwitcher
+            android:id="@+id/slidePnlDevCardCnt"
+            android:layout_width="28dp"
+            android:layout_height="match_parent"
+            android:text="0"
+            android:textColor="@color/title_gray"
+            android:textSize="28sp"
+            app:layout_constraintEnd_toStartOf="parent"
+            app:layout_constraintStart_toEndOf="@id/card" >
+            <TextView
+              android:layout_width="match_parent"
               android:layout_height="match_parent"
-              android:text="0"
+
               android:textColor="@color/title_gray"
-              android:textSize="28sp"
-              app:layout_constraintEnd_toStartOf="parent"
-              app:layout_constraintStart_toEndOf="@id/card" >
-              <TextView
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:text="0"
-                android:textColor="@color/title_gray"
-                android:textSize="28sp" />
-              <TextView
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:text="0"
-                android:textColor="@color/title_gray"
-                android:textSize="28sp" />
-            </TextSwitcher>
-          </android.support.constraint.ConstraintLayout>
+              android:textSize="28sp" />
+            <TextView
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+
+              android:textColor="@color/title_gray"
+              android:textSize="28sp" />
+          </TextSwitcher>
+        </android.support.constraint.ConstraintLayout>
 
           <TextSwitcher
             android:id="@+id/info_box"
@@ -465,15 +479,17 @@
 
   <LinearLayout
     android:id="@+id/chatDrawer"
-    android:layout_width="350dp"
-    android:layout_height="700dp"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
     android:layout_gravity="end"
+    android:layout_marginStart="50dp"
     android:orientation="vertical">
     <fragment
       android:id="@+id/chat"
       android:name="de.lmu.settlebattle.catanclient.chat.ChatFragment"
       android:layout_gravity="end"
-      android:layout_width="350dp"
-      android:layout_height="700dp"/>
+      android:layout_width="match_parent"
+      android:layout_marginBottom="110dp"
+      android:layout_height="match_parent"/>
 </LinearLayout>
 </android.support.v4.widget.DrawerLayout>

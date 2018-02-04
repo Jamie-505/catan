@@ -92,6 +92,8 @@ public class JSONUtils {
       case GAME_WAIT:
       case TOSS_CARDS_REQ:
       case ROBBER_TO:
+      case RD_CON1:
+      case RD_CON2:
       case ROLL_DICE:
       case STATUS_WAIT:
         return new Object[] { player.status, player };

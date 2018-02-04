@@ -26,6 +26,8 @@ import static de.lmu.settlebattle.catanclient.utils.Constants.PLAYER_LEFT;
 import static de.lmu.settlebattle.catanclient.utils.Constants.PLAYER_UPDATE;
 import static de.lmu.settlebattle.catanclient.utils.Constants.PLAYER_WAIT;
 import static de.lmu.settlebattle.catanclient.utils.Constants.PROTOCOL_SUPPORTED;
+import static de.lmu.settlebattle.catanclient.utils.Constants.RD_CON1;
+import static de.lmu.settlebattle.catanclient.utils.Constants.RD_CON2;
 import static de.lmu.settlebattle.catanclient.utils.Constants.ROBBER;
 import static de.lmu.settlebattle.catanclient.utils.Constants.ROBBER_AT;
 import static de.lmu.settlebattle.catanclient.utils.Constants.ROBBER_TO;
@@ -224,12 +226,26 @@ public class WebSocketService extends Service {
         playerLeft.putExtra(PLAYER_LEFT, id);
         broadcast(playerLeft);
         break;
+      case RD_CON1:
+        Storage.storePlayer(player);
+        if (itsMe) {
+          broadcast(RD_CON1);
+        } else {
+          broadcast(STATUS_UPD);
+        }
+        break;
+      case RD_CON2:
+        Storage.storePlayer(player);
+        if (itsMe) {
+          broadcast(RD_CON2);
+        } else {
+          broadcast(STATUS_UPD);
+        }
+        break;
       case ROBBER_AT:
         String robberStr = mail[1].toString();
         Robber robber = gson.fromJson(robberStr, Robber.class);
-        if (Storage.isItMe(robber.player)) {
-          broadcast(ROBBER_AT);
-        } else {
+        if (!Storage.isItMe(robber.player)) {
           Intent robberIntent = new Intent(ROBBER);
           robberIntent.putExtra(ROBBER, robberStr);
           broadcast(robberIntent);

@@ -10,6 +10,7 @@ import static de.lmu.settlebattle.catanclient.utils.Constants.BUILD_TRADE;
 import static de.lmu.settlebattle.catanclient.utils.Constants.BUILD_VILLAGE;
 import static de.lmu.settlebattle.catanclient.utils.Constants.CARD_BUY;
 import static de.lmu.settlebattle.catanclient.utils.Constants.CARD_KNIGHT;
+import static de.lmu.settlebattle.catanclient.utils.Constants.CARD_RD_CON;
 import static de.lmu.settlebattle.catanclient.utils.Constants.CHAT_IN;
 import static de.lmu.settlebattle.catanclient.utils.Constants.COSTS;
 import static de.lmu.settlebattle.catanclient.utils.Constants.DICE_RESULT;
@@ -25,8 +26,9 @@ import static de.lmu.settlebattle.catanclient.utils.Constants.OWNER;
 import static de.lmu.settlebattle.catanclient.utils.Constants.PLAYER;
 import static de.lmu.settlebattle.catanclient.utils.Constants.PLAYER_WAIT;
 import static de.lmu.settlebattle.catanclient.utils.Constants.RAW_MATERIALS;
+import static de.lmu.settlebattle.catanclient.utils.Constants.RD_CON1;
+import static de.lmu.settlebattle.catanclient.utils.Constants.RD_CON2;
 import static de.lmu.settlebattle.catanclient.utils.Constants.ROBBER;
-import static de.lmu.settlebattle.catanclient.utils.Constants.ROBBER_AT;
 import static de.lmu.settlebattle.catanclient.utils.Constants.ROBBER_TO;
 import static de.lmu.settlebattle.catanclient.utils.Constants.ROLL_DICE;
 import static de.lmu.settlebattle.catanclient.utils.Constants.STATUS_UPD;
@@ -136,6 +138,7 @@ public class MainActivity extends BaseSocketActivity implements FragmentHandler 
   };
 
   // Visual Elements
+  private Button cancelRdConBtn;
   private Button domTradeBtn;
   private Button endTurnBtn;
   private Button seaTradeBtn;
@@ -193,6 +196,7 @@ public class MainActivity extends BaseSocketActivity implements FragmentHandler 
     Board board = gson.fromJson(startActivity.getStringExtra(BOARD), Board.class);
     board = new Board(board.fields);
 
+    cancelRdConBtn = findViewById(R.id.end_rd_con_btn);
     chatDrawer = findViewById(R.id.chatDrawer);
     diceBtn = findViewById(R.id.throwDiceBtn);
     domTradeBtn = findViewById(R.id.dom_trade_btn);
@@ -213,14 +217,16 @@ public class MainActivity extends BaseSocketActivity implements FragmentHandler 
     streetLayer = findViewById(R.id.layerStreets);
 
     textSwitchers = new TextSwitcher[] { selfWoodCnt, selfClayCnt, selfWoolCnt,
-            selfWheatCnt, selfOreCnt, selfDevCardCnt };
+            selfWheatCnt, selfOreCnt };
 
     for (TextSwitcher tS : textSwitchers) {
       tS.setInAnimation(this, android.R.anim.slide_in_left);
       tS.setOutAnimation(this, android.R.anim.slide_out_right);
     }
+    selfDevCardCnt.setInAnimation(this, android.R.anim.slide_in_left);
+    selfDevCardCnt.setOutAnimation(this, android.R.anim.slide_out_right);
 
-    setClickListener();
+    setOnClickListener();
 
     int radius = 3;
 
@@ -637,6 +643,11 @@ public class MainActivity extends BaseSocketActivity implements FragmentHandler 
     showFragmentNoBackstack(new MonopoleFragment());
   }
 
+  private void playRdConCard() {
+    String msg = createJSONString(CARD_RD_CON, null);
+    mService.sendMessage(msg);
+  }
+
   private void reactToIntent(Intent intent) {
     String action = intent.getAction();
     if (action != null) {
@@ -661,6 +672,7 @@ public class MainActivity extends BaseSocketActivity implements FragmentHandler 
             enableRobber = false;
             isItTimeToBuild = true;
             setStatus("Du kannst jetzt bauen und handeln!");
+            cancelRdConBtn.setVisibility(View.GONE);
             diceBtn.setVisibility(View.INVISIBLE);
             domTradeBtn.setVisibility(View.VISIBLE);
             seaTradeBtn.setVisibility(View.VISIBLE);
@@ -726,11 +738,21 @@ public class MainActivity extends BaseSocketActivity implements FragmentHandler 
           hideActiveElements();
           updatePlayerViews();
           break;
+        case RD_CON1:
+          hideActiveElements();
+          setStatus("Baue deine 1. Strasse");
+          showView(cancelRdConBtn);
+          enableConstructionLayer(streetLayer);
+          break;
+        case RD_CON2:
+          setStatus("Baue deine 2. Strasse");
+          enableConstructionLayer(streetLayer);
+          cancelRdConBtn.setText(R.string.end_rd_con);
+          showView(cancelRdConBtn);
+          break;
         case ROBBER:
           Robber robber = gson.fromJson(intent.getStringExtra(ROBBER), Robber.class);
           moveRobber(robber.location);
-          break;
-        case ROBBER_AT:
           break;
         case ROBBER_TO:
           enableRobber = true;
@@ -782,7 +804,11 @@ public class MainActivity extends BaseSocketActivity implements FragmentHandler 
     viaKnightCard = false;
   }
 
-  private void setClickListener() {
+  private void setOnClickListener() {
+    cancelRdConBtn.setOnClickListener((View v) -> {
+      String msg = createJSONString(BUILD, null);
+      mService.sendMessage(msg);
+    });
     diceBtn.setOnClickListener((View v) -> {
       diceBtn.setVisibility(View.INVISIBLE);
       String diceMsg = createJSONString(ROLL_DICE, new Object());
@@ -819,8 +845,9 @@ public class MainActivity extends BaseSocketActivity implements FragmentHandler 
     filter.addAction(NEW_CONSTRUCT);
     filter.addAction(OK);
     filter.addAction(PLAYER_WAIT);
+    filter.addAction(RD_CON1);
+    filter.addAction(RD_CON2);
     filter.addAction(ROBBER);
-    filter.addAction(ROBBER_AT);
     filter.addAction(ROBBER_TO);
     filter.addAction(ROLL_DICE);
     filter.addAction(STATUS_UPD);

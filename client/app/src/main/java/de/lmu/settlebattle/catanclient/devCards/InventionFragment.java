@@ -48,8 +48,8 @@ public class InventionFragment extends MainActivityFragment {
       rawMat2.setBackgroundColor(Color.LTGRAY);
     });
 
-    Button sendTradeBtn = fragmentView.findViewById(R.id.send_trade_btn);
-    sendTradeBtn.setOnClickListener((View v) -> sendInvention());
+    Button sendBtn = fragmentView.findViewById(R.id.send_btn);
+    sendBtn.setOnClickListener((View v) -> sendInvention());
 
     return fragmentView;
   }

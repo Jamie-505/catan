@@ -7,7 +7,7 @@ public final class Constants {
   public static final String BUILD = "Bauen";
   public static final String CARD_BUY = "Entwicklungskarte kaufen";
   public static final String CARD_KNIGHT = "Ritter ausspielen";
-  public static final String CARD_RD_CON = "Straßenbaukarte ausspielen";
+  public static final String CARD_RD_CON = "Strassenbaukarte ausspielen";
   public static final String CHAT_IN = "Chatnachricht";
   public static final String CHAT_OUT = "Chatnachricht senden";
   public static final String COSTS = "Kosten";
@@ -84,7 +84,6 @@ public final class Constants {
   public final static String PROTOCOL = "Protokoll";
   public final static String RAW_MATERIAL = "Rohstoff";
   public final static String REQUEST = "Nachfrage";
-  public final static String ROAD_CONSTRUCTION = "Straßenbau";
   public final static String SENDER = "Absender";
   public final static String SETTLEMENT = "Siedlung";
   public final static String STREET = "Strasse";
@@ -117,6 +116,8 @@ public final class Constants {
   public final static String PLAYER_NAME = "Name";
   public final static String PLAYER_STATE = "Status";
   public final static String RAW_MATERIALS = "Rohstoffe";
+  public final static String RD_CON1 = "Strassenbau1";
+  public final static String RD_CON2 = "Strassenbau2";
   public final static String RD_CONSTR = "Strassenbau";
   public final static String RED = "Rot";
   public final static String STATUS_WAIT = "Warten";

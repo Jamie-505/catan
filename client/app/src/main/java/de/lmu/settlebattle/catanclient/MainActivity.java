@@ -55,6 +55,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.ViewPager;
+import android.support.v4.widget.DrawerLayout;
 import android.support.v7.widget.CardView;
 import android.util.Log;
 import android.view.Display;
@@ -138,25 +139,28 @@ public class MainActivity extends BaseSocketActivity implements FragmentHandler 
   private Button domTradeBtn;
   private Button endTurnBtn;
   private Button seaTradeBtn;
-  private ChatFragment chatFragment = new ChatFragment();
+  private ChatFragment chatFragment;
+  private CircleImageView currentRobberTile;
   private ConstructionsLayer settlementLayer;
   private ConstructionsLayer streetLayer;
+  private DrawerLayout drawer;
   private FragmentManager fragmentManager = getFragmentManager();
   private Gson gson = new Gson();
+  private ImageButton drawerHandleBtn;
   private ImageButton diceBtn;
-  private CircleImageView currentRobberTile;
+  private LinearLayout chatDrawer;
+  private RelativeLayout gridLayout;
   private SeaTradeFragment seaTradeFragment = new SeaTradeFragment();
   private SlidingUpPanelLayout slidingPanel;
+  private TextSwitcher infoBox;
   private TextSwitcher selfClayCnt;
   private TextSwitcher selfDevCardCnt;
   private TextSwitcher selfOreCnt;
   private TextSwitcher selfWheatCnt;
   private TextSwitcher selfWoodCnt;
   private TextSwitcher selfWoolCnt;
-  private TextSwitcher infoBox;
   private TextSwitcher[] textSwitchers;
   private TradeOfferFragment tradeOfferFragment = new TradeOfferFragment();
-  private RelativeLayout gridLayout;
 
   // Card Viewer
   private ViewPager mViewPager;
@@ -172,6 +176,9 @@ public class MainActivity extends BaseSocketActivity implements FragmentHandler 
         slidingPanel.getPanelState() != SlidingUpPanelLayout.PanelState.COLLAPSED) {
       slidingPanel.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
     }
+    if (drawer.isDrawerOpen(chatDrawer)) {
+      drawer.closeDrawer(Gravity.END);
+    }
     super.onBackPressed();
   }
   @Override
@@ -186,8 +193,11 @@ public class MainActivity extends BaseSocketActivity implements FragmentHandler 
     Board board = gson.fromJson(startActivity.getStringExtra(BOARD), Board.class);
     board = new Board(board.fields);
 
+    chatDrawer = findViewById(R.id.chatDrawer);
     diceBtn = findViewById(R.id.throwDiceBtn);
     domTradeBtn = findViewById(R.id.dom_trade_btn);
+    drawer = findViewById(R.id.drawer_layout);
+    drawerHandleBtn = findViewById(R.id.open_chat_btn);
     endTurnBtn = findViewById(R.id.end_turn_btn);
     gridLayout = findViewById(R.id.gridLayout);
     infoBox = findViewById(R.id.info_box);
@@ -287,25 +297,13 @@ public class MainActivity extends BaseSocketActivity implements FragmentHandler 
 
       @Override
       public void onPanelStateChanged(View panel, SlidingUpPanelLayout.PanelState previousState,
-          SlidingUpPanelLayout.PanelState newState) {
-
-         /*
-
-        if(slidingPanel.getPanelState() == SlidingUpPanelLayout.PanelState.ANCHORED||slidingPanel.getPanelState() == SlidingUpPanelLayout.PanelState.EXPANDED)
-        {
-          t.setVisibility(View.INVISIBLE);
-          y.setVisibility(View.VISIBLE);
-          Log.i(TAG, "Großer Text sollte sichbar sein ");
-        }
-        else {
-          t.setVisibility(View.VISIBLE);
-          y.setVisibility(View.INVISIBLE);
-          Log.i(TAG, "Kurzer Text sollte sichbar sein ");*/
-      }
+          SlidingUpPanelLayout.PanelState newState) {}
     });
     slidingPanel.setFadeOnClickListener(
         view -> slidingPanel.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED));
     slidingPanel.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
+
+    chatFragment = (ChatFragment) fragmentManager.findFragmentById(R.id.chat);
   }
 
   @Override
@@ -790,6 +788,7 @@ public class MainActivity extends BaseSocketActivity implements FragmentHandler 
       String diceMsg = createJSONString(ROLL_DICE, new Object());
       mService.sendMessage(diceMsg);
     });
+    drawerHandleBtn.setOnClickListener((View v) -> drawer.openDrawer(chatDrawer));
     domTradeBtn.setOnClickListener((View v) -> {
       Bundle tradeBundle = new Bundle();
       String rawMaterials = gson.toJson(self.rawMaterials);

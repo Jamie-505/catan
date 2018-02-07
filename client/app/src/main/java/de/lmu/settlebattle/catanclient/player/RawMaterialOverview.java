@@ -27,7 +27,7 @@ public class RawMaterialOverview {
   private int oreCount;
 
   @SerializedName(UNKNOWN)
-  private int unknownCnt;
+  private Integer unknownCnt;
 
   public RawMaterialOverview(int[] qnts) {
     this.woodCount = qnts[0];
@@ -93,7 +93,11 @@ public class RawMaterialOverview {
   public int getWoolCount() { return woolCount; }
 
   public int[] getQnts() {
-    return new int[] { woodCount, clayCount, woolCount, wheatCount, oreCount, unknownCnt};
+    try {
+      return new int[] { woodCount, clayCount, woolCount, wheatCount, oreCount, unknownCnt};
+    } catch (NullPointerException e) {
+      return new int[] { woodCount, clayCount, woolCount, wheatCount, oreCount };
+    }
   }
 
   public int getTotalAmnt() {

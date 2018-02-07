@@ -615,9 +615,9 @@ public class MainActivity extends BaseSocketActivity implements FragmentHandler 
           enableRobber = false;
           showFragmentNoBackstack(robberFragment);
         } else if (cV.getOwners().size() == 1) {
-          sendRobberMsg(cV.getOwners().get(0), viaKnightCard);
+          sendRobberMsg(cV.getOwners().get(0));
         } else {
-          sendRobberMsg(null, viaKnightCard);
+          sendRobberMsg(null);
         }
       }
     }
@@ -808,9 +808,9 @@ public class MainActivity extends BaseSocketActivity implements FragmentHandler 
     }
   }
 
-  public void sendRobberMsg(Integer id, boolean viaKnight) {
+  public void sendRobberMsg(Integer id) {
     Robber r = new Robber(currentRobberTile.getHex().getLocation(), id);
-    if (viaKnight) {
+    if (viaKnightCard) {
       mService.sendMessage(createJSONString(CARD_KNIGHT, r));
     } else {
       mService.sendMessage(createJSONString(ROBBER_TO, r));
@@ -1149,4 +1149,7 @@ public class MainActivity extends BaseSocketActivity implements FragmentHandler 
   public void sendMsgToServer(String msg) {
     mService.sendMessage(msg);
   }
+
+  @Override
+  public void sendRobberMsgToServer(Integer id) { sendRobberMsg(id); }
 }

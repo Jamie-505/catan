@@ -23,6 +23,7 @@ public abstract class MainActivityFragment extends Fragment {
     void displayFragMsg(String msg);
     void popBackstack(MainActivityFragment f);
     void sendMsgToServer(String msg);
+    void sendRobberMsgToServer(Integer id);
   }
 
   public String tag() {

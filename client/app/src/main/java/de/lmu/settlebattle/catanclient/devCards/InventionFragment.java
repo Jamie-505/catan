@@ -1,6 +1,7 @@
 package de.lmu.settlebattle.catanclient.devCards;
 
 import static de.lmu.settlebattle.catanclient.utils.Constants.INVENTION;
+import static de.lmu.settlebattle.catanclient.utils.Constants.RAW_MATERIALS;
 import static de.lmu.settlebattle.catanclient.utils.JSONUtils.createJSONString;
 
 import android.graphics.Color;
@@ -57,8 +58,8 @@ public class InventionFragment extends MainActivityFragment {
   private void sendInvention() {
     String type1 = rawMat1.getText().toString();
     String type2 = rawMat2.getText().toString();
-    RawMaterialOverview invention = new RawMaterialOverview(type1, type2);
-
+    RawMaterialOverview rawMats = new RawMaterialOverview(type1, type2);
+    Invention invention = new Invention(rawMats, null);
     String inventionMsg = createJSONString(INVENTION, invention);
     fragHandler.sendMsgToServer(inventionMsg);
     fragHandler.closeFragment(this);

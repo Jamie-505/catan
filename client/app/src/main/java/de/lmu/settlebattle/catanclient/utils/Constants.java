@@ -83,6 +83,7 @@ public final class Constants {
   public final static String PLAYER_LEFT = "Spieler ist weg";
   public final static String PROTOCOL = "Protokoll";
   public final static String RAW_MATERIAL = "Rohstoff";
+  public final static String RAW_MATERIALS = "Rohstoffe";
   public final static String REQUEST = "Nachfrage";
   public final static String SENDER = "Absender";
   public final static String SETTLEMENT = "Siedlung";
@@ -115,7 +116,6 @@ public final class Constants {
   public final static String PLAYER_ID_WON_GAME = "Spieler %s hat das Spiel gewonnen.";
   public final static String PLAYER_NAME = "Name";
   public final static String PLAYER_STATE = "Status";
-  public final static String RAW_MATERIALS = "Rohstoffe";
   public final static String RD_CON1 = "Strassenbau1";
   public final static String RD_CON2 = "Strassenbau2";
   public final static String RD_CONSTR = "Strassenbau";

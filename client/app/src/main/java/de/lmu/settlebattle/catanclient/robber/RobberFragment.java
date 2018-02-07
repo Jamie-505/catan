@@ -85,8 +85,7 @@ public class RobberFragment extends MainActivityFragment {
           );
           playerStatus.setBackgroundColor(getResources().getColor(colorId));
           playerStatus.setOnClickListener((View v) -> {
-            String msg = createJSONString(ROBBER_TO, new Robber(robberLoc, target.id));
-            fragHandler.sendMsgToServer(msg);
+            fragHandler.sendRobberMsgToServer(target.id);
             fragHandler.closeFragment(this);
           });
           playerStatus.setClickable(true);

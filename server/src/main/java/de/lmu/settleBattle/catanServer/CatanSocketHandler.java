@@ -129,23 +129,19 @@ public class CatanSocketHandler extends TextWebSocketHandler implements Property
                     break;
 
                 case CARD_MONOPOLY:
-                    //sendMessageToAll(CatanMessage.monopoleCard(SocketUtils.toInt(session.getId()), message));
                     utils.applyMonopolyCard(session, message);
                     break;
 
                 case CARD_INVENTION:
-                    //sendMessageToAll(CatanMessage.inventionCard(SocketUtils.toInt(session.getId()), message));
                     utils.applyInventionCard(session, message);
                     break;
 
                 case CARD_KNIGHT:
-                    //sendMessageToAll(CatanMessage.knightCard(SocketUtils.toInt(session.getId()), message));
                     utils.applyKnightCard(session, message);
                     break;
 
                 case CARD_RD_CON:
-                    //sendMessageToAll(CatanMessage.roadConstructionCard(SocketUtils.toInt(session.getId()), message));
-                    utils.applyRoadConstructionCard(session, message);
+                    utils.setFirstRoadStatus(session);
                     break;
 
                 case ROBBER_TO:

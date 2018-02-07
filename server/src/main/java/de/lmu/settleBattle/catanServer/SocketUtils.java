@@ -35,32 +35,24 @@ public class SocketUtils {
 
     //region build
     public boolean build(int id, TextMessage message) throws CatanException {
+        JSONObject payload = JSONUtils.createJSON(message).getJSONObject(BUILD);
+
+        if (!payload.has(TYPE) || !payload.has(PLACE)) {
+            Player player = gameCtrl.getPlayer(id);
+            if (player.isRCActive()) {
+                player.setStatus(TRADE_OR_BUILD);
+                return true;
+            }
+            return false;
+        }
+
+
         Building building = gson.fromJson(JSONUtils.createJSON(message)
                 .getJSONObject(Constants.BUILD).toString(), Building.class);
         if (building.getOwner() == id)
             return this.gameCtrl.placeBuilding(building, true);
         else throw new CatanException(
                 String.format("Spieler %s kann kein Gebäude mit der ID %s bauen.", id, building.getOwner()), true);
-    }
-    //endregion
-
-    //region applyRoadConstructionCard
-    public void applyRoadConstructionCard(WebSocketSession session, TextMessage message) throws CatanException {
-
-        Player player = gameCtrl.getPlayer(session.getId());
-
-        //the first road
-        Location[] locs1 = gson.fromJson(JSONUtils.createJSON(message)
-                .getJSONObject(Constants.CARD_RD_CON).getJSONArray("Strasse 1").toString(), Location[].class);
-
-        Building road1 = new Building(player.getId(), BuildingType.ROAD, locs1);
-
-        Location[] locs2 = gson.fromJson(JSONUtils.createJSON(message)
-                .getJSONObject(Constants.CARD_RD_CON).getJSONArray("Strasse 2").toString(), Location[].class);
-
-        Building road2 = new Building(player.getId(), BuildingType.ROAD, locs2);
-
-        gameCtrl.applyRoadConstructionCard(player, road1, road2);
     }
     //endregion
 
@@ -259,6 +251,15 @@ public class SocketUtils {
         player.applyKnightCard();
         gameCtrl.assignGreatestArmy(player);
         moveRobber(session, message, CARD_KNIGHT);
+    }
+
+    public void setFirstRoadStatus(WebSocketSession session) throws CatanException {
+        Player p = gameCtrl.getPlayer(session.getId());
+
+        if (!p.hasRoadConstructionCard())
+            throw new CatanException("Du hast keine Strassenbaukarte", true);
+
+        p.setStatus(FIRST_STREET);
     }
 
     //endregion

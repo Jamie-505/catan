@@ -392,6 +392,7 @@ public class Player extends JSONStringBuilder implements Comparable, Cloneable {
         return this.rawMaterialDeck.canAfford(overview);
     }
 
+    public boolean isRCActive() { return this.status.equals(FIRST_STREET) || this.status.equals(SECOND_STREET); }
     //region Properties
 
 

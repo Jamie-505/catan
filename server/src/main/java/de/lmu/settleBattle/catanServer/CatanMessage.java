@@ -343,6 +343,7 @@ public class CatanMessage {
         return new TextMessage(JSONUtils.setJSONType(Constants.CARD_RD_CON, payload).toString());
     }
 
+
     public static TextMessage roadConstructionCard(int playerId, TextMessage message) {
         JSONObject payload = JSONUtils.createJSON(message).getJSONObject(CARD_RD_CON);
         payload.put(PLAYER, playerId);

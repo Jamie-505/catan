@@ -212,7 +212,7 @@ public class GameController {
                     //play development card if ki possesses one
                     try {
                         if (ki.hasInventionCard()) applyInventionCard(ki);
-                        else if (ki.hasRoadConstructionCard()) applyRoadConstructionCard(ki);
+                        else if (ki.hasRoadConstructionCard()) applyRCCardForKI(ki);
                         else if (ki.hasMonopoleCard()) applyMonopoleCard(ki, RawMaterialType.getRandomTradingType());
                         else if (ki.hasKnightCard()) applyKnightCard(ki.getId(), -1, board.getRandomFieldLoc());
                     } catch (CatanException ex) {
@@ -335,7 +335,7 @@ public class GameController {
         //the player can only built building if he has enough raw materials
         else if (!this.initialPhaseActive) {
             Player player = getPlayer(building.getOwner());
-            if (!player.canAfford(building.getType()))
+            if (!player.canAfford(building.getType()) && !player.isRCActive())
                 exText = String.format("Du kannst dir keine %s leisten.", building.getType().toString());
 
             else if (player.getStock().getCount(building.getType()) < 1)
@@ -392,8 +392,8 @@ public class GameController {
             }
 
             //decrease raw materials
-            if (!initialPhaseActive) owner.decreaseRawMaterials(Building.getCosts(building.getType()));
-
+            if (!initialPhaseActive&& !owner.isRCActive()) owner.decreaseRawMaterials(Building.getCosts(building.getType()));
+            if(owner.getStatus().equals(Constants.FIRST_STREET)) owner.removeDevelopmentCard(DevCardType.ROAD_CONSTRUCTION);
             updateStatus(owner.getId());
         }
         return built;
@@ -453,10 +453,10 @@ public class GameController {
             System.out.printf("Die IDs %s und %s stimmen nicht überein\n", getCurrent().getId(), id);
             return;
         }
+        Player player = getCurrent();
 
         if (initialPhaseActive) {
             String status = Constants.BUILD_STREET;
-            Player player = getCurrent();
 
             if (player.getStatus().equals(BUILD_STREET)) {
                 player = nextMove();
@@ -464,6 +464,11 @@ public class GameController {
             }
 
             activatePlayer(player.getId(), status);
+        }
+
+        else if (player.isRCActive())  {
+            String newStatus = player.getStatus().equals(FIRST_STREET) ? SECOND_STREET : TRADE_OR_BUILD;
+            player.setStatus(newStatus);
         }
     }
 
@@ -506,48 +511,30 @@ public class GameController {
         }
     }
 
-    public void applyRoadConstructionCard(Player player, Building road1, Building road2) throws CatanException {
-        if (!player.hasRoadConstructionCard())
-            throw new CatanException(String.format(PLAYER_HAS_NO_DEV_CARD, player.getId(), DevCardType.ROAD_CONSTRUCTION.toString()), true);
+    public void applyRCCardForKI(Player ki) throws CatanException {
 
-        //add roads to board directly
-        boolean built = this.board.placeBuilding(road1, false);
+        if (!ki.isKI()) return;
 
-        if (built) {
-            built = this.board.placeBuilding(road2, false);
+        if (!ki.hasRoadConstructionCard())
+            throw new CatanException(String.format(PLAYER_HAS_NO_DEV_CARD, ki.getId(), DevCardType.ROAD_CONSTRUCTION.toString()), true);
 
-            Object[] data = new Object[2];
-            data[0] = road1;
-            data[1] = road2;
-            changes.firePropertyChange(RC_PLAYED, data, player);
+        ki.setStatus(FIRST_STREET);
 
+        try {
+            Building road1 = new Building(ki.getId(), BuildingType.ROAD, board.getFreeRoadLoc(ki, false));
+
+            boolean built = this.board.placeBuilding(road1, false);
+
+            if (built) {
+                Building road2 = new Building(ki.getId(), BuildingType.ROAD, board.getFreeRoadLoc(ki, false));
+                this.board.placeBuilding(road2, false);
+            }
         }
-
-        //remove construction card
-        if (built) {
-            player.removeDevelopmentCard(DevCardType.ROAD_CONSTRUCTION);
+        catch (CatanException ex) {
+            System.out.println("KI "+ ki.getName() + " löst eine Exception aus: " + ex.getMessage());
         }
-    }
-
-    public void applyRoadConstructionCard(Player player) throws CatanException {
-        if (!player.hasRoadConstructionCard())
-            throw new CatanException(String.format(PLAYER_HAS_NO_DEV_CARD, player.getId(), DevCardType.ROAD_CONSTRUCTION.toString()), true);
-
-        Building road1 = new Building(player.getId(), BuildingType.ROAD, board.getFreeRoadLoc(player, false));
-        boolean built = this.board.placeBuilding(road1, false);
-
-        if (built) {
-            Building road2 = new Building(player.getId(), BuildingType.ROAD, board.getFreeRoadLoc(player, false));
-            built = this.board.placeBuilding(road2, false);
-
-            Object[] data = new Object[2];
-            data[0] = road1;
-            data[1] = road2;
-            changes.firePropertyChange(RC_PLAYED, data, player);
-        }
-
-        if (built) {
-            player.removeDevelopmentCard(DevCardType.ROAD_CONSTRUCTION);
+        finally {
+            ki.removeDevelopmentCard(DevCardType.ROAD_CONSTRUCTION);
         }
     }
 

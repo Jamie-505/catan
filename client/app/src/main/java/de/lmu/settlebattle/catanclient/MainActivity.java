@@ -13,12 +13,16 @@ import static de.lmu.settlebattle.catanclient.utils.Constants.CARD_KNIGHT;
 import static de.lmu.settlebattle.catanclient.utils.Constants.CARD_RD_CON;
 import static de.lmu.settlebattle.catanclient.utils.Constants.CHAT_IN;
 import static de.lmu.settlebattle.catanclient.utils.Constants.COSTS;
+import static de.lmu.settlebattle.catanclient.utils.Constants.DEV_CARD;
+import static de.lmu.settlebattle.catanclient.utils.Constants.DEV_CARD_BOUGHT;
+import static de.lmu.settlebattle.catanclient.utils.Constants.DEV_CARD_PLAYED;
 import static de.lmu.settlebattle.catanclient.utils.Constants.DICE_RESULT;
 import static de.lmu.settlebattle.catanclient.utils.Constants.DICE_THROW;
 import static de.lmu.settlebattle.catanclient.utils.Constants.DISPLAY_ERROR;
 import static de.lmu.settlebattle.catanclient.utils.Constants.END_TURN;
 import static de.lmu.settlebattle.catanclient.utils.Constants.ERROR_MSG;
 import static de.lmu.settlebattle.catanclient.utils.Constants.HARVEST;
+import static de.lmu.settlebattle.catanclient.utils.Constants.NEW;
 import static de.lmu.settlebattle.catanclient.utils.Constants.LOCATION;
 import static de.lmu.settlebattle.catanclient.utils.Constants.NEW_CONSTRUCT;
 import static de.lmu.settlebattle.catanclient.utils.Constants.OK;
@@ -38,6 +42,7 @@ import static de.lmu.settlebattle.catanclient.utils.Constants.TRADE;
 import static de.lmu.settlebattle.catanclient.utils.Constants.TRD_ABORTED;
 import static de.lmu.settlebattle.catanclient.utils.Constants.TRD_FIN;
 import static de.lmu.settlebattle.catanclient.utils.Constants.TRD_OFFER;
+import static de.lmu.settlebattle.catanclient.utils.Constants.TYPE;
 import static de.lmu.settlebattle.catanclient.utils.JSONUtils.createJSONString;
 
 import android.app.Fragment;
@@ -72,6 +77,7 @@ import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.TextSwitcher;
 import android.widget.TextView;
+import butterknife.ButterKnife;
 import com.google.gson.Gson;
 import com.sdsmdg.harjot.vectormaster.VectorMasterDrawable;
 import com.sdsmdg.harjot.vectormaster.models.PathModel;
@@ -79,6 +85,8 @@ import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 import de.lmu.settlebattle.catanclient.MainActivityFragment.FragmentHandler;
 import de.lmu.settlebattle.catanclient.chat.ChatFragment;
 import de.lmu.settlebattle.catanclient.chat.ChatMessage;
+import de.lmu.settlebattle.catanclient.devCardChips.DevCardFragment;
+import de.lmu.settlebattle.catanclient.devCardChips.adapter.ChipsAdapter.DevCardHandler;
 import de.lmu.settlebattle.catanclient.devCards.InventionFragment;
 import de.lmu.settlebattle.catanclient.devCards.MonopoleFragment;
 import de.lmu.settlebattle.catanclient.dice.Dice;
@@ -119,18 +127,19 @@ import de.lmu.settlebattle.catanclient.utils.Harvest;
 import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import de.lmu.settlebattle.catanclient.chipsUI.ItemsFragment;
 import com.beloo.widget.chipslayoutmanager.BuildConfig;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-
-
-public class MainActivity extends BaseSocketActivity implements FragmentHandler {
+public class MainActivity extends BaseSocketActivity implements FragmentHandler, DevCardHandler {
 
   // LogCat tag
   private static final String TAG = MainActivity.class.getSimpleName();
 
+  private int cardPosition;
+  private boolean devCardActive;
+  private boolean devCardBought;
+  private boolean devCardPlayed;
   private boolean enableRobber;
   private boolean isItTimeToBuild;
   private boolean viaKnightCard;
@@ -176,6 +185,9 @@ public class MainActivity extends BaseSocketActivity implements FragmentHandler 
   private CardPagerAdapter mCardAdapter;
   private ShadowTransformer mCardShadowTransformer;
 
+  // Dev Card Fragment
+  private DevCardFragment devCardFragment = DevCardFragment.newInstance();
+
   @Override
   public void onBackPressed() {
     if (fragmentManager.getBackStackEntryCount() > 0) {
@@ -197,13 +209,11 @@ public class MainActivity extends BaseSocketActivity implements FragmentHandler 
     self = Storage.getSelf();
     setIntentFilters();
 
-
     //StartFragment for Cards
     ButterKnife.bind(this);
     getSupportFragmentManager().beginTransaction()
-        .add(R.id.fragmentContainer2, ItemsFragment.newInstance())
+        .add(R.id.dev_card_container, devCardFragment)
         .commit();
-
 
     Intent startActivity = getIntent();
     // I know weird but I need to get the fields from the message somehow to init the board
@@ -231,7 +241,7 @@ public class MainActivity extends BaseSocketActivity implements FragmentHandler 
     streetLayer = findViewById(R.id.layerStreets);
 
     textSwitchers = new TextSwitcher[] { selfWoodCnt, selfClayCnt, selfWoolCnt,
-            selfWheatCnt, selfOreCnt };
+        selfWheatCnt, selfOreCnt };
 
     for (TextSwitcher tS : textSwitchers) {
       tS.setInAnimation(this, android.R.anim.slide_in_left);
@@ -282,21 +292,23 @@ public class MainActivity extends BaseSocketActivity implements FragmentHandler 
           case BUILD_STREET:
             disableClickLayers();
             enableConstructionLayer(streetLayer);
+            slidingPanel.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
+            displaySnackBar(selectedItem, self.id);
             break;
           case BUILD_SETTLEMENT:
           case BUILD_CITY:
             disableClickLayers();
             enableConstructionLayer(settlementLayer);
+            slidingPanel.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
+            displaySnackBar(selectedItem, self.id);
             break;
           case CARD_BUY:
             disableClickLayers();
             mService.sendMessage(createJSONString(CARD_BUY, null));
             break;
         }
-        slidingPanel.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
-        displaySnackBar(selectedItem, null);
       } else {
-        displaySnackBar("Du kannst gerade nicht bauen, evtl musst du erst Würfeln oder auf deinen Zug warten", null);
+        displaySnackBar("Du kannst gerade nicht bauen, vermutlich musst du erst Würfeln oder auf deinen Zug warten", self.id);
       }
     });
 
@@ -541,10 +553,11 @@ public class MainActivity extends BaseSocketActivity implements FragmentHandler 
   private void endTurn() {
     hideActiveElements();
     mService.sendMessage(createJSONString(END_TURN, null));
+    devCardPlayed = false;
   }
 
   private CircleImageView findViewByLoc(Location l) {
-   return gridLayout.findViewWithTag(createTag(l));
+    return gridLayout.findViewWithTag(createTag(l));
   }
 
   private void hideActiveElements() {
@@ -701,15 +714,38 @@ public class MainActivity extends BaseSocketActivity implements FragmentHandler 
           if (!Storage.isItMe(cMsg.getSenderId())) {
             playBeep();
             String text = String.format(Locale.GERMAN,
-               "Neue Chatnachricht von %s erhalten", p.name);
+                "Neue Chatnachricht von %s erhalten", p.name);
             displaySnackBar(text, cMsg.getSenderId());
           }
           break;
         case COSTS:
-          Harvest costs = gson.fromJson(intent.getStringExtra(COSTS), Harvest.class);
-          if (Storage.isItMe(costs.getPlayerId())) {
-            String update = "Dir wurden " + costs.getRawMaterials() + " abgezogen!";
-            displaySnackBar(update, costs.getPlayerId());
+          // too much info!!!
+//          Harvest costs = gson.fromJson(intent.getStringExtra(COSTS), Harvest.class);
+//          if (Storage.isItMe(costs.getPlayerId())) {
+//            String update = "Dir wurden " + costs.getRawMaterials() + " abgezogen!";
+//            displaySnackBar(update, costs.getPlayerId());
+//          }
+          break;
+        case DEV_CARD_BOUGHT:
+          devCardBought = true;
+          String cardType = intent.getStringExtra(DEV_CARD);
+          devCardFragment.applyDevCard(cardType,0, NEW);
+          break;
+        case DEV_CARD_PLAYED:
+          int pId = intent.getIntExtra(PLAYER, -1);
+          if (Storage.isItMe(pId)) {
+            devCardPlayed = true;
+            devCardActive = false;
+            devCardFragment.invalidateCard(cardPosition);
+            // too much info!
+//            displaySnackBar("Karte erfolgreich ausgespielt", pId);
+          } else {
+            String type = intent.getStringExtra(TYPE);
+            p = Storage.getPlayer(pId);
+            displaySnackBar(
+                String.format(Locale.GERMAN, "%s hat eine %skarte ausgepielt", p.name, type),
+                pId
+            );
           }
           break;
         case DICE_RESULT:
@@ -732,11 +768,12 @@ public class MainActivity extends BaseSocketActivity implements FragmentHandler 
           displaySnackBar(intent.getStringExtra(ERROR_MSG), null);
           break;
         case HARVEST:
-          Harvest harvest = gson.fromJson(intent.getStringExtra(HARVEST), Harvest.class);
-          if (Storage.isItMe(harvest.getPlayerId())) {
-            String update = "Du hast " + harvest.getRawMaterials() + " erhalten!";
-            displaySnackBar(update, harvest.getPlayerId());
-          }
+          // too much info!
+//          Harvest harvest = gson.fromJson(intent.getStringExtra(HARVEST), Harvest.class);
+//          if (Storage.isItMe(harvest.getPlayerId())) {
+//            String update = "Du hast " + harvest.getRawMaterials() + " erhalten!";
+//            displaySnackBar(update, harvest.getPlayerId());
+//          }
           break;
         case NEW_CONSTRUCT:
           disableClickLayers();
@@ -773,6 +810,11 @@ public class MainActivity extends BaseSocketActivity implements FragmentHandler 
           setStatus("Setze den Räuber an eine neue Stelle");
           break;
         case ROLL_DICE:
+          if (devCardBought) {
+            devCardFragment.activateNewCards();
+            devCardBought = false;
+          }
+          devCardActive = false;
           setStatus("Lass die Würfel rollen!");
           showView(diceBtn);
           mViewPager.setCurrentItem(0, true);
@@ -820,6 +862,7 @@ public class MainActivity extends BaseSocketActivity implements FragmentHandler 
 
   private void setOnClickListener() {
     cancelRdConBtn.setOnClickListener((View v) -> {
+      devCardActive = false;
       String msg = createJSONString(BUILD, null);
       mService.sendMessage(msg);
     });
@@ -853,6 +896,8 @@ public class MainActivity extends BaseSocketActivity implements FragmentHandler 
     filter.addAction(BUILD_TRADE);
     filter.addAction(CHAT_IN);
     filter.addAction(COSTS);
+    filter.addAction(DEV_CARD_BOUGHT);
+    filter.addAction(DEV_CARD_PLAYED);
     filter.addAction(DICE_RESULT);
     filter.addAction(DISPLAY_ERROR);
     filter.addAction(HARVEST);
@@ -909,7 +954,6 @@ public class MainActivity extends BaseSocketActivity implements FragmentHandler 
 
       //Grid node listener restricted to the node's circular area.
       View.OnTouchListener gridNodeTouchListener = (v, event) -> {
-//        v.performClick();
         switch (event.getAction()) {
           case MotionEvent.ACTION_DOWN:
             float xPoint = event.getX();
@@ -1128,7 +1172,7 @@ public class MainActivity extends BaseSocketActivity implements FragmentHandler 
     }
   }
 
-// --------------------- interface methods ---------------------------------
+  // --------------------- interface methods ---------------------------------
   @Override
   public void closeFragment(MainActivityFragment f) {
     hideFragment(f);
@@ -1152,4 +1196,37 @@ public class MainActivity extends BaseSocketActivity implements FragmentHandler 
 
   @Override
   public void sendRobberMsgToServer(Integer id) { sendRobberMsg(id); }
+
+  @Override
+  public void playDevCard(DevCardType type, int position) {
+    // man darf nur Dev Cards spielen wenn man dran ist
+    if (isItTimeToBuild) {
+      // nur wenn man noch keine gespielt hat und aktuell keine ausgespielt wird
+      if (!devCardPlayed && !devCardActive) {
+        slidingPanel.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
+        cardPosition = position;
+        switch (type) {
+          case ERFINDUNG:
+            playInventionCard();
+            break;
+          case MONOPOL:
+            playMonoCard();
+            break;
+          case RITTER:
+            playKnightCard();
+            break;
+          case STRASSENBAU:
+            playRdConCard();
+            break;
+        }
+        devCardActive = true;
+      } else {
+        displaySnackBar("Du darfst nur eine Entwicklungskarte pro Zug ausspielen",
+            self.id);
+      }
+    } else {
+      displaySnackBar("Du kannst gerade nicht bauen, vermutlich musst du erst Würfeln oder auf deinen Zug warten",
+          self.id);
+    }
+  }
 }

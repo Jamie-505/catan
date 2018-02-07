@@ -7,6 +7,9 @@ import static de.lmu.settlebattle.catanclient.utils.Constants.BUILD_VILLAGE;
 import static de.lmu.settlebattle.catanclient.utils.Constants.CHAT_IN;
 import static de.lmu.settlebattle.catanclient.utils.Constants.CONNECTION_LOST;
 import static de.lmu.settlebattle.catanclient.utils.Constants.COSTS;
+import static de.lmu.settlebattle.catanclient.utils.Constants.DEV_CARD;
+import static de.lmu.settlebattle.catanclient.utils.Constants.DEV_CARD_BOUGHT;
+import static de.lmu.settlebattle.catanclient.utils.Constants.DEV_CARD_PLAYED;
 import static de.lmu.settlebattle.catanclient.utils.Constants.DICE_RESULT;
 import static de.lmu.settlebattle.catanclient.utils.Constants.DICE_THROW;
 import static de.lmu.settlebattle.catanclient.utils.Constants.DISPLAY_ERROR;
@@ -43,6 +46,7 @@ import static de.lmu.settlebattle.catanclient.utils.Constants.TRD_ACC;
 import static de.lmu.settlebattle.catanclient.utils.Constants.TRD_FIN;
 import static de.lmu.settlebattle.catanclient.utils.Constants.TRD_OFFER;
 import static de.lmu.settlebattle.catanclient.utils.Constants.TRD_SENT;
+import static de.lmu.settlebattle.catanclient.utils.Constants.TYPE;
 
 import android.app.Service;
 import android.content.Intent;
@@ -175,6 +179,19 @@ public class WebSocketService extends Service {
         Intent harvest = new Intent(type);
         harvest.putExtra(type, mail[1].toString());
         broadcast(harvest);
+        break;
+      case DEV_CARD_BOUGHT:
+        if (itsMe) {
+          Intent newDevCard = new Intent(DEV_CARD_BOUGHT);
+          newDevCard.putExtra(DEV_CARD, mail[2].toString());
+          broadcast(newDevCard);
+        }
+        break;
+      case DEV_CARD_PLAYED:
+        Intent devCardPlayed = new Intent(DEV_CARD_PLAYED);
+        devCardPlayed.putExtra(PLAYER, (Integer) mail[1]);
+        devCardPlayed.putExtra(TYPE, mail[2].toString());
+        broadcast(devCardPlayed);
         break;
       case DICE_RESULT:
         Intent diceResult = new Intent(DICE_RESULT);

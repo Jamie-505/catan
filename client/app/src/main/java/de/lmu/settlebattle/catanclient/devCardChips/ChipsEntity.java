@@ -1,4 +1,4 @@
-package de.lmu.settlebattle.catanclient.chipsLogic;
+package de.lmu.settlebattle.catanclient.devCardChips;
 
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -74,7 +74,6 @@ public class ChipsEntity implements Parcelable {
             return new ChipsEntity(this);
         }
     }
-
 
     @Override
     public int describeContents() {

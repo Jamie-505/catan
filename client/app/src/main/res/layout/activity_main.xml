@@ -144,33 +144,33 @@
           app:layout_constraintEnd_toEndOf="parent"
           app:layout_constraintStart_toEndOf="@id/dom_trade_btn" />
 
-      <Button
-        android:id="@+id/end_turn_btn"
-        style="@style/Widget.AppCompat.Button.Colored"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="8dp"
-        android:layout_marginStart="8dp"
-        android:layout_marginEnd="8dp"
-        android:text="@string/end_turn"
-        android:visibility="invisible"
-        app:layout_constraintStart_toStartOf="parent"
-        sothree:layout_constraintBottom_toBottomOf="parent"
-        sothree:layout_constraintEnd_toEndOf="parent" />
+        <Button
+          android:id="@+id/end_turn_btn"
+          style="@style/Widget.AppCompat.Button.Colored"
+          android:layout_width="0dp"
+          android:layout_height="wrap_content"
+          android:layout_marginBottom="8dp"
+          android:layout_marginStart="8dp"
+          android:layout_marginEnd="8dp"
+          android:text="@string/end_turn"
+          android:visibility="invisible"
+          app:layout_constraintStart_toStartOf="parent"
+          sothree:layout_constraintBottom_toBottomOf="parent"
+          sothree:layout_constraintEnd_toEndOf="parent" />
 
-      <Button
-        android:id="@+id/end_rd_con_btn"
-        style="@style/Widget.AppCompat.Button.Colored"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="8dp"
-        android:layout_marginStart="8dp"
-        android:layout_marginEnd="8dp"
-        android:text="@string/cancel_rd_construction"
-        android:visibility="gone"
-        app:layout_constraintStart_toStartOf="parent"
-        sothree:layout_constraintBottom_toBottomOf="parent"
-        sothree:layout_constraintEnd_toEndOf="parent" />
+        <Button
+          android:id="@+id/end_rd_con_btn"
+          style="@style/Widget.AppCompat.Button.Colored"
+          android:layout_width="0dp"
+          android:layout_height="wrap_content"
+          android:layout_marginBottom="8dp"
+          android:layout_marginStart="8dp"
+          android:layout_marginEnd="8dp"
+          android:text="@string/cancel_rd_construction"
+          android:visibility="gone"
+          app:layout_constraintStart_toStartOf="parent"
+          sothree:layout_constraintBottom_toBottomOf="parent"
+          sothree:layout_constraintEnd_toEndOf="parent" />
 
         <ImageButton
           android:id="@+id/open_chat_btn"
@@ -201,7 +201,6 @@
           android:layout_width="match_parent"
           android:layout_height="98dp">
 
-
           <android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
             xmlns:app="http://schemas.android.com/apk/res-auto"
             android:id="@+id/resource_display"
@@ -225,8 +224,7 @@
               android:id="@+id/slidePnlWoodCnt"
               android:layout_width="28dp"
               android:layout_height="match_parent"
-              android:paddingRight="8dp"
-              android:text="0"
+              android:paddingEnd="8dp"
               android:textColor="@color/title_gray"
               android:textSize="28sp"
               app:layout_constraintEnd_toStartOf="@id/brick"
@@ -234,13 +232,11 @@
               <TextView
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:text="0"
                 android:textColor="@color/title_gray"
                 android:textSize="28sp" />
               <TextView
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:text="0"
                 android:textColor="@color/title_gray"
                 android:textSize="28sp" />
             </TextSwitcher>
@@ -257,21 +253,16 @@
               android:id="@+id/slidePnlClayCnt"
               android:layout_width="28dp"
               android:layout_height="match_parent"
-              android:text="0"
-              android:textColor="@color/title_gray"
-              android:textSize="28sp"
               app:layout_constraintEnd_toStartOf="@id/sheep"
               app:layout_constraintStart_toEndOf="@id/brick">
               <TextView
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:text="0"
                 android:textColor="@color/title_gray"
                 android:textSize="28sp" />
               <TextView
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:text="0"
                 android:textColor="@color/title_gray"
                 android:textSize="28sp" />
             </TextSwitcher>
@@ -288,8 +279,7 @@
               android:id="@+id/slidePnlWoolCnt"
               android:layout_width="28dp"
               android:layout_height="match_parent"
-              android:paddingRight="8dp"
-              android:text="0"
+              android:paddingEnd="8dp"
               android:textColor="@color/title_gray"
               android:textSize="28sp"
               app:layout_constraintEnd_toStartOf="@id/wheat"
@@ -297,13 +287,11 @@
               <TextView
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:text="0"
                 android:textColor="@color/title_gray"
                 android:textSize="28sp" />
               <TextView
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:text="0"
                 android:textColor="@color/title_gray"
                 android:textSize="28sp" />
             </TextSwitcher>
@@ -320,8 +308,7 @@
               android:id="@+id/slidePnlWheatCnt"
               android:layout_width="28dp"
               android:layout_height="match_parent"
-              android:paddingRight="8dp"
-              android:text="0"
+              android:paddingEnd="8dp"
               android:textColor="@color/title_gray"
               android:textSize="28sp"
               app:layout_constraintEnd_toStartOf="@id/iron"
@@ -329,13 +316,11 @@
               <TextView
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:text="0"
                 android:textColor="@color/title_gray"
                 android:textSize="28sp" />
               <TextView
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:text="0"
                 android:textColor="@color/title_gray"
                 android:textSize="28sp" />
             </TextSwitcher>
@@ -352,8 +337,7 @@
               android:id="@+id/slidePnlOreCnt"
               android:layout_width="28dp"
               android:layout_height="match_parent"
-              android:paddingRight="8dp"
-              android:text="0"
+              android:paddingEnd="8dp"
               android:textColor="@color/title_gray"
               android:textSize="28sp"
               app:layout_constraintEnd_toStartOf="@id/card"
@@ -361,13 +345,11 @@
               <TextView
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:text="0"
                 android:textColor="@color/title_gray"
                 android:textSize="28sp" />
               <TextView
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:text="0"
                 android:textColor="@color/title_gray"
                 android:textSize="28sp" />
             </TextSwitcher>
@@ -379,37 +361,33 @@
               app:layout_constraintEnd_toStartOf="@id/slidePnlDevCardCnt"
               app:layout_constraintStart_toEndOf="@id/slidePnlOreCnt" />
 
-          <TextSwitcher
-            android:id="@+id/slidePnlDevCardCnt"
-            android:layout_width="28dp"
-            android:layout_height="match_parent"
-            android:text="0"
-            android:textColor="@color/title_gray"
-            android:textSize="28sp"
-            app:layout_constraintEnd_toStartOf="parent"
-            app:layout_constraintStart_toEndOf="@id/card" >
-            <TextView
-              android:layout_width="match_parent"
+            <TextSwitcher
+              android:id="@+id/slidePnlDevCardCnt"
+              android:layout_width="28dp"
               android:layout_height="match_parent"
-
               android:textColor="@color/title_gray"
-              android:textSize="28sp" />
-            <TextView
-              android:layout_width="match_parent"
-              android:layout_height="match_parent"
+              android:textSize="28sp"
+              app:layout_constraintEnd_toStartOf="parent"
+              app:layout_constraintStart_toEndOf="@id/card" >
+              <TextView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
 
-              android:textColor="@color/title_gray"
-              android:textSize="28sp" />
-          </TextSwitcher>
-        </android.support.constraint.ConstraintLayout>
+                android:textColor="@color/title_gray"
+                android:textSize="28sp" />
+              <TextView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+
+                android:textColor="@color/title_gray"
+                android:textSize="28sp" />
+            </TextSwitcher>
+          </android.support.constraint.ConstraintLayout>
 
           <TextSwitcher
             android:id="@+id/info_box"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Ein anderer Spieler ist am Zug"
-            android:textAlignment="center"
-            android:textSize="16sp"
             android:paddingTop="8dp"
             android:paddingBottom="8dp"
             sothree:layout_constraintEnd_toEndOf="parent"
@@ -421,12 +399,12 @@
               android:layout_height="wrap_content"
               android:text="Ein anderer Spieler ist am Zug"
               android:textAlignment="center"
-              android:textSize="16sp"/>
+              android:textSize="22sp"/>
             <TextView
               android:layout_width="match_parent"
               android:layout_height="wrap_content"
               android:textAlignment="center"
-              android:textSize="16sp"/>
+              android:textSize="22sp"/>
           </TextSwitcher>
         </android.support.constraint.ConstraintLayout>
 
@@ -434,57 +412,37 @@
           android:layout_width="match_parent"
           android:layout_height="2dp"
           android:background="?android:attr/listDivider" />
-      <!-- Ab hier neuer Ansatz-->
+        <!-- Ab hier neuer Ansatz-->
         <com.github.florent37.expansionpanel.viewgroup.ExpansionsViewGroupLinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            app:expansion_openOnlyOne="true"
-            android:orientation="vertical">
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content"
+          android:orientation="vertical">
 
           <include layout="@layout/entwicklungs_panel" />
 
           <View
-              android:id="@+id/listDiv1"
-              android:layout_width="match_parent"
-              android:layout_height="0.5dp"
-              android:background="?android:attr/listDivider" />
+            android:id="@+id/listDiv1"
+            android:layout_width="match_parent"
+            android:layout_height="0.5dp"
+            android:background="?android:attr/listDivider" />
 
           <include layout="@layout/bauen_panel" />
 
           <View
-              android:id="@+id/listDiv2"
-              android:layout_width="match_parent"
-              android:layout_height="0.5dp"
-              android:background="?android:attr/listDivider" />
+            android:id="@+id/listDiv2"
+            android:layout_width="match_parent"
+            android:layout_height="0.5dp"
+            android:background="?android:attr/listDivider" />
 
           <include layout="@layout/baufiguren_panel" />
 
           <View
-              android:id="@+id/listDiv3"
-              android:layout_width="match_parent"
-              android:layout_height="0.5dp"
-              android:background="?android:attr/listDivider" />
+            android:id="@+id/listDiv3"
+            android:layout_width="match_parent"
+            android:layout_height="0.5dp"
+            android:background="?android:attr/listDivider" />
 
         </com.github.florent37.expansionpanel.viewgroup.ExpansionsViewGroupLinearLayout>
-
-
-      <!--
-        <TextView
-          android:id="@+id/bauen"
-          android:layout_width="match_parent"
-          android:layout_height="wrap_content"
-          android:padding="10dp"
-          android:background="#ffffff"
-          android:text="@string/bauen_und_baukosten"
-          android:textAppearance="@style/Base.TextAppearance.AppCompat.Headline"
-          android:textColor="@color/title_gray" />
-
-        <ListView
-          android:id="@+id/list"
-          android:layout_width="match_parent"
-          android:layout_height="0dp"
-          android:layout_weight="1"
-          android:background="#ffffff" />-->
       </LinearLayout>
     </com.sothree.slidinguppanel.SlidingUpPanelLayout>
 
@@ -525,5 +483,5 @@
       android:layout_width="match_parent"
       android:layout_marginBottom="110dp"
       android:layout_height="match_parent"/>
-</LinearLayout>
+  </LinearLayout>
 </android.support.v4.widget.DrawerLayout>

@@ -72,7 +72,14 @@ public class JSONUtils {
         case COSTS:
           return new String[] { msgType, jObj.getString(msgType) };
         case DEV_CARD_BOUGHT:
-          return new String[] {"TODO"};
+          JSONObject obj = jObj.getJSONObject(msgType);
+          player = Storage.getPlayer(obj.getInt(PLAYER));
+          return new Object[] { DEV_CARD_BOUGHT, player, obj.getString(DEV_CARD) };
+        case DEV_CARD_PLAYED:
+          obj = jObj.getJSONObject(msgType);
+          Integer pId = obj.getInt(PLAYER);
+          String type = obj.getString(TYPE);
+          return new Object[] { DEV_CARD_PLAYED, pId, type };
         default:
           return displayError("Protokoll wird nicht unterstützt");
       }

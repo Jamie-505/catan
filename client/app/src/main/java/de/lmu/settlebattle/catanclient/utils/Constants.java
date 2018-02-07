@@ -21,10 +21,8 @@ public final class Constants {
   public static final String GET_ID = "Willkommen";
   public static final String HANDSHAKE = "Hallo";
   public static final String HARVEST = "Ertrag";
-  public static final String INVENTION = "Erfindung";
   public static final String LARGEST_ARMY = "Größte Rittermacht";
   public static final String LONGEST_RD = "Längste Handelsstrasse";
-  public static final String MONOPOL = "Monopol";
   public static final String NEW_CONSTRUCT ="Bauvorgang";
   public static final String OPPONENT ="Mitspieler";
   public static final String PLAYER = "Spieler";
@@ -61,6 +59,15 @@ public final class Constants {
 	public static final String PROTOCOL_SUPPORTED = "protocolMatch";
   public static final String NO_CONNECTION = "no connection";
 
+  // Dev Cards
+  public final static String NEW = "inaktiv (neu)";
+  public static final String INVENTION = "Erfindung";
+  public final static String KNIGHT = "Ritter";
+  public final static String MONOPOLE = "Monopol";
+  public final static String PLAYED = "(ausgespielt)";
+  public final static String RD_CONSTR = "Strassenbau";
+  public final static String VICTORY_PT = "Siegpunkt";
+
   // Error Handling
   public static final String MESSAGE = "Meldung";
   public static final String PROTOCOL_MISSMATCH = "Protocol Version Unsupported";
@@ -72,8 +79,6 @@ public final class Constants {
   public final static String CLAY = "Lehm";
   public final static String DICE_THROW = "Wurf";
   public final static String FIELDS = "Felder";
-  public final static String KNIGHT = "Ritter";
-  public final static String MONOPOLE = "Monopol";
   public final static String CONTENT = "Nachricht";
   public final static String NUMBER = "Zahl";
   public final static String OFFER = "Angebot";
@@ -92,7 +97,6 @@ public final class Constants {
   public final static String TURN_ORDER = "Reihenfolge";
   public final static String TYPE = "Typ";
   public final static String UNKNOWN = "Unbekannt";
-  public final static String VICTORY_PT = "Siegpunkt";
   public final static String VIEW_ID = "viewID";
   public final static String WHEAT = "Getreide";
   public final static String WINNER = "Sieger";
@@ -108,8 +112,10 @@ public final class Constants {
   public final static String BUILD_STREET = "Strasse bauen";
   public final static String BUILD_TRADE = "Handeln oder bauen";
   public final static String BUILD_VILLAGE = "Dorf bauen";
+  public final static String DEV_CARD = "Entwicklungskarte";
   public final static String DEV_CARDS = "Entwicklungskarten";
   public final static String DEV_CARD_BOUGHT = "Entwicklungskarte gekauft";
+  public final static String DEV_CARD_PLAYED = "Entwicklungskarte ausgespielt";
   public final static String ORANGE = "Orange";
   public final static String PLAYER_COLOR = "Farbe";
   public final static String PLAYER_ID = "id";
@@ -118,7 +124,6 @@ public final class Constants {
   public final static String PLAYER_STATE = "Status";
   public final static String RD_CON1 = "Strassenbau1";
   public final static String RD_CON2 = "Strassenbau2";
-  public final static String RD_CONSTR = "Strassenbau";
   public final static String RED = "Rot";
   public final static String STATUS_WAIT = "Warten";
   public final static String WHITE = "Weis";

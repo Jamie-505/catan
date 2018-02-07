@@ -57,22 +57,6 @@
             android:layout_marginStart="2dp"
             android:textColor="@android:color/holo_red_dark"
             />
-
-        <ImageButton
-            android:id="@+id/ibClose"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerVertical="true"
-            android:layout_marginEnd="4dp"
-            android:layout_marginLeft="4dp"
-            android:layout_marginRight="4dp"
-            android:layout_marginStart="4dp"
-            android:layout_toEndOf="@+id/tvPosition"
-            android:layout_toRightOf="@+id/tvPosition"
-            android:background="@null"
-            android:src="@drawable/ic_combined2"
-            android:visibility="gone" />
-
     </RelativeLayout>
 
     <TextView

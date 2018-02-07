@@ -11,7 +11,7 @@ public class DevCardOverview {
   @SerializedName(KNIGHT)
   private  int knight;
 
-  @SerializedName(MONOPOL)
+  @SerializedName(MONOPOLE)
   private int monopol;
 
   @SerializedName(RD_CONSTR)

@@ -11,7 +11,6 @@ public class Invention {
   public Invention(RawMaterialOverview rawMats, Integer playerId) {
     this.rawMats = rawMats;
     this.playerId = playerId;
-
   }
 
   @SerializedName(PLAYER)

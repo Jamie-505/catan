@@ -119,6 +119,12 @@ import de.lmu.settlebattle.catanclient.utils.Harvest;
 import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import de.lmu.settlebattle.catanclient.chipsUI.ItemsFragment;
+import com.beloo.widget.chipslayoutmanager.BuildConfig;
+import butterknife.BindView;
+import butterknife.ButterKnife;
+
+
 
 public class MainActivity extends BaseSocketActivity implements FragmentHandler {
 
@@ -190,6 +196,14 @@ public class MainActivity extends BaseSocketActivity implements FragmentHandler 
     setContentView(R.layout.activity_main);
     self = Storage.getSelf();
     setIntentFilters();
+
+
+    //StartFragment for Cards
+    ButterKnife.bind(this);
+    getSupportFragmentManager().beginTransaction()
+        .add(R.id.fragmentContainer2, ItemsFragment.newInstance())
+        .commit();
+
 
     Intent startActivity = getIntent();
     // I know weird but I need to get the fields from the message somehow to init the board

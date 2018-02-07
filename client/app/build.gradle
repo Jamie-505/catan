@@ -9,7 +9,7 @@ android {
         applicationId "de.lmu.settlebattle.catanclient"
         minSdkVersion 24
         targetSdkVersion 26
-        multiDexEnabled = false
+        multiDexEnabled = true
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
@@ -69,4 +69,22 @@ dependencies {
     compile 'com.github.antonygolovin:fluentsnackbar:1.0.0'
     // restart app
     compile 'com.jakewharton:process-phoenix:2.0.0'
+    // glide
+    compile 'com.github.bumptech.glide:glide:3.7.0'
+    //implementation ("com.github.bumptech.glide:glide:4.6.1") {
+    //    exclude group: "com.android.support"
+    //}
+    implementation "com.android.support:support-fragment:26.1.0"
+    //swipeupbar
+    compile 'com.github.florent37:expansionpanel:1.0.6'
+    // Butterknife Support
+    compile 'com.jakewharton:butterknife:8.8.1'
+    annotationProcessor 'com.jakewharton:butterknife-compiler:8.8.1'
+    //temporary 3rd party support PLS REMOVE BEFORE FINAL SUBMIT
+    compile('com.mikepenz:materialdrawer:5.8.0@aar') {
+        transitive = true
+    }
+    // ChipsLayout Manager IMPORTANT
+    compile 'com.beloo.widget:ChipsLayoutManager:0.3.7@aar'
+
 }

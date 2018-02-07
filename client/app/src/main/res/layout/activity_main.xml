@@ -409,7 +409,7 @@
             android:layout_height="wrap_content"
             android:text="Ein anderer Spieler ist am Zug"
             android:textAlignment="center"
-            android:textSize="22sp"
+            android:textSize="16sp"
             android:paddingTop="8dp"
             android:paddingBottom="8dp"
             sothree:layout_constraintEnd_toEndOf="parent"
@@ -421,12 +421,12 @@
               android:layout_height="wrap_content"
               android:text="Ein anderer Spieler ist am Zug"
               android:textAlignment="center"
-              android:textSize="22sp"/>
+              android:textSize="16sp"/>
             <TextView
               android:layout_width="match_parent"
               android:layout_height="wrap_content"
               android:textAlignment="center"
-              android:textSize="22sp"/>
+              android:textSize="16sp"/>
           </TextSwitcher>
         </android.support.constraint.ConstraintLayout>
 
@@ -434,7 +434,41 @@
           android:layout_width="match_parent"
           android:layout_height="2dp"
           android:background="?android:attr/listDivider" />
+      <!-- Ab hier neuer Ansatz-->
+        <com.github.florent37.expansionpanel.viewgroup.ExpansionsViewGroupLinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:expansion_openOnlyOne="true"
+            android:orientation="vertical">
 
+          <include layout="@layout/entwicklungs_panel" />
+
+          <View
+              android:id="@+id/listDiv1"
+              android:layout_width="match_parent"
+              android:layout_height="0.5dp"
+              android:background="?android:attr/listDivider" />
+
+          <include layout="@layout/bauen_panel" />
+
+          <View
+              android:id="@+id/listDiv2"
+              android:layout_width="match_parent"
+              android:layout_height="0.5dp"
+              android:background="?android:attr/listDivider" />
+
+          <include layout="@layout/baufiguren_panel" />
+
+          <View
+              android:id="@+id/listDiv3"
+              android:layout_width="match_parent"
+              android:layout_height="0.5dp"
+              android:background="?android:attr/listDivider" />
+
+        </com.github.florent37.expansionpanel.viewgroup.ExpansionsViewGroupLinearLayout>
+
+
+      <!--
         <TextView
           android:id="@+id/bauen"
           android:layout_width="match_parent"
@@ -450,7 +484,7 @@
           android:layout_width="match_parent"
           android:layout_height="0dp"
           android:layout_weight="1"
-          android:background="#ffffff" />
+          android:background="#ffffff" />-->
       </LinearLayout>
     </com.sothree.slidinguppanel.SlidingUpPanelLayout>
 

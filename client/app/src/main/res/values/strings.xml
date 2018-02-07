@@ -90,4 +90,21 @@
   <string name="end_rd_con">Straßenbau beenden</string>
   <string name="try_reconnect">erneut versuchen</string>
 
+  <!-- Vorübergehend -->
+
+  <string name="delete">Delete</string>
+  <string name="insert">Insert</string>
+  <string name="move_to">Move to:</string>
+  <string name="move">Move</string>
+  <string name="scroll">Scroll</string>
+
+  <string name="main">Main</string>
+  <string name="bottom_sheet">Bottom Sheet</string>
+
+  <!-- TODO: Remove or change this placeholder text -->
+  <string name="show_sheet">Show sheet</string>
+  <string name="fragment_bottom_sheet_description">This is fragment with bottom sheet dialog. Created to show example of RecyclerView with ChipsLayoutManager inside other scrollable container</string>
+
+
+
 </resources>

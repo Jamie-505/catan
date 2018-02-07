@@ -271,7 +271,7 @@ public class CatanMessage {
     public static TextMessage developmentCardBought(int playerId, DevCardType type) {
         JSONObject payload = new JSONObject();
         payload.put(Constants.PLAYER, playerId);
-        payload.put(Constants.CARD_BUY, type.toString());
+        payload.put(Constants.DEV_CARD, type.toString());
         return new TextMessage(JSONUtils.setJSONType(CARD_SOLD,payload).toString());
     }
 

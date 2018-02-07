@@ -40,9 +40,52 @@ public class CatanSocketHandler extends TextWebSocketHandler implements Property
         );
 
         utils.getGameCtrl().addPropertyChangeListener(e -> {
-            if (e.getPropertyName().equals(ROBBER_AT)) {
-                System.out.println("Robber was moved");
-                sendMessageToAll((TextMessage) e.getNewValue());
+            boolean sendStatusUpdate = false;
+            Player player = null;
+
+            switch (e.getPropertyName()) {
+                case ROBBER_AT:
+                    System.out.println("Robber was moved");
+                    sendMessageToAll((TextMessage) e.getNewValue());
+                    break;
+
+                case KNIGHT_PLAYED:
+                    player = (Player) e.getNewValue();
+                    Object[] knightData = (Object[]) e.getOldValue();
+                    sendMessageToAll(CatanMessage.knightCard(player.getId(), (int) knightData[0], (Location) knightData[1]));
+                    sendStatusUpdate = true;
+                    break;
+
+                case MONOPOLE_PLAYED:
+                    player = (Player) e.getNewValue();
+                    sendMessageToAll(CatanMessage.monopoleCard(player.getId(), (RawMaterialType) e.getOldValue()));
+                    sendStatusUpdate = true;
+                    break;
+
+                case INVENTION_PLAYED:
+                    player = (Player) e.getNewValue();
+                    sendMessageToAll(CatanMessage.inventionCard(player.getId(), (RawMaterialOverview) e.getOldValue()));
+                    sendStatusUpdate = true;
+                    break;
+
+                case RC_PLAYED:
+                    player = (Player) e.getNewValue();
+                    Object[] rcData = (Object[]) e.getOldValue();
+                    try {
+                        sendMessageToAll(CatanMessage.roadConstructionCard((Building) rcData[0], (Building) rcData[1]));
+                    } catch (CatanException ex) {
+                        System.out.println(ex.getMessage());
+                    }
+                    sendStatusUpdate = true;
+                    break;
+            }
+
+            if (sendStatusUpdate && player != null) {
+                try {
+                    this.sendStatusUpdate(player);
+                } catch (IOException ex) {
+                    ex.printStackTrace();
+                }
             }
         });
 
@@ -128,8 +171,8 @@ public class CatanSocketHandler extends TextWebSocketHandler implements Property
                     getGameCtrl().dice(SocketUtils.toInt(session.getId()));
                     break;
 
-                case CARD_MONOPOLY:
-                    utils.applyMonopolyCard(session, message);
+                case CARD_MONOPOLE:
+                    utils.applyMonopoleCard(session, message);
                     break;
 
                 case CARD_INVENTION:
@@ -191,9 +234,11 @@ public class CatanSocketHandler extends TextWebSocketHandler implements Property
                         getGameCtrl().moveKIs();
                     }
                     break;
+
+                default:
+                    OK = false;
+                    errorMessage = String.format("Der Nachrichtentyp %s ist uns nicht bekannt.", type);
             }
-
-
         } catch (CatanException ex) {
 
             if (ex.sendToClient()) {
@@ -225,7 +270,7 @@ public class CatanSocketHandler extends TextWebSocketHandler implements Property
                 getGameCtrl().moveKIs();
             }
 
-            if(!current.isKI() && current.getStatus().equals(WAIT_FOR_ALL_TO_EXTRACT_CARDS))
+            if (!current.isKI() && current.getStatus().equals(WAIT_FOR_ALL_TO_EXTRACT_CARDS))
                 getGameCtrl().updateStatusAfterCardExtraction(current);
         }
     }
@@ -502,28 +547,6 @@ public class CatanSocketHandler extends TextWebSocketHandler implements Property
                 case END_TURN:
                 case STATUS_UPD:
                     sendStatusUpdate = true;
-                    break;
-
-                case KNIGHT_PLAYED:
-                    Object[] knightData = (Object[])evt.getOldValue();
-                    sendMessageToAll(CatanMessage.knightCard(player.getId(), (int)knightData[0], (Location)knightData[1]));
-                    sendStatusUpdate = false;
-                    break;
-
-                case MONOPOLE_PLAYED:
-                    sendMessageToAll(CatanMessage.monopoleCard(player.getId(), (RawMaterialType)evt.getOldValue()));
-                    sendStatusUpdate = false;
-                    break;
-
-                case INVENTION_PLAYED:
-                    sendMessageToAll(CatanMessage.inventionCard(player.getId(), (RawMaterialOverview)evt.getOldValue()));
-                    sendStatusUpdate = false;
-                    break;
-
-                case RC_PLAYED:
-                    Object[] rcData = (Object[])evt.getOldValue();
-                    sendMessageToAll(CatanMessage.roadConstructionCard((Building)rcData[0], (Building)rcData[1]));
-                    sendStatusUpdate = false;
                     break;
 
                 default:

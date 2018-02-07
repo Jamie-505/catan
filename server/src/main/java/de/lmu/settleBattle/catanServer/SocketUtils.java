@@ -228,29 +228,32 @@ public class SocketUtils {
     public void applyInventionCard(WebSocketSession session, TextMessage message) throws Exception {
         Player player = gameCtrl.getPlayer(session.getId());
 
-        JSONObject json = JSONUtils.createJSON(message).getJSONObject(INVENTION);
-        JSONObject rawMaterialJSON = json.getJSONObject(Constants.RAW_MATERIALS);
+        JSONObject payload = JSONUtils.createJSON(message).getJSONObject(INVENTION);
+        JSONObject rawMaterialJSON = payload.getJSONObject(Constants.RAW_MATERIALS);
         RawMaterialOverview overview = gson.fromJson(rawMaterialJSON.toString(), RawMaterialOverview.class);
 
         gameCtrl.applyInventionCard(player, overview);
     }
 
-    public void applyMonopolyCard(WebSocketSession session, TextMessage message) throws Exception {
+    public void applyMonopoleCard(WebSocketSession session, TextMessage message) throws Exception {
         Player monoPlayer = gameCtrl.getPlayer(session.getId());
 
-        JSONObject json = JSONUtils.createJSON(message).getJSONObject(MONOPOLE);
-        JSONObject rawMaterialJSON = json.getJSONObject(Constants.RAW_MATERIAL);
-        RawMaterialType type = gson.fromJson(rawMaterialJSON.toString(), RawMaterialType.class);
+        JSONObject payload = JSONUtils.createJSON(message).getJSONObject(MONOPOLE);
+        RawMaterialType type = gson.fromJson(payload.getString(RAW_MATERIAL), RawMaterialType.class);
 
         gameCtrl.applyMonopoleCard(monoPlayer, type);
     }
 
     public void applyKnightCard(WebSocketSession session, TextMessage message) throws Exception {
-        Player player = gameCtrl.getPlayer(session.getId());
+        JSONObject payload = JSONUtils.createJSON(message).getJSONObject(CARD_KNIGHT);
 
-        player.applyKnightCard();
-        gameCtrl.assignGreatestArmy(player);
-        moveRobber(session, message, CARD_KNIGHT);
+        int opponentId = -1;
+        if (payload.has(DESTINATION))
+            opponentId = payload.getInt(DESTINATION);
+
+        Location newRobberLoc = gson.fromJson(payload.getJSONObject(PLACE).toString(), Location.class);
+
+        gameCtrl.applyKnightCard(toInt(session.getId()), opponentId, newRobberLoc);
     }
 
     public void setFirstRoadStatus(WebSocketSession session) throws CatanException {

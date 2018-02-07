@@ -260,7 +260,7 @@ public class JSONUtilsTest {
             .getJSONObject(Constants.CARD_SOLD);
 
     assertEquals(4, payload.get(Constants.PLAYER));
-    assertEquals(Constants.KNIGHT, payload.get(Constants.CARD_BUY));
+    assertEquals(Constants.KNIGHT, payload.get(Constants.DEV_CARD));
   }
 
   //region longestRoadMessageShouldBeCorrect

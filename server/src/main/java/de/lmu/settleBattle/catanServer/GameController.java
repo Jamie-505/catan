@@ -382,8 +382,8 @@ public class GameController {
                 // if a city was built then the owner has already received 1 victory point for the settlement he built before
                 owner.increaseVictoryPoints(1, true);
             } else {
-              //if owner has new longest road, update it
-              assignLongestRoad(building, owner);
+                //if owner has new longest road, update it
+                assignLongestRoad(building, owner);
             }
 
             //raw material distribution for second settlement
@@ -412,30 +412,30 @@ public class GameController {
      * @throws CatanException
      */
     void assignLongestRoad(Building road, Player owner) throws CatanException {
-      //if the player has less than 5 roads or less then the current longest road he cant possibly get the longest road
-      if (owner.getRoads().size() < Math.max(5, board.getLongestRoadLength()) ) return;
+        //if the player has less than 5 roads or less then the current longest road he cant possibly get the longest road
+        if (owner.getRoads().size() < Math.max(5, board.getLongestRoadLength())) return;
 
-      int newRoadLength = getBoard().getLongestRoad(road, owner, false, false).size();
+        int newRoadLength = getBoard().getLongestRoad(road, owner, false, false).size();
 
-      if (newRoadLength > owner.getLongestRoadLength())
-        owner.setLongestRoadLength(newRoadLength);
+        if (newRoadLength > owner.getLongestRoadLength())
+            owner.setLongestRoadLength(newRoadLength);
 
-      if (isLongestRoad(newRoadLength) && newRoadLength >= 5) {
-        getBoard().setLongestRoadLength(newRoadLength);
-        if (playerWithLongestRoad == null) {
-          owner.setHasLongestRoad(true);
-          playerWithLongestRoad = owner;
-          playerWithLongestRoad.increaseVictoryPoints(2, true);
+        if (isLongestRoad(newRoadLength) && newRoadLength >= 5) {
+            getBoard().setLongestRoadLength(newRoadLength);
+            if (playerWithLongestRoad == null) {
+                owner.setHasLongestRoad(true);
+                playerWithLongestRoad = owner;
+                playerWithLongestRoad.increaseVictoryPoints(2, true);
+            }
+
+            if (owner != playerWithLongestRoad) {
+                playerWithLongestRoad.setHasLongestRoad(false);
+                owner.setHasLongestRoad(true);
+                playerWithLongestRoad.decreaseVictoryPoints(2, true);
+                playerWithLongestRoad = owner;
+                playerWithLongestRoad.increaseVictoryPoints(2, true);
+            }
         }
-
-        if (owner != playerWithLongestRoad) {
-          playerWithLongestRoad.setHasLongestRoad(false);
-          owner.setHasLongestRoad(true);
-          playerWithLongestRoad.decreaseVictoryPoints(2, true);
-          playerWithLongestRoad = owner;
-          playerWithLongestRoad.increaseVictoryPoints(2, true);
-        }
-      }
     }
 
     private boolean isLongestRoad(int newRoadLength) {
@@ -497,18 +497,20 @@ public class GameController {
         if (!monoPlayer.hasMonopoleCard())
             throw new CatanException(String.format(PLAYER_HAS_NO_DEV_CARD, monoPlayer.getId(), DevCardType.MONOPOLE.toString()), true);
 
-        changes.firePropertyChange(MONOPOLE_PLAYED, targetType, monoPlayer);
-
         monoPlayer.removeDevelopmentCard(DevCardType.MONOPOLE, 1);
 
         for (Player player : players) {
-            if (player != monoPlayer && player.hasRawMaterial(targetType)) {
+            if (!player.equals(monoPlayer) && player.hasRawMaterial(targetType)) {
                 RawMaterialOverview overview =
                         new RawMaterialOverview(targetType, player.getRawMaterialCount(targetType));
                 player.decreaseRawMaterials(overview);
                 monoPlayer.increaseRawMaterials(overview);
             }
         }
+
+        monoPlayer.setStatus(TRADE_OR_BUILD);
+
+        changes.firePropertyChange(MONOPOLE_PLAYED, targetType, monoPlayer);
     }
 
     public void applyRCCardForKI(Player ki) throws CatanException {
@@ -545,12 +547,11 @@ public class GameController {
         if (overview.getTotalCount() != 2)
             throw new CatanException(String.format("Es können genau 2 Rohstoffe gezogen werden, nicht %s", overview.getTotalCount()), true);
 
-        changes.firePropertyChange(INVENTION_PLAYED, "null", player);
-
         this.rawMaterialDeck.decrease(overview);
         player.increaseRawMaterials(overview);
         player.removeDevelopmentCard(DevCardType.INVENTION, 1);
 
+        player.setStatus(TRADE_OR_BUILD);
 
         changes.firePropertyChange(INVENTION_PLAYED, overview, player);
     }
@@ -579,9 +580,9 @@ public class GameController {
             overview.increase(type, 1);
         }
 
-        changes.firePropertyChange(INVENTION_PLAYED, types, player);
-
         player.increaseRawMaterials(overview);
+
+        changes.firePropertyChange(INVENTION_PLAYED, overview, player);
     }
 
 
@@ -590,15 +591,19 @@ public class GameController {
         if (!knightPlayer.equals(getCurrent()))
             CatanException.throwNotYourTurnException(knightPlayerId);
 
-        if (!knightPlayer.hasInventionCard())
-            throw new CatanException(String.format(PLAYER_HAS_NO_DEV_CARD, knightPlayer.getId(), DevCardType.KNIGHT.toString()), true);
-
-        knightPlayer.applyKnightCard();
         activateRobber(knightPlayerId, targetPlayerId, newRobberLoc);
+
+        //remove knight card after robber has been activated because if wrong data has been sent (e.g. opponent cannot be robbed)
+        //the card should not be removed from player
+        knightPlayer.applyKnightCard();
 
         Object[] data = new Object[2];
         data[0] = targetPlayerId;
         data[1] = newRobberLoc;
+
+        if (isGreatestArmyPlayer(knightPlayer))
+            assignGreatestArmy(knightPlayer);
+
         changes.firePropertyChange(KNIGHT_PLAYED, data, knightPlayer);
     }
     //endregion
@@ -709,7 +714,8 @@ public class GameController {
         offer = new RawMaterialOverview(offerType, offerAmount);
         request = new RawMaterialOverview(requestType, 1);
 
-        if (!player.canAfford(offer)) throw new CatanException("Du hast nicht genug Rohstoffe für diesen Handel.", true);
+        if (!player.canAfford(offer))
+            throw new CatanException("Du hast nicht genug Rohstoffe für diesen Handel.", true);
 
         player.trade(offer, request);
     }
@@ -879,7 +885,9 @@ public class GameController {
                 if (opponent != null && opponent.getRawMaterialCount() > 0) {
                     board.getRobber().robPlayer(currentPlayer, opponent);
                     break;
-                } else { opponent = null; }
+                } else {
+                    opponent = null;
+                }
             }
         }
 
@@ -905,7 +913,7 @@ public class GameController {
     /**
      * player tosses cards after a roll of 7 if he has at least 7 raw materials
      *
-     * @param id id of the player who has to toss cards
+     * @param id       id of the player who has to toss cards
      * @param overview overview containing all cards he extracts
      */
     public void tossRawMaterialCards(int id, RawMaterialOverview overview) throws CatanException {
@@ -1057,36 +1065,25 @@ public class GameController {
         return this.rawMaterialDeck;
     }
 
-    public boolean assignGreatestArmy(Player player) throws Exception {
-        boolean done = false;
+    public boolean isGreatestArmyPlayer(Player player) throws CatanException {
 
-        if (player.getArmyCount() < 3) return true;
+        if (player.getArmyCount() < 3) return false;
+
+        return this.greatestArmyPlayer == null || this.getPlayerWithHighestArmyCount().equals(player);
+    }
+
+    public void assignGreatestArmy(Player player) throws CatanException {
 
         if (this.greatestArmyPlayer == null) {
-            player.increaseVictoryPoints(2, true);
-            player.setGreatestArmy(true);
+            player.assignGreatestArmy();
             this.greatestArmyPlayer = player;
-            done = true;
-        } else {
-
-            if (this.getPlayerWithHighestArmyCount() == player && this.greatestArmyPlayer != player) {
-
-                try {
-                    greatestArmyPlayer.decreaseVictoryPoints(2);
-                    greatestArmyPlayer.setGreatestArmy(false);
-                    player.increaseVictoryPoints(2, true);
-                    player.setGreatestArmy(true);
-                    this.greatestArmyPlayer = player;
-                    done = true;
-                } catch (Exception ex) {
-                    ex.printStackTrace();
-                    done = false;
-                }
-            }
         }
 
-        return done;
-
+        else if (!this.greatestArmyPlayer.equals(player)) {
+            this.greatestArmyPlayer.removeGreatestArmy();
+            player.assignGreatestArmy();
+            this.greatestArmyPlayer = player;
+        }
     }
 
     private Player getPlayerWithHighestArmyCount() {
@@ -1105,9 +1102,13 @@ public class GameController {
         return this.gameOver;
     }
 
-    public DevelopmentCardOverview getDevelopmentCardDeck() { return this.developmentCardDeck; }
+    public DevelopmentCardOverview getDevelopmentCardDeck() {
+        return this.developmentCardDeck;
+    }
 
-    public void setDevelopmentCardDeck(DevelopmentCardOverview devCardDeck) { this.developmentCardDeck = devCardDeck; }
+    public void setDevelopmentCardDeck(DevelopmentCardOverview devCardDeck) {
+        this.developmentCardDeck = devCardDeck;
+    }
     //endregion
 }
 

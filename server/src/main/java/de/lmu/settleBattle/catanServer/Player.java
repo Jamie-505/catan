@@ -313,10 +313,7 @@ public class Player extends JSONStringBuilder implements Comparable, Cloneable {
      * applys knight card
      */
     public void applyKnightCard() throws CatanException {
-        if (!developmentDeck.hasKnightCard())
-            throw new CatanException(String.format(PLAYER_HAS_NO_DEV_CARD, this.id, DevCardType.KNIGHT.toString()), true);
-
-        developmentDeck.decrease(DevCardType.KNIGHT, 1);
+        removeKnightCard();
         increaseArmyCount();
     }
 
@@ -463,6 +460,16 @@ public class Player extends JSONStringBuilder implements Comparable, Cloneable {
 
     public void setGreatestArmy(boolean boo) {
         this.greatestArmy = boo;
+    }
+
+    public void assignGreatestArmy() throws CatanException {
+        this.greatestArmy = true;
+        this.increaseVictoryPoints(2, true);
+    }
+
+    public void removeGreatestArmy() throws CatanException {
+        this.greatestArmy = false;
+        this.decreaseVictoryPoints(2, true);
     }
 
     public void setLongestRoadLength(int longestRoadLength) {
@@ -622,7 +629,7 @@ public class Player extends JSONStringBuilder implements Comparable, Cloneable {
         return developmentDeck;
     }
 
-    public void removeKnightCard() throws Exception {
+    public void removeKnightCard() throws CatanException {
         this.developmentDeck.decrease(DevCardType.KNIGHT, 1);
     }
 

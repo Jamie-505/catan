@@ -26,8 +26,8 @@ public class Constants {
     public final static String CARD_RD_CON = "Strassenbaukarte ausspielen";
     public final static String FIRST_STREET = "Strassenbau1";
     public final static String SECOND_STREET = "Strassenbau2";
-    public final static String CARD_MONOPOLY = "Monopolkarte ausspielen";
-    public final static String CARD_INVENTION = "Erfindungskarte ausspielen";
+    public final static String CARD_INVENTION = "Erfindung";
+    public final static String CARD_MONOPOLE = "Monopol";
     public final static String CARD_SOLD = "Entwicklungskarte gekauft";
     public final static String CHAT_IN = "Chatnachricht";
     public final static String CHAT_OUT = "Chatnachricht senden";
@@ -63,6 +63,7 @@ public class Constants {
     public final static String ACCEPT = "Annehmen";
     public final static String FELLOW_PLAYER = "Mitspieler";
     public final static String ARMY = "Rittermacht";
+    public final static String DEV_CARD = "Entwicklungskarte";
     public final static String DEV_CARDS = "Entwicklungskarten";
     public final static String ADD_KI = "addKI";
     public final static String VIEW_ID = "viewID";

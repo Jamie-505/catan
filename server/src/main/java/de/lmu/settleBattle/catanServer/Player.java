@@ -20,10 +20,6 @@ public class Player extends JSONStringBuilder implements Comparable, Cloneable {
     public void addPropertyChangeListener(PropertyChangeListener l) {
         changes.addPropertyChangeListener(l);
     }
-
-    public void removePropertyChangeListener(PropertyChangeListener l) {
-        changes.removePropertyChangeListener(l);
-    }
     //endregion
 
     // region Members
@@ -152,7 +148,7 @@ public class Player extends JSONStringBuilder implements Comparable, Cloneable {
 
         int[] result = dice.roll();
 
-        System.out.printf("%s diced %s. fire property change", this.id, result[0]+result[1]);
+        System.out.printf("%s diced %s. fire property change", this.id, result[0] + result[1]);
         changes.firePropertyChange(ROLL_DICE, result, this);
 
         return result;
@@ -302,7 +298,7 @@ public class Player extends JSONStringBuilder implements Comparable, Cloneable {
     public boolean isActive() {
         return this.status.equals(EXTRACT_CARDS_DUE_TO_ROBBER) || this.status.equals(ROBBER_TO) ||
                 this.status.equals(TRADE_OR_BUILD) || this.status.equals(BUILD_SETTLEMENT) ||
-                this.status.equals(BUILD_STREET) ||this.status.equals(DICE) || this.status.equals(START_GAME);
+                this.status.equals(BUILD_STREET) || this.status.equals(DICE) || this.status.equals(START_GAME);
     }
 
     private int increaseArmyCount() {
@@ -320,7 +316,7 @@ public class Player extends JSONStringBuilder implements Comparable, Cloneable {
     public void decreaseVictoryPoints(int amount, boolean sendStatusUpdate) throws CatanException {
         if (victoryPtsTotal <= 0)
             throw new CatanException(String.format("Siegpunkte können nicht um %s verringert werden. (Haben %s)",
-                amount, victoryPtsTotal), true);
+                    amount, victoryPtsTotal), true);
         if (amount < 0)
             throw new CatanException(String.format("amount muss positiv sein (Wert: %s)", amount), false);
 
@@ -367,7 +363,9 @@ public class Player extends JSONStringBuilder implements Comparable, Cloneable {
         return this.developmentDeck.hasMonopoleCard();
     }
 
-    public boolean hasKnightCard() {return this.developmentDeck.hasKnightCard();}
+    public boolean hasKnightCard() {
+        return this.developmentDeck.hasKnightCard();
+    }
 
     public void removeDevelopmentCard(DevCardType type, int amount) throws CatanException {
         this.developmentDeck.decrease(type, amount);
@@ -389,11 +387,91 @@ public class Player extends JSONStringBuilder implements Comparable, Cloneable {
         return this.rawMaterialDeck.canAfford(overview);
     }
 
-    public boolean isRCActive() { return this.status.equals(FIRST_STREET) || this.status.equals(SECOND_STREET); }
+    public boolean shouldAcceptTradeRequest(TradeRequest tr) {
+        boolean accept = false;
+        RawMaterialOverview request = tr.getRequest();
+        RawMaterialOverview offer = tr.getOffer();
+
+        for (BuildingType type : BuildingType.values()) {
+            accept = couldAffordBuilding(type, request, offer) && !canAfford(type) && stock.getCount(type) > 0;
+            if (accept) break;
+        }
+
+        if (!accept) {
+            accept = canAfford(BuildingType.SETTLEMENT) && request.hasOnly(RawMaterialType.ORE) && stock.getCount(BuildingType.SETTLEMENT) > 0 ||
+                    canAfford(BuildingType.CITY) && request.getOreCount() == 0 && request.getWheatCount() == 0 && stock.getCount(BuildingType.CITY) > 0||
+                    canAfford(BuildingType.ROAD) && !canAfford(BuildingType.SETTLEMENT) && request.getClayCount() == 0 && request.getWoodCount() == 0 && stock.getCount(BuildingType.ROAD) > 0;
+        }
+
+        if (!accept) {
+            accept = couldAffordDevCard(request, offer) && !canAffordDevCard();
+        }
+
+        return accept;
+    }
+
+    private boolean couldAffordDevCard(RawMaterialOverview request, RawMaterialOverview offer) {
+        boolean ret;
+
+        try {
+            RawMaterialOverview newOverview = (RawMaterialOverview) this.rawMaterialDeck.clone();
+            newOverview.decrease(request);
+            newOverview.increase(offer);
+
+            ret = newOverview.canAffordDevelopmentCard();
+        } catch (Exception ex) {
+            return false;
+        }
+
+        return ret;
+    }
+
+    private boolean couldAffordBuilding(BuildingType type, RawMaterialOverview request, RawMaterialOverview offer) {
+        boolean ret;
+
+        try {
+            RawMaterialOverview newOverview = (RawMaterialOverview) this.rawMaterialDeck.clone();
+            newOverview.decrease(request);
+            newOverview.increase(offer);
+
+            ret = newOverview.canAfford().contains(type);
+        } catch (Exception ex) {
+            return false;
+        }
+
+        return ret;
+    }
+
+    public boolean isRCActive() {
+        return this.status.equals(FIRST_STREET) || this.status.equals(SECOND_STREET);
+    }
+
+    public void sendBestTradeRequest() throws CatanException {
+        TradeRequest tr = this.rawMaterialDeck.getBestTradeRequest();
+
+        if (tr != null) {
+            tr.setPlayerId(this.getId());
+            changes.firePropertyChange(SEND_TRD, tr, this);
+        }
+    }
+
+    /**
+     * random decision if a trade request should be sent to all
+     *
+     * @return true if KI wants to send trade request
+     */
+    public boolean decidesToSendTr() {
+        Random random = new Random();
+
+        int randomInt = random.nextInt(10);
+        return randomInt % 3 == 0;
+    }
     //region Properties
 
 
-    public int getId() { return id; }
+    public int getId() {
+        return id;
+    }
 
     public int getArmyCount() {
         return armyCount;
@@ -404,7 +482,7 @@ public class Player extends JSONStringBuilder implements Comparable, Cloneable {
     }
 
     public void setStatus(String newStatus, boolean sendStatusUpdate) {
-        if(newStatus.equals("")) return;
+        if (newStatus.equals("")) return;
 
         boolean fire = !newStatus.equals(this.status);
         String oldStatus = this.status;
@@ -606,8 +684,11 @@ public class Player extends JSONStringBuilder implements Comparable, Cloneable {
         return settlements;
     }
 
-    public List<Building> getCities() {
-        return cities;
+    public Building getRandomSettlement() {
+        Random random = new Random();
+        int randomIndex = random.nextInt(this.settlements.size());
+
+        return this.settlements.get(randomIndex);
     }
 
     public List<Building> getSettlementsAndCities() {
@@ -615,6 +696,25 @@ public class Player extends JSONStringBuilder implements Comparable, Cloneable {
         buildings.addAll(settlements);
         buildings.addAll(cities);
         return buildings;
+    }
+
+    /**
+     *
+     * @param allAttachable specifies if all settlements and citites which are returned are attachable,
+     *                      which means if a road can be placed next to them
+     * @return list of attachable settlements and cities
+     */
+    public List<Building> getSettlementsAndCities(boolean allAttachable) {
+        List<Building> attachableList = new ArrayList<>();
+        List<Building> buildings = getSettlementsAndCities();
+
+        if (!allAttachable) return buildings;
+
+        for (Building bld : buildings) {
+            if (bld.isAttachable()) attachableList.add(bld);
+        }
+
+        return attachableList;
     }
 
     public RawMaterialType removeRandomResource() throws Exception {
@@ -637,12 +737,18 @@ public class Player extends JSONStringBuilder implements Comparable, Cloneable {
         return roads;
     }
 
+    public List<Building> getAttachableRoads() {
+        List<Building> attachableRoads = new ArrayList<>();
+
+        for (Building r : roads) {
+            if (r.isAttachable()) attachableRoads.add(r);
+        }
+
+        return attachableRoads;
+    }
+
     //____________FOR TESTING___________________________
     public void setRawMaterialDeck(RawMaterialOverview rmo) {
         this.rawMaterialDeck = rmo;
-    }
-
-    public RawMaterialOverview getResources() {
-        return this.rawMaterialDeck;
     }
 }

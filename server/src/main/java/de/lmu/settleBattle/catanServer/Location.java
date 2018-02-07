@@ -48,6 +48,20 @@ public class Location extends JSONStringBuilder {
         return Math.abs(x) == 3 || Math.abs(y) == 3 || Math.abs(x+y) == 3;
     }
 
+    public boolean isDesert() { return x==0 && y ==0; }
+
+    public static int getWaterAndDesertCount(Location[] locs) {
+        if (locs == null || locs.length == 0) return 0;
+
+        int count = 0;
+        for (Location loc : locs) {
+            if (loc.isWaterField() || loc.isDesert())
+                count++;
+        }
+
+        return count;
+    }
+
     @Override
     public boolean equals(Object object) {
         if (object instanceof Location) {

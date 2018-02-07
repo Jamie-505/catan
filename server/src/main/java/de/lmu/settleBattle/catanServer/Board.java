@@ -191,7 +191,53 @@ public class Board extends JSONStringBuilder {
     }
 
     /**
+     * gets a random location on which a settlement (or city) is placed who's owner has not the specified id
+     * the robber must not be placed on field either
+     * this method might be used if the robber has to be moved
+     *
+     * @param id id of player who calls method
+     * @return Location of a field
+     */
+    public Location getNewLocForRobber(int id) {
+        List<Building> buildings = getSettlementsAndCities();
+        Collections.shuffle(buildings);
+
+        for (Building bld : buildings) {
+            if (bld.getOwner() != id) {
+                List<Location> validLocs = new ArrayList<>();
+
+                // collect valid locations
+                for (Location loc : bld.getLocations()) {
+                    if (robber.isValidNewLocation(loc))
+                        validLocs.add(loc);
+                }
+
+                // continue if building is not connected to a valid location
+                // it could placed on 2 water fields and on the third could be the robber
+                if (validLocs.size() == 0)
+                    continue;
+
+                Random random = new Random();
+                int index = random.nextInt(validLocs.size());
+
+                return validLocs.get(index);
+            }
+        }
+
+        // find any valid new robber location if above no valid location was found
+        // this case might never occur but now it's treated
+        Location loc = getRandomFieldLoc();
+
+        while (!robber.isValidNewLocation(loc)) {
+            loc = getRandomFieldLoc();
+        }
+
+        return loc;
+    }
+
+    /**
      * finds adjacent locations
+     *
      * @param location location object to find neighbors for
      * @return list of locations that are adjacent to a field ordered
      * as circle around location
@@ -213,6 +259,25 @@ public class Board extends JSONStringBuilder {
         }
 
         return neighbors;
+    }
+
+    public ArrayList<Location[]> getAdjacentSettlementLocs(Location[] roadLocs) {
+        if (roadLocs.length != 2) return null;
+
+        int locIndex = roadLocs[0].isWaterField() ? 1 : 0;
+        List<Location> adjacentLocs = getAdjacentLocations(roadLocs[locIndex]);
+
+        int index = adjacentLocs.indexOf(roadLocs[(locIndex + 1) % 2]);
+        if (index < 0) return null;
+
+        ArrayList<Location[]> retLocs = new ArrayList<>();
+
+        for (int i = 0; i < 2; i++) {
+            int tryIndex = Math.floorMod(i == 0 ? index - 1 : index + 1, adjacentLocs.size());
+            retLocs.add(new Location[]{roadLocs[0], roadLocs[1], adjacentLocs.get(tryIndex)});
+        }
+
+        return retLocs;
     }
 
     /**
@@ -243,7 +308,7 @@ public class Board extends JSONStringBuilder {
             int locInt = i == 0 ? (index + 1) : (index - 1);
             locInt = Math.floorMod(locInt, adjacentLocs.size());
 
-            if (locInt == -1) locInt = adjacentLocs.size()-1;
+            if (locInt == -1) locInt = adjacentLocs.size() - 1;
 
             Location l2 = adjacentLocs.get(locInt);
             rLocs = new Location[]{l1, l2};
@@ -254,6 +319,72 @@ public class Board extends JSONStringBuilder {
         }
 
         return null;
+    }
+
+    /**
+     * tries to find a valid Location[] to place a road, therefore first tries to extend longest road
+     *
+     * @param player       player who wants to place new road
+     * @param initialPhase states if initial phase is active because then road must be placed next to last settlement
+     * @return an array containing 2 Location objects where a road can be placed
+     * @throws CatanException if no location was found
+     */
+    public Location[] getFreeRoadLoc(Player player, boolean initialPhase) throws CatanException {
+        List<Building> buildings = new ArrayList<>();
+
+        if (initialPhase) buildings.add(player.getLastSettlement());
+        else {
+
+            //when building road first try to extend longest road
+            if (player.getLongestRoadLength() > 1) {
+
+                //=> place road next to first or last road in longest road path
+                List<Building> longestRoad = getLongestRoad(player.getRoads().get(0), player, false, false);
+
+                Building first = longestRoad.get(0);
+                if (first.isAttachable()) buildings.add(first);
+                Building last = longestRoad.get(longestRoad.size() - 1);
+                if (last.isAttachable()) buildings.add(last);
+            }
+
+            // if longest road cannot be extended then try to place road somewhere else
+            // create new list of all attachable settlements, cities and roads of player and shuffle it
+            // afterwards add these to the list buildings so that the first elements are first and
+            // last element of longest road and afterwards all other buildings will be checked
+            List<Building> allBuildings = new ArrayList<>();
+
+            allBuildings.addAll(player.getAttachableRoads());
+            allBuildings.addAll(player.getSettlementsAndCities(true));
+
+            Collections.shuffle(allBuildings);
+            buildings.addAll(allBuildings);
+        }
+
+        for (Building s : buildings) {
+            if (s.isRoad()) {
+                Location[] rLocs = getFreeAdjacentRoad(s.getLocations());
+                if (rLocs != null) return rLocs;
+
+                    //mark road as not attachable (for other roads)
+                else s.setAttachable(false);
+
+            } else {
+                for (int i = 0; i < 3; i++) {
+                    Location[] locs = new Location[2];
+
+                    locs[0] = s.getLocations()[(i + 1) % 3];
+                    locs[1] = s.getLocations()[i];
+
+                    if (canBeBuiltHere(locs))
+                        return locs;
+                }
+
+                //next to this settlement/city no road can be placed => mark as not attachable
+                s.setAttachable(false);
+            }
+        }
+
+        throw new CatanException("Es wurde keine gültige Location für eine deiner Straßen gefunden", true);
     }
 
     /**
@@ -268,12 +399,10 @@ public class Board extends JSONStringBuilder {
         Location[] rLocs = getFreeRoadLoc(loc);
 
         //turn locations around so former loc[1] is fix and an adjacent road for loc[0] will be found
-        if (rLocs == null && !loc[0].isWaterField()) rLocs = getFreeRoadLoc(new Location[] {loc[1], loc[0]});
+        if (rLocs == null && !loc[0].isWaterField()) rLocs = getFreeRoadLoc(new Location[]{loc[1], loc[0]});
 
         return rLocs;
     }
-
-
 
 
     /**
@@ -298,52 +427,19 @@ public class Board extends JSONStringBuilder {
         return overview;
     }
 
-    public Location[] getFreeRoadLoc(Player player, boolean initialPhase) throws CatanException {
-        List<Building> buildings = new ArrayList<Building>();
-
-        if (initialPhase) buildings.add(player.getLastSettlement());
-        else {
-            //get any road connected to road or settlement of the player
-            buildings.addAll(player.getSettlementsAndCities());
-            buildings.addAll(player.roads);
-        }
-
-        Collections.shuffle(buildings);
-
-        for (Building s : buildings) {
-            if (s.isRoad()) {
-                //find adjacent road
-                Location[] rLocs = getFreeAdjacentRoad(s.getLocations());
-                if (rLocs != null) return rLocs;
-
-            } else {
-                for (int i = 0; i < 3; i++) {
-                    Location[] locs = new Location[2];
-
-                    locs[0] = s.getLocations()[(i + 1) % 3];
-                    locs[1] = s.getLocations()[i];
-
-                    if (canBeBuiltHere(locs))
-                        return locs;
-                }
-            }
-        }
-
-        throw new CatanException("Es wurde keine gültige Location für eine deiner Straßen gefunden", true);
-    }
-
     /**
      * takes a road, gets all its four neighbours if available,
      * gets all connected roads for each, count the longest distinct path for each,
      * take the longest two and add one to them and return the result,
      * if the two longest roots are adjacent then no need to add one
-     * @param road the road that is newly placed
-     * @param builder the player who's building the road
+     *
+     * @param road            the road that is newly placed
+     * @param builder         the player who's building the road
      * @param alternativePath is used to go to a different neighbor first if necessary
      * @return int equal to the longest road count for that player
      */
     public ArrayList<Building> getLongestRoad(Building road, Player builder, boolean alternativePath,
-    boolean stopRecursion) {
+                                              boolean stopRecursion) {
         try {
             ArrayList<Building> allRoads = new ArrayList<>(builder.getRoads());
             ArrayList<Building> visitedRoads = new ArrayList<>();
@@ -372,7 +468,7 @@ public class Board extends JSONStringBuilder {
             }
 
             while (!(currentRoad == road) || hasUnvisitedNeighbors(road, null, allRoads,
-                visitedRoads, true)) {
+                    visitedRoads, true)) {
                 if (!visitedRoads.contains(currentRoad))
                     visitedRoads.add(currentRoad);
                 if (currentRoad == road) {
@@ -386,7 +482,7 @@ public class Board extends JSONStringBuilder {
 
                     // if this is true it means we created a circle in our graph
                     if (ancestor != road && neighbors.contains(road) && !neighborsAreAdjacent(road,
-                        allRoads)) {
+                            allRoads)) {
                         // should even work if we have more or circles that are bigger than one hex in diameter
                         try {
                             // find out which location do the current road and the root share
@@ -402,7 +498,7 @@ public class Board extends JSONStringBuilder {
                             for (Building r : allRoads) {
                                 if (!Arrays.asList(r.getLocations()).contains(commonLocation)) {
                                     if (getNeighbors(r, allRoads).size() == 1
-                                        || neighborsAreAdjacent(r, allRoads)) {
+                                            || neighborsAreAdjacent(r, allRoads)) {
                                         deadEnds.add(r);
                                     }
                                 }
@@ -423,15 +519,15 @@ public class Board extends JSONStringBuilder {
                                 if (getNeighbors(r, allRoads).size() == 2) {
                                     for (boolean alternative : alternatives) {
                                         ArrayList<Building> outOfTheBoxRoad = getLongestRoad(r,
-                                            builder,
-                                            alternative, true);
+                                                builder,
+                                                alternative, true);
                                         if (outOfTheBoxRoad.size() > longestPath.size()) {
                                             longestPath = new ArrayList<>(outOfTheBoxRoad);
                                         }
                                     }
                                 } else {
                                     ArrayList<Building> outOfTheBoxRoad = getLongestRoad(r, builder,
-                                        false, true);
+                                            false, true);
                                     if (outOfTheBoxRoad.size() > longestPath.size()) {
                                         longestPath = new ArrayList<>(outOfTheBoxRoad);
                                     }
@@ -439,13 +535,13 @@ public class Board extends JSONStringBuilder {
                             }
                         } catch (Exception e) {
                             System.out.println("We detected a round about in " + builder.getName()
-                                + "'s streets/nThis caused trouble calculating the longest road for this player...");
+                                    + "'s streets/nThis caused trouble calculating the longest road for this player...");
                         }
                     }
                 }
 
                 if (hasUnvisitedNeighbors(currentRoad, ancestor, allRoads, visitedRoads,
-                    currentRoad == road)) {
+                        currentRoad == road)) {
                     // traverse down on the first unvisited Street
                     for (Building neighbor : neighbors) {
                         if (!visitedRoads.contains(neighbor)) {
@@ -492,11 +588,11 @@ public class Board extends JSONStringBuilder {
     private boolean neighborsAreAdjacent(Building r, ArrayList<Building> allRoads) {
         ArrayList<Building> neighbors = getNeighbors(r, allRoads);
         return neighbors.size() == 2 && neighbors.get(0)
-            .edgesAreAdjacent(neighbors.get(1).getLocations());
+                .edgesAreAdjacent(neighbors.get(1).getLocations());
     }
 
     private boolean hasUnvisitedNeighbors(Building road, Building ancestor, ArrayList<Building> allRoads,
-        ArrayList<Building> visitedRoads, boolean isRoot) {
+                                          ArrayList<Building> visitedRoads, boolean isRoot) {
         ArrayList<Building> neighbors;
         if (isRoot) {
             neighbors = getNeighbors(road, allRoads);
@@ -513,7 +609,8 @@ public class Board extends JSONStringBuilder {
 
     /**
      * finds all neighbor streets
-     * @param road the road you want to find the neighbors of
+     *
+     * @param road     the road you want to find the neighbors of
      * @param allRoads List of all existing roads for the player
      * @return Arraylist with a max of 2 roads adjacent to the road
      */
@@ -523,53 +620,57 @@ public class Board extends JSONStringBuilder {
             return null;
         }
         ArrayList<Building> neighbors = new ArrayList<>();
-        for (Building other: allRoads) {
-            if (road.edgesAreAdjacent(other.getLocations())){
+        for (Building other : allRoads) {
+            if (road.edgesAreAdjacent(other.getLocations())) {
                 neighbors.add(other);
             }
         }
         return neighbors;
     }
+
     /**
      * finds all neighbor streets that are not neighbors of the ancestor street
-     * @param road the road you want to find the neighbors of
+     *
+     * @param road     the road you want to find the neighbors of
      * @param ancestor road you visited right before you ended up on the current road
      * @param allRoads List of all existing roads for the player
      * @return Arraylist with a max of 2 roads adjacent to the road
      */
 
     private ArrayList<Building> getChildNeighbors(Building road, Building ancestor, ArrayList<Building> allRoads) {
-      if (!(road.isRoad())) {
-          return null;
-      }
-      ArrayList<Building> neighbors = new ArrayList<>();
-      for (Building other: allRoads) {
-         if (road.edgesAreAdjacent(other.getLocations())){
-             neighbors.add(other);
-          }
-      }
-      // remove all neighbors of the ancestor
-      for (Building r : allRoads) {
-          if (ancestor.edgesAreAdjacent(r.getLocations())) {
-              neighbors.remove(r);
-          }
-      }
-      neighbors.remove(ancestor);
-      return neighbors;
+        if (!(road.isRoad())) {
+            return null;
+        }
+        ArrayList<Building> neighbors = new ArrayList<>();
+        for (Building other : allRoads) {
+            if (road.edgesAreAdjacent(other.getLocations())) {
+                neighbors.add(other);
+            }
+        }
+        // remove all neighbors of the ancestor
+        for (Building r : allRoads) {
+            if (ancestor.edgesAreAdjacent(r.getLocations())) {
+                neighbors.remove(r);
+            }
+        }
+        neighbors.remove(ancestor);
+        return neighbors;
     }
 
     /**
      * searches for free corners for settlements
+     * connected roads are not checked => can be called in initial phase
      *
      * @return Location[] array to place a settlement at
      */
-    public Location[] getRandomFreeSettlementLoc() {
-        Location[] locs = null;
+    public Location[] getFreeSettlementLoc() {
+        Location[] validLocs = null;
 
-        while (!canBeBuiltHere(locs)) {
-            locs = new Location[3];
+        for (int i = 0; i < 20; i++) {
+            Location[] locs = new Location[3];
             Random random = new Random();
 
+            //returns a non-water field
             Location l1 = this.getFields()[random.nextInt(19)].getLocation();
 
             ArrayList<Location> adjacentLocations = this.getAdjacentLocations(l1);
@@ -583,9 +684,20 @@ public class Board extends JSONStringBuilder {
             locs[0] = l1;
             locs[1] = l2;
             locs[2] = l3;
+
+            boolean foundValid = canBeBuiltHere(locs);
+
+            // valid Location array was found but if it contains a water field or the desert,
+            // it might not be the best choice => store valid locations and search ahead
+            if (foundValid) {
+                if (Location.getWaterAndDesertCount(locs) == 0) {
+                    return locs;
+                } else if (validLocs == null || Location.getWaterAndDesertCount(validLocs) > Location.getWaterAndDesertCount(locs))
+                    validLocs = locs;
+            }
         }
 
-        return locs;
+        return validLocs;
     }
 
     /**
@@ -641,8 +753,12 @@ public class Board extends JSONStringBuilder {
      */
     public Haven getConnectedHaven(Building building) {
         for (Haven haven : havens) {
-            if (building.isBuiltAroundHere(haven.getLocations(), false))
-                return haven;
+            Location landLoc = haven.getLocations()[0].isWaterField() ? haven.getLocations()[1] : haven.getLocations()[0];
+
+            for (Location loc : building.getLocations()) {
+                if (loc.equals(landLoc))
+                    return haven;
+            }
         }
 
         return null;

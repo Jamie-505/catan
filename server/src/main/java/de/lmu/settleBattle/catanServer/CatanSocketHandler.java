@@ -32,7 +32,7 @@ public class CatanSocketHandler extends TextWebSocketHandler implements Property
         utils = new SocketUtils();
 
         utils.getGameCtrl().getBoard().addPropertyChangeListener(e -> {
-                    if (e.getPropertyName().equals("new building")) {
+                    if ("new building".equals(e.getPropertyName())) {
                         System.out.printf("A new building has been built: %s %n",
                                 ((Building) e.getNewValue()).toJSONString());
                         sendMessageToAll(CatanMessage.newBuilding((Building) e.getNewValue()));
@@ -41,8 +41,8 @@ public class CatanSocketHandler extends TextWebSocketHandler implements Property
         );
 
         utils.getGameCtrl().addPropertyChangeListener(e -> {
-            boolean sendStatusUpdate = false;
-            Player player = null;
+            TextMessage message = null;
+            Player player = ROBBER_AT.equals(e.getPropertyName()) ? null : (Player) e.getNewValue();
 
             switch (e.getPropertyName()) {
                 case ROBBER_AT:
@@ -51,33 +51,29 @@ public class CatanSocketHandler extends TextWebSocketHandler implements Property
                     break;
 
                 case KNIGHT_PLAYED:
-                    player = (Player) e.getNewValue();
                     Object[] knightData = (Object[]) e.getOldValue();
-                    sendMessageToAll(CatanMessage.knightCard(player.getId(), (int) knightData[0], (Location) knightData[1]));
-                    sendStatusUpdate = true;
+                    message = CatanMessage.knightCard(player.getId(), (int) knightData[0], (Location) knightData[1]);
                     break;
 
                 case MONOPOLE_PLAYED:
-                    player = (Player) e.getNewValue();
-                    sendMessageToAll(CatanMessage.monopoleCard(player.getId(), (RawMaterialType) e.getOldValue()));
-                    sendStatusUpdate = true;
+                    message = CatanMessage.monopoleCard(player.getId(), (RawMaterialType) e.getOldValue());
                     break;
 
                 case INVENTION_PLAYED:
-                    player = (Player) e.getNewValue();
-                    sendMessageToAll(CatanMessage.inventionCard(player.getId(), (RawMaterialOverview) e.getOldValue()));
-                    sendStatusUpdate = true;
+                    message = CatanMessage.inventionCard(player.getId(), (RawMaterialOverview) e.getOldValue());
                     break;
 
                 case RC_PLAYED:
-                    player = (Player) e.getNewValue();
-                    sendMessageToAll(CatanMessage.roadConstructionCard(player.getId()));
-                    sendStatusUpdate = true;
+                    message = CatanMessage.roadConstructionCard(player.getId());
                     break;
+
+                case GAME_OVER:
+                    message = CatanMessage.endGame(player);
             }
 
-            if (sendStatusUpdate && player != null) {
+            if (message != null) {
                 try {
+                    sendMessageToAll(message);
                     this.sendStatusUpdate(player);
                 } catch (IOException ex) {
                     ex.printStackTrace();
@@ -100,9 +96,8 @@ public class CatanSocketHandler extends TextWebSocketHandler implements Property
         System.out.println(session.getId() + " has opened a connection");
         super.afterConnectionEstablished(session);
 
-        Player player = new Player(SocketUtils.toInt(session.getId()));
-
         try {
+            Player player = new Player(SocketUtils.toInt(session.getId()));
             utils.getGameCtrl().addPlayer(player);
 
             //add change listener for status property so every time the status changes a message will be sent
@@ -215,7 +210,7 @@ public class CatanSocketHandler extends TextWebSocketHandler implements Property
                     break;
 
                 case END_TURN:
-                    nextMove();
+                    getGameCtrl().nextMove();
                     break;
 
                 case ADD_KI:
@@ -288,18 +283,6 @@ public class CatanSocketHandler extends TextWebSocketHandler implements Property
 
         sendMessageToAll(CatanMessage.startGame(utils.getGameCtrl().getBoard(), ids));
         getGameCtrl().startGame();
-    }
-
-    private void nextMove() {
-        Player current = utils.getGameCtrl().getCurrent();
-
-        //current player has won the game
-        if (current.hasWon()) {
-            utils.getGameCtrl().endGame(current);
-            sendMessageToAll(CatanMessage.endGame(current));
-        } else {
-            utils.getGameCtrl().nextMove();
-        }
     }
     //endregion
 
@@ -442,7 +425,7 @@ public class CatanSocketHandler extends TextWebSocketHandler implements Property
         // the request cant have the same elements as the offer
         if (tradeRequest.getRequest().hasSameMaterial(tradeRequest.getOffer()))
             throw new CatanException("Angebot und Nachfrage können nicht die gleichen Rohstoffe enthalten.", true);
-        
+
         //has player offered raw materials ?
         Player player = utils.getGameCtrl().getPlayer(tradeRequest.getPlayerId());
         if (!player.canAfford(tradeRequest.getOffer()))
@@ -470,6 +453,8 @@ public class CatanSocketHandler extends TextWebSocketHandler implements Property
 
         utils.getTradeRequests().add(tradeRequest);
         sendMessageToAll(CatanMessage.trade(tradeRequest, TRD_OFFER));
+
+        getGameCtrl().makeKIsRespondToTr(tradeRequest);
 
         return true;
     }

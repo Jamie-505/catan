@@ -215,11 +215,6 @@ public class SocketUtils {
         gameCtrl.tossCardsAndUpdateStatus(toInt(session.getId()), overview);
     }
 
-    public boolean endGame(WebSocketSession session) {
-
-        return gameCtrl.endGame(gameCtrl.getPlayer(session.getId()));
-    }
-
     public void applyInventionCard(WebSocketSession session, TextMessage message) throws Exception {
         Player player = gameCtrl.getPlayer(session.getId());
 

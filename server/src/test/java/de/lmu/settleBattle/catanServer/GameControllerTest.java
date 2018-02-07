@@ -227,7 +227,7 @@ public class GameControllerTest {
         //player 3 places his first settlement and afterwards should have status BUILD_STREET
         int sCnt = gameController.getBoard().getSettlements().size();
         int rCnt = gameController.getBoard().getRoads().size();
-        Building s1 = new Building(player3.getId(), BuildingType.SETTLEMENT, gameController.getBoard().getRandomFreeSettlementLoc());
+        Building s1 = new Building(player3.getId(), BuildingType.SETTLEMENT, gameController.getBoard().getFreeSettlementLoc());
         gameController.placeBuilding(s1);
 
         assertEquals(sCnt + 1, gameController.getBoard().getSettlements().size());
@@ -256,7 +256,7 @@ public class GameControllerTest {
         //player 3 places his second settlement
         sCnt = gameController.getBoard().getSettlements().size();
         rCnt = gameController.getBoard().getRoads().size();
-        Building s2 = new Building(player3.getId(), BuildingType.SETTLEMENT, gameController.getBoard().getRandomFreeSettlementLoc());
+        Building s2 = new Building(player3.getId(), BuildingType.SETTLEMENT, gameController.getBoard().getFreeSettlementLoc());
         gameController.placeBuilding(s2);
 
         assertEquals(sCnt + 1, gameController.getBoard().getSettlements().size());
@@ -324,7 +324,7 @@ public class GameControllerTest {
 
         for (int i = 0; i < 6; i++) {
             Building s = new Building(player.getId(), BuildingType.SETTLEMENT, gameController.getBoard()
-                    .getRandomFreeSettlementLoc());
+                    .getFreeSettlementLoc());
             assertTrue(gameController.placeBuilding(s));
             Building r = new Building(player.getId(), BuildingType.ROAD, gameController.getBoard()
                     .getFreeRoadLoc(player, gameController.isInitialPhaseActive()));

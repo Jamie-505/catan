@@ -8,7 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-public class RawMaterialOverview extends JSONStringBuilder {
+public class RawMaterialOverview extends JSONStringBuilder implements Cloneable {
 
     @Expose
     @SerializedName(Constants.WOOD)
@@ -76,8 +76,10 @@ public class RawMaterialOverview extends JSONStringBuilder {
     }
 
     //region increase
+
     /**
      * increases a raw material amount
+     *
      * @param type type of raw material to increase
      * @param i    value to be added
      */
@@ -116,8 +118,10 @@ public class RawMaterialOverview extends JSONStringBuilder {
     //endregion
 
     //region decrease
+
     /**
      * decreases a raw material amount
+     *
      * @param type type of raw material to decrease
      * @param i    value to be subtracted
      */
@@ -177,6 +181,7 @@ public class RawMaterialOverview extends JSONStringBuilder {
 
     /**
      * used in the main deck to withdraw random card
+     *
      * @return random card
      * @throws IllegalArgumentException
      */
@@ -194,8 +199,10 @@ public class RawMaterialOverview extends JSONStringBuilder {
 
     //endregion
     //region canAfford
+
     /**
      * decides whether there is enough raw material to afford a building
+     *
      * @param building building to afford
      * @return
      */
@@ -220,6 +227,7 @@ public class RawMaterialOverview extends JSONStringBuilder {
 
     /**
      * creates a list of BuildingTypes that can be afforded with raw material stock
+     *
      * @return list
      */
     public List<BuildingType> canAfford() {
@@ -289,9 +297,11 @@ public class RawMaterialOverview extends JSONStringBuilder {
     }
 
     //region hasOnly
+
     /**
      * returns true if raw material overview has only raw materials
      * with a special type and typeCount == count
+     *
      * @param count
      * @param type
      * @return
@@ -304,6 +314,7 @@ public class RawMaterialOverview extends JSONStringBuilder {
     /**
      * returns true if raw material overview has only raw materials
      * of one raw material type with typeCount == count, otherwise false
+     *
      * @param count
      * @return
      */
@@ -335,6 +346,7 @@ public class RawMaterialOverview extends JSONStringBuilder {
     /**
      * returns true if raw material overview contains only raw
      * materials with a special type
+     *
      * @param type
      * @return
      */
@@ -367,6 +379,7 @@ public class RawMaterialOverview extends JSONStringBuilder {
 
     /**
      * returns raw material amount of a special type
+     *
      * @param type
      * @return
      */
@@ -403,6 +416,70 @@ public class RawMaterialOverview extends JSONStringBuilder {
         if (clayCount > 0) types.add(RawMaterialType.CLAY);
 
         return types;
+    }
+
+    public TradeRequest getBestTradeRequest() throws CatanException {
+        if (this.getTotalCount() < 1) return null;
+
+        RawMaterialOverview request = new RawMaterialOverview(0);
+        RawMaterialOverview offer = new RawMaterialOverview(0);
+
+        List<BuildingType> canAfford = canAfford();
+        List<RawMaterialType> types = getTypes();
+
+        if (!canAfford.contains(BuildingType.SETTLEMENT)) {
+            request.increase(RawMaterialType.WOOD, woodCount == 0 ? 1 : 0);
+            request.increase(RawMaterialType.CLAY, clayCount == 0 ? 1 : 0);
+
+            //if player cannot even afford road, don't request more
+            //otherwise ask for wheat and wool to build settlement
+            if (canAfford.contains(BuildingType.ROAD)) {
+                request.increase(RawMaterialType.WHEAT, wheatCount == 0 ? 1 : 0);
+                request.increase(RawMaterialType.WOOL, woolCount == 0 ? 1 : 0);
+            }
+
+            if (types.contains(RawMaterialType.ORE))
+                offer.increase(RawMaterialType.ORE, 1);
+            else offer.increase(getMaxType(), 1);
+
+        } else if (!canAfford.contains(BuildingType.CITY)) {
+            request.increase(RawMaterialType.ORE, Math.min(3 - oreCount, 0));
+            request.increase(RawMaterialType.WHEAT, Math.min(2 - wheatCount, 0));
+
+            if (types.contains(RawMaterialType.WOOL))
+                offer.increase(RawMaterialType.WOOL, 1);
+            else if (types.contains(RawMaterialType.WOOD))
+                offer.increase(RawMaterialType.WOOD, 1);
+            else if (types.contains(RawMaterialType.CLAY))
+                offer.increase(RawMaterialType.CLAY, 1);
+            else offer.increase(getMaxType(), 1);
+        }
+
+        return new TradeRequest(offer, request);
+    }
+
+    public RawMaterialType getMaxType() {
+        List<RawMaterialType> types = getTypes();
+
+        if (types.size() == 0)
+            return null;
+
+        if (types.size() == 1)
+            return types.get(0);
+
+        RawMaterialType max = types.get(0);
+
+        for (int i = 1; i < types.size(); i++) {
+            if (getTypeCount(types.get(i)) > getTypeCount(max))
+                max = types.get(i);
+        }
+
+        return max;
+    }
+
+    @Override
+    public Object clone() throws CloneNotSupportedException {
+        return super.clone();
     }
 
     @Override

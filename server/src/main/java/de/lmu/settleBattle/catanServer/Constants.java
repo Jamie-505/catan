@@ -143,6 +143,7 @@ public class Constants {
     final static String VP_INCR = "Victory Pts Increased";
     final static String DEV_CARD_BUY = "DevCard Bought";
     final static String TURN_ORDER = "Reihenfolge";
+    final static String SEND_TRD = "Ki sendet TradeRequest";
 
     //Exception Messages
     final static String PLAYER_HAS_NO_DEV_CARD = "Der Spieler %s besitzt keine Entwicklungskarte vom Typ %s";

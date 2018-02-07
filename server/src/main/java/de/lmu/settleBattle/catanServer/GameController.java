@@ -3,13 +3,7 @@ package de.lmu.settleBattle.catanServer;
 import static de.lmu.settleBattle.catanServer.Constants.*;
 
 import java.beans.PropertyChangeSupport;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Stack;
+import java.util.*;
 import java.beans.PropertyChangeListener;
 
 public class GameController {
@@ -20,16 +14,11 @@ public class GameController {
     public void addPropertyChangeListener(PropertyChangeListener l) {
         changes.addPropertyChangeListener(l);
     }
-
-    public void removePropertyChangeListener(PropertyChangeListener l) {
-        changes.removePropertyChangeListener(l);
-    }
     //endregion
 
     private Board board;
     private List<Player> players;
     private int currentTurn;
-    private List<String> chatHistory;
     private RawMaterialOverview rawMaterialDeck;
     private DevelopmentCardOverview developmentCardDeck;
     private Stack<Player> playerStack;
@@ -44,7 +33,6 @@ public class GameController {
         players = new ArrayList<>();
         board = new Board();
         currentTurn = 0;
-        chatHistory = new ArrayList<>();
         rawMaterialDeck = new RawMaterialOverview(19);
         developmentCardDeck = new DevelopmentCardOverview();
         initialPhaseActive = false;
@@ -64,7 +52,6 @@ public class GameController {
      */
     public boolean startGame() {
         if (readyToStartGame()) {
-            //defineTurnOrder();
             initializeBuildingPhase();
             gameStarted = true;
             activatePlayer(getCurrent().getId(), BUILD_SETTLEMENT);
@@ -83,7 +70,7 @@ public class GameController {
     /**
      * initializes objects used for initial phase
      */
-    public void initializeBuildingPhase() {
+    private void initializeBuildingPhase() {
         playerStack = new Stack<>();
         initialPhaseActive = true;
         round = 1;
@@ -91,12 +78,12 @@ public class GameController {
     }
     //endregion
 
-    //region turn order handling
+    //region turn handling
     public Player getCurrent() {
         return players.get(this.getCurrentIndex());
     }
 
-    public int getCurrentIndex() {
+    private int getCurrentIndex() {
         return currentTurn % players.size();
     }
 
@@ -106,9 +93,14 @@ public class GameController {
      * @return player to turn next
      */
     public Player nextMove() {
+        Player current = getCurrent();
+        if (current.hasWon()) {
+            endGame(current);
+            changes.firePropertyChange(GAME_OVER, "null", current);
+            return current;
+        }
         return this.initialPhaseActive ? next_initialPhase() : next_gameStarted();
     }
-
     /**
      * will be called if game is started aleady and building phase is over
      *
@@ -150,8 +142,8 @@ public class GameController {
 
         return player;
     }
-
     //endregion
+
     //region KI handling
 
     /**
@@ -168,7 +160,7 @@ public class GameController {
         if (!getCurrent().isKI() || !getCurrent().isActive())
             return;
 
-        while (getCurrent().isActive() && getCurrent().isKI()) {
+        while (getCurrent().isActive() && getCurrent().isKI() && !gameOver) {
             moveKI(getCurrent());
         }
     }
@@ -177,7 +169,6 @@ public class GameController {
      * performs move for KI according to its status
      *
      * @param ki ki to be moved
-     * @throws CatanException
      */
     public void moveKI(Player ki) {
         boolean nextMove = false;
@@ -186,84 +177,65 @@ public class GameController {
             switch (ki.getStatus()) {
                 case START_GAME:
                     ki.setStatus(WAIT_FOR_GAME_START);
-                    nextMove = false;
                     break;
 
                 case DICE:
                     dice(ki.getId());
-                    nextMove = false;
                     break;
 
                 case BUILD_SETTLEMENT:
                     Building settlement = new Building(ki.getId(),
-                            BuildingType.SETTLEMENT, board.getRandomFreeSettlementLoc());
+                            BuildingType.SETTLEMENT, board.getFreeSettlementLoc());
                     placeBuilding(settlement, true);
-                    nextMove = false;
                     break;
 
                 case BUILD_STREET:
                     Building street = new Building(ki.getId(), BuildingType.ROAD,
                             board.getFreeRoadLoc(ki, initialPhaseActive));
                     placeBuilding(street, true);
-                    nextMove = false;
                     break;
 
                 case TRADE_OR_BUILD:
-                    //play development card if ki possesses one
-                    try {
-                        if (ki.hasInventionCard()) applyInventionCard(ki);
-                        else if (ki.hasRoadConstructionCard()) applyRCCard(ki);
-                        else if (ki.hasMonopoleCard()) applyMonopoleCard(ki, RawMaterialType.getRandomTradingType());
-                        else if (ki.hasKnightCard()) applyKnightCard(ki.getId(), -1, board.getRandomFieldLoc());
-                    } catch (CatanException ex) {
-                        System.out.println("Dieser Zug war nicht gültig, versuche es beim nächsten Mal nochmal");
-                    }
+                    nextMove = true;
 
-                    if (ki.canAfford(BuildingType.SETTLEMENT)) {
-                        Building s = new Building(ki.getId(), BuildingType.SETTLEMENT, board.getRandomFreeSettlementLoc());
-                        placeBuilding(s, true);
-                    } else if (ki.canAfford(BuildingType.ROAD)) {
+                    //play development card if ki possesses one
+                    if (ki.getDevelopmentDeck().getTotalCount() > 0)
+                        applyDevCard(ki);
+
+                    if (ki.canAfford(BuildingType.CITY) && ki.getSettlements().size() > 0 && ki.getStock().getCount(BuildingType.CITY) > 0) {
+                        Building city = new Building(ki.getId(), BuildingType.CITY, ki.getRandomSettlement().getLocations());
+                        placeBuilding(city, true);
+                    } else if (ki.canAfford(BuildingType.SETTLEMENT) && ki.getStock().getCount(BuildingType.SETTLEMENT) > 0) {
+                        boolean built = placeValidSettlement(ki);
+
+                        // if settlement could not be build then there is no valid location for it
+                        // => player must build road to be able to place settlement
+                        if (!built && ki.canAfford(BuildingType.ROAD) && ki.getStock().getCount(BuildingType.ROAD) > 0) {
+                            Building r = new Building(ki.getId(), BuildingType.ROAD, board.getFreeRoadLoc(ki, initialPhaseActive));
+                            placeBuilding(r, true);
+                        }
+                    } else if (ki.canAfford(BuildingType.ROAD) && ki.getStock().getCount(BuildingType.ROAD) > 0) {
                         Building r = new Building(ki.getId(), BuildingType.ROAD, board.getFreeRoadLoc(ki, initialPhaseActive));
                         placeBuilding(r, true);
                     } else if (ki.canAffordDevCard()) {
                         buyDevelopmentCard(ki);
                     }
-                    nextMove = true;
                     break;
 
                 case ROBBER_TO:
-                    if (waitForPlayerToExtractCards(ki.getId()))
-                        nextMove = false;
-
-                    else {
-                        boolean activated;
-                        try {
-                            activateRobber(ki.getId(), -1, board.getRandomFieldLoc());
-                            activated = true;
-                        } catch (CatanException ex) {
-                            System.out.println(ex.getMessage());
-                            activated = false;
-                        }
-
-                        //try second time
-                        if (!activated)
-                            activateRobber(ki.getId(), -1, board.getRandomFieldLoc());
-
-                        nextMove = false;
-                    }
+                    if (!waitForPlayerToExtractCards(ki.getId()))
+                        activateRobber(ki.getId(), -1, board.getNewLocForRobber(ki.getId()));
                     break;
 
                 case EXTRACT_CARDS_DUE_TO_ROBBER:
                     //KI has to extract cards
                     tossRawMaterialCards(ki);
                     updateStatusAfterCardExtraction(ki);
-                    nextMove = false;
                     break;
 
                 case WAIT_FOR_ALL_TO_EXTRACT_CARDS:
                     if (!waitForPlayerToExtractCards(ki.getId()))
                         updateStatusAfterCardExtraction(ki);
-                    nextMove = false;
 
             }
         } catch (CatanException ex) {
@@ -273,12 +245,26 @@ public class GameController {
         if (nextMove) nextMove();
     }
 
+
     public boolean waitForPlayerToExtractCards(int id) {
         for (Player player : getRealPlayers()) {
             if (player.getStatus().equals(EXTRACT_CARDS_DUE_TO_ROBBER) && player.getId() != id)
                 return true;
         }
         return false;
+    }
+
+    public void makeKIsRespondToTr(TradeRequest tr) {
+        List<Player> kis = getKIs();
+
+        if (kis.size() == 0) {
+            return;
+        }
+
+        for (Player ki : kis) {
+            boolean accept = ki.canAfford(tr.getRequest()) && ki.shouldAcceptTradeRequest(tr);
+            tr.accept(accept, ki.getId());
+        }
     }
 
     public void activatePlayer(int id, String status) {
@@ -392,17 +378,49 @@ public class GameController {
             }
 
             //decrease raw materials
-            if (!initialPhaseActive&& !owner.isRCActive()) owner.decreaseRawMaterials(Building.getCosts(building.getType()));
-            if(owner.getStatus().equals(Constants.FIRST_STREET)) owner.removeDevelopmentCard(DevCardType.ROAD_CONSTRUCTION);
+            if (!initialPhaseActive && !owner.isRCActive())
+                owner.decreaseRawMaterials(Building.getCosts(building.getType()));
+
+            if (owner.getStatus().equals(Constants.FIRST_STREET))
+                owner.removeDevelopmentCard(DevCardType.ROAD_CONSTRUCTION);
+
             updateStatus(owner.getId());
         }
         return built;
-
     }
 
     public boolean placeBuilding(Building building) throws CatanException {
         return placeBuilding(building, false);
     }
+
+
+    /**
+     * places settlement at random valid location for player
+     *
+     * @param owner owner of new settlement
+     */
+    private boolean placeValidSettlement(Player owner) {
+        //iterate through rows and check for each if settlement can be placed next to it
+        for (Building road : owner.getRoads()) {
+            List<Location[]> locs = board.getAdjacentSettlementLocs(road.getLocations());
+            if (locs == null) continue;
+
+            boolean built;
+
+            for (Location[] sLoc : locs) {
+                try {
+                    Building settlement = new Building(owner.getId(), BuildingType.SETTLEMENT, sLoc);
+                    built = placeBuilding(settlement, false);
+                    if (built) return true;
+                } catch (CatanException ex) {
+                    //Location was not valid, try ahead
+                }
+            }
+        }
+
+        return false;
+    }
+
 
     /**
      * assigns longest road to owner if he has longest road
@@ -412,25 +430,26 @@ public class GameController {
      * @throws CatanException
      */
     void assignLongestRoad(Building road, Player owner) throws CatanException {
-        //if the player has less than 5 roads or less then the current longest road he cant possibly get the longest road
+        //if the player has less than 5 roads or less than the current longest road he cant possibly get the longest road
         if (owner.getRoads().size() < Math.max(5, board.getLongestRoadLength())) return;
 
-        int newRoadLength = getBoard().getLongestRoad(road, owner, false, false).size();
+        int newRoadLength = board.getLongestRoad(road, owner, false, false).size();
 
+        //update length of longest road of current player if it increased
         if (newRoadLength > owner.getLongestRoadLength())
             owner.setLongestRoadLength(newRoadLength);
 
-        if (isLongestRoad(newRoadLength) && newRoadLength >= 5) {
-            getBoard().setLongestRoadLength(newRoadLength);
+        if (isLongestRoad(newRoadLength)) {
+            board.setLongestRoadLength(newRoadLength);
+            owner.setHasLongestRoad(true);
+
             if (playerWithLongestRoad == null) {
-                owner.setHasLongestRoad(true);
                 playerWithLongestRoad = owner;
                 playerWithLongestRoad.increaseVictoryPoints(2, true);
             }
 
             if (owner != playerWithLongestRoad) {
                 playerWithLongestRoad.setHasLongestRoad(false);
-                owner.setHasLongestRoad(true);
                 playerWithLongestRoad.decreaseVictoryPoints(2, true);
                 playerWithLongestRoad = owner;
                 playerWithLongestRoad.increaseVictoryPoints(2, true);
@@ -439,7 +458,7 @@ public class GameController {
     }
 
     private boolean isLongestRoad(int newRoadLength) {
-        return board.getLongestRoadLength() < newRoadLength;
+        return board.getLongestRoadLength() < newRoadLength && newRoadLength >= 5;
     }
     //endregion
 
@@ -494,7 +513,46 @@ public class GameController {
         this.rawMaterialDeck.increase(price);
     }
 
+    /**
+     * applies random development card for KI
+     *
+     * @param ki KI which has turn
+     */
+    private void applyDevCard(Player ki) {
+        List<DevCardType> types = ki.getDevelopmentDeck().getApplicableTypes();
+        if (types.size()==0)return;
 
+        Random random = new Random();
+        int index = random.nextInt(types.size());
+
+        try {
+            switch (types.get(index)) {
+                case KNIGHT:
+                    applyKnightCard(ki.getId(), -1, board.getNewLocForRobber(ki.getId()));
+                    break;
+                case INVENTION:
+                    applyInventionCard(ki);
+                    break;
+                case MONOPOLE:
+                    applyMonopoleCard(ki, RawMaterialType.getRandomTradingType());
+                    break;
+                case ROAD_CONSTRUCTION:
+                    applyRCCard(ki);
+                    break;
+
+            }
+        } catch (CatanException ex) {
+            System.out.println(ki.getName() + "löste eine Exception aus: " + ex.getMessage());
+        }
+    }
+
+    /**
+     * applies monopole card for player
+     *
+     * @param monoPlayer player who applies card
+     * @param targetType raw material type he will receive from everybody
+     * @throws CatanException if player has no monopole card
+     */
     public void applyMonopoleCard(Player monoPlayer, RawMaterialType targetType) throws CatanException {
         if (!monoPlayer.hasMonopoleCard())
             throw new CatanException(String.format(PLAYER_HAS_NO_DEV_CARD, monoPlayer.getId(), DevCardType.MONOPOLE.toString()), true);
@@ -515,6 +573,13 @@ public class GameController {
         changes.firePropertyChange(MONOPOLE_PLAYED, targetType, monoPlayer);
     }
 
+    /**
+     * applies road construction for KI
+     *
+     * @param ki player who applies road construction card
+     *           roads will be chosen randomly and card will be removed immediately
+     * @throws CatanException if player has no rc card
+     */
     public void applyRCCard(Player ki) throws CatanException {
 
         if (!ki.isKI()) return;
@@ -523,21 +588,18 @@ public class GameController {
             throw new CatanException(String.format(PLAYER_HAS_NO_DEV_CARD, ki.getId(), DevCardType.ROAD_CONSTRUCTION.toString()), true);
 
         ki.setStatus(FIRST_STREET);
-        Building road1 = null;
-        Building road2 = null;
 
         try {
-            road1 = new Building(ki.getId(), BuildingType.ROAD, board.getFreeRoadLoc(ki, false));
-
+            Building road1 = new Building(ki.getId(), BuildingType.ROAD, board.getFreeRoadLoc(ki, false));
             boolean built = this.board.placeBuilding(road1, false);
 
             if (built) {
-                road2 = new Building(ki.getId(), BuildingType.ROAD, board.getFreeRoadLoc(ki, false));
+                Building road2 = new Building(ki.getId(), BuildingType.ROAD, board.getFreeRoadLoc(ki, false));
                 this.board.placeBuilding(road2, false);
             }
-        }
-        catch (CatanException ex) {
-            System.out.println("KI "+ ki.getName() + " löst eine Exception aus: " + ex.getMessage());
+        } catch (CatanException ex) {
+            System.out.println("KI " + ki.getName() + " löste eine Exception aus: " + ex.getMessage());
+            ki.setStatus(TRADE_OR_BUILD);
         }
         finally {
             ki.removeDevelopmentCard(DevCardType.ROAD_CONSTRUCTION);
@@ -581,9 +643,6 @@ public class GameController {
      * @throws CatanException
      */
     public void applyInventionCard(Player player) throws CatanException {
-        if (!player.hasInventionCard())
-            throw new CatanException(String.format(PLAYER_HAS_NO_DEV_CARD, player.getId(), DevCardType.INVENTION.toString()), true);
-
         List<RawMaterialType> types = new ArrayList<>();
 
         for (int i = 0; i < 2; i++) {
@@ -597,9 +656,7 @@ public class GameController {
             overview.increase(type, 1);
         }
 
-        player.increaseRawMaterials(overview);
-
-        changes.firePropertyChange(INVENTION_PLAYED, overview, player);
+        applyInventionCard(player, overview);
     }
 
 
@@ -608,7 +665,7 @@ public class GameController {
         if (!knightPlayer.equals(getCurrent()))
             CatanException.throwNotYourTurnException(knightPlayerId);
 
-        activateRobber(knightPlayerId, targetPlayerId, newRobberLoc);
+        targetPlayerId = activateRobber(knightPlayerId, targetPlayerId, newRobberLoc);
 
         //remove knight card after robber has been activated because if wrong data has been sent (e.g. opponent cannot be robbed)
         //the card should not be removed from player
@@ -791,6 +848,16 @@ public class GameController {
         return players;
     }
 
+    public List<Player> getKIs() {
+        List<Player> kiList = new ArrayList<>();
+
+        for (Player player : this.players) {
+            if (player.isKI()) kiList.add(player);
+        }
+
+        return kiList;
+    }
+
     public List<Player> getRealPlayers() {
         List<Player> realPlayers = new ArrayList<>();
 
@@ -875,7 +942,7 @@ public class GameController {
      * @param newRobberLoc new location of robber
      * @return id of player that was robbed
      */
-    public void activateRobber(int playerId, int opponentId, Location newRobberLoc) throws CatanException {
+    public int activateRobber(int playerId, int opponentId, Location newRobberLoc) throws CatanException {
         //check if player has turn
         if (getCurrent().getId() != playerId) CatanException.throwNotYourTurnException(getCurrent().getId());
 
@@ -911,6 +978,7 @@ public class GameController {
         changes.firePropertyChange(ROBBER_AT, false, CatanMessage.robberMoved(getCurrent(), board.getRobber(), opponent));
 
         currentPlayer.setStatus(TRADE_OR_BUILD);
+        return opponent == null ? -1 : opponent.getId();
     }
 
     /**
@@ -930,7 +998,7 @@ public class GameController {
     /**
      * player tosses cards after a roll of 7 if he has at least 7 raw materials
      *
-     * @param id       id of the player who has to toss cards
+     * @param id id of the player who has to toss cards
      * @param overview overview containing all cards he extracts
      */
     public void tossRawMaterialCards(int id, RawMaterialOverview overview) throws CatanException {
@@ -1056,9 +1124,6 @@ public class GameController {
     }
 
     public boolean endGame(Player winner) {
-        if (!winner.hasWon() || winner.getId() != getPlayerWithHighestPoints().getId()) {
-            return false;
-        }
         this.gameStarted = false;
         this.gameOver = true;
         return true;
@@ -1095,9 +1160,7 @@ public class GameController {
         if (this.greatestArmyPlayer == null) {
             player.assignGreatestArmy();
             this.greatestArmyPlayer = player;
-        }
-
-        else if (!this.greatestArmyPlayer.equals(player)) {
+        } else if (!this.greatestArmyPlayer.equals(player)) {
             this.greatestArmyPlayer.removeGreatestArmy();
             player.assignGreatestArmy();
             this.greatestArmyPlayer = player;

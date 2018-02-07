@@ -55,26 +55,8 @@ public class Haven extends JSONStringBuilder {
         return harvest;
     }
 
-    /**
-     * <method name: none>
-     * <description: none>
-     * <preconditions: none>
-     * <postconditions: none>
-     */
-    public RawMaterialType trade(RawMaterialType[] rm) {
-        //TODO
-        return null;
-    }
-
     public void setOccupied(boolean isOccupied) {
         this.isOccupied = isOccupied;
-    }
-
-    public RawMaterialType trade(TradeRequest tr) {
-        if (this.isValidTradeRequest(tr)) {
-            //TODO
-        }
-        return null;
     }
 
     /**

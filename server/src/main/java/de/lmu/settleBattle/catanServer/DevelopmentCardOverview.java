@@ -132,10 +132,6 @@ public class DevelopmentCardOverview extends JSONStringBuilder {
         return this.invention > 0;
     }
 
-    public int getTotalCount() {
-        return invention+knight+monopole+roadConstruction+victoryPoint;
-    }
-
     public boolean hasKnightCard() {
         return this.knight > 0;
     }
@@ -144,14 +140,24 @@ public class DevelopmentCardOverview extends JSONStringBuilder {
         return this.roadConstruction > 0;
     }
 
+    public int getTotalCount() {
+        return invention+knight+monopole+roadConstruction+victoryPoint;
+    }
+
     public List<DevCardType> getWithdrawableTypes() {
+        List<DevCardType> types = getApplicableTypes();
+        if (victoryPoint > 0) types.add(DevCardType.VICTORY_POINT);
+
+        return types;
+    }
+
+    public List<DevCardType> getApplicableTypes() {
         List<DevCardType> types = new ArrayList<>();
 
         if (knight > 0) types.add(DevCardType.KNIGHT);
         if (invention > 0) types.add(DevCardType.INVENTION);
         if (monopole > 0) types.add(DevCardType.MONOPOLE);
         if (roadConstruction > 0) types.add(DevCardType.ROAD_CONSTRUCTION);
-        if (victoryPoint > 0) types.add(DevCardType.VICTORY_POINT);
 
         return types;
     }

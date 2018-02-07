@@ -78,6 +78,9 @@ public class TradeRequest extends JSONStringBuilder {
 
     public boolean isAccepted() { return answers.values().contains(true); }
     public boolean getAcceptedBy(int fellowPlayerId) { return answers.get(fellowPlayerId); }
+
+    public boolean hasResponded(int fellowPlayerId) { return answers.containsKey(fellowPlayerId); }
+
     public boolean accept(boolean accept, int fellowPlayerId) {
 
         if (this.playerId == fellowPlayerId || this.cancelled || this.executed) return false;

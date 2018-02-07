@@ -27,6 +27,8 @@ public class Building extends JSONStringBuilder {
 
     private RawMaterialOverview costs;
 
+    private boolean attachable;
+
     //region Constructors
     public Building() { }
 
@@ -35,6 +37,7 @@ public class Building extends JSONStringBuilder {
         initializeLocations(type);
         this.costs = getCosts(type);
         this.viewID = null;
+        this.attachable = true;
     }
 
     public Building(BuildingType type, int owner) {
@@ -167,6 +170,9 @@ public class Building extends JSONStringBuilder {
             else return matchCount >= 2;
         }
     }
+
+    public boolean isAttachable() { return attachable; }
+    public void setAttachable(boolean acc) { this.attachable = acc; }
 
     public boolean isSettlement() { return this.type != null && this.type.equals(BuildingType.SETTLEMENT); }
 

@@ -12,4 +12,3 @@ cd ~/${app_name}
 ./gradlew bootRepackage
 
 sudo systemctl start catanBackend.service
-#gradle bootrun

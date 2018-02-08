@@ -64,6 +64,7 @@ public class Constants {
     public final static String FELLOW_PLAYER = "Mitspieler";
     public final static String ARMY = "Rittermacht";
     public final static String DEV_CARD = "Entwicklungskarte";
+    public final static String DEV_CARD_PLAYED = "Entwicklungskarte ausgespielt";
     public final static String DEV_CARDS = "Entwicklungskarten";
     public final static String ADD_KI = "addKI";
     public final static String VIEW_ID = "viewID";

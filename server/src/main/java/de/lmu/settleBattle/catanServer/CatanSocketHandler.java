@@ -24,10 +24,11 @@ public class CatanSocketHandler extends TextWebSocketHandler implements Property
     public CatanSocketHandler() {
         super();
 
-        initialize();
+        initializeGame();
+        this.sessions = Collections.synchronizedSet(new HashSet<WebSocketSession>());
     }
 
-    private void initialize() {
+    private void initializeGame() {
         utils = new SocketUtils();
 
         utils.getGameCtrl().getBoard().addPropertyChangeListener(e -> {
@@ -70,12 +71,7 @@ public class CatanSocketHandler extends TextWebSocketHandler implements Property
 
                 case RC_PLAYED:
                     player = (Player) e.getNewValue();
-                    Object[] rcData = (Object[]) e.getOldValue();
-                    try {
-                        sendMessageToAll(CatanMessage.roadConstructionCard((Building) rcData[0], (Building) rcData[1]));
-                    } catch (CatanException ex) {
-                        System.out.println(ex.getMessage());
-                    }
+                    sendMessageToAll(CatanMessage.roadConstructionCard(player.getId()));
                     sendStatusUpdate = true;
                     break;
             }
@@ -88,8 +84,6 @@ public class CatanSocketHandler extends TextWebSocketHandler implements Property
                 }
             }
         });
-
-        this.sessions = Collections.synchronizedSet(new HashSet<WebSocketSession>());
     }
 
     public SocketUtils getUtils() {
@@ -254,24 +248,32 @@ public class CatanSocketHandler extends TextWebSocketHandler implements Property
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
-            if (OK) sendOK(session);
-            else if (!errorMessage.equals("")) {
-                System.out.printf("Send error to: %s %s\n", session.getId(), errorMessage);
-                sendError(session, errorMessage);
-            }
+            //the game is over and will be reinitialized
+            if (getGameCtrl().isGameOver()) {
+                if (sessions.size() == 0) initializeGame();
+            } else {
+                //send OK message
+                if (OK) sendOK(session);
 
-            if (errorObject instanceof TradeRequest) {
-                TradeRequest tr = (TradeRequest) errorObject;
-                tr.accept(false, SocketUtils.toInt(session.getId()));
-            }
+                    //send error to client
+                else if (!errorMessage.equals("")) {
+                    System.out.printf("Send error to: %s %s\n", session.getId(), errorMessage);
+                    sendError(session, errorMessage);
+                }
 
-            Player current = getGameCtrl().getCurrent();
-            if (current.isKI() && (current.isActive() || current.getStatus().equals(WAIT_FOR_ALL_TO_EXTRACT_CARDS))) {
-                getGameCtrl().moveKIs();
-            }
+                if (errorObject instanceof TradeRequest) {
+                    TradeRequest tr = (TradeRequest) errorObject;
+                    tr.accept(false, SocketUtils.toInt(session.getId()));
+                }
 
-            if (!current.isKI() && current.getStatus().equals(WAIT_FOR_ALL_TO_EXTRACT_CARDS))
-                getGameCtrl().updateStatusAfterCardExtraction(current);
+                Player current = getGameCtrl().getCurrent();
+                if (current.isKI() && (current.isActive() || current.getStatus().equals(WAIT_FOR_ALL_TO_EXTRACT_CARDS))) {
+                    getGameCtrl().moveKIs();
+                }
+
+                if (!current.isKI() && current.getStatus().equals(WAIT_FOR_ALL_TO_EXTRACT_CARDS))
+                    getGameCtrl().updateStatusAfterCardExtraction(current);
+            }
         }
     }
 
@@ -295,7 +297,6 @@ public class CatanSocketHandler extends TextWebSocketHandler implements Property
         if (current.hasWon()) {
             utils.getGameCtrl().endGame(current);
             sendMessageToAll(CatanMessage.endGame(current));
-            initialize();
         } else {
             utils.getGameCtrl().nextMove();
         }
@@ -313,24 +314,22 @@ public class CatanSocketHandler extends TextWebSocketHandler implements Property
         sessions.remove(session);
         sendMessageToAll(CatanMessage.playerLeft(SocketUtils.toInt(id)));
 
-        if (!utils.getGameCtrl().isGameOver()) {
+        //replace player by KI
+        if (sessions.size() > 0) {
+            Player player = getGameCtrl().getPlayer(id);
 
-            //replace player by KI
-            if (sessions.size() > 0) {
-                Player player = getGameCtrl().getPlayer(id);
+            if (player == null)
+                throw new CatanException(String.format("Es konnte kein Spieler mit der ID %s gefunden werden.", id), true);
 
-                if (player == null)
-                    throw new CatanException(String.format("Es konnte kein Spieler mit der ID %s gefunden werden.", id), true);
+            player.setKI(true);
+            if (player.equals(getGameCtrl().getCurrent()))
+                getGameCtrl().moveKIs();
+        }
 
-                player.setKI(true);
-                if (player.equals(getGameCtrl().getCurrent()))
-                    getGameCtrl().moveKIs();
-            }
-
-            //no real player left --> reinitialize game
-            else {
-                initialize();
-            }
+        //no real player left --> reinitialize game
+        else {
+            initializeGame();
+            this.sessions = Collections.synchronizedSet(new HashSet<WebSocketSession>());
         }
     }
     //endregion

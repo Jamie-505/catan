@@ -278,7 +278,7 @@ public class CatanMessage {
     public static TextMessage developmentCardBought_Public(int playerId) {
         JSONObject payload = new JSONObject();
         payload.put(Constants.PLAYER, playerId);
-        payload.put(Constants.CARD_BUY, UNKNOWN);
+        payload.put(Constants.DEV_CARD, UNKNOWN);
         return new TextMessage(JSONUtils.setJSONType(CARD_SOLD,payload).toString());
     }
     //endregion
@@ -315,13 +315,14 @@ public class CatanMessage {
 
     //region action cards
 
-    public static TextMessage knightCard(int playerId, int victimId, Location location) {
+    public static TextMessage knightCard(int playerId, int opponentId, Location location) {
         JSONObject payload = new JSONObject();
         payload.put(Constants.PLACE, location.toJSON());
-        payload.put(Constants.DESTINATION, victimId);
+        payload.put(Constants.DESTINATION, opponentId);
         payload.put(Constants.PLAYER, playerId);
+        payload.put(Constants.TYPE, KNIGHT);
 
-        return new TextMessage(JSONUtils.setJSONType(Constants.CARD_KNIGHT, payload).toString());
+        return new TextMessage(JSONUtils.setJSONType(Constants.DEV_CARD_PLAYED, payload).toString());
     }
 
     public static TextMessage knightCard(int playerId, TextMessage message) {
@@ -330,33 +331,31 @@ public class CatanMessage {
         return new TextMessage(JSONUtils.setJSONType(Constants.CARD_KNIGHT, payload).toString());
     }
 
-    public static TextMessage roadConstructionCard(Building road1, Building road2) throws CatanException {
-
-        if (!road1.isRoad() || !road2.isRoad() ) throw new CatanException("Mit dieser Karte können nur Straßen gebaut werden", true);
-        if (road1.getOwner() != road2.getOwner()) throw new CatanException("Beide Straßen müssen den gleichen Eigentümer haben", true);
-
+    public static TextMessage roadConstructionCard(Building road1, Building road2) {
         JSONObject payload = new JSONObject();
         payload.put(Constants.PLAYER, road1.getOwner());
         payload.put(Constants.ROAD, road1.toJSON());
         payload.put(Constants.ROAD, road2.toJSON());
+        payload.put(Constants.TYPE, ROAD_CONSTRUCTION);
 
-        return new TextMessage(JSONUtils.setJSONType(Constants.CARD_RD_CON, payload).toString());
+        return new TextMessage(JSONUtils.setJSONType(Constants.DEV_CARD_PLAYED, payload).toString());
     }
 
+    public static TextMessage roadConstructionCard(int id) {
+        JSONObject payload = new JSONObject();
+        payload.put(PLAYER, id);
+        payload.put(TYPE, ROAD_CONSTRUCTION);
 
-    public static TextMessage roadConstructionCard(int playerId, TextMessage message) {
-        JSONObject payload = JSONUtils.createJSON(message).getJSONObject(CARD_RD_CON);
-        payload.put(PLAYER, playerId);
-
-        return new TextMessage(JSONUtils.setJSONType(Constants.CARD_RD_CON, payload).toString());
+        return new TextMessage(JSONUtils.setJSONType(Constants.DEV_CARD_PLAYED, payload).toString());
     }
 
     public static TextMessage monopoleCard(int playerId, RawMaterialType type) {
         JSONObject payload = new JSONObject();
         payload.put(Constants.PLAYER, playerId);
         payload.put(Constants.RAW_MATERIAL, type.toString());
+        payload.put(Constants.TYPE, MONOPOLE);
 
-        return new TextMessage(JSONUtils.setJSONType(Constants.MONOPOLE, payload).toString());
+        return new TextMessage(JSONUtils.setJSONType(Constants.DEV_CARD_PLAYED, payload).toString());
     }
 
     public static TextMessage monopoleCard(int playerId, TextMessage message) {
@@ -370,8 +369,9 @@ public class CatanMessage {
         JSONObject payload = new JSONObject();
         payload.put(Constants.PLAYER, playerId);
         payload.put(Constants.RAW_MATERIALS, overview.toJSON());
+        payload.put(Constants.TYPE, INVENTION);
 
-        return new TextMessage(JSONUtils.setJSONType(Constants.INVENTION, payload).toString());
+        return new TextMessage(JSONUtils.setJSONType(Constants.DEV_CARD_PLAYED, payload).toString());
     }
 
     public static TextMessage inventionCard(int playerId, TextMessage message) {

@@ -212,7 +212,7 @@ public class GameController {
                     //play development card if ki possesses one
                     try {
                         if (ki.hasInventionCard()) applyInventionCard(ki);
-                        else if (ki.hasRoadConstructionCard()) applyRCCardForKI(ki);
+                        else if (ki.hasRoadConstructionCard()) applyRCCard(ki);
                         else if (ki.hasMonopoleCard()) applyMonopoleCard(ki, RawMaterialType.getRandomTradingType());
                         else if (ki.hasKnightCard()) applyKnightCard(ki.getId(), -1, board.getRandomFieldLoc());
                     } catch (CatanException ex) {
@@ -467,8 +467,10 @@ public class GameController {
         }
 
         else if (player.isRCActive())  {
-            String newStatus = player.getStatus().equals(FIRST_STREET) ? SECOND_STREET : TRADE_OR_BUILD;
-            player.setStatus(newStatus);
+            if (player.getStatus().equals(SECOND_STREET))
+                endRCCard(player.getId());
+
+            else player.setStatus(SECOND_STREET);
         }
     }
 
@@ -513,7 +515,7 @@ public class GameController {
         changes.firePropertyChange(MONOPOLE_PLAYED, targetType, monoPlayer);
     }
 
-    public void applyRCCardForKI(Player ki) throws CatanException {
+    public void applyRCCard(Player ki) throws CatanException {
 
         if (!ki.isKI()) return;
 
@@ -521,14 +523,16 @@ public class GameController {
             throw new CatanException(String.format(PLAYER_HAS_NO_DEV_CARD, ki.getId(), DevCardType.ROAD_CONSTRUCTION.toString()), true);
 
         ki.setStatus(FIRST_STREET);
+        Building road1 = null;
+        Building road2 = null;
 
         try {
-            Building road1 = new Building(ki.getId(), BuildingType.ROAD, board.getFreeRoadLoc(ki, false));
+            road1 = new Building(ki.getId(), BuildingType.ROAD, board.getFreeRoadLoc(ki, false));
 
             boolean built = this.board.placeBuilding(road1, false);
 
             if (built) {
-                Building road2 = new Building(ki.getId(), BuildingType.ROAD, board.getFreeRoadLoc(ki, false));
+                road2 = new Building(ki.getId(), BuildingType.ROAD, board.getFreeRoadLoc(ki, false));
                 this.board.placeBuilding(road2, false);
             }
         }
@@ -537,6 +541,19 @@ public class GameController {
         }
         finally {
             ki.removeDevelopmentCard(DevCardType.ROAD_CONSTRUCTION);
+            changes.firePropertyChange(RC_PLAYED, "null", ki);
+        }
+    }
+
+    public void endRCCard(int id) {
+        endRCCard(getPlayer(id));
+    }
+
+    public void endRCCard(Player player) {
+        if (player.isRCActive()) {
+            boolean fire = !player.getStatus().equals(FIRST_STREET);
+            player.setStatus(TRADE_OR_BUILD);
+            if (fire) changes.firePropertyChange(RC_PLAYED, "", player);
         }
     }
 
@@ -1042,6 +1059,7 @@ public class GameController {
         if (!winner.hasWon() || winner.getId() != getPlayerWithHighestPoints().getId()) {
             return false;
         }
+        this.gameStarted = false;
         this.gameOver = true;
         return true;
     }

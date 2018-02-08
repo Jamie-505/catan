@@ -38,14 +38,9 @@ public class SocketUtils {
         JSONObject payload = JSONUtils.createJSON(message).getJSONObject(BUILD);
 
         if (!payload.has(TYPE) || !payload.has(PLACE)) {
-            Player player = gameCtrl.getPlayer(id);
-            if (player.isRCActive()) {
-                player.setStatus(TRADE_OR_BUILD);
-                return true;
-            }
-            return false;
+            gameCtrl.endRCCard(id);
+            return true;
         }
-
 
         Building building = gson.fromJson(JSONUtils.createJSON(message)
                 .getJSONObject(Constants.BUILD).toString(), Building.class);

@@ -322,8 +322,9 @@ public class JSONUtilsTest {
   @Test
   public void knightCardMessageShouldBeCorrect() throws Exception {
     JSONObject knightJSON = JSONUtils.createJSON(CatanMessage.knightCard(1, 4, l1));
-    JSONObject knight = knightJSON.getJSONObject(Constants.CARD_KNIGHT);
+    JSONObject knight = knightJSON.getJSONObject(Constants.DEV_CARD_PLAYED);
 
+    assertEquals(Constants.KNIGHT, knight.getString(Constants.TYPE));
     assertEquals(1, knight.get(Constants.PLAYER));
     assertEquals(4, knight.get(Constants.DESTINATION));
     assertTrue(knight.has(Constants.PLACE));
@@ -334,8 +335,9 @@ public class JSONUtilsTest {
   @Test
   public void roadConstructionCardShouldBeCorrect() throws Exception {
     JSONObject roadJSON = JSONUtils.createJSON(CatanMessage.roadConstructionCard(road,road2));
-    JSONObject road = roadJSON.getJSONObject(Constants.CARD_RD_CON);
+    JSONObject road = roadJSON.getJSONObject(Constants.DEV_CARD_PLAYED);
 
+    assertEquals(Constants.ROAD_CONSTRUCTION, road.getString(Constants.TYPE));
     assertTrue(road.has(Constants.PLAYER));
     assertTrue(road.has(Constants.ROAD));
     assertTrue(road.getJSONObject(Constants.ROAD)
@@ -346,8 +348,9 @@ public class JSONUtilsTest {
   @Test
   public void monopoleCardShouldBeCorrect() throws Exception {
     JSONObject monopoleJSON = JSONUtils.createJSON(CatanMessage.monopoleCard(0, RawMaterialType.WHEAT));
-    JSONObject monopole = monopoleJSON.getJSONObject(Constants.MONOPOLE);
+    JSONObject monopole = monopoleJSON.getJSONObject(Constants.DEV_CARD_PLAYED);
 
+    assertEquals(Constants.MONOPOLE, monopole.getString(Constants.TYPE));
     assertTrue(monopole.has(Constants.PLAYER));
     assertEquals(Constants.WHEAT, monopole.get(Constants.RAW_MATERIAL));
   }
@@ -355,8 +358,9 @@ public class JSONUtilsTest {
   @Test
   public void inventionCardShouldBeCorrect() throws Exception {
     JSONObject inventionJSON = JSONUtils.createJSON(CatanMessage.inventionCard(5, rmOverview));
-    JSONObject invention = inventionJSON.getJSONObject(Constants.INVENTION);
+    JSONObject invention = inventionJSON.getJSONObject(Constants.DEV_CARD_PLAYED);
 
+    assertEquals(Constants.INVENTION, invention.getString(Constants.TYPE));
     assertTrue(invention.has(Constants.PLAYER));
     assertTrue(invention.has(Constants.RAW_MATERIALS));
     assertEquals(2, invention.getJSONObject(Constants.RAW_MATERIALS).get(Constants.WHEAT));

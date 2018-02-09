@@ -440,6 +440,10 @@ public class CatanSocketHandler extends TextWebSocketHandler implements Property
         if (tradeRequest.getOffer().getTotalCount() < 1 || tradeRequest.getRequest().getTotalCount() < 1)
             throw new CatanException("Angebot/Nachfrage müssen je mindestens einen Rohstoff enthalten.", true);
 
+        // the request cant have the same elements as the offer
+        if (tradeRequest.getRequest().hasSameMaterial(tradeRequest.getOffer()))
+            throw new CatanException("Angebot und Nachfrage können nicht die gleichen Rohstoffe enthalten.", true);
+        
         //has player offered raw materials ?
         Player player = utils.getGameCtrl().getPlayer(tradeRequest.getPlayerId());
         if (!player.canAfford(tradeRequest.getOffer()))

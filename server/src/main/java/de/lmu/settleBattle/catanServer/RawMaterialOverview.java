@@ -316,6 +316,23 @@ public class RawMaterialOverview extends JSONStringBuilder {
     }
 
     /**
+     * returns true if any of the offer material matches
+     * the request that the method called upon
+     * @param offer
+     * @return
+     */
+    public boolean hasSameMaterial(RawMaterialOverview offer){
+
+        if ((this.clayCount > 0 && offer.clayCount > 0) ||
+                (this.oreCount > 0 && offer.oreCount > 0) ||
+                (this.wheatCount > 0 && offer.wheatCount > 0) ||
+                (this.woolCount > 0 && offer.woolCount > 0) ||
+                (this.woodCount > 0 && offer.woodCount > 0)) return true;
+
+        return false;
+    }
+
+    /**
      * returns true if raw material overview contains only raw
      * materials with a special type
      * @param type

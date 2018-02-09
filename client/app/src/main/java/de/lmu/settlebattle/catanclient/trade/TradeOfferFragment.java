@@ -1,15 +1,20 @@
 package de.lmu.settlebattle.catanclient.trade;
 
+import static de.lmu.settlebattle.catanclient.utils.Constants.BLUE;
+import static de.lmu.settlebattle.catanclient.utils.Constants.ORANGE;
+import static de.lmu.settlebattle.catanclient.utils.Constants.RED;
 import static de.lmu.settlebattle.catanclient.utils.Constants.TRADE;
 import static de.lmu.settlebattle.catanclient.utils.Constants.TRD_ABORTED;
 import static de.lmu.settlebattle.catanclient.utils.Constants.TRD_ACC;
 import static de.lmu.settlebattle.catanclient.utils.Constants.TRD_RES;
+import static de.lmu.settlebattle.catanclient.utils.Constants.WHITE;
 import static de.lmu.settlebattle.catanclient.utils.JSONUtils.createJSONString;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.widget.CardView;
@@ -18,6 +23,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import com.google.gson.Gson;
@@ -75,7 +81,22 @@ public class TradeOfferFragment extends MainActivityFragment {
       ImageButton playerIcon = view.findViewById(R.id.playerIcon);
       int colorId = getResources().getIdentifier(trader.color.toLowerCase(),
           "color", mainActivity.getPackageName());
-      playerIcon.setBackgroundColor(getResources().getColor(colorId));
+      Drawable color = null;
+      switch (trader.color) {
+        case BLUE:
+          color = getResources().getDrawable(R.drawable.pl_blau_armeen);
+          break;
+        case ORANGE:
+          color = getResources().getDrawable(R.drawable.pl_orange_james);
+          break;
+        case RED:
+          color = getResources().getDrawable(R.drawable.pl_rot_lisa);
+          break;
+        case WHITE:
+          color = getResources().getDrawable(R.drawable.pl_weiss_danijel);
+          break;
+      }
+      playerIcon.setImageDrawable(color);
 
       int i = 0;
       // fill fields with correct amounts

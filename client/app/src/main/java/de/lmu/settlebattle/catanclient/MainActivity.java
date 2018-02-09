@@ -1,5 +1,6 @@
 package de.lmu.settlebattle.catanclient;
 
+import static android.view.View.GONE;
 import static de.lmu.settlebattle.catanclient.grid.building.BuildingView.createTag;
 import static de.lmu.settlebattle.catanclient.utils.Constants.BOARD;
 import static de.lmu.settlebattle.catanclient.utils.Constants.BUILD;
@@ -43,6 +44,7 @@ import static de.lmu.settlebattle.catanclient.utils.Constants.TRD_ABORTED;
 import static de.lmu.settlebattle.catanclient.utils.Constants.TRD_FIN;
 import static de.lmu.settlebattle.catanclient.utils.Constants.TRD_OFFER;
 import static de.lmu.settlebattle.catanclient.utils.Constants.TYPE;
+import static de.lmu.settlebattle.catanclient.utils.Constants.WHITE;
 import static de.lmu.settlebattle.catanclient.utils.JSONUtils.createJSONString;
 
 import android.app.Fragment;
@@ -695,7 +697,7 @@ public class MainActivity extends BaseSocketActivity implements FragmentHandler,
             enableRobber = false;
             isItTimeToBuild = true;
             setStatus("Du kannst jetzt bauen und handeln!");
-            cancelRdConBtn.setVisibility(View.GONE);
+            cancelRdConBtn.setVisibility(GONE);
             diceBtn.setVisibility(View.INVISIBLE);
             domTradeBtn.setVisibility(View.VISIBLE);
             seaTradeBtn.setVisibility(View.VISIBLE);
@@ -1147,6 +1149,17 @@ public class MainActivity extends BaseSocketActivity implements FragmentHandler,
     updatePlayerCards();
     updateSlidePanel();
   }
+
+  private void playerWins() {
+    DrawerLayout all = findViewById(R.id.drawer_layout);
+    all.setVisibility(GONE);
+    // hier fehlt noch der neue container mit Gifhandling
+  };
+  private void playerLoses() {
+    DrawerLayout all = findViewById(R.id.drawer_layout);
+    all.setVisibility(GONE);
+    // hier fehlt noch der neue container mit Gifhandling
+  };
 
   private void updateSlidePanel() {
     self = Storage.getSelf();

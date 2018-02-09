@@ -1,4 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:background="#075C5F">
+
+  <ImageView
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:src="@drawable/start_bg"
+      android:scaleType="centerCrop" />
 <android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
   android:id="@+id/contain"
   xmlns:app="http://schemas.android.com/apk/res-auto"
@@ -9,214 +21,264 @@
   tools:context="de.lmu.settlebattle.catanclient.LobbyActivity">
 
   <android.support.constraint.ConstraintLayout
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content">
-    <android.support.constraint.ConstraintLayout
-      android:id="@+id/player"
-      android:layout_width="368dp"
-      android:layout_height="94dp"
-      android:layout_marginTop="8dp"
-      android:layout_marginStart="16dp"
-      android:layout_marginEnd="16dp"
-      app:layout_constraintEnd_toEndOf="parent"
-      app:layout_constraintStart_toStartOf="parent"
-      app:layout_constraintTop_toTopOf="parent">
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content">
 
-      <ImageView
-        android:id="@+id/playerPic"
-        android:layout_width="90dp"
-        android:layout_height="90dp"
-        android:layout_marginTop="4dp"
-        android:src="@drawable/ic_user"
+    <LinearLayout
+        android:id="@+id/linearLayout2"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="16dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="16dp"
+        android:orientation="vertical"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent">
 
       <TextView
-        android:id="@+id/playerName"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="8dp"
-        android:layout_marginStart="16dp"
+          android:id="@+id/textView5"
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content"
+          android:text="Hi, James!"
+          android:textAppearance="@style/CatTitleText1"
+          tools:text="@string/hallo_james" />
+
+      <TextView
+          android:id="@+id/textView6"
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content"
+          android:text="Bitte warte hier in der Lobby bis weitere Spieler beitreten."
+          android:textAppearance="@style/TitleTextStyle"
+          android:textSize="18dp" />
+    </LinearLayout>
+
+    <android.support.constraint.ConstraintLayout
+        android:id="@+id/player"
+        android:layout_width="0dp"
+        android:layout_height="94dp"
+        android:layout_marginStart="8dp"
         android:layout_marginEnd="8dp"
-        android:textAppearance="@android:style/TextAppearance.Material.Large"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@+id/playerStatus"
-        app:layout_constraintStart_toEndOf="@+id/playerPic"
-        app:layout_constraintTop_toTopOf="@+id/playerPic" />
+        android:layout_marginTop="8dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/linearLayout2">
+
+      <ImageView
+          android:id="@+id/playerPic"
+          style="@style/RoundBornerImageButton"
+          android:layout_width="90dp"
+          android:layout_height="90dp"
+          android:layout_marginTop="4dp"
+          android:src="@drawable/pl_weiss_danijel"
+          app:layout_constraintStart_toStartOf="parent"
+          app:layout_constraintTop_toTopOf="parent" />
+
+      <TextView
+          android:id="@+id/playerName"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:layout_marginStart="16dp"
+          android:layout_marginTop="4dp"
+          android:textAppearance="@style/CatTitleText3"
+          app:layout_constraintStart_toEndOf="@+id/playerPic"
+          app:layout_constraintTop_toTopOf="parent" />
 
       <ImageButton
-        android:id="@+id/playerStatus"
-        android:layout_width="45dp"
-        android:layout_height="90dp"
-        android:src="@drawable/ic_hourglass"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+          android:id="@+id/playerStatus"
+          android:layout_width="45dp"
+          android:layout_height="90dp"
+          android:src="@drawable/ic_hourglass"
+          app:layout_constraintBottom_toBottomOf="parent"
+          app:layout_constraintEnd_toEndOf="parent"
+          app:layout_constraintTop_toTopOf="parent"
+          style="@style/RoundBorderImageButton2"/>
     </android.support.constraint.ConstraintLayout>
 
     <android.support.constraint.ConstraintLayout
-      android:id="@+id/player2"
-      android:visibility="invisible"
-      android:layout_width="368dp"
-      android:layout_height="wrap_content"
-      android:layout_marginTop="8dp"
-      android:layout_marginStart="16dp"
-      android:layout_marginEnd="16dp"
-      app:layout_constraintEnd_toEndOf="parent"
-      app:layout_constraintStart_toStartOf="parent"
-      app:layout_constraintTop_toBottomOf="@+id/player">
+        android:id="@+id/player2"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="8dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:visibility="invisible"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/player">
 
       <ImageView
-        android:id="@+id/p2Pic"
-        android:layout_width="90dp"
-        android:layout_height="90dp"
-        android:layout_marginTop="4dp"
-        android:src="@drawable/ic_user"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+          android:id="@+id/p2Pic"
+          style="@style/RoundBornerImageButton"
+          android:layout_width="90dp"
+          android:layout_height="90dp"
+          android:layout_marginTop="4dp"
+          android:src="@drawable/pl_rot_lisa"
+          app:layout_constraintStart_toStartOf="parent"
+          app:layout_constraintTop_toTopOf="parent" />
 
       <TextView
-        android:id="@+id/p2Name"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="8dp"
-        android:layout_marginStart="16dp"
-        android:layout_marginEnd="8dp"
-        android:text="TextView"
-        android:textAppearance="@android:style/TextAppearance.Material.Large"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@+id/p2Status"
-        app:layout_constraintStart_toEndOf="@+id/p2Pic"
-        app:layout_constraintTop_toTopOf="@+id/p2Pic" />
+          android:id="@+id/p2Name"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:layout_marginStart="16dp"
+          android:layout_marginTop="4dp"
+          android:text="TextView"
+          android:textAppearance="@style/CatTitleText3"
+          app:layout_constraintStart_toEndOf="@+id/p2Pic"
+          app:layout_constraintTop_toTopOf="@+id/p2Pic" />
 
       <ImageButton
-        android:id="@+id/p2Status"
-        android:layout_width="45dp"
-        android:layout_height="90dp"
-        android:background="@android:color/holo_red_dark"
-        android:src="@drawable/ic_hourglass"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+          android:id="@+id/p2Status"
+          android:layout_width="45dp"
+          style="@style/RoundBorderImageButton2"
+          android:layout_height="90dp"
+          android:background="@android:color/holo_red_dark"
+          android:src="@drawable/ic_hourglass"
+          app:layout_constraintBottom_toBottomOf="parent"
+          app:layout_constraintEnd_toEndOf="parent"
+          app:layout_constraintTop_toTopOf="parent" />
     </android.support.constraint.ConstraintLayout>
 
     <android.support.constraint.ConstraintLayout
-      android:id="@+id/player3"
-      android:visibility="invisible"
-      android:layout_width="368dp"
-      android:layout_height="wrap_content"
-      android:layout_marginTop="8dp"
-      android:layout_marginStart="16dp"
-      android:layout_marginEnd="16dp"
-      app:layout_constraintEnd_toEndOf="parent"
-      app:layout_constraintStart_toStartOf="parent"
-      app:layout_constraintTop_toBottomOf="@+id/player2">
+        android:id="@+id/player3"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="8dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:visibility="invisible"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/player2">
 
       <ImageView
-        android:id="@+id/p3Pic"
-        android:layout_width="90dp"
-        android:layout_height="90dp"
-        android:layout_marginTop="4dp"
-        android:src="@drawable/ic_user"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+          android:id="@+id/p3Pic"
+          style="@style/RoundBornerImageButton"
+          android:layout_width="90dp"
+          android:layout_height="90dp"
+          android:layout_marginTop="4dp"
+          android:src="@drawable/pl_orange_james"
+          app:layout_constraintStart_toStartOf="parent"
+          app:layout_constraintTop_toTopOf="parent" />
 
       <TextView
-        android:id="@+id/p3Name"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="8dp"
-        android:layout_marginStart="16dp"
-        android:layout_marginEnd="8dp"
-        android:textAppearance="@android:style/TextAppearance.Material.Large"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@+id/p3Status"
-        app:layout_constraintStart_toEndOf="@+id/p3Pic"
-        app:layout_constraintTop_toTopOf="@+id/p3Pic" />
+          android:id="@+id/p3Name"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:layout_marginStart="16dp"
+          android:layout_marginTop="4dp"
+          android:textAppearance="@style/CatTitleText3"
+          app:layout_constraintStart_toEndOf="@+id/p3Pic"
+          app:layout_constraintTop_toTopOf="@+id/p3Pic" />
 
       <ImageButton
-        android:id="@+id/p3Status"
-        android:layout_width="45dp"
-        android:layout_height="90dp"
-        android:background="@android:color/holo_red_dark"
-        android:src="@drawable/ic_hourglass"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+          android:id="@+id/p3Status"
+          android:layout_width="45dp"
+          android:layout_height="90dp"
+          style="@style/RoundBorderImageButton2"
+          android:background="@android:color/holo_red_dark"
+          android:src="@drawable/ic_hourglass"
+          app:layout_constraintBottom_toBottomOf="parent"
+          app:layout_constraintEnd_toEndOf="parent"
+          app:layout_constraintTop_toTopOf="parent" />
     </android.support.constraint.ConstraintLayout>
 
     <android.support.constraint.ConstraintLayout
-      android:id="@+id/player4"
-      android:visibility="invisible"
-      android:layout_width="368dp"
-      android:layout_height="wrap_content"
-      android:layout_marginTop="8dp"
-      android:layout_marginStart="16dp"
-      android:layout_marginEnd="16dp"
-      app:layout_constraintEnd_toEndOf="parent"
-      app:layout_constraintStart_toStartOf="parent"
-      app:layout_constraintTop_toBottomOf="@+id/player3">
+        android:id="@+id/player4"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="8dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:visibility="invisible"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/player3">
 
       <ImageView
-        android:id="@+id/p4Pic"
-        android:layout_width="90dp"
-        android:layout_height="90dp"
-        android:layout_marginTop="4dp"
-        android:src="@drawable/ic_user"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+          android:id="@+id/p4Pic"
+          style="@style/RoundBornerImageButton"
+          android:layout_width="90dp"
+          android:layout_height="90dp"
+          android:layout_marginTop="4dp"
+          android:src="@drawable/pl_weiss_danijel"
+          app:layout_constraintStart_toStartOf="parent"
+          app:layout_constraintTop_toTopOf="parent" />
 
       <TextView
-        android:id="@+id/p4Name"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="8dp"
-        android:layout_marginStart="16dp"
-        android:layout_marginEnd="8dp"
-        android:textAppearance="@android:style/TextAppearance.Material.Large"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@+id/p4Status"
-        app:layout_constraintStart_toEndOf="@+id/p4Pic"
-        app:layout_constraintTop_toTopOf="@+id/p4Pic" />
+          android:id="@+id/p4Name"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:layout_marginStart="16dp"
+          android:layout_marginTop="4dp"
+          android:textAppearance="@style/CatTitleText3"
+          app:layout_constraintStart_toEndOf="@+id/p4Pic"
+          app:layout_constraintTop_toTopOf="@+id/p4Pic" />
 
       <ImageButton
-        android:id="@+id/p4Status"
-        android:layout_width="45dp"
-        android:layout_height="90dp"
-        android:background="@android:color/holo_red_dark"
-        android:src="@drawable/ic_hourglass"
-        app:layout_behavior="de.lmu.settlebattle.catanclient.utils.SnackBarBehaviour"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+          android:id="@+id/p4Status"
+          android:layout_width="45dp"
+          android:layout_height="90dp"
+          android:background="@android:color/holo_red_dark"
+          android:src="@drawable/ic_hourglass"
+          app:layout_behavior="de.lmu.settlebattle.catanclient.utils.SnackBarBehaviour"
+          app:layout_constraintBottom_toBottomOf="parent"
+          app:layout_constraintEnd_toEndOf="parent"
+          app:layout_constraintTop_toTopOf="parent" />
     </android.support.constraint.ConstraintLayout>
   </android.support.constraint.ConstraintLayout>
 
   <android.support.constraint.ConstraintLayout
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:layout_gravity="bottom|start"
-    app:layout_behavior="de.lmu.settlebattle.catanclient.utils.SnackBarBehaviour">
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:layout_gravity="bottom|start"
+      app:layout_behavior="de.lmu.settlebattle.catanclient.utils.SnackBarBehaviour">
 
     <Button
-      android:id="@+id/startGameBtn"
-      android:layout_width="0dp"
-      android:layout_height="wrap_content"
-      android:layout_marginBottom="8dp"
-      android:layout_marginStart="8dp"
-      android:layout_marginEnd="8dp"
-      android:text="@string/starten"
-      app:layout_constraintBottom_toBottomOf="parent"
-      app:layout_constraintEnd_toEndOf="parent"
-      app:layout_constraintStart_toStartOf="parent" />
+        android:id="@+id/kiBtn"
+        style="@style/RoundedButton"
+        android:layout_width="360dp"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:backgroundTint="@color/lblFromName"
+        android:text="@string/add_ki"
+        app:layout_constraintBottom_toTopOf="@+id/startGameBtn"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/starten" />
+
+    <TextView
+        android:id="@+id/starten"
+        android:layout_width="360dp"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="4dp"
+        android:paddingLeft="8dp"
+        android:paddingRight="8dp"
+        android:text="Keine Lust zu warten? Füge eine künstliche Intelligenz als Spieler hinzu und leg sofort los:"
+        android:textAlignment="center"
+        android:textAppearance="@android:style/TextAppearance.Material.Subhead"
+        app:layout_constraintBottom_toTopOf="@+id/kiBtn"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
     <Button
-      android:id="@+id/kiBtn"
-      android:layout_width="wrap_content"
-      android:layout_height="wrap_content"
-      android:layout_marginBottom="8dp"
-      android:text="@string/add_ki"
-      app:layout_constraintBottom_toTopOf="@+id/startGameBtn"
-      app:layout_constraintLeft_toLeftOf="parent"
-      app:layout_constraintRight_toRightOf="parent" />
+        android:id="@+id/startGameBtn"
+        style="@style/RoundedButton"
+        android:layout_width="360dp"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginStart="8dp"
+        android:text="@string/starten"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/kiBtn" />
+
   </android.support.constraint.ConstraintLayout>
 </android.support.design.widget.CoordinatorLayout>
+</RelativeLayout>

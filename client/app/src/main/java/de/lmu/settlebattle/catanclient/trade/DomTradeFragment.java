@@ -136,13 +136,13 @@ public class DomTradeFragment extends MainActivityFragment {
   @Override
   public void onViewCreated(View view, Bundle savedInstanceState) {
     Button initCnclBtn = fragmentView.findViewById(R.id.init_cancel_btn);
-    cancelBtn = fragmentView.findViewById(R.id.cancel_btn);
-    sendTradeBtn = fragmentView.findViewById(R.id.send_trade_btn);
+    ImageButton cancelBtn = fragmentView.findViewById(R.id.cancel_btn);
+    Button sendTradeBtn = fragmentView.findViewById(R.id.send_trade_btn);
     tradeStatus = fragmentView.findViewById(R.id.trade_status);
 
     cancelBtn.setOnClickListener((View v) -> cancelTrade());
 
-    initCnclBtn.setOnClickListener((View v) -> fragHandler.closeFragment(this));
+    cancelBtn.setOnClickListener((View v) -> fragHandler.closeFragment(this));
 
     sendTradeBtn.setOnClickListener((View v) -> {
       sendTradeRequest();

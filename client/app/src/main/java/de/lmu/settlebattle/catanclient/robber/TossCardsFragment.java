@@ -93,8 +93,12 @@ public class TossCardsFragment extends MainActivityFragment {
         }
         if (numPickCnt == tossCardCnt) {
           okBtn.setEnabled(true);
+          okBtn.setAlpha(1f);
+          okBtn.setClickable(true);
         } else {
           okBtn.setEnabled(false);
+          okBtn.setAlpha(.8f);
+          okBtn.setClickable(false);
         }
       });
     }

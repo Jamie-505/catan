@@ -26,7 +26,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_weight="1"
-        android:background="@color/title_gray"
+        android:background="#075C5F"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -119,12 +119,13 @@
 
         <Button
           android:id="@+id/dom_trade_btn"
-          style="@style/Widget.AppCompat.Button.Colored"
+          style="@style/RoundedButtonTransparent"
           android:layout_width="0dp"
           android:layout_height="wrap_content"
           android:layout_marginBottom="8dp"
           android:layout_marginStart="8dp"
           android:text="Handeln"
+          android:elevation="2dp"
           android:visibility="invisible"
           app:layout_constraintBottom_toTopOf="@id/end_turn_btn"
           app:layout_constraintStart_toStartOf="parent"
@@ -132,13 +133,14 @@
 
         <Button
           android:id="@+id/seatrade_btn"
-          style="@style/Widget.AppCompat.Button.Colored"
+          style="@style/RoundedButtonTransparent"
           android:layout_width="0dp"
           android:layout_height="wrap_content"
           android:layout_marginBottom="8dp"
           android:layout_marginStart="8dp"
           android:layout_marginEnd="8dp"
           android:text="Seehandel"
+          android:elevation="2dp"
           android:visibility="invisible"
           app:layout_constraintBottom_toTopOf="@id/end_turn_btn"
           app:layout_constraintEnd_toEndOf="parent"
@@ -146,7 +148,7 @@
 
         <Button
           android:id="@+id/end_turn_btn"
-          style="@style/Widget.AppCompat.Button.Colored"
+          style="@style/RoundedButton"
           android:layout_width="0dp"
           android:layout_height="wrap_content"
           android:layout_marginBottom="8dp"
@@ -174,15 +176,18 @@
 
         <ImageButton
           android:id="@+id/open_chat_btn"
-          android:src="@drawable/ic_chat"
+          android:src="@drawable/communication"
+          android:tint="@color/white"
+          style="@style/RoundedButtonTransparent"
+          android:backgroundTintMode="src_over"
+          android:backgroundTint="@color/main_color"
           android:scaleType="centerCrop"
-          android:background="@color/transparent"
-          android:layout_width="80dp"
-          android:layout_height="80dp"
+          android:layout_width="64dp"
+          android:layout_height="64dp"
+          android:padding="16dp"
           android:layout_marginBottom="8dp"
           android:layout_marginStart="8dp"
           android:layout_marginEnd="8dp"
-          android:padding="8dp"
           sothree:layout_constraintBottom_toBottomOf="parent"
           sothree:layout_constraintBottom_toTopOf="@id/dom_trade_btn"
           sothree:layout_constraintEnd_toEndOf="parent" />
@@ -399,12 +404,12 @@
               android:layout_height="wrap_content"
               android:text="Ein anderer Spieler ist am Zug"
               android:textAlignment="center"
-              android:textSize="22sp"/>
+              android:textSize="16dp"/>
             <TextView
               android:layout_width="match_parent"
               android:layout_height="wrap_content"
               android:textAlignment="center"
-              android:textSize="22sp"/>
+              android:textSize="16dp"/>
           </TextSwitcher>
         </android.support.constraint.ConstraintLayout>
 
@@ -432,15 +437,12 @@
             android:id="@+id/listDiv2"
             android:layout_width="match_parent"
             android:layout_height="0.5dp"
-            android:background="?android:attr/listDivider" />
+            android:background="?android:attr/listDivider"
+            android:layout_marginBottom="48dp"/>
 
-          <include layout="@layout/baufiguren_panel" />
 
-          <View
-            android:id="@+id/listDiv3"
-            android:layout_width="match_parent"
-            android:layout_height="0.5dp"
-            android:background="?android:attr/listDivider" />
+
+
 
         </com.github.florent37.expansionpanel.viewgroup.ExpansionsViewGroupLinearLayout>
       </LinearLayout>
@@ -458,7 +460,7 @@
         android:layout_marginBottom="8dp"
         android:layout_marginStart="32dp"
         android:layout_marginEnd="32dp"
-        android:background="@android:color/transparent"
+        android:background="@drawable/button_pill_fragment"
         android:elevation="40dp"
         app:layout_constraintBottom_toTopOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -485,3 +487,4 @@
       android:layout_height="match_parent"/>
   </LinearLayout>
 </android.support.v4.widget.DrawerLayout>
+

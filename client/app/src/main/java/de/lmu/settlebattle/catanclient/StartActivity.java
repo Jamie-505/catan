@@ -33,6 +33,7 @@ public class StartActivity extends Activity {
       } else if (NO_CONNECTION.equals(intent.getAction())) {
         countDown.cancel();
         btnConnect.setEnabled(true);
+        btnConnect.setAlpha(1f);
         btnConnect.setText(R.string.try_reconnect);
       }
     }
@@ -59,6 +60,8 @@ public class StartActivity extends Activity {
 
     btnConnect.setOnClickListener((View v) -> {
       btnConnect.setEnabled(false);
+      btnConnect.setAlpha(.8f);
+      btnConnect.setClickable(false);
       countDown = new CountDownTimer(5000, 1000) {
 
         public void onTick(long millisUntilFinished) {
@@ -69,6 +72,7 @@ public class StartActivity extends Activity {
         public void onFinish() {
           btnConnect.setText(R.string.try_reconnect);
           btnConnect.setEnabled(true);
+          btnConnect.setAlpha(1f);
         }
       }.start();
       wSThread.start();

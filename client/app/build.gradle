@@ -87,4 +87,6 @@ dependencies {
     // ChipsLayout Manager IMPORTANT
     compile 'com.beloo.widget:ChipsLayoutManager:0.3.7@aar'
 
+    // stylish textfield
+    compile 'com.github.HITGIF:TextFieldBoxes:1.3.9'
 }

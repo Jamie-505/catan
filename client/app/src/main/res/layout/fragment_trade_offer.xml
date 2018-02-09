@@ -24,6 +24,7 @@
     android:layout_marginStart="8dp"
     android:layout_marginEnd="8dp"
     android:textAlignment="center"
+
     app:layout_constraintEnd_toEndOf="parent"
     app:layout_constraintStart_toStartOf="parent"
     app:layout_constraintTop_toTopOf="parent" />
@@ -36,6 +37,7 @@
     app:layout_constraintEnd_toEndOf="parent"
     app:layout_constraintStart_toStartOf="parent"
     app:layout_constraintTop_toBottomOf="@+id/playerName"
+      android:textAppearance="@style/CatTitleText3"
     app:srcCompat="@drawable/ic_user" />
   <TextView
     android:id="@+id/infoText"
@@ -46,6 +48,7 @@
     android:layout_marginEnd="8dp"
     android:text="@string/wants_to_trade"
     app:layout_constraintEnd_toEndOf="parent"
+      android:textAppearance="@style/CatTitleText3"
     app:layout_constraintStart_toStartOf="parent"
     app:layout_constraintBottom_toTopOf="@id/offerContainer"
     app:layout_constraintTop_toBottomOf="@+id/playerIcon" />
@@ -67,12 +70,13 @@
       android:layout_width="match_parent"
       android:layout_height="match_parent"
       android:orientation="vertical">
+
       <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/offer_txt"
-        android:textAlignment="center"
-        android:textSize="18sp" />
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content"
+          android:text="@string/offer_txt"
+          android:textAlignment="center"
+           />
       <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -221,12 +225,13 @@
       android:layout_width="match_parent"
       android:layout_height="match_parent"
       android:orientation="vertical">
+
       <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/req_text"
-        android:textAlignment="center"
-        android:textSize="18sp" />
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content"
+          android:text="@string/req_text"
+          android:textAlignment="center"
+           />
       <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -365,30 +370,33 @@
     app:layout_constraintStart_toStartOf="parent"
     app:layout_constraintBottom_toBottomOf="parent"
     app:layout_constraintTop_toBottomOf="@id/reqContainer">
+
     <Button
-      android:id="@+id/decBtn"
-      android:layout_width="wrap_content"
-      android:layout_height="wrap_content"
-      android:layout_marginStart="8dp"
-      android:layout_marginEnd="4dp"
-      android:text="@string/decline"
-      android:textColor="@color/rot"
-      app:layout_constraintBottom_toBottomOf="parent"
-      app:layout_constraintEnd_toStartOf="@id/accBtn"
-      app:layout_constraintStart_toStartOf="parent"
-      app:layout_constraintTop_toTopOf="parent" />
+        android:id="@+id/decBtn"
+        style="@style/RoundedButtonTransparent"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="4dp"
+        android:layout_marginStart="8dp"
+        android:text="@string/decline"
+        android:textColor="@color/rot"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/accBtn"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
     <Button
-      android:id="@+id/accBtn"
-      android:layout_width="wrap_content"
-      android:layout_height="wrap_content"
-      android:layout_marginStart="4dp"
-      android:layout_marginEnd="8dp"
-      android:text="@string/accept"
-      android:textColor="@color/body_background_green"
-      app:layout_constraintBottom_toBottomOf="parent"
-      app:layout_constraintStart_toEndOf="@+id/decBtn"
-      app:layout_constraintEnd_toEndOf="parent"
-      app:layout_constraintTop_toTopOf="parent" />
+        android:id="@+id/accBtn"
+        style="@style/RoundedButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="8dp"
+        android:layout_marginStart="4dp"
+        android:text="@string/accept"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/decBtn"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <android.support.v7.widget.CardView
         android:id="@+id/tradeStatus"

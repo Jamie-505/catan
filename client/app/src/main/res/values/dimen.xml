@@ -1,11 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
   <dimen name="card_padding">60dp</dimen>
-  <dimen name="indeterminate_progress_size">32dp</dimen>
-  <!-- Typography -->
+    <!-- Typography -->
   <dimen name="activity_horizontal_margin">16dp</dimen>
-  <dimen name="activity_vertical_margin">16dp</dimen>
-  <dimen name="picker">20dp</dimen>
-  <dimen name="numSideItems">1</dimen>
-  <dimen name="item_space">10dp</dimen>
+    <dimen name="item_space">10dp</dimen>
 </resources>

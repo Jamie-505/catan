@@ -8,17 +8,23 @@ import android.content.IntentFilter;
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
 import android.support.v4.content.LocalBroadcastManager;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.Spinner;
 import android.content.BroadcastReceiver;
 
 import de.lmu.settlebattle.catanclient.utils.JSONUtils;
 import de.lmu.settlebattle.catanclient.player.Storage;
+import de.lmu.settlebattle.catanclient.utils.Constants;
+import studio.carbonylgroup.textfieldboxes.ExtendedEditText;
+
 import java.util.HashMap;
 
 public class SelectPlayerActivity extends BaseSocketActivity {
@@ -38,8 +44,9 @@ public class SelectPlayerActivity extends BaseSocketActivity {
       }
     }
   };
+  private String pColor;
 
-	@Override
+  @Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_select_player);
@@ -60,6 +67,10 @@ public class SelectPlayerActivity extends BaseSocketActivity {
 		spinner.setAdapter(adapter);
 
     Button confirmBtn = findViewById(R.id.enterLobbyBtn);
+    ImageButton orangeBtn = findViewById(R.id.BtnOrange);
+    ImageButton rotBtn = findViewById(R.id.BtnRot);
+    ImageButton weissBtn = findViewById(R.id.BtnWeiss);
+    ImageButton blauBtn = findViewById(R.id.BtnBlau);
 		EditText pNameField = findViewById(R.id.input_player_name);
 
     EditText.OnEditorActionListener enterListener = (inputField, actionId, event) -> {
@@ -71,8 +82,73 @@ public class SelectPlayerActivity extends BaseSocketActivity {
       return true;
     };
 
+
+    orangeBtn.setOnClickListener((View v) -> {
+      pColor = ORANGE;
+      orangeBtn.setImageAlpha(255);
+      rotBtn.setImageAlpha(128);
+      weissBtn.setImageAlpha(128);
+      blauBtn.setImageAlpha(128);
+    });
+
+    rotBtn.setOnClickListener((View v) -> {
+      pColor = RED;
+      rotBtn.setImageAlpha(255);
+      orangeBtn.setImageAlpha(128);
+      weissBtn.setImageAlpha(128);
+      blauBtn.setImageAlpha(128);
+    });
+
+    weissBtn.setOnClickListener((View v) -> {
+      pColor = WHITE;
+      weissBtn.setImageAlpha(255);
+      orangeBtn.setImageAlpha(128);
+      rotBtn.setImageAlpha(128);
+      blauBtn.setImageAlpha(128);
+    });
+
+    blauBtn.setOnClickListener((View v) -> {
+      pColor = BLUE;
+      blauBtn.setImageAlpha(255);
+      orangeBtn.setImageAlpha(128);
+      weissBtn.setImageAlpha(128);
+      rotBtn.setImageAlpha(128);
+    });
+
+    pNameField.addTextChangedListener(new TextWatcher() {
+
+      @Override
+      public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+        if(s.toString().trim().length()!=0){
+          confirmBtn.setEnabled(true);
+          confirmBtn.setAlpha(1f);
+          confirmBtn.setClickable(true);
+        } else {
+          confirmBtn.setEnabled(false);
+          confirmBtn.setAlpha(0.8f);
+          confirmBtn.setClickable(false);
+        }
+
+
+      }
+
+      @Override
+      public void beforeTextChanged(CharSequence s, int start, int count,
+                                    int after) {
+        // TODO Auto-generated method stub
+
+      }
+
+      @Override
+      public void afterTextChanged(Editable s) {
+        // TODO Auto-generated method stub
+
+      }
+    });
+
+
     confirmBtn.setOnClickListener((View v) -> {
-      String pColor = spinner.getSelectedItem().toString();
       String pName = pNameField.getText().toString();
       if (pName.length() > 0) {
 	      sendPlayerInfo(pName, pColor);
@@ -80,6 +156,9 @@ public class SelectPlayerActivity extends BaseSocketActivity {
 
     });
   }
+
+
+
 
   public void displayError(String eMsg){
     View layout = findViewById(R.id.contain);

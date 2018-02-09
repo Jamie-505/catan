@@ -3,27 +3,43 @@
   xmlns:app="http://schemas.android.com/apk/res-auto"
   android:layout_width="wrap_content"
   android:layout_height="wrap_content"
-  android:background="@color/fragmentBackground"
+  android:background="@drawable/button_pill_fragment"
   xmlns:numberpicker="http://schemas.android.com/apk/res-auto">
+  <ImageButton
+      android:id="@+id/cancel_btn"
+      android:padding="6dp"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_marginEnd="8dp"
+      android:layout_marginTop="-32dp"
+      android:background="@color/transparent"
+      app:layout_constraintEnd_toEndOf="parent"
+      app:layout_constraintTop_toTopOf="parent"
+      numberpicker:srcCompat="@android:drawable/ic_menu_close_clear_cancel" />
 
   <!-- this part disables the clicking on the tiles behind the fragment -->
+
   <android.support.constraint.ConstraintLayout
     android:layout_width="0dp"
     android:layout_height="0dp"
+    android:layout_marginTop="36dp"
     android:clickable="true"
     android:focusable="true"
     app:layout_constraintBottom_toBottomOf="parent"
     app:layout_constraintEnd_toEndOf="parent"
     app:layout_constraintStart_toStartOf="parent"
-    app:layout_constraintTop_toTopOf="parent" />
+    app:layout_constraintTop_toTopOf="parent"
+    />
 
   <android.support.constraint.ConstraintLayout
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
+    android:layout_marginTop="32dp"
     app:layout_constraintBottom_toBottomOf="parent"
     app:layout_constraintEnd_toEndOf="parent"
     app:layout_constraintStart_toStartOf="parent"
-    app:layout_constraintTop_toTopOf="parent">
+    app:layout_constraintTop_toTopOf="parent"
+      >
 
     <android.support.v7.widget.CardView
       android:id="@+id/offer_container"
@@ -325,148 +341,157 @@
     </android.support.v7.widget.CardView>
 
     <android.support.constraint.ConstraintLayout
-      android:id="@+id/action_container"
-      android:layout_width="match_parent"
-      android:layout_height="wrap_content"
-      android:layout_marginBottom="8dp"
-      app:layout_constraintBottom_toBottomOf="parent"
-      app:layout_constraintEnd_toEndOf="parent"
-      app:layout_constraintStart_toStartOf="parent"
-      app:layout_constraintTop_toBottomOf="@id/req_container">
-
-      <Button
-        android:id="@+id/send_trade_btn"
-        android:layout_width="wrap_content"
+        android:id="@+id/action_container"
+        android:layout_width="340dp"
         android:layout_height="wrap_content"
-        android:elevation="8dp"
-        android:text="@string/offer_trade"
-        android:textAlignment="center"
-        android:textColor="@color/body_background_green"
-        android:paddingStart="8dp"
-        android:paddingEnd="8dp"
-        app:layout_constraintStart_toEndOf="@id/init_cancel_btn"
+        android:layout_marginBottom="8dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/req_container">
 
       <Button
-        android:id="@+id/init_cancel_btn"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:paddingStart="8dp"
-        android:paddingEnd="8dp"
-        android:elevation="8dp"
-        android:text="@string/cancel"
-        android:textColor="@color/rot"
-        android:textAlignment="center"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@id/send_trade_btn"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+          android:id="@+id/send_trade_btn"
+          style="@style/RoundedButton"
+          android:layout_width="0dp"
+          android:layout_height="wrap_content"
+          android:layout_marginEnd="8dp"
+          android:layout_marginStart="8dp"
+          android:elevation="4dp"
+          android:paddingEnd="8dp"
+          android:paddingStart="8dp"
+          android:text="@string/offer_trade"
+          android:textAlignment="center"
+          app:layout_constraintEnd_toEndOf="parent"
+          app:layout_constraintStart_toStartOf="parent" />
+
+      <Button
+          android:id="@+id/init_cancel_btn"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:elevation="8dp"
+          android:paddingEnd="8dp"
+          android:paddingStart="8dp"
+          android:text="@string/cancel"
+          android:textAlignment="center"
+          android:textColor="@color/rot"
+          android:visibility="gone"
+          app:layout_constraintBottom_toBottomOf="parent"
+          app:layout_constraintEnd_toStartOf="@id/send_trade_btn"
+          app:layout_constraintStart_toStartOf="parent"
+          app:layout_constraintTop_toTopOf="parent" />
 
       <android.support.v7.widget.CardView
-        android:id="@+id/trade_status"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:visibility="gone"
-        app:cardCornerRadius="8dp"
-        app:cardElevation="8dp"
-        app:contentPadding="8dp"
-        app:layout_constraintBottom_toTopOf="@id/cancel_btn"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
+          android:id="@+id/trade_status"
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content"
+          android:visibility="gone"
+          app:cardCornerRadius="8dp"
+          app:cardElevation="8dp"
+          app:contentPadding="8dp"
+          app:layout_constraintBottom_toTopOf="@id/cancel_btn"
+          app:layout_constraintEnd_toEndOf="parent"
+          app:layout_constraintStart_toStartOf="parent"
+          app:layout_constraintTop_toTopOf="parent">
 
         <LinearLayout
-          android:layout_width="match_parent"
-          android:layout_height="match_parent"
-          android:orientation="vertical">
-          <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:orientation="horizontal">
+            android:orientation="vertical">
+
+          <LinearLayout
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:orientation="horizontal">
+
             <LinearLayout
-              android:id="@+id/p0"
-              android:layout_width="wrap_content"
-              android:layout_height="wrap_content"
-              android:layout_weight="1"
-              android:visibility="gone"
-              android:paddingStart="4dp"
-              android:paddingEnd="4dp"
-              android:gravity="center"
-              android:orientation="vertical">
-              <TextView
-                android:id="@+id/p0Name"
+                android:id="@+id/p0"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textSize="24sp" />
+                android:layout_weight="1"
+                android:gravity="center"
+                android:orientation="vertical"
+                android:paddingEnd="4dp"
+                android:paddingStart="4dp"
+                android:visibility="gone">
+
+              <TextView
+                  android:id="@+id/p0Name"
+                  android:layout_width="wrap_content"
+                  android:layout_height="wrap_content"
+                  android:textSize="24sp" />
+
               <ImageButton
-                android:id="@+id/p0Status"
-                android:layout_width="45dp"
-                android:layout_height="45dp"
-                android:src="@drawable/ic_hourglass"/>
+                  android:id="@+id/p0Status"
+                  android:layout_width="45dp"
+                  android:layout_height="45dp"
+                  android:src="@drawable/ic_hourglass" />
             </LinearLayout>
 
             <LinearLayout
-              android:id="@+id/p1"
-              android:layout_width="wrap_content"
-              android:layout_height="wrap_content"
-              android:layout_weight="1"
-              android:visibility="gone"
-              android:paddingStart="4dp"
-              android:paddingEnd="4dp"
-              android:gravity="center"
-              android:orientation="vertical">
-              <TextView
-                android:id="@+id/p1Name"
+                android:id="@+id/p1"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textSize="24sp" />
+                android:layout_weight="1"
+                android:gravity="center"
+                android:orientation="vertical"
+                android:paddingEnd="4dp"
+                android:paddingStart="4dp"
+                android:visibility="gone">
+
+              <TextView
+                  android:id="@+id/p1Name"
+                  android:layout_width="wrap_content"
+                  android:layout_height="wrap_content"
+                  android:textSize="24sp" />
+
               <ImageButton
-                android:id="@+id/p1Status"
-                android:layout_width="45dp"
-                android:layout_height="45dp"
-                android:src="@drawable/ic_hourglass"/>
+                  android:id="@+id/p1Status"
+                  android:layout_width="45dp"
+                  android:layout_height="45dp"
+                  android:src="@drawable/ic_hourglass" />
             </LinearLayout>
 
             <LinearLayout
-              android:id="@+id/p2"
-              android:layout_width="wrap_content"
-              android:layout_height="wrap_content"
-              android:layout_weight="1"
-              android:visibility="gone"
-              android:paddingStart="4dp"
-              android:paddingEnd="4dp"
-              android:gravity="center"
-              android:orientation="vertical">
-              <TextView
-                android:id="@+id/p2Name"
+                android:id="@+id/p2"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textSize="24sp" />
+                android:layout_weight="1"
+                android:gravity="center"
+                android:orientation="vertical"
+                android:paddingEnd="4dp"
+                android:paddingStart="4dp"
+                android:visibility="gone">
+
+              <TextView
+                  android:id="@+id/p2Name"
+                  android:layout_width="wrap_content"
+                  android:layout_height="wrap_content"
+                  android:textSize="24sp" />
+
               <ImageButton
-                android:id="@+id/p2Status"
-                android:layout_width="45dp"
-                android:layout_height="45dp"
-                android:src="@drawable/ic_hourglass"/>
+                  android:id="@+id/p2Status"
+                  android:layout_width="45dp"
+                  android:layout_height="45dp"
+                  android:src="@drawable/ic_hourglass" />
             </LinearLayout>
           </LinearLayout>
         </LinearLayout>
       </android.support.v7.widget.CardView>
 
       <Button
-        android:id="@+id/cancel_btn"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:elevation="8dp"
-        android:text="@string/cancel"
-        android:textColor="@color/rot"
-        android:textAlignment="center"
-        android:visibility="gone"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/trade_status"/>
+          android:id="@+id/cancel_btn"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:elevation="8dp"
+          android:text="@string/cancel"
+          android:textAlignment="center"
+          android:textColor="@color/rot"
+          android:visibility="gone"
+          app:layout_constraintBottom_toBottomOf="parent"
+          app:layout_constraintEnd_toEndOf="parent"
+          app:layout_constraintStart_toStartOf="parent"
+          app:layout_constraintTop_toBottomOf="@id/trade_status" />
 
     </android.support.constraint.ConstraintLayout>
 

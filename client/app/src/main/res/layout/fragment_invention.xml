@@ -33,25 +33,27 @@
       android:padding="16dp">
 
       <TextView
-        android:id="@+id/first_selection_text"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="8dp"
-        android:ems="16"
-        android:text="@string/first_raw_material"
-        android:textAlignment="center"
-        android:textSize="20sp"
-        app:layout_constraintBottom_toTopOf="@id/first_selection"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+          android:id="@+id/first_selection_text"
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content"
+          android:layout_marginBottom="8dp"
+          android:ems="16"
+          android:text="@string/first_raw_material"
+          android:textAlignment="center"
+          android:textAppearance="@style/CatTitleText3"
+          app:layout_constraintBottom_toTopOf="@id/first_selection"
+          app:layout_constraintEnd_toEndOf="parent"
+          app:layout_constraintStart_toStartOf="parent"
+          app:layout_constraintTop_toTopOf="parent" />
 
       <RadioGroup
         android:id="@+id/first_selection"
         android:layout_width="match_parent"
         android:layout_height="55dp"
         android:orientation="horizontal"
-        android:background="@drawable/border"
+          android:background="@drawable/button_pill_transparent"
+          android:paddingStart="8dp"
+          android:paddingEnd="8dp"
         app:layout_constraintBottom_toTopOf="@id/second_selection_text"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -109,26 +111,28 @@
       </RadioGroup>
 
       <TextView
-        android:id="@+id/second_selection_text"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:layout_marginBottom="8dp"
-        android:ems="16"
-        android:text="@string/second_raw_material"
-        android:textAlignment="center"
-        android:textSize="20sp"
-        app:layout_constraintBottom_toTopOf="@id/second_selection"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/first_selection" />
+          android:id="@+id/second_selection_text"
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content"
+          android:layout_marginBottom="8dp"
+          android:layout_marginTop="16dp"
+          android:ems="16"
+          android:text="@string/second_raw_material"
+          android:textAlignment="center"
+          android:textAppearance="@style/CatTitleText3"
+          app:layout_constraintBottom_toTopOf="@id/second_selection"
+          app:layout_constraintEnd_toEndOf="parent"
+          app:layout_constraintStart_toStartOf="parent"
+          app:layout_constraintTop_toBottomOf="@id/first_selection" />
 
       <RadioGroup
         android:id="@+id/second_selection"
         android:layout_width="match_parent"
         android:layout_height="55dp"
         android:orientation="horizontal"
-        android:background="@drawable/border"
+          android:background="@drawable/button_pill_transparent"
+          android:paddingStart="8dp"
+          android:paddingEnd="8dp"
         app:layout_constraintBottom_toTopOf="@id/send_btn"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -186,16 +190,18 @@
       </RadioGroup>
 
       <Button
-        android:id="@+id/send_btn"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:padding="16dp"
-        android:text="@string/choose_raw_materials"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/second_selection" />
+          android:id="@+id/send_btn"
+          style="@style/RoundedButton"
+          android:layout_width="0dp"
+          android:layout_height="wrap_content"
+          android:layout_marginBottom="8dp"
+          android:layout_marginTop="16dp"
+          android:padding="16dp"
+          android:text="@string/choose_raw_materials"
+          app:layout_constraintBottom_toBottomOf="parent"
+          app:layout_constraintEnd_toEndOf="parent"
+          app:layout_constraintStart_toStartOf="parent"
+          app:layout_constraintTop_toBottomOf="@id/second_selection" />
     </android.support.constraint.ConstraintLayout>
   </android.support.v7.widget.CardView>
 

@@ -28,4 +28,5 @@
   <color name="blau_dark">#03a9f4</color>
   <color name="weis">#fafafa</color>
   <color name="weis_dark">#9e9e9e</color>
+  <color name="main_color">#FF788D</color>
 </resources>

@@ -3,8 +3,6 @@
   <string name="author_name">Made with <node>&#x2764;</node> By SettleBattle</string>
   <string name="btn_join">Beitreten</string>
   <string name="btn_send">Send</string>
-  <string name="btn_connect">Verbindung wird hergestellt…</string>
-  <string name="chat_history">Chat History</string>
   <string name="connection_lost">
     <node>&#x1F92C;</node>Du hast die Verbindung zum Server verloren…\n
     Ein <node>&#x1f916;</node> hat deinen Platz eingenommen
@@ -12,16 +10,10 @@
     Mit dem Click auf OK wirst du zum Startscreen zurück gebracht und
     kannst dort auf die nächste Runde warten.
   </string>
-  <string name="enter_name">Enter your name</string>
-  <string name="payload">Message</string>
-  <string name="send">Send</string>
-  <string name="title">Catan App</string>
   <string name="game_name">Die Siedler</string>
-  <string name="welcome_text">Willkommen zur Android Version von die Siedler. Du kannst nun eine Runde spielen.</string>
-  <string name="start_game">Spiel starten</string>
-  <string name="snackbar_text">Farbe bereits ausgewählt</string>
-  <string name="snackbar_farbe">Farbe bereits ausgewählt</string>
-  <string name="snackbar_action">Automatische Farbe</string>
+  <string name="welcome_text">Liebevoll <node>&#x2764;</node>  entwickelt im Rahmen des SEP der LMU München vom Team SettleBattle.</string>
+  <string name="start_game">Spiel beginnen!</string>
+  <string name="hallo_james">Hallo, James.</string>
   <!-- activity_select_playerayer -->
   <string name="beitreten">Lobby beitreten</string>
 
@@ -35,13 +27,6 @@
   </string-array>
 
   <!-- Sea Trade Auswahl -->
-  <string-array name="raw_materials">
-    <item>Erz</item>
-    <item>Getreide</item>
-    <item>Holz</item>
-    <item>Lehm</item>
-    <item>Wolle</item>
-  </string-array>
 
   <!-- Binnenhandel -->
   <string name="ore">Erz</string>
@@ -54,12 +39,11 @@
   <string name="accept">Akzeptieren</string>
   <string name="decline">Ablehnen</string>
 
-  <string name="title_activity_lobby_activitiy">LobbyActivitiy</string>
   <string name="starten">Spiel Starten</string>
   <string name="player_name_input_hint">Wie möchtest du heißen?</string>
   <string name="wait_for_other_players">Warte auf andere Spieler…</string>
-  <string name="offer_resource">ich tausche</string>
-  <string name="request_trade">gegen</string>
+  <string name="offer_resource">Ich tausche...</string>
+  <string name="request_trade">Gegen...</string>
   <string name="ok">OK</string>
   <string name="offer_txt">Angebot:</string>
   <string name="req_text">Nachfrage:</string>
@@ -67,20 +51,13 @@
   <string name="cancel">Abbrechen</string>
 
   <!-- Strings für das Sliding Panel-->
-  <string name="action_settings">Settings</string>
-  <string name="action_hide">Hide Panel</string>
-  <string name="action_show">Show Panel</string>
-  <string name="action_anchor_enable">Enable Anchor Point</string>
-  <string name="action_anchor_disable">Disable Anchor Point</string>
 
-  <string name="bauen_und_baukosten">Bauen und Baukosten</string>
   <string name="add_ki">Füge KI hinzu</string>
   <string name="end_turn">Zug beenden</string>
   <string name="select_robber_target">Wähle aus wen du bestehlen willst</string>
   <string name="toss_cards">Diese Karten abgeben</string>
   <string name="toss_cards_bc_robber">Karten wegen Räuber abgeben</string>
   <string name="trade">Tausche!</string>
-  <string name="choose_color">Wähle deine Farbe:</string>
   <string name="claim_resource">Rohstoff eintreiben</string>
   <string name="monopole_choice">Wähle dein Monopol:</string>
   <string name="second_raw_material">2. Rohstoff</string>
@@ -89,22 +66,11 @@
   <string name="cancel_rd_construction">Strassenbau abbrechen</string>
   <string name="end_rd_con">Straßenbau beenden</string>
   <string name="try_reconnect">erneut versuchen</string>
+  <string name="singup">Wer möchtest du sein?</string>
 
   <!-- Vorübergehend -->
 
-  <string name="delete">Delete</string>
-  <string name="insert">Insert</string>
-  <string name="move_to">Move to:</string>
-  <string name="move">Move</string>
-  <string name="scroll">Scroll</string>
-
-  <string name="main">Main</string>
-  <string name="bottom_sheet">Bottom Sheet</string>
-
   <!-- TODO: Remove or change this placeholder text -->
-  <string name="show_sheet">Show sheet</string>
-  <string name="fragment_bottom_sheet_description">This is fragment with bottom sheet dialog. Created to show example of RecyclerView with ChipsLayoutManager inside other scrollable container</string>
-
 
 
 </resources>

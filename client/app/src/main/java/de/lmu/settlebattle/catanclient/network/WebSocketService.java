@@ -393,7 +393,7 @@ public class WebSocketService extends Service {
     Log.d(TAG, "Send to server -> " + jsonMsg);
     try {
       webSocketClient.send(jsonMsg);
-    } catch (WebsocketNotConnectedException e) {
+    } catch (Exception e) {
       broadcast(CONNECTION_LOST);
     }
   }

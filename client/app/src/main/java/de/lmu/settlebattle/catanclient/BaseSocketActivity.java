@@ -28,12 +28,18 @@ public abstract class BaseSocketActivity extends AppCompatActivity {
   protected BroadcastReceiver superBcReceiver = new BroadcastReceiver() {
     @Override
     public void onReceive(Context context, Intent intent) {
-      if (intent.getAction().equals(PLAYER_LEFT)) {
+      if (PLAYER_LEFT.equals(intent.getAction())) {
         Player p = Storage.getPlayer(intent.getIntExtra(PLAYER_LEFT, -1));
-        displaySnackBar(
-            String.format("%s hat die Verbindung verloren - eine KI übernimmt",
-            p.name), p.id);
-      } else if (intent.getAction().equals(CONNECTION_LOST)) {
+        // player might try to join after game started and if this player leaves
+        // p is null
+        if (p != null) {
+          displaySnackBar(
+              String.format("%s hat die Verbindung verloren - eine KI übernimmt",
+                  p.name), p.id);
+        } else {
+          displaySnackBar("Jemand hat versucht nachträglich dem Spiel beizutreten", null);
+        }
+      } else if (CONNECTION_LOST.equals(intent.getAction())) {
         displayConnectionLoss();
       }
     }

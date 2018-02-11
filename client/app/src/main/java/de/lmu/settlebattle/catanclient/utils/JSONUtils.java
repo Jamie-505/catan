@@ -36,6 +36,11 @@ public class JSONUtils {
         case ERROR:
           Error error = gson.fromJson(jObj.getString(ERROR), Error.class);
           return displayError(error.Message);
+        case GAME_OVER:
+          JSONObject gameOver = jObj.getJSONObject(msgType);
+          String winMsg = gameOver.getString(CONTENT);
+          Integer winnerId = gameOver.getInt(WINNER);
+          return new Object[] { msgType, winMsg, winnerId };
         case GAME_START:
           JSONObject game = new JSONObject(jObj.getString(GAME_START));
           int[] order = gson.fromJson(game.getString(TURN_ORDER), int[].class);

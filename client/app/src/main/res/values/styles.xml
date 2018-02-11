@@ -73,6 +73,13 @@
     <item name="fontFamily">@font/circularstd_medium</item>
     <item name="android:opacity">opaque</item>
   </style>
+  <style name="CatTitleText2" parent="android:TextAppearance.Material.Widget.ActionBar.Title">
+    <item name="android:textColor">#FFF</item>
+    <item name="android:textSize">34dp</item>
+    <item name="fontFamily">@font/circularstd_bold</item>
+    <item name="android:opacity">opaque</item>
+  </style>
+
 
     <style name="CatTitleText3" parent="android:TextAppearance.Material.Widget.ActionBar.Title">
     <item name="android:textColor">#FFF</item>

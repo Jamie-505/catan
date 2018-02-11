@@ -21,7 +21,6 @@ public final class Constants {
   public static final String GET_ID = "Willkommen";
   public static final String HANDSHAKE = "Hallo";
   public static final String HARVEST = "Ertrag";
-  public static final String LARGEST_ARMY = "Größte Rittermacht";
   public static final String LONGEST_RD = "Längste Handelsstrasse";
   public static final String NEW_CONSTRUCT ="Bauvorgang";
   public static final String OPPONENT ="Mitspieler";
@@ -119,7 +118,6 @@ public final class Constants {
   public final static String ORANGE = "Orange";
   public final static String PLAYER_COLOR = "Farbe";
   public final static String PLAYER_ID = "id";
-  public final static String PLAYER_ID_WON_GAME = "Spieler %s hat das Spiel gewonnen.";
   public final static String PLAYER_NAME = "Name";
   public final static String PLAYER_STATE = "Status";
   public final static String RD_CON1 = "Strassenbau1";

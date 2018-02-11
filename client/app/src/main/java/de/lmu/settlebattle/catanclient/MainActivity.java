@@ -22,8 +22,10 @@ import static de.lmu.settlebattle.catanclient.utils.Constants.DICE_THROW;
 import static de.lmu.settlebattle.catanclient.utils.Constants.DISPLAY_ERROR;
 import static de.lmu.settlebattle.catanclient.utils.Constants.END_TURN;
 import static de.lmu.settlebattle.catanclient.utils.Constants.ERROR_MSG;
+import static de.lmu.settlebattle.catanclient.utils.Constants.GAME_OVER;
 import static de.lmu.settlebattle.catanclient.utils.Constants.HARVEST;
 import static de.lmu.settlebattle.catanclient.utils.Constants.LOCATION;
+import static de.lmu.settlebattle.catanclient.utils.Constants.MESSAGE;
 import static de.lmu.settlebattle.catanclient.utils.Constants.NEW;
 import static de.lmu.settlebattle.catanclient.utils.Constants.NEW_CONSTRUCT;
 import static de.lmu.settlebattle.catanclient.utils.Constants.OK;
@@ -45,6 +47,7 @@ import static de.lmu.settlebattle.catanclient.utils.Constants.TRD_FIN;
 import static de.lmu.settlebattle.catanclient.utils.Constants.TRD_OFFER;
 import static de.lmu.settlebattle.catanclient.utils.Constants.TYPE;
 import static de.lmu.settlebattle.catanclient.utils.Constants.WHITE;
+import static de.lmu.settlebattle.catanclient.utils.Constants.WINNER;
 import static de.lmu.settlebattle.catanclient.utils.JSONUtils.createJSONString;
 
 import android.app.Fragment;
@@ -62,6 +65,7 @@ import android.media.Ringtone;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.constraint.ConstraintLayout;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
@@ -74,12 +78,16 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.TextSwitcher;
 import android.widget.TextView;
 import butterknife.ButterKnife;
+
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.target.GlideDrawableImageViewTarget;
 import com.google.gson.Gson;
 import com.sdsmdg.harjot.vectormaster.VectorMasterDrawable;
 import com.sdsmdg.harjot.vectormaster.models.PathModel;
@@ -673,6 +681,16 @@ public class MainActivity extends BaseSocketActivity implements FragmentHandler,
     mService.sendMessage(msg);
   }
 
+  private void playerLoses() {
+    DrawerLayout all = findViewById(R.id.drawer_layout);
+    all.setVisibility(GONE);
+    // hier fehlt noch der neue container mit Gifhandling
+  }
+
+  private void playerWins() {
+
+  }
+
   private void reactToIntent(Intent intent) {
     String action = intent.getAction();
     if (action != null) {
@@ -764,6 +782,104 @@ public class MainActivity extends BaseSocketActivity implements FragmentHandler,
           break;
         case DISPLAY_ERROR:
           displaySnackBar(intent.getStringExtra(ERROR_MSG), null);
+          break;
+        case GAME_OVER:
+          disableClickLayers();
+          hideActiveElements();
+          if (Storage.isItMe(intent.getIntExtra(WINNER, -1))) {
+
+            // deactivate sliding panel
+            slidingPanel.setEnabled(false);
+//          // display overlay
+            ConstraintLayout gameOver = (ConstraintLayout) findViewById(R.id.gameOverOverlay);
+            gameOver.setVisibility(View.VISIBLE);
+            gameOver.bringToFront();
+            //bring chat button to front
+            drawerHandleBtn.bringToFront();
+            drawerHandleBtn.setElevation(55f);
+            drawerHandleBtn.setZ(1000f);
+            // fix chat button disappearing, bringt to front when drawecloses
+            drawer.setDrawerListener(new DrawerLayout.DrawerListener() {
+              @Override
+              public void onDrawerSlide(View view, float v) {
+
+              }
+
+              @Override
+              public void onDrawerOpened(View view) {
+
+              }
+
+              @Override
+              public void onDrawerClosed(View view) {
+                drawerHandleBtn.bringToFront();
+                drawerHandleBtn.setElevation(55f);
+                drawerHandleBtn.setZ(1000f);
+              }
+
+              @Override
+              public void onDrawerStateChanged(int i) {
+
+              }
+
+
+            });
+            // Gif View, winnerAnnounce -> Du hast gewonnen, winnerInfo -> wer hat gewonne (fehlt)
+            ImageView gifView = (ImageView) findViewById(R.id.gifView);
+            TextView winnerTxt = (TextView) findViewById(R.id.winnerAnnounce);
+            TextView winnerWhoTxt = (TextView) findViewById(R.id.winnerInfo);
+            winnerWhoTxt.setVisibility(View.GONE);
+            GlideDrawableImageViewTarget imageViewTarget = new GlideDrawableImageViewTarget(gifView);
+            Glide.with(this).load(R.raw.winner).into(imageViewTarget);
+            winnerTxt.setText("Du hast gewonnen!");
+          } else {
+            // deactivate sliding panel
+            slidingPanel.setEnabled(false);
+//          // display overlay
+            ConstraintLayout gameOver = (ConstraintLayout) findViewById(R.id.gameOverOverlay);
+            gameOver.setVisibility(View.VISIBLE);
+            gameOver.bringToFront();
+            //bring chat button to front
+            drawerHandleBtn.bringToFront();
+            drawerHandleBtn.setElevation(55f);
+            drawerHandleBtn.setZ(1000f);
+            // fix chat button disappearing, bringt to front when drawecloses
+            drawer.setDrawerListener(new DrawerLayout.DrawerListener() {
+              @Override
+              public void onDrawerSlide(View view, float v) {
+
+              }
+
+              @Override
+              public void onDrawerOpened(View view) {
+
+              }
+
+              @Override
+              public void onDrawerClosed(View view) {
+                drawerHandleBtn.bringToFront();
+                drawerHandleBtn.setElevation(55f);
+                drawerHandleBtn.setZ(1000f);
+              }
+
+              @Override
+              public void onDrawerStateChanged(int i) {
+
+              }
+
+
+            });
+            // Gif View, winnerAnnounce -> Du hast gewonnen, winnerInfo -> wer hat gewonne (fehlt)
+            ImageView gifView = (ImageView) findViewById(R.id.gifView);
+            TextView winnerTxt = (TextView) findViewById(R.id.winnerAnnounce);
+            TextView winnerWhoTxt = (TextView) findViewById(R.id.winnerInfo);
+            winnerWhoTxt.setVisibility(View.VISIBLE);
+            // TODO
+            winnerWhoTxt.setText("Ich muss noch von James gesetzt werden");
+            GlideDrawableImageViewTarget imageViewTarget = new GlideDrawableImageViewTarget(gifView);
+            Glide.with(this).load(R.raw.looser).into(imageViewTarget);
+            winnerTxt.setText("Du hast verloren!");
+          }
           break;
         case HARVEST:
           // too much info!
@@ -898,6 +1014,7 @@ public class MainActivity extends BaseSocketActivity implements FragmentHandler,
     filter.addAction(DEV_CARD_PLAYED);
     filter.addAction(DICE_RESULT);
     filter.addAction(DISPLAY_ERROR);
+    filter.addAction(GAME_OVER);
     filter.addAction(HARVEST);
     filter.addAction(NEW_CONSTRUCT);
     filter.addAction(OK);
@@ -1149,17 +1266,6 @@ public class MainActivity extends BaseSocketActivity implements FragmentHandler,
     updatePlayerCards();
     updateSlidePanel();
   }
-
-  private void playerWins() {
-    DrawerLayout all = findViewById(R.id.drawer_layout);
-    all.setVisibility(GONE);
-    // hier fehlt noch der neue container mit Gifhandling
-  };
-  private void playerLoses() {
-    DrawerLayout all = findViewById(R.id.drawer_layout);
-    all.setVisibility(GONE);
-    // hier fehlt noch der neue container mit Gifhandling
-  };
 
   private void updateSlidePanel() {
     self = Storage.getSelf();

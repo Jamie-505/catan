@@ -6,6 +6,7 @@ import static de.lmu.settlebattle.catanclient.utils.Constants.BUILD_TRADE;
 import static de.lmu.settlebattle.catanclient.utils.Constants.BUILD_VILLAGE;
 import static de.lmu.settlebattle.catanclient.utils.Constants.CHAT_IN;
 import static de.lmu.settlebattle.catanclient.utils.Constants.CONNECTION_LOST;
+import static de.lmu.settlebattle.catanclient.utils.Constants.CONTENT;
 import static de.lmu.settlebattle.catanclient.utils.Constants.COSTS;
 import static de.lmu.settlebattle.catanclient.utils.Constants.DEV_CARD;
 import static de.lmu.settlebattle.catanclient.utils.Constants.DEV_CARD_BOUGHT;
@@ -15,11 +16,13 @@ import static de.lmu.settlebattle.catanclient.utils.Constants.DICE_THROW;
 import static de.lmu.settlebattle.catanclient.utils.Constants.DISPLAY_ERROR;
 import static de.lmu.settlebattle.catanclient.utils.Constants.ERROR;
 import static de.lmu.settlebattle.catanclient.utils.Constants.ERROR_MSG;
+import static de.lmu.settlebattle.catanclient.utils.Constants.GAME_OVER;
 import static de.lmu.settlebattle.catanclient.utils.Constants.GAME_READY;
 import static de.lmu.settlebattle.catanclient.utils.Constants.GAME_START;
 import static de.lmu.settlebattle.catanclient.utils.Constants.GAME_WAIT;
 import static de.lmu.settlebattle.catanclient.utils.Constants.GET_ID;
 import static de.lmu.settlebattle.catanclient.utils.Constants.HARVEST;
+import static de.lmu.settlebattle.catanclient.utils.Constants.MESSAGE;
 import static de.lmu.settlebattle.catanclient.utils.Constants.NEW_CONSTRUCT;
 import static de.lmu.settlebattle.catanclient.utils.Constants.NEXT_ACTIVITY;
 import static de.lmu.settlebattle.catanclient.utils.Constants.NO_CONNECTION;
@@ -47,6 +50,7 @@ import static de.lmu.settlebattle.catanclient.utils.Constants.TRD_FIN;
 import static de.lmu.settlebattle.catanclient.utils.Constants.TRD_OFFER;
 import static de.lmu.settlebattle.catanclient.utils.Constants.TRD_SENT;
 import static de.lmu.settlebattle.catanclient.utils.Constants.TYPE;
+import static de.lmu.settlebattle.catanclient.utils.Constants.WINNER;
 
 import android.app.Service;
 import android.content.Intent;
@@ -201,11 +205,19 @@ public class WebSocketService extends Service {
       case ERROR:
         displayError(mail[1].toString());
         break;
+      case GAME_OVER:
+        Intent gameOver = new Intent(GAME_OVER);
+        gameOver.putExtra(MESSAGE, mail[1].toString());
+        int winnerId = Integer.valueOf(mail[2].toString());
+        gameOver.putExtra(WINNER, winnerId);
+        broadcast(gameOver);
+        break;
       case GAME_READY:
         Storage.storePlayer(player);
         if (itsMe) {
           // should cause select player activity so switch to lobby
           broadcast(NEXT_ACTIVITY);
+
         } else {
           // updates lobby with latest data
           broadcast(PLAYER_UPDATE);

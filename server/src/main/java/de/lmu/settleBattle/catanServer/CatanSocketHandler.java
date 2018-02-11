@@ -42,6 +42,7 @@ public class CatanSocketHandler extends TextWebSocketHandler implements Property
 
         utils.getGameCtrl().addPropertyChangeListener(e -> {
             TextMessage message = null;
+            boolean sendStatusUpdate = false;
             Player player = ROBBER_AT.equals(e.getPropertyName()) ? null : (Player) e.getNewValue();
 
             switch (e.getPropertyName()) {
@@ -51,30 +52,36 @@ public class CatanSocketHandler extends TextWebSocketHandler implements Property
                     break;
 
                 case KNIGHT_PLAYED:
+                    sendStatusUpdate = true;
                     Object[] knightData = (Object[]) e.getOldValue();
                     message = CatanMessage.knightCard(player.getId(), (int) knightData[0], (Location) knightData[1]);
                     break;
 
                 case MONOPOLE_PLAYED:
+                    sendStatusUpdate = true;
                     message = CatanMessage.monopoleCard(player.getId(), (RawMaterialType) e.getOldValue());
                     break;
 
                 case INVENTION_PLAYED:
+                    sendStatusUpdate = true;
                     message = CatanMessage.inventionCard(player.getId(), (RawMaterialOverview) e.getOldValue());
                     break;
 
                 case RC_PLAYED:
+                    sendStatusUpdate = true;
                     message = CatanMessage.roadConstructionCard(player.getId());
                     break;
 
                 case GAME_OVER:
                     message = CatanMessage.endGame(player);
+
+                    break;
             }
 
             if (message != null) {
                 try {
                     sendMessageToAll(message);
-                    this.sendStatusUpdate(player);
+                    if(sendStatusUpdate)this.sendStatusUpdate(player);
                 } catch (IOException ex) {
                     ex.printStackTrace();
                 }

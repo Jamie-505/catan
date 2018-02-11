@@ -752,12 +752,18 @@ public class Board extends JSONStringBuilder {
      * @return
      */
     public Haven getConnectedHaven(Building building) {
-        for (Haven haven : havens) {
-            Location landLoc = haven.getLocations()[0].isWaterField() ? haven.getLocations()[1] : haven.getLocations()[0];
 
+        for (Haven haven : havens) {
+            int matchCount = 0;
             for (Location loc : building.getLocations()) {
-                if (loc.equals(landLoc))
-                    return haven;
+                for (Location hLoc : haven.getLocations()) {
+                    if (loc.equals(hLoc)) {
+                        matchCount++;
+
+                        if (matchCount == 2) { return haven; }
+                        break;
+                    }
+                }
             }
         }
 

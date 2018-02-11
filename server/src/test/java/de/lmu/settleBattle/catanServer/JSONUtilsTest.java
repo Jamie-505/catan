@@ -281,7 +281,7 @@ public class JSONUtilsTest {
   @Test
   public void tradeMessagesShouldBeCorrect() throws Exception {
 
-    //test new trade request
+    //test new tradeScenario1 request
     JSONObject tradeRequestJSON = JSONUtils.createJSON(CatanMessage.trade(tradeRequest, Constants.TRD_OFFER));
 
     JSONObject request = tradeRequestJSON.getJSONObject(Constants.TRD_OFFER);
@@ -291,7 +291,7 @@ public class JSONUtilsTest {
     assertTrue(request.has(Constants.OFFER));
     assertTrue(request.has(Constants.REQUEST));
 
-    //test accepted trade request
+    //test accepted tradeScenario1 request
     JSONObject tradeAcceptedJSON = JSONUtils.createJSON(CatanMessage.trade(tradeRequest_Accepted, Constants.TRD_ACC));
     JSONObject trAccepted = tradeAcceptedJSON.getJSONObject(Constants.TRD_ACC);
 
@@ -299,7 +299,7 @@ public class JSONUtilsTest {
     assertTrue(tradeRequest_Accepted.getAcceptedBy(3));
     assertTrue(tradeRequest_Accepted.isAccepted());
 
-    //test performed trade request
+    //test performed tradeScenario1 request
     tradeRequest_Accepted.execute(3);
 
     JSONObject tr = tradeRequest_Accepted.toJSON();
@@ -307,7 +307,7 @@ public class JSONUtilsTest {
     assertEquals((Integer)tr.get(Constants.FELLOW_PLAYER), tradeRequest_Accepted.getExecutedWith());
     assertTrue(tradeRequest_Accepted.isExecuted());
 
-    //test cancelled trade request
+    //test cancelled tradeScenario1 request
     tradeRequest.cancel();
 
     JSONObject tradeCancelledJSON = JSONUtils.createJSON(CatanMessage.trade(tradeRequest, Constants.TRD_ABORTED));

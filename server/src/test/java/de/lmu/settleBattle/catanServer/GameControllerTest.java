@@ -392,4 +392,41 @@ public class GameControllerTest {
         assertFalse(player1.hasLongestRoad());
         assertEquals(6, gameController.getBoard().getLongestRoadLength());
     }
+
+
+    @Test
+    public void tradeScenario1() throws CatanException {
+        Building settlement = new Building(player1.getId(), BuildingType.SETTLEMENT, new Location[] { new Location(-3,0), new Location(-3,1), new Location(-2,0)});
+        gameController.setInitialPhaseActive(true);
+
+        player1.setStatus(BUILD_SETTLEMENT);
+
+        gameController.placeBuilding(settlement, false);
+
+        assertTrue(player1.hasXTo1Haven(3));
+
+        player1.setRawMaterialDeck(new RawMaterialOverview(0,0,3,0,0));
+        gameController.seaTrade(player1, new TradeRequest(new RawMaterialOverview(0,0,3,0,0), new RawMaterialOverview(0,1,0,0,0)));
+
+        assertEquals(1, player1.getRawMaterialCount(RawMaterialType.ORE));
+        assertEquals(0, player1.getRawMaterialCount(RawMaterialType.WOOD));
+    }
+
+    @Test
+    public void tradeScenario2() throws CatanException {
+        Building settlement = new Building(player1.getId(), BuildingType.SETTLEMENT, new Location[] { new Location(2,-2), new Location(3,-3), new Location(3,-2)});
+        gameController.setInitialPhaseActive(true);
+
+        player1.setStatus(BUILD_SETTLEMENT);
+
+        gameController.placeBuilding(settlement, false);
+
+        assertTrue(player1.hasXTo1Haven(3));
+
+        player1.setRawMaterialDeck(new RawMaterialOverview(0,0,3,0,0));
+        gameController.seaTrade(player1, new TradeRequest(new RawMaterialOverview(0,0,3,0,0), new RawMaterialOverview(0,1,0,0,0)));
+
+        assertEquals(1, player1.getRawMaterialCount(RawMaterialType.ORE));
+        assertEquals(0, player1.getRawMaterialCount(RawMaterialType.WOOD));
+    }
 }

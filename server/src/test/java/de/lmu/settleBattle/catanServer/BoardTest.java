@@ -272,6 +272,38 @@ public class BoardTest {
         Collections.shuffle(roadBoard.getRoads());
     }
 
+    //
+    private void longestRoadScenario6(Player player2) throws CatanException {
+        roadBoard = new Board();
+        player2.roads.clear();
+        player2.stock = new BuildingStock();
+        roads = new ArrayList<>();
+
+        roads.add(new Building(2, ROAD, new Location[]{new Location(-2, -1), new Location(-1, -1)}));
+        roads.add(new Building(2, ROAD, new Location[]{new Location(-1, -2), new Location(-1, -1)}));
+        roads.add(new Building(2, ROAD, new Location[]{new Location(-1, -1), new Location(0, -2)}));
+        roads.add(new Building(2, ROAD, new Location[]{new Location(0, -1), new Location(-1, -1)}));
+
+        roads.add(new Building(2, ROAD, new Location[]{new Location(0, -1), new Location(0, -2)}));
+        roads.add(new Building(2, ROAD, new Location[]{new Location(0, -1), new Location(1, -2)}));
+        roads.add(new Building(2, ROAD, new Location[]{new Location(0, -2), new Location(1, -2)}));
+        roads.add(new Building(2, ROAD, new Location[]{new Location(1, -3), new Location(1, -2)}));
+
+        roads.add(new Building(2, ROAD, new Location[]{new Location(1, -2), new Location(2, -3)}));
+        roads.add(new Building(2, ROAD, new Location[]{new Location(1, -2), new Location(2, -2)}));
+        roads.add(new Building(2, ROAD, new Location[]{new Location(1, -2), new Location(1, -1)}));
+        roads.add(new Building(2, ROAD, new Location[]{new Location(2, -2), new Location(1, -1)}));
+        roads.add(new Building(2, ROAD, new Location[]{new Location(2, -3), new Location(2, -2)}));
+
+        roads.add(new Building(2, ROAD, new Location[]{new Location(3, -2), new Location(2, -2)}));
+        roads.add(new Building(2, ROAD, new Location[]{new Location(2, -1), new Location(2, -2)}));
+
+        for (int i = 0; i < roads.size(); i++) {
+            roadBoard.addRoad(roads.get(i));
+            player2.addBuilding(roads.get(i));
+        }
+    }
+
     //region longestRoadTest
     @Test
     public void longestRoadTest() throws CatanException {
@@ -295,6 +327,11 @@ public class BoardTest {
         longestRoadScenario5(player2);
 
         assertEquals(14, roadBoard.getLongestRoad(roads.get(roads.size() - 1), player2, false, false).size());
+
+        longestRoadScenario6(player2);
+
+        assertEquals(11, roadBoard.getLongestRoad(roads.get(roads.size() - 1), player2, false, false).size());
+
 
     }
     //endregion

@@ -92,15 +92,22 @@ public class GameController {
      *
      * @return player to turn next
      */
-    public Player nextMove() {
-        Player current = getCurrent();
-        if (current.hasWon()) {
-            endGame(current);
-            changes.firePropertyChange(GAME_OVER, "null", current);
-            return current;
+    public Player nextMove(Player player) {
+        if (player == null)
+            getPlayerWithHighestPoints();
+
+        if (player.hasWon()) {
+            endGame();
+            changes.firePropertyChange(GAME_OVER, "null", player);
+            return player;
         }
         return this.initialPhaseActive ? next_initialPhase() : next_gameStarted();
     }
+
+    public Player nextMove() {
+        return nextMove(getPlayerWithHighestPoints());
+    }
+
     /**
      * will be called if game is started aleady and building phase is over
      *
@@ -242,7 +249,7 @@ public class GameController {
             System.out.println(ex.getMessage());
             ki.setStatus(WAIT, false);
         }
-        if (nextMove) nextMove();
+        if (nextMove) nextMove(ki);
     }
 
 
@@ -478,7 +485,7 @@ public class GameController {
             String status = Constants.BUILD_STREET;
 
             if (player.getStatus().equals(BUILD_STREET)) {
-                player = nextMove();
+                player = nextMove(player);
                 status = initialPhaseActive ? BUILD_SETTLEMENT : DICE;
             }
 
@@ -591,11 +598,11 @@ public class GameController {
 
         try {
             Building road1 = new Building(ki.getId(), BuildingType.ROAD, board.getFreeRoadLoc(ki, false));
-            boolean built = this.board.placeBuilding(road1, false);
+            boolean built = this.placeBuilding(road1, false);
 
             if (built) {
                 Building road2 = new Building(ki.getId(), BuildingType.ROAD, board.getFreeRoadLoc(ki, false));
-                this.board.placeBuilding(road2, false);
+                this.placeBuilding(road2, false);
             }
         } catch (CatanException ex) {
             System.out.println("KI " + ki.getName() + " löste eine Exception aus: " + ex.getMessage());
@@ -1123,7 +1130,7 @@ public class GameController {
         return board;
     }
 
-    public boolean endGame(Player winner) {
+    public boolean endGame() {
         this.gameStarted = false;
         this.gameOver = true;
         return true;
@@ -1148,7 +1155,7 @@ public class GameController {
         return this.rawMaterialDeck;
     }
 
-    public boolean isGreatestArmyPlayer(Player player) throws CatanException {
+    public boolean isGreatestArmyPlayer(Player player) {
 
         if (player.getArmyCount() < 3) return false;
 
@@ -1168,7 +1175,7 @@ public class GameController {
     }
 
     private Player getPlayerWithHighestArmyCount() {
-        Player topPlayer = players.get(0);
+        Player topPlayer = this.greatestArmyPlayer == null ? this.getPlayer(0) : this.greatestArmyPlayer;
 
         for (Player player : players) {
             if (player.getArmyCount() > topPlayer.getArmyCount()) {

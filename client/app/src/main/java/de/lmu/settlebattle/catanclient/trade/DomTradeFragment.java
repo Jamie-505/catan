@@ -66,9 +66,9 @@ public class DomTradeFragment extends MainActivityFragment {
             if (sendTradeBtn != null && tradeStatus != null) {
               sendTradeBtn.setVisibility(View.GONE);
               disableNumPicks();
+              initCancelBtn.setVisibility(View.GONE);
               tradeStatus.setVisibility(View.VISIBLE);
               cancelBtn.setVisibility(View.VISIBLE);
-
             }
             updateTradeStatus(-1, false);
             break;
@@ -79,9 +79,10 @@ public class DomTradeFragment extends MainActivityFragment {
 
   private Player[] players = new Player[3];
   private Gson gson = new Gson();
-  private Button cancelBtn;
   private Button sendTradeBtn;
   private CardView tradeStatus;
+  private ImageButton cancelBtn;
+  private ImageButton initCancelBtn;
   private MainActivity mainActivity;
   private Map<String, int[]> tradeInfo = new HashMap<>();
   private RawMaterialOverview rawMat;
@@ -135,14 +136,14 @@ public class DomTradeFragment extends MainActivityFragment {
 
   @Override
   public void onViewCreated(View view, Bundle savedInstanceState) {
-    Button initCnclBtn = fragmentView.findViewById(R.id.init_cancel_btn);
-    ImageButton cancelBtn = fragmentView.findViewById(R.id.cancel_btn);
-    Button sendTradeBtn = fragmentView.findViewById(R.id.send_trade_btn);
+    cancelBtn = fragmentView.findViewById(R.id.cancel_btn);
+    initCancelBtn = fragmentView.findViewById(R.id.init_cancel_btn);
+    sendTradeBtn = fragmentView.findViewById(R.id.send_trade_btn);
     tradeStatus = fragmentView.findViewById(R.id.trade_status);
 
     cancelBtn.setOnClickListener((View v) -> cancelTrade());
 
-    cancelBtn.setOnClickListener((View v) -> fragHandler.closeFragment(this));
+    initCancelBtn.setOnClickListener((View v) -> fragHandler.closeFragment(this));
 
     sendTradeBtn.setOnClickListener((View v) -> {
       sendTradeRequest();

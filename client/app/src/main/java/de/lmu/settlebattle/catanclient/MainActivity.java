@@ -786,7 +786,8 @@ public class MainActivity extends BaseSocketActivity implements FragmentHandler,
         case GAME_OVER:
           disableClickLayers();
           hideActiveElements();
-          if (Storage.isItMe(intent.getIntExtra(WINNER, -1))) {
+          Player winner = Storage.getPlayer(intent.getIntExtra(WINNER, self.id));
+          if (Storage.isItMe(winner)) {
 
             // deactivate sliding panel
             slidingPanel.setEnabled(false);
@@ -874,8 +875,7 @@ public class MainActivity extends BaseSocketActivity implements FragmentHandler,
             TextView winnerTxt = (TextView) findViewById(R.id.winnerAnnounce);
             TextView winnerWhoTxt = (TextView) findViewById(R.id.winnerInfo);
             winnerWhoTxt.setVisibility(View.VISIBLE);
-            // TODO
-            winnerWhoTxt.setText("Ich muss noch von James gesetzt werden");
+            winnerWhoTxt.setText(winner.name + " hat das Spiel gewonnen!");
             GlideDrawableImageViewTarget imageViewTarget = new GlideDrawableImageViewTarget(gifView);
             Glide.with(this).load(R.raw.looser).into(imageViewTarget);
             winnerTxt.setText("Du hast verloren!");
@@ -1242,6 +1242,8 @@ public class MainActivity extends BaseSocketActivity implements FragmentHandler,
       resCards.setText(String.valueOf(p.rawMaterials.getTotalAmnt()));
       TextView vpPoints = cardView.findViewById(R.id.siegpunkte);
       vpPoints.setText(String.valueOf(p.victoryPts));
+      TextView knightPts = cardView.findViewById(R.id.offeneRitter);
+      knightPts.setText(String.valueOf(p.army));
       if (!p.status.equals(STATUS_WAIT)) {
         mViewPager.setCurrentItem(i, true);
         cardView.findViewById(R.id.cardContain).setBackgroundColor(Color.WHITE);

@@ -22,8 +22,8 @@ import static de.lmu.settlebattle.catanclient.utils.Constants.DISPLAY_ERROR;
 import static de.lmu.settlebattle.catanclient.utils.Constants.END_TURN;
 import static de.lmu.settlebattle.catanclient.utils.Constants.ERROR_MSG;
 import static de.lmu.settlebattle.catanclient.utils.Constants.HARVEST;
-import static de.lmu.settlebattle.catanclient.utils.Constants.NEW;
 import static de.lmu.settlebattle.catanclient.utils.Constants.LOCATION;
+import static de.lmu.settlebattle.catanclient.utils.Constants.NEW;
 import static de.lmu.settlebattle.catanclient.utils.Constants.NEW_CONSTRUCT;
 import static de.lmu.settlebattle.catanclient.utils.Constants.OK;
 import static de.lmu.settlebattle.catanclient.utils.Constants.OWNER;
@@ -123,13 +123,9 @@ import de.lmu.settlebattle.catanclient.trade.DomTradeFragment;
 import de.lmu.settlebattle.catanclient.trade.SeaTradeFragment;
 import de.lmu.settlebattle.catanclient.trade.Trade;
 import de.lmu.settlebattle.catanclient.trade.TradeOfferFragment;
-import de.lmu.settlebattle.catanclient.utils.Harvest;
 import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import com.beloo.widget.chipslayoutmanager.BuildConfig;
-import butterknife.BindView;
-import butterknife.ButterKnife;
 
 public class MainActivity extends BaseSocketActivity implements FragmentHandler, DevCardHandler {
 
@@ -168,7 +164,7 @@ public class MainActivity extends BaseSocketActivity implements FragmentHandler,
   private ImageButton diceBtn;
   private LinearLayout chatDrawer;
   private RelativeLayout gridLayout;
-  private SeaTradeFragment seaTradeFragment = new SeaTradeFragment();
+  private SeaTradeFragment seaTradeFragment;
   private SlidingUpPanelLayout slidingPanel;
   private TextSwitcher infoBox;
   private TextSwitcher selfClayCnt;
@@ -886,7 +882,7 @@ public class MainActivity extends BaseSocketActivity implements FragmentHandler,
       infoBox.setText("Ein anderer Spieler ist am Zug");
       endTurn();
     });
-    seaTradeBtn.setOnClickListener((View v) -> showFragmentViaBackstack(seaTradeFragment));
+    seaTradeBtn.setOnClickListener((View v) -> showFragmentViaBackstack(seaTradeFragment = new SeaTradeFragment()));
   }
 
   private void setIntentFilters() {

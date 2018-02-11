@@ -53,12 +53,16 @@ public class SeaTradeFragment extends MainActivityFragment {
   }
 
   private void sendTradeRequest() {
-    RawMaterialOverview offer = new RawMaterialOverview(offerBtn.getText().toString(), 1);
-    RawMaterialOverview req = new RawMaterialOverview(reqBtn.getText().toString(), 1);
-    Trade seaTrade = new Trade(offer, req);
+    try {
+      RawMaterialOverview offer = new RawMaterialOverview(offerBtn.getText().toString(), 1);
+      RawMaterialOverview req = new RawMaterialOverview(reqBtn.getText().toString(), 1);
+      Trade seaTrade = new Trade(offer, req);
 
-    String tradeMsg = createJSONString(SEA_TRADE, seaTrade);
-    fragHandler.sendMsgToServer(tradeMsg);
-    fragHandler.popBackstack(this);
+      String tradeMsg = createJSONString(SEA_TRADE, seaTrade);
+      fragHandler.sendMsgToServer(tradeMsg);
+      fragHandler.popBackstack(this);
+    } catch (NullPointerException e) {
+      fragHandler.displayFragMsg("Bitte wähle deine Resourcen für den Tausch aus");
+    }
   }
 }

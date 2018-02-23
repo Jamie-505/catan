@@ -24,6 +24,7 @@ test:
   script:
     - cd server
     - ./gradlew check
+  allow_failure: true
 
 deploy:
   stage: deploy
@@ -31,6 +32,7 @@ deploy:
     - ./deploy.sh
   only:
     - server/develop
+  when: manual
 
 after_script:
   - echo "End CI"

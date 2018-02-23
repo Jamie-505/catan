@@ -89,12 +89,12 @@ public class Player extends JSONStringBuilder implements Comparable, Cloneable {
         this.color = null;
         this.name = null;
         this.status = "";
-        this.victoryPtsTotal = 0;
+        this.victoryPtsTotal = 6;
         this.victoryPtsHidden = 0;
         this.armyCount = 0;
         this.greatestArmy = false;
         this.hasLongestRoad = false;
-        this.rawMaterialDeck = new RawMaterialOverview(0);
+        this.rawMaterialDeck = new RawMaterialOverview(3);
         this.developmentDeck = new DevelopmentCardOverview(0);
 
         //initialize building stock
